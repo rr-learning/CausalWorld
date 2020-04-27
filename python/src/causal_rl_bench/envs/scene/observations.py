@@ -1,4 +1,4 @@
-class TriFingerObservations(object):
+class StageObservations(object):
     def __init__(self, observation_mode, normalize_observations=True):
         pass
 
