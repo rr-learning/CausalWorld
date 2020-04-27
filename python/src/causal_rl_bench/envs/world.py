@@ -15,7 +15,7 @@ class World(gym.Env):
     """
 
     def __init__(
-        self, task_id="pushing", control_rate=0.003, enable_visualization=True, seed=0,
+        self, task_id="pushing", control_rate=0.02, enable_visualization=True, seed=0,
             action_mode="joint_position",
     ):
         """
@@ -32,7 +32,10 @@ class World(gym.Env):
 
         gym.Env.__init__(self)
 
-        self.robot = TriFingerRobot()
+        self.robot = TriFingerRobot(action_mode=action_mode,
+                                    observation_mode="structured",
+                                    enable_visualization=enable_visualization,
+                                    control_rate=control_rate)
         self.stage = Stage()
         self.tasks = []
 

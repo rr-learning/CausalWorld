@@ -10,6 +10,9 @@ class TriFingerAction(object):
         self.num_fingers = 3
         self.max_motor_torque = 0.36
 
+        self.low = None
+        self.high = None
+
         if action_mode == "joint_positions":
             lower_bounds = np.array([-math.radians(70), -math.radians(70), -math.radians(160)] * self.num_fingers)
             upper_bounds = np.array([math.radians(70), 0, math.radians(-2)] * self.num_fingers)
@@ -18,9 +21,9 @@ class TriFingerAction(object):
             upper_bounds = np.array([self.max_motor_torque] * 3 * self.num_fingers)
         elif action_mode == "both":
             lower_bounds = np.array([-self.max_motor_torque] * 3 * self.num_fingers
-                                + [-math.radians(70), -math.radians(70), -math.radians(160)] * self.num_fingers)
+                                    + [-math.radians(70), -math.radians(70), -math.radians(160)] * self.num_fingers)
             upper_bounds = np.array([self.max_motor_torque] * 3 * self.num_fingers
-                                 + [math.radians(70), 0, math.radians(-2)] * self.num_fingers)
+                                    + [math.radians(70), 0, math.radians(-2)] * self.num_fingers)
         else:
             raise ValueError("No valid action_mode specified: {}".format(action_mode))
 
@@ -48,27 +51,16 @@ class TriFingerAction(object):
         if self.normalized_actions:
             return (action > -1.).all() and (action < 1.).all()
         else:
-            low = self.low
-            high = self.high
-            return (action > low).all() and (action < high).all()
+            return (action > self.low).all() and (action < self.high).all()
 
     def clip_action(self, action):
         if self.normalized_actions:
             return np.clip(action, -1.0, 1.0)
         else:
-            low = self.low
-            high = self.high
-            return np.clip(action, low, high)
+            return np.clip(action, self.low, self.high)
 
     def normalize_action(self, action):
-        low = self.low
-        high = self.high
-        return 2.0 * (action - low) / (high - low) - 1.0
+        return 2.0 * (action - self.low) / (self.high - self.low) - 1.0
 
     def denormalize_action(self, action):
-        low = self.low
-        high = self.high
-        return low + (action + 1.0) / 2.0 * (high - low)
-
-
-
+        return self.low + (action + 1.0) / 2.0 * (self.high - self.low)
