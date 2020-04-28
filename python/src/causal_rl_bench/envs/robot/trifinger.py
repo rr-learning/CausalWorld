@@ -131,15 +131,15 @@ class TriFingerRobot(object):
         self.control_index = -1
         return
 
-    def reset_state(self):
-        # This resets the robot fingers into the base state
+    def reset_state(self, joint_position=None):
+        # This resets the robot fingers into a random position if nothing is provided
         self.last_action_applied = None
         self.latest_observation = None
         self.latest_full_state = None
         self.control_index = -1
-        # TODO: reset to random position? when specified?
-        joint_positions = self.robot_observations.lower_bounds["joint_positions"]
-        self.latest_full_state = self.tri_finger.reset_finger(joint_positions)
+        if joint_position is None:
+            joint_position = self.robot_actions.sample_actions()
+        self.latest_full_state = self.tri_finger.reset_finger(joint_position)
         observations_dict, observations_list = \
             self.robot_observations.get_current_observations\
                 (self.latest_full_state)
