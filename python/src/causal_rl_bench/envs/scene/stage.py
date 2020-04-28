@@ -14,10 +14,14 @@ class Stage(object):
         self.normalize_observations = normalize_observations
         self.stage_observations = None
         self.latest_full_state = None
+        self.name_keys = []
         return
 
     def add_rigid_general_object(self, name, shape, **object_params):
-        #TODO: check if names are duplicate
+        if name in self.name_keys:
+            raise Exception("name already exists as key for scene objects")
+        else:
+            self.name_keys.append(name)
         if shape == "cube":
             self.rigid_objects[name] = Cuboid(name, **object_params)
         return
@@ -26,6 +30,10 @@ class Stage(object):
         raise Exception(" Not implemented")
 
     def add_silhoutte_general_object(self, name, shape, **object_params):
+        if name in self.name_keys:
+            raise Exception("name already exists as key for scene objects")
+        else:
+            self.name_keys.append(name)
         if shape == "cube":
             self.visual_objects[name] = SCuboid(name, **object_params)
         return
@@ -45,6 +53,10 @@ class Stage(object):
         return self.latest_full_state
 
     def set_states(self, names, positions, orientations):
+        if any(name in self.name_keys for name in names):
+            raise Exception("one or more names already exists as key for scene objects")
+        else:
+            self.name_keys += names
         for i in range(len(names)):
             name = names[i]
             if name in self.rigid_objects.keys():

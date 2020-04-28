@@ -175,7 +175,16 @@ class TriFingerObservations(object):
                 observations_list = np.append(observations_list,
                                               observations_dict[observation]
                                               .flatten())
-        #TODO: scale if normalized
+
+        # TODO: This needs to be in line with the scene observations and chacked again
+        if self.normalized_observations:
+            observations_list = self.normalize_observation(observations_list)
+            slice_start = 0
+            for key in self.observations_keys:
+                slice_stop = slice_start + len(observations_dict[key])
+                observations_dict[key] = observations_list[slice_start:slice_stop]
+                slice_start = slice_stop
+
         return observations_dict, observations_list
 
 
