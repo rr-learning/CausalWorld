@@ -13,10 +13,10 @@ class TriFingerAction(object):
         num_fingers = 3
         self.action_mode = action_mode
         if action_mode == "joint_positions":
-            lower_bounds = np.array([-math.radians(70), -math.radians(70),
-                                     -math.radians(160)] * num_fingers)
-            upper_bounds = np.array([math.radians(70), 0, math.radians(-2)]
-                                    * num_fingers)
+            lower_bounds = np.array([-math.radians(90), -math.radians(90),
+                                     -math.radians(172)] * 3)
+            upper_bounds = np.array([math.radians(90), math.radians(100),
+                                     math.radians(-2)] * 3)
         elif action_mode == "joint_torques":
             lower_bounds = np.array([-self.max_motor_torque] * 3 * num_fingers)
             upper_bounds = np.array([self.max_motor_torque] * 3 * num_fingers)

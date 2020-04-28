@@ -55,7 +55,7 @@ class Cuboid(RigidObject):
             baseOrientation=orientation,
             baseMass=mass
         )
-        pybullet.changeVisualShape(self.block_id, -1, rgbaColor=rgbaColor)
+        pybullet.changeVisualShape(self.block, -1, rgbaColor=rgbaColor)
         #specifying bounds
         self.lower_bounds = dict()
         self.upper_bounds = dict()
