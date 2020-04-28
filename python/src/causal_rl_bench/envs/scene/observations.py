@@ -20,6 +20,7 @@ class StageObservations(object):
         self.high = np.array([])
         self.visual_objects_state = dict()
         self.set_observation_spaces()
+        self.initialize_observations()
         return
 
     def get_observation_spaces(self):

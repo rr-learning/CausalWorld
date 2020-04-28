@@ -33,7 +33,7 @@ class PickingTask(Task):
         return self.robot.get_current_full_observations()
 
     def get_description(self):
-        return "Task where the goal is to push an object towards a goal position"
+        return "Task where the goal is to pick an object and lift it as high as possible"
 
     def get_reward(self):
         reward = 0.0

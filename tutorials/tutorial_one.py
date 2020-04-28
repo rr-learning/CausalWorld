@@ -1,10 +1,12 @@
 from causal_rl_bench.envs.world import World
+from causal_rl_bench.tasks.pushing import PushingTask
 import numpy as np
 import time
 
 
 def example():
-    env = World(control_rate=0.02, enable_visualization=True)
+    task = PushingTask()
+    env = World(task=task, control_rate=0.02, enable_visualization=True)
     env.reset()
     for i in range(5):
         env.reset()
@@ -13,7 +15,6 @@ def example():
                 np.random.uniform(env.action_space.low, env.action_space.high,
                                   env.action_space.shape))
 
-    time.sleep(20)
 
 
 if __name__ == '__main__':
