@@ -17,6 +17,7 @@ class Stage(object):
         return
 
     def add_rigid_general_object(self, name, shape, **object_params):
+        #TODO: check if names are duplicate
         if shape == "cube":
             self.rigid_objects[name] = Cuboid(name, **object_params)
         return

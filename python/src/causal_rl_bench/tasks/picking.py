@@ -1,4 +1,5 @@
 from causal_rl_bench.tasks.task import Task
+import numpy as np
 
 
 class PickingTask(Task):
@@ -33,11 +34,6 @@ class PickingTask(Task):
 
     def get_reward(self):
         reward = 0.0
-        done = False
-        dist_pos_obj_goal = self.scene_objects["pushing_object"].position \
-                            - self.scene_objects["goal_silhouette"].position
-        dist_ori_obj_goal = self.scene_objects["pushing_object"].orientation \
-                            - self.scene_objects["goal_silhouette"].orientation
         return reward
 
     def get_counterfactual_variant(self):
@@ -45,3 +41,14 @@ class PickingTask(Task):
 
     def reset_scene_objects(self):
         pass
+
+    def is_terminated(self):
+        return False
+
+    def filter_observations(self, observations_dict):
+        observations_filtered = np.array([])
+        for key in observations_dict.keys():
+            observations_filtered = \
+                np.append(observations_filtered,
+                          np.array(observations_filtered[key]))
+        return observations_filtered

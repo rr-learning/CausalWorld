@@ -52,7 +52,12 @@ class World(gym.Env):
         return
 
     def step(self, action):
-        raise Exception(" ")
+        observations_dict = self.robot.apply_action(action)
+        task_observations = self.task.filter_observations(observations_dict)
+        reward = self.task.get_reward()
+        done = self.task.is_terminated()
+        info = {}
+        return task_observations, reward, done, info
 
     def sample_new_task(self):
         raise Exception(" ")
@@ -69,7 +74,7 @@ class World(gym.Env):
         return [seed]
 
     def reset(self):
-        raise Exception(" ")
+        return self.task.reset_task()
 
     def close(self):
         raise Exception(" ")
