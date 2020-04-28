@@ -1,23 +1,19 @@
 import numpy as np
-import time
-import pybullet
 import gym
-
-from pybullet_fingers.sim_finger import SimFinger
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
-from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.tasks.picking import PickingTask
+from causal_rl_bench.envs.env_utils import combine_spaces
 
 
 class World(gym.Env):
     """
     Base environment of the robot manipulation task
     """
-
+    #TODO: rename from control rate to skip frame
     def __init__( self, task=None, task_id="picking", control_rate=0.02,
                   enable_visualization=True, seed=0,
-                  action_mode="joint_position", observation_mode="structured",
+                  action_mode="joint_positions", observation_mode="structured",
                   camera_rate=0.3, normalize_actions=True,
                   normalize_observations=True, **kwargs):
         """
@@ -42,18 +38,32 @@ class World(gym.Env):
         self.seed(seed)
         self.stage = Stage(observation_mode=observation_mode,
                            normalize_observations=normalize_observations)
+        self.enforce_episode_length = False
+
+        self.metadata = {"render.modes": ["human"]}
         gym.Env.__init__(self)
         if task is None:
             if task_id == "picking":
                 self.task = PickingTask()
         else:
             self.task = task
-        task.init_task(self.robot, self.stage)
+        self.task.init_task(self.robot, self.stage)
+        selected_observations = self.task.observation_keys
+        self.robot.select_observations(selected_observations)
+        self.stage.select_observations(selected_observations)
+        self.observation_space = \
+            combine_spaces(self.robot.get_observation_spaces(),
+                           self.stage.get_observation_spaces())
+        self.action_space = self.robot.get_action_spaces()
+        #TODO: verify spaces here
+
         return
 
     def step(self, action):
-        observations_dict = self.robot.apply_action(action)
-        task_observations = self.task.filter_observations(observations_dict)
+        robot_observations_dict = self.robot.apply_action(action)
+        stage_observations_dict = self.stage.get_full_state()
+        task_observations = self.task.filter_observations(robot_observations_dict,
+                                                          stage_observations_dict)
         reward = self.task.get_reward()
         done = self.task.is_terminated()
         info = {}

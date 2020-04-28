@@ -79,3 +79,9 @@ class Stage(object):
 
     def clear(self):
         self.latest_full_state = None
+
+    def select_observations(self, observation_keys):
+        current_observations_keys = self.stage_observations.observations_keys
+        for key in current_observations_keys:
+            if key not in observation_keys:
+                self.stage_observations.remove_observations([key])

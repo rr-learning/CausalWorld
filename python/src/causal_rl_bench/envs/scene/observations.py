@@ -37,7 +37,7 @@ class StageObservations(object):
                                   high=self.high,
                                   dtype=np.uint8)
 
-    def set_observation_spaces(self):
+    def initialize_observations(self):
         for rigid_object in self.rigid_objects:
             state_keys = rigid_object.get_state().keys()
             for state_key in state_keys:
@@ -47,6 +47,7 @@ class StageObservations(object):
                     rigid_object.upper_bounds[state_key]
                 self.observations_keys.append(state_key)
         for visual_object in self.visual_objects:
+            self.visual_objects_state.update(visual_object.get_state())
             state_keys = visual_object.get_state().keys()
             for state_key in state_keys:
                 self.lower_bounds[state_key] = \
@@ -54,11 +55,12 @@ class StageObservations(object):
                 self.upper_bounds[state_key] = \
                     visual_object.upper_bounds[state_key]
                 self.observations_keys.append(state_key)
+        return
+
+    def set_observation_spaces(self):
         for key in self.observations_keys:
             self.low = np.append(self.low, np.array(self.lower_bounds[key]))
             self.high = np.append(self.high, np.array(self.upper_bounds[key]))
-        for visual_object in self.visual_objects:
-            self.visual_objects_state.update(visual_object.get_state())
 
     def is_normalized(self):
         return self.normalized_observations
@@ -90,6 +92,15 @@ class StageObservations(object):
         observations_dict.update(self.visual_objects_state)
         return observations_dict
 
+    def remove_observations(self, observations):
+        for observation in observations:
+            if observation not in self.observations_keys:
+                raise Exception(
+                    "Observation key {} is not known".format(observation))
+            del self.lower_bounds[observation]
+            del self.upper_bounds[observation]
+            self.observations_keys.remove(observation)
+        self.set_observation_spaces()
 
 
 

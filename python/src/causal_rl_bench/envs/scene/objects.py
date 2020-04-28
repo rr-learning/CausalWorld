@@ -48,15 +48,14 @@ class Cuboid(RigidObject):
         else:
             raise Exception("The colour specified is not supported")
         self.block_id = pybullet.createCollisionShape(
-            shapeType=pybullet.GEOM_BOX, halfExtents=np.array(size)/2,
-            rgbaColor=rgbaColor
-        )
+            shapeType=pybullet.GEOM_BOX, halfExtents=np.array(size)/2)
         self.block = pybullet.createMultiBody(
             baseCollisionShapeIndex=self.block_id,
             basePosition=position,
             baseOrientation=orientation,
             baseMass=mass
         )
+        pybullet.changeVisualShape(self.block_id, -1, rgbaColor=rgbaColor)
         #specifying bounds
         self.lower_bounds = dict()
         self.upper_bounds = dict()

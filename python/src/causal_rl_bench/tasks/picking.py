@@ -8,6 +8,8 @@ class PickingTask(Task):
         self.id = "picking"
         self.robot = None
         self.stage = None
+        self.observation_keys = ["joint_positions",
+                                 "rigid_block_to_pick_position"]
         return
 
     def init_task(self, robot, stage):
@@ -47,8 +49,9 @@ class PickingTask(Task):
 
     def filter_observations(self, observations_dict):
         observations_filtered = np.array([])
-        for key in observations_dict.keys():
+        for key in self.observation_keys:
             observations_filtered = \
                 np.append(observations_filtered,
                           np.array(observations_filtered[key]))
         return observations_filtered
+

@@ -158,16 +158,22 @@ class TriFingerRobot(object):
         return self.tri_finger.pinocchio_utils.forward_kinematics(
             robot_state.joint_position)
     
-    def get_observation_space(self):
+    def get_observation_spaces(self):
         return self.robot_observations.get_observation_spaces()
 
     def sample_actions(self, sampling_strategy="uniform"):
         self.robot_actions.sample_actions(sampling_strategy)
 
     def sample_positions(self, sampling_strategy="uniform"):
-        self.robot_actions.sample_actions(sampling_strategy,
-                                          mode="joint_positions")
+        positions = self.robot_actions.sample_actions(sampling_strategy,
+                                                      mode="joint_positions")
+        return positions
 
     def get_action_spaces(self):
         return self.robot_actions.get_action_space()
 
+    def select_observations(self, observation_keys):
+        current_observations_keys = self.robot_observations.observations_keys
+        for key in current_observations_keys:
+            if key not in observation_keys:
+                self.robot_observations.remove_observations([key])

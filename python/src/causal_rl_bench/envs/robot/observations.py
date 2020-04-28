@@ -138,7 +138,7 @@ class TriFingerObservations(object):
 
     def remove_observations(self, observations):
         for observation in observations:
-            if observation not in observations:
+            if observation not in self.observations_keys:
                 raise Exception(
                     "Observation key {} is not known".format(observation))
             del self.lower_bounds[observation]

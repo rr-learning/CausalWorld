@@ -1,12 +1,9 @@
-from counterfactual.python.src.causal_rl_bench.envs.scene.objects import SceneObjects
-
-
 class Task(object):
     def __init__(self):
-        self.scene_objects = SceneObjects()
+        pass
 
     def get_scene_objects(self):
-        return self.scene_objects
+        raise NotImplementedError()
 
     def get_counterfactual_variant(self):
         raise NotImplementedError()
