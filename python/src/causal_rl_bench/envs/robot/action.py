@@ -61,17 +61,12 @@ class TriFingerAction(object):
     def denormalize_action(self, action):
         return self.low + (action + 1.0) / 2.0 * (self.high - self.low)
 
-    def sample_actions(self, sampling_strategy="uniform", mode=None):
+    def sample_actions(self, sampling_strategy="seperated", mode=None):
         #TODO: why are the numbers different from the bounds?
         if mode is None:
             mode = self.action_mode
         if mode == "joint_positions" and \
                 sampling_strategy == "uniform":
-            list_to_return = []
-            upper = np.random.uniform(-math.radians(30), math.radians(30))
-            middle = np.random.uniform(-math.radians(60), math.radians(60))
-            lower = np.random.uniform(-math.radians(100), -math.radians(2))
-            list_to_return += [upper, middle, lower]
-            return list_to_return
+            return np.random.uniform(self.low, self.high)
         else:
             raise Exception("not yet implemented")
