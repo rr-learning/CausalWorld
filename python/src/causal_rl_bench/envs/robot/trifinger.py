@@ -113,6 +113,7 @@ class TriFingerRobot(object):
         full_state = {"joint_positions": self.latest_full_state.position,
                       "joint_velocities": self.latest_full_state.velocity,
                       "joint_torques": self.latest_full_state.torque}
+
         return full_state
 
     def set_full_state(self, joint_positions):
@@ -144,5 +145,4 @@ class TriFingerRobot(object):
     def get_tip_positions(self, robot_state):
         return self.tri_finger.pinocchio_utils.forward_kinematics(
             robot_state.joint_position)
-
 
