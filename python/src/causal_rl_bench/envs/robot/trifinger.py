@@ -125,7 +125,7 @@ class TriFingerRobot(object):
         self.latest_observation = None
         self.latest_full_state = None
         self.control_index = -1
-        #TODO: reset to random position? when specified?
+        # TODO: reset to random position? when specified?
         joint_positions = self.robot_observations.lower_bounds["joint_positions"]
         self.latest_full_state = self.tri_finger.reset_finger(joint_positions)
         observations_dict, observations_list = \
@@ -145,4 +145,9 @@ class TriFingerRobot(object):
     def get_tip_positions(self, robot_state):
         return self.tri_finger.pinocchio_utils.forward_kinematics(
             robot_state.joint_position)
+    
+    def get_observation_space(self):
+        return self.robot_observations.get_observation_spaces()
 
+    def get_action_spaces(self):
+        return self.robot_actions.get_action_space()
