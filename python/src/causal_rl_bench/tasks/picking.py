@@ -17,7 +17,8 @@ class PickingTask(Task):
         self.stage = stage
         self.stage.add_rigid_general_object(name="block_to_pick",
                                             shape="cube")
-        return self.reset_task()
+        self.stage.finalize_stage()
+        return
 
     def reset_task(self):
         sampled_positions = self.robot.sample_positions()
@@ -47,11 +48,14 @@ class PickingTask(Task):
     def is_terminated(self):
         return False
 
-    def filter_observations(self, observations_dict):
+    def filter_observations(self, robot_observations_dict,
+                            stage_observations_dict):
+        full_observations_dict = dict(robot_observations_dict)
+        full_observations_dict.update(stage_observations_dict)
         observations_filtered = np.array([])
         for key in self.observation_keys:
             observations_filtered = \
                 np.append(observations_filtered,
-                          np.array(observations_filtered[key]))
+                          np.array(full_observations_dict[key]))
         return observations_filtered
 

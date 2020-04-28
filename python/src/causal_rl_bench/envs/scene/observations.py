@@ -58,6 +58,8 @@ class StageObservations(object):
         return
 
     def set_observation_spaces(self):
+        self.low = np.array([])
+        self.high = np.array([])
         for key in self.observations_keys:
             self.low = np.append(self.low, np.array(self.lower_bounds[key]))
             self.high = np.append(self.high, np.array(self.upper_bounds[key]))

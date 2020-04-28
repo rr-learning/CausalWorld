@@ -42,10 +42,10 @@ class Stage(object):
         raise Exception(" Not implemented")
 
     def finalize_stage(self):
-        self.stage_observations = StageObservations(self.observation_mode,
-                                                    self.normalize_observations,
-                                                    self.rigid_objects.values(),
-                                                    self.visual_objects.values())
+        self.stage_observations = StageObservations(self.rigid_objects.values(),
+                                                    self.visual_objects.values(),
+                                                    self.observation_mode,
+                                                    self.normalize_observations)
 
     def get_full_state(self):
         self.latest_full_state = \
@@ -53,10 +53,6 @@ class Stage(object):
         return self.latest_full_state
 
     def set_states(self, names, positions, orientations):
-        if any(name in self.name_keys for name in names):
-            raise Exception("one or more names already exists as key for scene objects")
-        else:
-            self.name_keys += names
         for i in range(len(names)):
             name = names[i]
             if name in self.rigid_objects.keys():
