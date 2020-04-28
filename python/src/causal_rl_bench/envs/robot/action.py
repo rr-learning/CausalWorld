@@ -6,27 +6,22 @@ from gym import spaces
 
 class TriFingerAction(object):
     def __init__(self, action_mode, normalize_actions=True):
-        self.normalized_actions = normalize_actions
-        self.num_fingers = 3
+        self.normalize_actions = normalize_actions
         self.max_motor_torque = 0.36
-
         self.low = None
         self.high = None
-
+        num_fingers = 3
         if action_mode == "joint_positions":
-            lower_bounds = np.array([-math.radians(70), -math.radians(70), -math.radians(160)] * self.num_fingers)
-            upper_bounds = np.array([math.radians(70), 0, math.radians(-2)] * self.num_fingers)
-        elif action_mode == "torques":
-            lower_bounds = np.array([-self.max_motor_torque] * 3 * self.num_fingers)
-            upper_bounds = np.array([self.max_motor_torque] * 3 * self.num_fingers)
-        elif action_mode == "both":
-            lower_bounds = np.array([-self.max_motor_torque] * 3 * self.num_fingers
-                                    + [-math.radians(70), -math.radians(70), -math.radians(160)] * self.num_fingers)
-            upper_bounds = np.array([self.max_motor_torque] * 3 * self.num_fingers
-                                    + [math.radians(70), 0, math.radians(-2)] * self.num_fingers)
+            lower_bounds = np.array([-math.radians(70), -math.radians(70),
+                                     -math.radians(160)] * num_fingers)
+            upper_bounds = np.array([math.radians(70), 0, math.radians(-2)]
+                                    * num_fingers)
+        elif action_mode == "joint_torques":
+            lower_bounds = np.array([-self.max_motor_torque] * 3 * num_fingers)
+            upper_bounds = np.array([self.max_motor_torque] * 3 * num_fingers)
         else:
-            raise ValueError("No valid action_mode specified: {}".format(action_mode))
-
+            raise ValueError("No valid action_mode specified: {}".
+                             format(action_mode))
         self.set_action_space(lower_bounds, upper_bounds)
 
     def set_action_space(self, lower_bounds, upper_bounds):
@@ -35,7 +30,7 @@ class TriFingerAction(object):
         self.high = upper_bounds
 
     def get_action_space(self):
-        if self.normalized_actions:
+        if self.normalize_actions:
             return spaces.Box(low=-np.ones(len(self.low)),
                               high=np.ones(len(self.high)),
                               dtype=np.float64)
@@ -45,16 +40,16 @@ class TriFingerAction(object):
                               dtype=np.float64)
 
     def is_normalized(self):
-        return self.normalized_actions
+        return self.normalize_actions
 
     def satisfy_constraints(self, action):
-        if self.normalized_actions:
+        if self.normalize_actions:
             return (action > -1.).all() and (action < 1.).all()
         else:
             return (action > self.low).all() and (action < self.high).all()
 
     def clip_action(self, action):
-        if self.normalized_actions:
+        if self.normalize_actions:
             return np.clip(action, -1.0, 1.0)
         else:
             return np.clip(action, self.low, self.high)

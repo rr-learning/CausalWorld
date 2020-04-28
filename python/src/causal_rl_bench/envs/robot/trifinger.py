@@ -8,8 +8,9 @@ import numpy as np
 class TriFingerRobot(object):
     def __init__(self, action_mode, observation_mode, enable_visualization=True,
                  camera_rate=0.3, control_rate=0.02, camera_turned_on=False,
-                 normalize_actions=True):
-        self.normalized_actions = normalize_actions
+                 normalize_actions=True, normalize_observations=True):
+        self.normalize_actions = normalize_actions
+        self.normalize_observations = normalize_observations
         self.action_mode = action_mode
         self.observation_mode = observation_mode
         self.camera_rate = camera_rate
@@ -18,7 +19,8 @@ class TriFingerRobot(object):
         self.simulation_rate = 0.001
         self.control_index = -1
 
-        self.tri_finger = SimFinger(self.simulation_rate, enable_visualization, "tri")
+        self.tri_finger = SimFinger(self.simulation_rate, enable_visualization,
+                                    "tri")
 
         self.camera_skip_steps = int(round(self.camera_rate / self.control_rate))
         self.steps_per_control = int(round(self.control_rate / self.simulation_rate))
@@ -32,64 +34,85 @@ class TriFingerRobot(object):
 
         self.last_action_applied = None
         self.latest_observation = None
+        self.latest_full_state = None
 
     def set_action_mode(self, action_mode):
-        self.robot_actions = TriFingerAction(action_mode)
+        self.robot_actions = TriFingerAction(action_mode,
+                                             self.normalize_actions)
 
     def get_action_mode(self):
         return self.action_mode
 
     def set_observation_mode(self, observation_mode):
-        self.robot_observations = TriFingerObservations(observation_mode)
+        self.robot_observations = \
+            TriFingerObservations(observation_mode, self.normalize_observations)
 
     def get_observation_mode(self):
         return self.observation_mode
 
     def set_camera_rate(self, camera_rate):
         self.camera_rate = camera_rate
+        self.camera_skip_steps = int(
+            round(self.camera_rate / self.control_rate))
+        assert (abs(
+            self.camera_rate - self.camera_skip_steps * self.control_rate)
+                <= 0.000001)
 
     def get_camera_rate(self):
         return self.camera_rate
 
     def set_control_rate(self, control_rate):
         self.control_rate = control_rate
+        self.steps_per_control = int(
+            round(self.control_rate / self.simulation_rate))
+        assert (abs(
+            self.control_rate - self.steps_per_control * self.simulation_rate)
+                <= 0.000001)
 
     def get_control_rate(self):
         return self.control_rate
 
     def turn_on_cameras(self):
         self.camera_turned_on = True
+        self.robot_observations.add_observation("cameras")
 
     def turn_off_cameras(self):
         self.camera_turned_on = False
+        self.robot_observations.remove_observations(["cameras"])
 
     def apply_action(self, action):
         self.control_index += 1
         unscaled_action = self.robot_actions.denormalize_action(action)
         if self.action_mode == "joint_positions":
             finger_action = self.tri_finger.Action(position=unscaled_action)
-        elif self.action_mode == "torques":
+        elif self.action_mode == "joint_torques":
             finger_action = self.tri_finger.Action(torque=unscaled_action)
-        elif self.action_mode == "both":
-            finger_action = self.tri_finger.Action(torque=unscaled_action[:9], position=unscaled_action[9:])
         else:
-            finger_action = self.tri_finger.Action(position=unscaled_action)
+            raise Exception("The action mode {} is not supported".
+                            format(self.action_mode))
 
         for _ in range(self.steps_per_control):
             t = self.tri_finger.append_desired_action(finger_action)
             self.tri_finger.step_simulation()
-        if self.camera_turned_on and self.control_index % self.camera_skip_steps == 0:
-            observation = self.tri_finger.get_observation(t, update_images=True)
+        if self.camera_turned_on and \
+                self.control_index % self.camera_skip_steps == 0:
+            state = \
+                self.tri_finger.get_observation(t, update_images=True)
         else:
-            observation = self.tri_finger.get_observation(t, update_images=False)
-        self.latest_observation = observation
+            state = \
+                self.tri_finger.get_observation(t, update_images=False)
+        observations_dict, observations_list = \
+            self.robot_observations.get_current_robot_observations(state)
+        self.latest_full_state = state
         self.last_action_applied = action
+        self.latest_observation = observations_dict
+        return observations_dict
 
     def get_full_state(self):
         # The full state is independent of the observation mode
-        full_state = {"tf_positions": self.latest_observation.position,
-                      "tf_velocities": self.latest_observation.velocity,
-                      "tf_torque": self.latest_observation.torque}
+        full_state = {"joint_positions": self.latest_full_state.position,
+                      "joint_velocities": self.latest_full_state.velocity,
+                      "joint_torque": self.latest_full_state.torque}
         return full_state
 
     def set_full_state(self, joint_positions):
@@ -98,23 +121,26 @@ class TriFingerRobot(object):
     def reset_robot_state(self):
         # This resets the robot fingers into the base state
         self.last_action_applied = None
+        self.latest_observation = None
+        self.latest_full_state = None
         self.control_index = -1
+        #TODO: reset to random position? when specified?
         joint_positions = self.robot_observations.lower_bounds["joint_positions"]
-        self.latest_observation = self.tri_finger.reset_finger(joint_positions)
+        self.latest_full_state = self.tri_finger.reset_finger(joint_positions)
+        observations_dict, observations_list = \
+            self.robot_observations.get_current_robot_observations\
+                (self.latest_full_state)
+        self.latest_observation = observations_dict
 
     def get_last_action_applied(self):
         return self.last_action_applied
 
     def get_current_full_observations(self):
-        if self.observation_mode == "structured":
-            return np.concatenate(self.latest_observation.position,
-                                  self.latest_observation.velocity,
-                                  self.latest_observation.torque)
-        elif self.observation_mode == "cameras":
-            latest_camera_observations = [self.latest_observation.camera_60,
-                                          self.latest_observation.camera_180,
-                                          self.latest_observation.camera_300]
-            return np.stack(latest_camera_observations, axis=0)
+        return self.latest_observation
 
     def get_current_partial_observations(self, keys):
         raise Exception("Not implemented")
+
+    def get_tip_positions(self, robot_state):
+        return self.tri_finger.pinocchio_utils.forward_kinematics(
+            robot_state.joint_position)
