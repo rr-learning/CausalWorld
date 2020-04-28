@@ -5,7 +5,7 @@ from gym import spaces
 
 
 class TriFingerAction(object):
-    def __init__(self, action_mode, normalize_actions=True):
+    def __init__(self, action_mode="joint_positions", normalize_actions=True):
         self.normalize_actions = normalize_actions
         self.max_motor_torque = 0.36
         self.low = None
