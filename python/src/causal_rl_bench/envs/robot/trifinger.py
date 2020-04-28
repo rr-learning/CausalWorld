@@ -117,9 +117,21 @@ class TriFingerRobot(object):
         return full_state
 
     def set_full_state(self, joint_positions):
-        self.tri_finger.reset_finger(joint_positions)
+        self.latest_full_state = self.tri_finger.reset_finger(joint_positions)
+        observations_dict, observations_list = \
+            self.robot_observations.get_current_observations \
+                (self.latest_full_state)
+        self.latest_observation = observations_dict
+        return
 
-    def reset_robot_state(self):
+    def clear(self):
+        self.last_action_applied = None
+        self.latest_observation = None
+        self.latest_full_state = None
+        self.control_index = -1
+        return
+
+    def reset_state(self):
         # This resets the robot fingers into the base state
         self.last_action_applied = None
         self.latest_observation = None
@@ -146,3 +158,9 @@ class TriFingerRobot(object):
         return self.tri_finger.pinocchio_utils.forward_kinematics(
             robot_state.joint_position)
 
+    def sample_actions(self, sampling_strategy="uniform"):
+        self.robot_actions.sample_actions(sampling_strategy)
+
+    def sample_positions(self, sampling_strategy="uniform"):
+        self.robot_actions.sample_actions(sampling_strategy,
+                                          mode="joint_positions")

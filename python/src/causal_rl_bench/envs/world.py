@@ -7,6 +7,7 @@ from pybullet_fingers.sim_finger import SimFinger
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.tasks.picking import PickingTask
 
 
 class World(gym.Env):
@@ -14,10 +15,11 @@ class World(gym.Env):
     Base environment of the robot manipulation task
     """
 
-    def __init__(
-        self, task_id="pushing", control_rate=0.02, enable_visualization=True, seed=0,
-            action_mode="joint_position",
-    ):
+    def __init__( self, task=None, task_id="picking", control_rate=0.02,
+                  enable_visualization=True, seed=0,
+                  action_mode="joint_position", observation_mode="structured",
+                  camera_rate=0.3, normalize_actions=True,
+                  normalize_observations=True, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
@@ -29,15 +31,25 @@ class World(gym.Env):
             enable_visualization (bool): if the simulation env is to be
                 visualized
         """
-
-        gym.Env.__init__(self)
-
         self.robot = TriFingerRobot(action_mode=action_mode,
-                                    observation_mode="structured",
+                                    observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,
-                                    control_rate=control_rate)
-        self.stage = Stage()
-        self.tasks = []
+                                    control_rate=control_rate,
+                                    camera_rate=camera_rate,
+                                    normalize_actions=normalize_actions,
+                                    normalize_observations=normalize_observations
+                                    )
+        self.seed(seed)
+        self.stage = Stage(observation_mode=observation_mode,
+                           normalize_observations=normalize_observations)
+        gym.Env.__init__(self)
+        if task is None:
+            if task_id == "picking":
+                self.task = PickingTask()
+        else:
+            self.task = task
+        task.init_task(self.robot, self.stage)
+        return
 
     def step(self, action):
         raise Exception(" ")

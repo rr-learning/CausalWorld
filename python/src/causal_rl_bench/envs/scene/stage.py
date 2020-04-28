@@ -1,6 +1,8 @@
 from causal_rl_bench.envs.scene.observations import StageObservations
 from causal_rl_bench.envs.scene.objects import Cuboid
 from causal_rl_bench.envs.scene.silhouette import SCuboid
+import math
+import numpy as np
 
 
 class Stage(object):
@@ -14,20 +16,20 @@ class Stage(object):
         self.latest_full_state = None
         return
 
-    def add_rigid_general_object(self, name, shape, object_params):
+    def add_rigid_general_object(self, name, shape, **object_params):
         if shape == "cube":
             self.rigid_objects[name] = Cuboid(name, **object_params)
         return
 
-    def add_rigid_mesh_object(self, name, file, object_params):
+    def add_rigid_mesh_object(self, name, file, **object_params):
         raise Exception(" Not implemented")
 
-    def add_silhoutte_general_object(self, name, shape, object_params):
+    def add_silhoutte_general_object(self, name, shape, **object_params):
         if shape == "cube":
             self.visual_objects[name] = SCuboid(name, **object_params)
         return
 
-    def add_silhoutte_mesh_object(self, name, file, object_params):
+    def add_silhoutte_mesh_object(self, name, file, **object_params):
         raise Exception(" Not implemented")
 
     def finalize_stage(self):
@@ -54,3 +56,25 @@ class Stage(object):
 
     def get_observation_spaces(self):
         return self.stage_observations.get_observation_spaces()
+
+    def random_position(self, height_limits=(0.05, 0.15),
+                        angle_limits=(-2 * math.pi, 2 * math.pi),
+                        radius_limits=(0.0, 0.15)):
+        angle = np.random.uniform(*angle_limits)
+        radial_distance = np.random.uniform(*radius_limits)
+
+        if isinstance(height_limits, (int, float)):
+            height_z = height_limits
+        else:
+            height_z = np.random.uniform(*height_limits)
+
+        object_position = [
+            radial_distance * math.cos(angle),
+            radial_distance * math.sin(angle),
+            height_z,
+        ]
+
+        return object_position
+
+    def clear(self):
+        self.latest_full_state = None

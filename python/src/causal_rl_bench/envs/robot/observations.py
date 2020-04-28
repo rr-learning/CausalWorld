@@ -175,6 +175,7 @@ class TriFingerObservations(object):
                 observations_list = np.append(observations_list,
                                               observations_dict[observation]
                                               .flatten())
+        #TODO: scale if normalized
         return observations_dict, observations_list
 
 
