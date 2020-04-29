@@ -80,8 +80,9 @@ class World(gym.Env):
         info = {}
 
         if self.logging:
+            # TODO: pass the full state to the logger in the future
             self.logger.append(robot_action=action,
-                               world_state=self.get_full_state(),
+                               world_state=stage_observations_dict,
                                reward=reward,
                                timestamp=self.episode_length * self.skip_frame)
 
