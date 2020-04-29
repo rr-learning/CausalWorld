@@ -12,7 +12,7 @@ class WorldLogger:
         self.episodes = []
         self._curr = None
 
-    def new_episode(self):
+    def new_episode(self, task_params=None):
         if self._curr:
             # convert to dict for saving so loading has no dependencies
             self.episodes.append(self._curr.__dict__)

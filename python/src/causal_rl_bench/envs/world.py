@@ -1,6 +1,7 @@
 import numpy as np
 import gym
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
+from causal_rl_bench.loggers.world_logger import WorldLogger
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.picking import PickingTask
 from causal_rl_bench.envs.env_utils import combine_spaces
@@ -14,7 +15,8 @@ class World(gym.Env):
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  camera_skip_frame=0.3, normalize_actions=True,
-                 normalize_observations=True, max_episode_length=None, **kwargs):
+                 normalize_observations=True, max_episode_length=None,
+                 logging=True, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
@@ -59,12 +61,16 @@ class World(gym.Env):
             combine_spaces(self.robot.get_observation_spaces(),
                            self.stage.get_observation_spaces())
         self.action_space = self.robot.get_action_spaces()
+        self.logging = logging
+        self.logger = WorldLogger()
+        self.skip_frame = skip_frame
         #TODO: verify spaces here
 
         return
 
     def step(self, action):
         self.episode_length += 1
+
         robot_observations_dict = self.robot.apply_action(action)
         stage_observations_dict = self.stage.get_full_state()
         task_observations = self.task.filter_observations(robot_observations_dict,
@@ -72,6 +78,13 @@ class World(gym.Env):
         reward = self.task.get_reward()
         done = self.task.is_terminated()
         info = {}
+
+        if self.logging:
+            self.logger.append(robot_action=action,
+                               world_state=self.get_full_state(),
+                               reward=reward,
+                               timestamp=self.episode_length * self.skip_frame)
+
         return task_observations, reward, done, info
 
     def sample_new_task(self):
@@ -90,6 +103,9 @@ class World(gym.Env):
 
     def reset(self):
         self.episode_length = 0
+        if self.logging:
+            # TODO: Replace this with another task method in the future providing additional params for the reinit
+            self.logger.new_episode(task_params=self.task.get_description())
         return self.task.reset_task()
 
     def close(self):
