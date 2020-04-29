@@ -14,7 +14,7 @@ class World(gym.Env):
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  camera_skip_frame=0.3, normalize_actions=True,
-                 normalize_observations=True, **kwargs):
+                 normalize_observations=True, max_episode_length=None, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
@@ -37,7 +37,12 @@ class World(gym.Env):
         self.seed(seed)
         self.stage = Stage(observation_mode=observation_mode,
                            normalize_observations=normalize_observations)
-        self.enforce_episode_length = False
+        if max_episode_length is None:
+            self.enforce_episode_length = False
+        else:
+            self.enforce_episode_length = True
+        self.max_episode_length = max_episode_length
+        self.episode_length = 0
 
         self.metadata = {"render.modes": ["human"]}
         gym.Env.__init__(self)
@@ -59,6 +64,7 @@ class World(gym.Env):
         return
 
     def step(self, action):
+        self.episode_length += 1
         robot_observations_dict = self.robot.apply_action(action)
         stage_observations_dict = self.stage.get_full_state()
         task_observations = self.task.filter_observations(robot_observations_dict,
@@ -83,6 +89,7 @@ class World(gym.Env):
         return [seed]
 
     def reset(self):
+        self.episode_length = 0
         return self.task.reset_task()
 
     def close(self):
@@ -92,10 +99,14 @@ class World(gym.Env):
         raise Exception(" ")
 
     def enforce_max_episode_length(self, episode_length=2000):
-        raise Exception(" ")
+        self.enforce_episode_length = True
+        self.max_episode_length = episode_length
 
     def _is_done(self):
-        return self.tasks.is_done()
+        if self.enforce_episode_length and self.episode_length > self.max_episode_length:
+            return True
+        else:
+            return self.task.is_done()
 
     def get_full_state(self):
         raise Exception(" ")
