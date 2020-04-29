@@ -1,33 +1,133 @@
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
 
+import math
+import numpy as np
+import pytest
 
-class TestTriFingerObservations:
-    def test_get_observation_spaces(self):
-        assert False
 
-    def test_set_observation_spaces(self):
-        assert False
+@pytest.fixture(scope='module')
+def os_camera_full():
+    return TriFingerObservations(observation_mode="cameras", normalize_observations=False)
 
-    def test_is_normalized(self):
-        assert False
 
-    def test_normalize_observation(self):
-        assert False
+@pytest.fixture(scope='module')
+def os_structured_full():
+    return TriFingerObservations(observation_mode="structured", normalize_observations=False)
 
-    def test_denormalize_observation(self):
-        assert False
 
-    def test_satisfy_constraints(self):
-        assert False
+@pytest.fixture(scope='module')
+def os_default():
+    return TriFingerObservations()
 
-    def test_clip_observation(self):
-        assert False
 
-    def test_add_observation(self):
-        assert False
+@pytest.fixture(scope='module')
+def os_custom_keys_norm():
+    return TriFingerObservations(observation_mode="structured", normalize_observations=True,
+                                 observation_keys=["end_effector_positions",
+                                                   "action_joint_positions"])
 
-    def test_remove_observations(self):
-        assert False
 
-    def test_get_current_observations(self):
-        assert False
+lower_obs_space_structured_full = np.array([-math.radians(90), -math.radians(90),
+                                            - math.radians(172)] * 3 + [-20] * 3 * 3 +[-0.36, -0.36, -0.36] * 3)
+upper_obs_space_structured_full = np.array([math.radians(90), math.radians(100),
+                                            math.radians(-2)] * 3 + [20] * 3 * 3 +[0.36, 0.36, 0.36] * 3)
+
+upper_99_structured_norm = np.array([0.99] * 27)
+upper_100_structured_norm = np.array([1.0] * 27)
+upper_101_structured_norm = np.array([1.01] * 27)
+
+lower_99_structured_norm = np.array([-0.99] * 27)
+lower_100_structured_norm = np.array([-1.0] * 27)
+lower_101_structured_norm = np.array([-1.01] * 27)
+
+lower_obs_space_custom = np.array([-0.5, -0.5, 0.0]*3 + [-math.radians(70), -math.radians(70), -math.radians(160)] * 3)
+upper_obs_space_custom = np.array([0.5, 0.5, 0.5]*3 + [math.radians(70), math.radians(0), math.radians(-2)] * 3)
+
+
+normalized_struct_obs_to_be_clipped = np.array([1.02, 0.4, -2]*9)
+normalized_struct_obs_clipped = np.array([1., 0.4, -1.]*9)
+
+
+def test_get_observation_spaces(os_default, os_camera_full, os_structured_full, os_custom_keys_norm):
+    assert (os_default.get_observation_spaces().low == -1.).all()
+    assert (os_custom_keys_norm.get_observation_spaces().low == -1.).all()
+    assert (os_default.get_observation_spaces().high == 1.).all()
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
+
+    assert (os_structured_full.get_observation_spaces().low == lower_obs_space_structured_full).all()
+    assert (os_camera_full.get_observation_spaces().low == 0).all()
+    assert (os_structured_full.get_observation_spaces().high == upper_obs_space_structured_full).all()
+    assert (os_camera_full.get_observation_spaces().high == 255).all()
+
+
+@pytest.mark.skip
+def test_set_observation_spaces():
+    assert False
+
+
+def test_is_normalized(os_default, os_camera_full, os_structured_full, os_custom_keys_norm):
+    assert os_default.is_normalized()
+    assert os_custom_keys_norm.is_normalized()
+    assert not os_camera_full.is_normalized()
+    assert not os_structured_full.is_normalized()
+
+
+def test_normalize_observation(os_structured_full, os_custom_keys_norm):
+    assert (os_structured_full.normalize_observation(
+        upper_obs_space_structured_full) == upper_100_structured_norm).all()
+    assert (os_structured_full.normalize_observation(
+        lower_obs_space_structured_full) == lower_100_structured_norm).all()
+
+    assert (os_custom_keys_norm.normalize_observation(upper_obs_space_custom) == 1).all()
+    assert (os_custom_keys_norm.normalize_observation(lower_obs_space_custom) == -1).all()
+
+
+def test_denormalize_observation(os_structured_full, os_custom_keys_norm):
+    assert os_structured_full.denormalize_observation(
+        np.array([1.0] * 27)) == pytest.approx(upper_obs_space_structured_full)
+    assert os_structured_full.denormalize_observation(
+        np.array([-1.0] * 27)) == pytest.approx(lower_obs_space_structured_full)
+
+    assert os_custom_keys_norm.denormalize_observation(np.array([1.0] * 18)) == pytest.approx(upper_obs_space_custom)
+    assert os_custom_keys_norm.denormalize_observation(np.array([-1.0] * 18)) == pytest.approx(lower_obs_space_custom)
+
+
+def test_satisfy_constraints(os_default, os_structured_full):
+    assert os_default.satisfy_constraints(upper_99_structured_norm)
+    assert not os_default.satisfy_constraints(upper_100_structured_norm)
+    assert not os_default.satisfy_constraints(upper_101_structured_norm)
+
+    assert os_structured_full.satisfy_constraints(lower_obs_space_structured_full * 0.5)
+    assert not os_structured_full.satisfy_constraints(lower_obs_space_structured_full * 1.01)
+
+    assert os_default.satisfy_constraints(lower_99_structured_norm)
+    assert not os_default.satisfy_constraints(lower_100_structured_norm)
+    assert not os_default.satisfy_constraints(lower_101_structured_norm)
+
+
+def test_clip_observation(os_default, os_structured_full):
+    assert (os_default.clip_observation(upper_99_structured_norm) == upper_99_structured_norm).all()
+    assert (os_default.clip_observation(lower_99_structured_norm) == lower_99_structured_norm).all()
+    assert (os_default.clip_observation(upper_100_structured_norm) == upper_100_structured_norm).all()
+    assert (os_default.clip_observation(lower_100_structured_norm) == lower_100_structured_norm).all()
+    assert (os_default.clip_observation(upper_101_structured_norm) == upper_100_structured_norm).all()
+    assert (os_default.clip_observation(lower_101_structured_norm) == lower_100_structured_norm).all()
+
+    assert os_structured_full.clip_observation(os_structured_full.denormalize_observation(
+        normalized_struct_obs_to_be_clipped)) == pytest.approx(
+        os_structured_full.denormalize_observation(normalized_struct_obs_clipped))
+
+
+@pytest.mark.skip
+def test_add_observation():
+    assert False
+
+
+@pytest.mark.skip
+def test_remove_observations():
+    assert False
+
+
+@pytest.mark.skip
+def test_get_current_observations():
+    assert False

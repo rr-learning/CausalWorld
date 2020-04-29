@@ -22,6 +22,6 @@ class WorldLogger:
     def append(self, robot_action, world_state, reward, timestamp):
         self._curr.append(robot_action, world_state, reward, timestamp)
 
-    def store(self, filename):
+    def save(self, filename):
         with open(filename, "wb") as file_handle:
             pickle.dump(self.episodes, file_handle)

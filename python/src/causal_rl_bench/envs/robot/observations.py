@@ -63,9 +63,9 @@ class TriFingerObservations(object):
                 self.observations_keys = ["joint_positions",
                                           "joint_velocities",
                                           "joint_torques"]
-            elif all(key in observation_keys
-                     for key in self.lower_bounds.keys()):
-                self.observation_keys = observation_keys
+            elif all(key in self.lower_bounds.keys()
+                     for key in observation_keys):
+                self.observations_keys = observation_keys
             else:
                 raise ValueError("One of the provided observation_"
                                  "keys is unknown")
