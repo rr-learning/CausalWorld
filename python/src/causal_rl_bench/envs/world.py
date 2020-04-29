@@ -10,18 +10,17 @@ class World(gym.Env):
     """
     Base environment of the robot manipulation task
     """
-    #TODO: rename from control rate to skip frame
-    def __init__( self, task=None, task_id="picking", control_rate=0.02,
-                  enable_visualization=True, seed=0,
-                  action_mode="joint_positions", observation_mode="structured",
-                  camera_rate=0.3, normalize_actions=True,
-                  normalize_observations=True, **kwargs):
+    def __init__(self, task=None, task_id="picking", skip_frame=0.02,
+                 enable_visualization=True, seed=0,
+                 action_mode="joint_positions", observation_mode="structured",
+                 camera_skip_frame=0.3, normalize_actions=True,
+                 normalize_observations=True, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
 
         Args:
-            control_rate_s (float): the rate at which the env step runs
+            skip_frame (float): the time step at which the env step runs
             finger-type (str "single"/"tri"): to train on the "single"
                 or the "tri" finger
             enable_visualization (bool): if the simulation env is to be
@@ -30,8 +29,8 @@ class World(gym.Env):
         self.robot = TriFingerRobot(action_mode=action_mode,
                                     observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,
-                                    control_rate=control_rate,
-                                    camera_rate=camera_rate,
+                                    skip_frame=skip_frame,
+                                    camera_skip_frame=camera_skip_frame,
                                     normalize_actions=normalize_actions,
                                     normalize_observations=normalize_observations
                                     )

@@ -7,14 +7,14 @@ import numpy as np
 
 class TriFingerRobot(object):
     def __init__(self, action_mode, observation_mode, enable_visualization=True,
-                 camera_rate=0.3, control_rate=0.02, camera_turned_on=False,
+                 camera_skip_frame=0.3, skip_frame=0.02, camera_turned_on=False,
                  normalize_actions=True, normalize_observations=True):
         self.normalize_actions = normalize_actions
         self.normalize_observations = normalize_observations
         self.action_mode = action_mode
         self.observation_mode = observation_mode
-        self.camera_rate = camera_rate
-        self.control_rate = control_rate
+        self.camera_skip_frame = camera_skip_frame
+        self.skip_frame = skip_frame
         self.camera_turned_on = camera_turned_on
         self.simulation_rate = 0.001
         self.control_index = -1
@@ -22,11 +22,11 @@ class TriFingerRobot(object):
         self.tri_finger = SimFinger(self.simulation_rate, enable_visualization,
                                     "tri")
 
-        self.camera_skip_steps = int(round(self.camera_rate / self.control_rate))
-        self.steps_per_control = int(round(self.control_rate / self.simulation_rate))
-        assert (abs(self.control_rate - self.steps_per_control * self.simulation_rate)
+        self.camera_skip_steps = int(round(self.camera_skip_frame / self.skip_frame))
+        self.steps_per_control = int(round(self.skip_frame / self.simulation_rate))
+        assert (abs(self.skip_frame - self.steps_per_control * self.simulation_rate)
                 <= 0.000001)
-        assert (abs(self.camera_rate - self.camera_skip_steps * self.control_rate)
+        assert (abs(self.camera_skip_frame - self.camera_skip_steps * self.skip_frame)
                 <= 0.000001)
 
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
@@ -50,27 +50,27 @@ class TriFingerRobot(object):
     def get_observation_mode(self):
         return self.observation_mode
 
-    def set_camera_rate(self, camera_rate):
-        self.camera_rate = camera_rate
+    def camera_skip_frame(self, camera_skip_frame):
+        self.camera_skip_frame = camera_skip_frame
         self.camera_skip_steps = int(
-            round(self.camera_rate / self.control_rate))
+            round(self.camera_skip_frame / self.skip_frame))
         assert (abs(
-            self.camera_rate - self.camera_skip_steps * self.control_rate)
+            self.camera_skip_frame - self.camera_skip_steps * self.skip_frame)
                 <= 0.000001)
 
-    def get_camera_rate(self):
-        return self.camera_rate
+    def get_camera_skip_frame(self):
+        return self.camera_skip_frame
 
-    def set_control_rate(self, control_rate):
-        self.control_rate = control_rate
+    def set_skip_frame(self, skip_frame):
+        self.skip_frame = skip_frame
         self.steps_per_control = int(
-            round(self.control_rate / self.simulation_rate))
+            round(self.skip_frame / self.simulation_rate))
         assert (abs(
-            self.control_rate - self.steps_per_control * self.simulation_rate)
+            self.skip_frame - self.steps_per_control * self.simulation_rate)
                 <= 0.000001)
 
-    def get_control_rate(self):
-        return self.control_rate
+    def get_skip_frame(self):
+        return self.skip_frame
 
     def turn_on_cameras(self):
         self.camera_turned_on = True
