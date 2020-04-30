@@ -34,20 +34,8 @@ class PushingTask(Task):
         self.robot.set_full_state(sampled_positions)
 
         self.task_solved = False
+        self.reset_scene_objects()
 
-        # TODO: Refactor the orientation sampling into a general util method
-
-        block_position = self.stage.random_position(height_limits=0.0435)
-        block_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
-                                                degrees=True).as_quat()
-
-        goal_position = self.stage.random_position(height_limits=0.0435)
-        goal_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
-                                               degrees=True).as_quat()
-
-        self.stage.set_states(names=["block", "goal_block"],
-                              positions=[block_position, goal_position],
-                              orientations=[block_orientation, goal_orientation])
         return self.robot.get_current_full_observations()
 
     def get_description(self):
@@ -87,4 +75,16 @@ class PushingTask(Task):
         pass
 
     def reset_scene_objects(self):
-        pass
+        # TODO: Refactor the orientation sampling into a general util method
+
+        block_position = self.stage.random_position(height_limits=0.0435)
+        block_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
+                                                degrees=True).as_quat()
+
+        goal_position = self.stage.random_position(height_limits=0.0435)
+        goal_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
+                                               degrees=True).as_quat()
+
+        self.stage.set_states(names=["block", "goal_block"],
+                              positions=[block_position, goal_position],
+                              orientations=[block_orientation, goal_orientation])

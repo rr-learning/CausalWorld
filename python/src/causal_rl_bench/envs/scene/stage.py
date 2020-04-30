@@ -85,6 +85,15 @@ class Stage(object):
 
         return object_position
 
+    def clear_stage(self):
+        # TODO: Need to remove rigid and visual objects here
+        self.rigid_objects = dict()
+        self.visual_objects = dict()
+        self.stage_observations = None
+        self.latest_full_state = None
+        self.name_keys = []
+
+
     def clear(self):
         self.latest_full_state = None
 
