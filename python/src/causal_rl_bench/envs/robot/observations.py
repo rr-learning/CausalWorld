@@ -54,9 +54,10 @@ class TriFingerObservations(object):
         self.observation_functions = dict()
 
         if observation_mode == "cameras":
-            self.low = np.zeros(shape=(3, 540, 720, 3), dtype=np.uint8).flatten()
+            self.observations_keys = ["cameras"]
+            self.low = np.zeros(shape=(3, 540, 720, 3), dtype=np.uint8)
             self.high = np.full(shape=(3, 540, 720, 3), fill_value=255,
-                                dtype=np.uint8).flatten()
+                                dtype=np.uint8)
         elif observation_mode == "structured":
             if observation_keys is None:
                 # Default structured observation space
@@ -150,44 +151,27 @@ class TriFingerObservations(object):
 
     def get_current_observations(self, robot_state):
         observations_dict = dict()
-        observations_list = np.array([])
         for observation in self.observations_keys:
             if observation == "joint_positions":
                 observations_dict["joint_positions"] = robot_state.position
-                observations_list = np.append(observations_list,
-                                              robot_state.position)
             elif observation == "joint_torques":
                 observations_dict["joint_torques"] = robot_state.torque
-                observations_list = np.append(observations_list,
-                                              robot_state.torque)
             elif observation == "joint_velocities":
                 observations_dict["joint_velocities"] = robot_state.velocity
-                observations_list = np.append(observations_list,
-                                              robot_state.velocity)
             elif observation == "cameras":
                 camera_obs = np.stack((robot_state.camera_60,
                                       robot_state.camera_180,
                                       robot_state.camera_300), axis=0)
                 observations_dict["cameras"] = camera_obs
-                observations_list = np.append(observations_list,
-                                              camera_obs.flatten())
             else:
                 observations_dict[observation] = \
                     self.observation_functions[observation](robot_state)
-                observations_list = np.append(observations_list,
-                                              observations_dict[observation]
-                                              .flatten())
 
-        # TODO: This needs to be in line with the scene observations and chacked again
         if self.normalized_observations:
-            observations_list = self.normalize_observation(observations_list)
-            slice_start = 0
             for key in self.observations_keys:
-                slice_stop = slice_start + len(observations_dict[key])
-                observations_dict[key] = observations_list[slice_start:slice_stop]
-                slice_start = slice_stop
+                observations_dict[key] = self.normalize_observation(observations_dict[key])
 
-        return observations_dict, observations_list
+        return observations_dict
 
 
 

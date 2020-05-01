@@ -93,7 +93,6 @@ class World(gym.Env):
 
     def switch_task(self, task):
         self.task = task
-        self.stage.clear_stage()
         self.task.init_task(self.robot, self.stage)
         selected_observations = self.task.observation_keys
         self.robot.select_observations(selected_observations)

@@ -120,9 +120,8 @@ class TriFingerRobot(object):
 
     def set_full_state(self, joint_positions):
         self.latest_full_state = self.tri_finger.reset_finger(joint_positions)
-        observations_dict, observations_list = \
-            self.robot_observations.get_current_observations \
-                (self.latest_full_state)
+        observations_dict = self.robot_observations.get_current_observations(
+            self.latest_full_state)
         self.latest_observation = observations_dict
         return
 

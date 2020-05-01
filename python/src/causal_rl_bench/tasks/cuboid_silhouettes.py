@@ -22,15 +22,21 @@ class CuboidSilhouette(Task):
         self.cube_color = cube_color
 
         self.task_solved = False
-
-        self.observation_keys = ["joint_positions",
-                                 "silhouette_cuboid_target_position",
-                                 "silhouette_cuboid_target_orientation",
-                                 "silhouette_cuboid_target_size"]
+        self.observation_keys = []
 
     def init_task(self, robot, stage):
         self.robot = robot
         self.stage = stage
+
+        if self.robot.get_observation_mode() == "structured":
+            self.observation_keys = ["joint_positions",
+                                     "silhouette_cuboid_target_position",
+                                     "silhouette_cuboid_target_orientation",
+                                     "silhouette_cuboid_target_size"]
+        elif self.robot.get_observation_mode() == "cameras":
+            self.observation_keys = ["cameras"]
+        else:
+            raise ValueError("Observation mode not supported for this task")
 
         if self.silhouette_position_mode == "center":
             self.silhouette_position = np.array([0, 0, 0.0115 + self.silhouette_size[2] / 2 * self.unit_length])
@@ -60,8 +66,9 @@ class CuboidSilhouette(Task):
                                                 orientation=cube_orientation,
                                                 colour=self.cube_color)
 
-            self.observation_keys.append("rigid_cube_{}_position".format(i))
-            self.observation_keys.append("rigid_cube_{}_orientation".format(i))
+            if self.robot.get_observation_mode() == "structured":
+                self.observation_keys.append("rigid_cube_{}_position".format(i))
+                self.observation_keys.append("rigid_cube_{}_orientation".format(i))
 
         self.stage.finalize_stage()
 
