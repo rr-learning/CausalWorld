@@ -9,6 +9,7 @@ class PushingTask(Task):
         self.id = "pushing"
         self.robot = None
         self.stage = None
+        self.seed = 0
 
         self.task_solved = False
 
@@ -88,3 +89,16 @@ class PushingTask(Task):
         self.stage.set_states(names=["block", "goal_block"],
                               positions=[block_position, goal_position],
                               orientations=[block_orientation, goal_orientation])
+
+    def get_task_params(self):
+        task_params_dict = dict()
+        task_params_dict["task_id"] = self.id
+        task_params_dict["skip_frame"] = self.robot.get_skip_frame()
+        task_params_dict["seed"] = self.seed
+        task_params_dict["action_mode"] = self.robot.get_action_mode()
+        task_params_dict["observation_mode"] = self.robot.get_action_mode()
+        task_params_dict["camera_skip_frame"] = self.robot.get_camera_skip_frame()
+        task_params_dict["normalize_actions"] = self.robot.robot_actions.is_normalized()
+        task_params_dict["normalize_observations"] = self.robot.robot_observations.is_normalized()
+        task_params_dict["max_episode_length"] = None
+        return task_params_dict

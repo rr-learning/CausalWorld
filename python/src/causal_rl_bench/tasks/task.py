@@ -23,3 +23,6 @@ class Task(object):
 
     def reset_scene_objects(self):
         raise NotImplementedError()
+
+    def get_task_params(self):
+        raise NotImplementedError()

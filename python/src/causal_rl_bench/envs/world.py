@@ -4,6 +4,7 @@ from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.loggers.world_logger import WorldLogger
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.picking import PickingTask
+from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.envs.env_utils import combine_spaces
 
 
@@ -51,6 +52,8 @@ class World(gym.Env):
         if task is None:
             if task_id == "picking":
                 self.task = PickingTask()
+            elif task_id == "pushing":
+                self.task = PushingTask()
         else:
             self.task = task
         self.task.init_task(self.robot, self.stage)
