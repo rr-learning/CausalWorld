@@ -37,6 +37,7 @@ class TriFingerRobot(object):
         self.latest_full_state = None
 
     def set_action_mode(self, action_mode):
+        self.action_mode = action_mode
         self.robot_actions = TriFingerAction(action_mode,
                                              self.normalize_actions)
 
@@ -44,13 +45,14 @@ class TriFingerRobot(object):
         return self.action_mode
 
     def set_observation_mode(self, observation_mode):
+        self.observation_mode = observation_mode
         self.robot_observations = \
             TriFingerObservations(observation_mode, self.normalize_observations)
 
     def get_observation_mode(self):
         return self.observation_mode
 
-    def camera_skip_frame(self, camera_skip_frame):
+    def set_camera_skip_frame(self, camera_skip_frame):
         self.camera_skip_frame = camera_skip_frame
         self.camera_skip_steps = int(
             round(self.camera_skip_frame / self.skip_frame))

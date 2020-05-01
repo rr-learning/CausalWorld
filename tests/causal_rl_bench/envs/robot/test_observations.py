@@ -60,11 +60,6 @@ def test_get_observation_spaces(os_default, os_camera_full, os_structured_full, 
     assert (os_camera_full.get_observation_spaces().high == 255).all()
 
 
-@pytest.mark.skip
-def test_set_observation_spaces():
-    assert False
-
-
 def test_is_normalized(os_default, os_camera_full, os_structured_full, os_custom_keys_norm):
     assert os_default.is_normalized()
     assert os_custom_keys_norm.is_normalized()
@@ -118,14 +113,42 @@ def test_clip_observation(os_default, os_structured_full):
         os_structured_full.denormalize_observation(normalized_struct_obs_clipped))
 
 
-@pytest.mark.skip
-def test_add_observation():
-    assert False
+def test_add_and_remove_observation(os_custom_keys_norm):
+    os_custom_keys_norm.add_observation("joint_torques")
+    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+                                                     "action_joint_positions",
+                                                     "joint_torques"]
+    assert len(os_custom_keys_norm.get_observation_spaces().low) == 27
+    assert len(os_custom_keys_norm.get_observation_spaces().high) == 27
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
+    os_custom_keys_norm.remove_observations(["joint_torques"])
+    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+                                                     "action_joint_positions"]
+    assert len(os_custom_keys_norm.get_observation_spaces().low) == 18
+    assert len(os_custom_keys_norm.get_observation_spaces().high) == 18
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
 
+    def dummy_fn(robot):
+        return [1, 1, 1]
 
-@pytest.mark.skip
-def test_remove_observations():
-    assert False
+    os_custom_keys_norm.add_observation("dummy_key", low_bound=[-4, -4, -4], upper_bound=[2, 2, 2],
+                                        observation_fn=dummy_fn)
+    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+                                                     "action_joint_positions",
+                                                     "dummy_key"]
+    assert len(os_custom_keys_norm.get_observation_spaces().low) == 21
+    assert len(os_custom_keys_norm.get_observation_spaces().high) == 21
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
+    os_custom_keys_norm.remove_observations(["dummy_key"])
+    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+                                                     "action_joint_positions"]
+    assert len(os_custom_keys_norm.get_observation_spaces().low) == 18
+    assert len(os_custom_keys_norm.get_observation_spaces().high) == 18
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
+    assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
 
 
 @pytest.mark.skip
