@@ -2,6 +2,8 @@ from counterfactual.python.src.causal_rl_bench.tasks.task import Task
 from scipy.spatial.transform import Rotation as rotation
 import numpy as np
 import math
+import pybullet
+import itertools
 
 
 class CuboidSilhouette(Task):
@@ -17,7 +19,6 @@ class CuboidSilhouette(Task):
         self.num_of_rigid_cubes = int(np.prod(self.silhouette_size))
         self.silhouette_position_mode = silhouette_position_mode
         self.silhouette_orientation = [0, 0, 0, 1]
-        self.silhouette_subgoals = []
         self.unit_length = unit_length
         self.cube_color = cube_color
 
@@ -40,6 +41,13 @@ class CuboidSilhouette(Task):
 
         if self.silhouette_position_mode == "center":
             self.silhouette_position = np.array([0, 0, 0.0115 + self.silhouette_size[2] / 2 * self.unit_length])
+            # TODO: this needs to be implemented for a general silhouette orientation
+            self.s_xhigher = self.silhouette_size[0] / 2 * self.unit_length
+            self.s_xlower = - self.silhouette_size[0] / 2 * self.unit_length
+            self.s_yhigher = self.silhouette_size[1] / 2 * self.unit_length
+            self.s_ylower = - self.silhouette_size[1] / 2 * self.unit_length
+            self.s_zhigher = 0.0115 + self.silhouette_size[2] / 2 * self.unit_length
+            self.s_zlower = 0.0115
         else:
             raise ValueError("please provide valid silhouette position argument")
 
@@ -87,7 +95,15 @@ class CuboidSilhouette(Task):
         return "Task where the goal is to stack available cubes into a target silhouette"
 
     def get_reward(self):
+        state = self.stage.get_full_state()
         reward = 0.0
+        for i in range(self.num_of_rigid_cubes):
+            cuboid_position = state["rigid_cube_{}_position".format(i)]
+            cuboid_orientation = state["rigid_cube_{}_orientation".format(i)]
+            reward += self.reward_per_cuboid(cuboid_position=cuboid_position,
+                                             cuboid_orientation=cuboid_orientation,
+                                             cuboid_size=np.array([1, 1, 1]) * self.unit_length)
+        print(reward)
         return reward
 
     def is_terminated(self):
@@ -132,3 +148,45 @@ class CuboidSilhouette(Task):
             self.stage.set_states(names=["cube_{}".format(i)],
                                   positions=[cube_position],
                                   orientations=[cube_orientation])
+
+    def reward_per_cuboid(self, cuboid_position, cuboid_orientation, cuboid_size):
+        cuboid_reward = 0
+        for unit_vertex_tuple in itertools.product([-1, 1], repeat=3):
+            vertex_position_in_cube_frame = np.multiply(np.array(unit_vertex_tuple), cuboid_size / 2)
+            vertex_coords, _ = pybullet.multiplyTransforms(positionA=cuboid_position,
+                                                           orientationA=[0, 0, 0, 1],
+                                                           positionB=vertex_position_in_cube_frame,
+                                                           orientationB=cuboid_orientation)
+            vertex_distance = 0
+            if vertex_coords[0] > self.s_xhigher:
+                vertex_distance += vertex_coords[0] - self.s_xhigher
+            elif vertex_coords[0] > self.s_xlower:
+                vertex_distance += vertex_coords[0] - self.s_xlower
+
+            if vertex_coords[1] > self.s_yhigher:
+                vertex_distance += vertex_coords[1] - self.s_yhigher
+            elif vertex_coords[1] > self.s_ylower:
+                vertex_distance += vertex_coords[1] - self.s_ylower
+
+            if vertex_coords[2] > self.s_zhigher:
+                vertex_distance += vertex_coords[2] - self.s_zhigher
+            elif vertex_coords[2] > self.s_zlower:
+                vertex_distance += vertex_coords[2] - self.s_zlower
+            cuboid_reward -= vertex_distance
+        return cuboid_reward
+
+    def reset_to_counterfactual_variant(self, **kwargs):
+        pass
+
+    def get_task_params(self):
+        task_params_dict = dict()
+        task_params_dict["task_id"] = self.id
+        task_params_dict["skip_frame"] = self.robot.get_skip_frame()
+        task_params_dict["seed"] = self.seed
+        task_params_dict["action_mode"] = self.robot.get_action_mode()
+        task_params_dict["observation_mode"] = self.robot.get_action_mode()
+        task_params_dict["camera_skip_frame"] = self.robot.get_camera_skip_frame()
+        task_params_dict["normalize_actions"] = self.robot.robot_actions.is_normalized()
+        task_params_dict["normalize_observations"] = self.robot.robot_observations.is_normalized()
+        task_params_dict["max_episode_length"] = None
+        return task_params_dict

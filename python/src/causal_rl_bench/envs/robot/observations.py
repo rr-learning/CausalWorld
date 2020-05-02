@@ -103,8 +103,18 @@ class TriFingerObservations(object):
     def normalize_observation(self, observation):
         return 2.0 * (observation - self.low) / (self.high - self.low) - 1.0
 
+    def normalize_observation_for_key(self, observation, key):
+        lower_key = np.array(self.lower_bounds[key])
+        higher_key = np.array(self.upper_bounds[key])
+        return 2.0 * (observation - lower_key) / (higher_key - lower_key) - 1.0
+
     def denormalize_observation(self, observation):
         return self.low + (observation + 1.0) / 2.0 * (self.high - self.low)
+
+    def denormalize_observation_for_key(self, observation, key):
+        lower_key = np.array(self.lower_bounds[key])
+        higher_key = np.array(self.upper_bounds[key])
+        return lower_key + (observation + 1.0) / 2.0 * (higher_key - lower_key)
 
     def satisfy_constraints(self, observation):
         if self.normalized_observations:
@@ -169,7 +179,7 @@ class TriFingerObservations(object):
 
         if self.normalized_observations:
             for key in self.observations_keys:
-                observations_dict[key] = self.normalize_observation(observations_dict[key])
+                observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
 
         return observations_dict
 
