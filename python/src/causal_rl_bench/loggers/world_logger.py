@@ -12,14 +12,14 @@ class WorldLogger:
         if filename is None:
             self.episodes = []
         else:
-            with open(filename, "r") as file:
+            with open(filename, "rb") as file:
                 self.episodes = pickle.load(file)
         self._curr = None
 
     def new_episode(self, task_params=None):
         if self._curr:
             # convert to dict for saving so loading has no dependencies
-            self.episodes.append(self._curr.__dict__)
+            self.episodes.append(self._curr)
         self._curr = Episode(task_params)
 
     def append(self, robot_action, world_state, reward, timestamp):
@@ -28,7 +28,8 @@ class WorldLogger:
     def save(self, filename, output_path=None):
         if output_path is None:
             self.path = os.path.join("output", "logs")
-            os.makedirs(self.path)
+            if not os.path.isdir(self.path):
+                os.makedirs(self.path)
         else:
             self.path = output_path
 
