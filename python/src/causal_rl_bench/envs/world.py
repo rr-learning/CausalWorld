@@ -123,7 +123,13 @@ class World(gym.Env):
         if self.logging:
             # TODO: Replace this with another task method in the future providing additional params for the reinit
             self.logger.new_episode(task_params=self.task.get_description())
-        return self.task.reset_task()
+        robot_observations_dict = self.task.reset_task()
+        #TODO: make sure that stage observations returned are up to date
+        stage_observations_dict = self.stage.get_current_observations()
+        task_observations = self.task.filter_observations(
+            robot_observations_dict,
+            stage_observations_dict)
+        return task_observations
 
     def close(self):
         self.robot.close()
