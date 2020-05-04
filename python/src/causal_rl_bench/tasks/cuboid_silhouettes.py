@@ -56,7 +56,8 @@ class CuboidSilhouette(Task):
                                                 size=self.silhouette_size * self.unit_length,
                                                 position=self.silhouette_position,
                                                 orientation=self.silhouette_orientation,
-                                                colour="green")
+                                                colour="green",
+                                                alpha=0.5)
 
         for i in range(self.num_of_rigid_cubes):
             # TODO: For this we need more flexible sampling utils
@@ -95,9 +96,9 @@ class CuboidSilhouette(Task):
         return "Task where the goal is to stack available cubes into a target silhouette"
 
     def get_reward(self):
-        state = self.stage.get_full_state()
         reward = 0.0
         for i in range(self.num_of_rigid_cubes):
+            state = self.stage.get_object_state("cube_{}".format(i))
             cuboid_position = state["rigid_cube_{}_position".format(i)]
             cuboid_orientation = state["rigid_cube_{}_orientation".format(i)]
             reward += self.reward_per_cuboid(cuboid_position=cuboid_position,
@@ -106,7 +107,7 @@ class CuboidSilhouette(Task):
         print(reward)
         return reward
 
-    def is_terminated(self):
+    def is_done(self):
         return self.task_solved
 
     def filter_observations(self, robot_observations_dict,
@@ -144,9 +145,9 @@ class CuboidSilhouette(Task):
             cube_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
                                                    degrees=True).as_quat()
 
-            self.stage.set_states(names=["cube_{}".format(i)],
-                                  positions=[cube_position],
-                                  orientations=[cube_orientation])
+            self.stage.set_objects_pose(names=["cube_{}".format(i)],
+                                        positions=[cube_position],
+                                        orientations=[cube_orientation])
 
     def reward_per_cuboid(self, cuboid_position, cuboid_orientation, cuboid_size):
         cuboid_reward = 0
@@ -174,14 +175,48 @@ class CuboidSilhouette(Task):
             cuboid_reward -= vertex_distance
         return cuboid_reward
 
-    def reset_to_counterfactual_variant(self, **kwargs):
-        pass
+    def do_random_intervention(self):
+        # TODO: for now just intervention on a specific object
+        interventions_dict = dict()
+        self.unit_length = np.random.uniform(low=0.04, high=0.08)
+
+        for i in range(self.num_of_rigid_cubes):
+            min_angle = i / self.num_of_rigid_cubes * 2 * math.pi
+            max_angle = (i + 1) / self.num_of_rigid_cubes * 2 * math.pi
+            cube_position = self.stage.random_position(height_limits=0.0115 + self.unit_length / 2,
+                                                       radius_limits=(0.05, 0.13),
+                                                       angle_limits=(min_angle, max_angle))
+            cube_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
+                                                   degrees=True).as_quat()
+            new_colour = np.random.uniform([0], [1], size=[3, ])
+            interventions_dict["position"] = cube_position
+            interventions_dict["orientation"] = cube_orientation
+            interventions_dict["colour"] = new_colour
+            interventions_dict["size"] = np.array([1, 1, 1]) * self.unit_length
+            self.stage.object_intervention("cube_{}".format(i), interventions_dict)
+
+        #For target silhouette
+
+        self.silhouette_position = np.array([0, 0, 0.0115 + self.silhouette_size[2] / 2 * self.unit_length])
+        # TODO: this needs to be implemented for a general silhouette orientation
+        self.s_xhigher = self.silhouette_size[0] / 2 * self.unit_length
+        self.s_xlower = - self.silhouette_size[0] / 2 * self.unit_length
+        self.s_yhigher = self.silhouette_size[1] / 2 * self.unit_length
+        self.s_ylower = - self.silhouette_size[1] / 2 * self.unit_length
+        self.s_zhigher = 0.0115 + self.silhouette_size[2] / 2 * self.unit_length
+        self.s_zlower = 0.0115
+
+        interventions_dict_target = dict()
+        interventions_dict_target["position"] = self.silhouette_position
+        interventions_dict_target["orientation"] = [0, 0, 0, 1]
+        interventions_dict_target["colour"] = np.random.uniform([0], [1], size=[3, ])
+        interventions_dict_target["size"] = self.silhouette_size * self.unit_length
+        self.stage.object_intervention("cuboid_target", interventions_dict_target)
 
     def get_task_params(self):
         task_params_dict = dict()
         task_params_dict["task_id"] = self.id
         task_params_dict["skip_frame"] = self.robot.get_skip_frame()
-        task_params_dict["seed"] = self.seed
         task_params_dict["action_mode"] = self.robot.get_action_mode()
         task_params_dict["observation_mode"] = self.robot.get_action_mode()
         task_params_dict["camera_skip_frame"] = self.robot.get_camera_skip_frame()

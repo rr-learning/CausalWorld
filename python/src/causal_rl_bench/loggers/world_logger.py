@@ -1,7 +1,7 @@
 from causal_rl_bench.loggers.episode import Episode
 
 import pickle
-
+import os
 
 class WorldLogger:
     """
@@ -25,8 +25,14 @@ class WorldLogger:
     def append(self, robot_action, world_state, reward, timestamp):
         self._curr.append(robot_action, world_state, reward, timestamp)
 
-    def save(self, filename):
-        with open(filename, "wb") as file_handle:
+    def save(self, filename, output_path=None):
+        if output_path is None:
+            self.path = os.path.join("output", "logs")
+            os.makedirs(self.path)
+        else:
+            self.path = output_path
+
+        with open(os.path.join(self.path, filename), "wb") as file_handle:
             pickle.dump(self.episodes, file_handle)
 
     def get_episode(self, number=0):
