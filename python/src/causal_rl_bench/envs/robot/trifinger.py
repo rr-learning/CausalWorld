@@ -179,3 +179,6 @@ class TriFingerRobot(object):
         for key in current_observations_keys:
             if key not in observation_keys:
                 self.robot_observations.remove_observations([key])
+
+    def close(self):
+        self.tri_finger.close()

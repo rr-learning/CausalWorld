@@ -8,9 +8,6 @@ from causal_rl_bench.envs.env_utils import combine_spaces
 
 
 class World(gym.Env):
-    """
-    Base environment of the robot manipulation task
-    """
     def __init__(self, task=None, task_id="picking", skip_frame=0.02,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
@@ -65,7 +62,7 @@ class World(gym.Env):
         self.logger = WorldLogger()
         self.skip_frame = skip_frame
         #TODO: verify spaces here
-
+        self.max_time_steps = 5000
         return
 
     def step(self, action):
@@ -76,7 +73,7 @@ class World(gym.Env):
         task_observations = self.task.filter_observations(robot_observations_dict,
                                                           stage_observations_dict)
         reward = self.task.get_reward()
-        done = self.task.is_terminated()
+        done = self._is_done()
         info = {}
 
         if self.logging:
@@ -119,7 +116,7 @@ class World(gym.Env):
         return self.task.reset_task()
 
     def close(self):
-        raise Exception(" ")
+        self.robot.close()
 
     def render(self, mode='human'):
         raise Exception(" ")
