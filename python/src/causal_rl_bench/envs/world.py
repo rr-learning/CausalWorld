@@ -12,7 +12,7 @@ from causal_rl_bench.envs.env_utils import combine_spaces
 
 class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
-                'video.frames_per_second': 10}
+                'video.frames_per_second': 50}
 
     def __init__(self, task=None, task_id="picking", skip_frame=0.02,
                  enable_visualization=True, seed=0,
@@ -73,7 +73,7 @@ class World(gym.Env):
 
         self._cam_dist = 1
         self._cam_yaw = 0
-        self._cam_pitch = -30
+        self._cam_pitch = -60
         self._render_width = 960
         self._render_height = 720
         self._p = self.robot.get_pybullet_client()
@@ -126,7 +126,13 @@ class World(gym.Env):
         if self.logging:
             # TODO: Replace this with another task method in the future providing additional params for the reinit
             self.logger.new_episode(task_params=self.task.get_task_params())
-        return self.task.reset_task()
+        robot_observations_dict = self.task.reset_task()
+        #TODO: make sure that stage observations returned are up to date
+        stage_observations_dict = self.stage.get_current_observations()
+        task_observations = self.task.filter_observations(
+            robot_observations_dict,
+            stage_observations_dict)
+        return task_observations
 
     def close(self):
         if self.logging:

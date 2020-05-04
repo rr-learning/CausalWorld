@@ -37,7 +37,7 @@ class SCuboid(SilhouetteObject):
         name, size=np.array([0.065, 0.065, 0.065]),
         position=np.array([0.0, 0.0, 0.0425]),
         orientation=np.array([0, 0, 0, 1]),
-        alpha=0.2, colour=np.array([1, 0, 0])
+        alpha=0.3, colour=np.array([0, 1, 0])
     ):
         super(SCuboid, self).__init__(name)
         self.type_id = 0

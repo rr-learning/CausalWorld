@@ -175,7 +175,7 @@ class TriFingerRobot(object):
         return self.robot_actions.get_action_space()
 
     def select_observations(self, observation_keys):
-        current_observations_keys = self.robot_observations.observations_keys
+        current_observations_keys = list(self.robot_observations.observations_keys)
         for key in current_observations_keys:
             if key not in observation_keys:
                 self.robot_observations.remove_observations([key])

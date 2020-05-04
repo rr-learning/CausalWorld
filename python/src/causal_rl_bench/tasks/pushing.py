@@ -114,10 +114,11 @@ class PushingTask(Task):
         new_colour = np.random.uniform([0], [1], size=[3, ])
         interventions_dict["position"] = new_block_position
         interventions_dict["colour"] = new_colour
-        self.stage.object_intervention("block", interventions_dict)
+        # self.stage.object_intervention("block", interventions_dict)
         interventions_dict = dict()
-        gaol_block_position = self.stage.random_position(height_limits=0.0425)
-        interventions_dict["position"] = gaol_block_position
+        goal_block_position = self.stage.random_position(height_limits=0.0425)
+        new_size = np.random.uniform([0.065], [0.15], size=[3,])
+        interventions_dict["size"] = new_size
         self.stage.object_intervention("goal_block", interventions_dict)
         return
 

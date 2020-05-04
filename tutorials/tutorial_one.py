@@ -12,6 +12,7 @@ import time
 
 def example():
     task = PushingTask()
+    #TODO: modify skip frame
     env = World(task=task, skip_frame=0.02, enable_visualization=False)
     recorder = VideoRecorder(env,
                              'video.mp4')
@@ -22,7 +23,8 @@ def example():
         # env.reset()
         # env.set_full_state(current_state)
         env.do_random_intervention()
-        for i in range(100):
+        for i in range(500):
+            recorder.capture_frame()
             # env.step(
             #     np.random.uniform(env.action_space.low, env.action_space.high,
             #                       env.action_space.shape))
