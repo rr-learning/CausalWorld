@@ -185,3 +185,9 @@ class TriFingerRobot(object):
 
     def get_state_size(self):
         return self.state_size
+
+    #TODO: refactor in the pybullet_fingers repo
+    def get_pybullet_client(self):
+        return self.tri_finger._p
+
+
