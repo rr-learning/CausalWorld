@@ -52,7 +52,7 @@ class Stage(object):
         stage_state = []
         for name in self.name_keys:
             if name in self.rigid_objects:
-                object =  self.rigid_objects[name]
+                object = self.rigid_objects[name]
             elif name in self.visual_objects:
                 object = self.visual_objects[name]
             stage_state.extend(object.get_state(state_type='list'))
@@ -75,16 +75,16 @@ class Stage(object):
             get_current_observations()
         return self.latest_full_state
 
-    def set_positions(self, object_names, positions_list, orientations_list):
-        for i in range(len(object_names)):
-            name = object_names[i]
+    def set_objects_pose(self, names, positions, orientations):
+        for i in range(len(names)):
+            name = names[i]
             if name in self.rigid_objects:
                 object = self.rigid_objects[name]
             elif name in self.visual_objects:
                 object = self.visual_objects[name]
             else:
                 raise Exception("Object {} doesnt exist".format(name))
-            object.set_position(positions_list[i], orientations_list[i])
+            object.set_pose(positions[i], orientations[i])
         self.latest_full_state = self.get_full_state()
         return
 

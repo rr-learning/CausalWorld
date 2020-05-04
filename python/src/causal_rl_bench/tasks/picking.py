@@ -26,11 +26,7 @@ class PickingTask(Task):
         self.robot.clear()
         self.stage.clear()
         self.robot.set_full_state(sampled_positions)
-        new_block_position = self.stage.random_position(height_limits=0.0425)
-        #TODO: sample new orientation too
-        new_orientation = [0, 0, 0, 1]
-        self.stage.set_positions(["block_to_pick"], [new_block_position],
-                                  [new_orientation])
+        self.reset_scene_objects()
         return self.robot.get_current_full_observations()
 
     def get_description(self):
@@ -44,7 +40,11 @@ class PickingTask(Task):
         pass
 
     def reset_scene_objects(self):
-        pass
+        new_block_position = self.stage.random_position(height_limits=0.0425)
+        new_orientation = [0, 0, 0, 1]
+        self.stage.set_objects_pose(["block_to_pick"], [new_block_position],
+                                    [new_orientation])
+        return
 
     def is_done(self):
         return False

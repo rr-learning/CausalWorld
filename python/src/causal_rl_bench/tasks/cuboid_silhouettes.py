@@ -133,7 +133,6 @@ class CuboidSilhouette(Task):
                                 unit_length=self.unit_length,
                                 cube_color=self.cube_color)
 
-
     def reset_scene_objects(self):
         for i in range(self.num_of_rigid_cubes):
             # TODO: For this we need more flexible sampling utils

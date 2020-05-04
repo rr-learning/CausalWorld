@@ -27,8 +27,11 @@ class RigidObject(object):
     def get_state_size(self):
         raise Exception("get_state_size not implemented")
 
-    def set_position(self, position, orientation):
+    def set_pose(self, position, orientation):
         raise Exception("get_state_size not implemented")
+
+    def is_not_fixed(self):
+        raise Exception("is_not_fixed not implemented")
 
 
 class Cuboid(RigidObject):
@@ -55,17 +58,6 @@ class Cuboid(RigidObject):
         self.size = size
         self.not_fixed = True
         self.colour = colour
-        # if colour == "red":
-        #     self.colour = 0
-        #     self.colour = [1, 0, 0, 1]
-        # elif colour == "blue":
-        #     self.colour = 1
-        #     self.colour = [0, 0, 1, 1]
-        # elif colour == "green":
-        #     self.colour = 2
-        #     self.colour = [0, 1, 0, 1]
-        # else:
-        #     raise Exception("The colour specified is not supported")
         self.block_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_BOX, halfExtents=np.array(size)/2)
         self.block = pybullet.createMultiBody(
@@ -111,8 +103,8 @@ class Cuboid(RigidObject):
             np.array([1]*3)
         self._state_variable_names = ['type', 'position',
                                       'orientation', 'linear_velocity',
-                                      'angular_velocity', 'angular_velocity',
-                                      'mass', 'size', 'colour']
+                                      'angular_velocity', 'mass',
+                                      'size', 'colour']
         self._state_variable_sizes = []
         self.state_size = 0
         for state_variable_name in self._state_variable_names:
@@ -241,11 +233,11 @@ class Cuboid(RigidObject):
                 self.block
             )
             state["rigid_" + self.name + "_type"] = self.type_id
-            state["rigid_" + self.name + "_position"] = position
-            state["rigid_" + self.name + "_orientation"] = orientation
+            state["rigid_" + self.name + "_position"] = np.array(position)
+            state["rigid_" + self.name + "_orientation"] = np.array(orientation)
             linear_velocity, angular_velocity = pybullet.getBaseVelocity(self.block)
-            state["rigid_" + self.name + "_linear_velocity"] = linear_velocity
-            state["rigid_" + self.name + "_angular_velocity"] = angular_velocity
+            state["rigid_" + self.name + "_linear_velocity"] = np.array(linear_velocity)
+            state["rigid_" + self.name + "_angular_velocity"] = np.array(angular_velocity)
             state["rigid_" + self.name + "_mass"] = self.mass
             state["rigid_" + self.name + "_size"] = self.size
             state["rigid_" + self.name + "_colour"] = self.colour
@@ -289,7 +281,7 @@ class Cuboid(RigidObject):
     def get_state_size(self):
         return self.state_size
 
-    def set_position(self, position, orientation):
+    def set_pose(self, position, orientation):
         pybullet.resetBasePositionAndOrientation(
             self.block, position, orientation
         )

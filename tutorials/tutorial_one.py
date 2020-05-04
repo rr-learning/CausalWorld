@@ -7,12 +7,12 @@ import time
 
 
 def example():
-    task = PickingTask()
+    task = PushingTask()
     env = World(task=task, skip_frame=0.02, enable_visualization=True)
     env.reset()
     # current_state = env.get_full_state()
     for i in range(5):
-        env.reset()
+        # env.reset()
         # env.set_full_state(current_state)
         env.do_random_intervention()
         for i in range(100):

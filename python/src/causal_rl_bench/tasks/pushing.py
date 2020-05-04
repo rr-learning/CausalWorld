@@ -1,5 +1,5 @@
 from causal_rl_bench.tasks.task import Task
-from scipy.spatial.transform import Rotation as rotation
+from causal_rl_bench.utils.state_utils import euler_to_quaternion
 import numpy as np
 
 
@@ -27,6 +27,7 @@ class PushingTask(Task):
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube")
         self.stage.finalize_stage()
+        return
 
     def reset_task(self):
         sampled_positions = self.robot.sample_positions()
@@ -43,11 +44,12 @@ class PushingTask(Task):
         return "Task where the goal is to push an object towards a goal position"
 
     def get_reward(self):
-        state = self.stage.get_full_state()
-        block_position = state["rigid_block_position"]
-        block_orientation = state["rigid_block_orientation"]
-        goal_position = state["silhouette_goal_block_position"]
-        goal_orientation = state["silhouette_goal_block_orientation"]
+        block_state = self.stage.get_object_state('block')
+        block_position = block_state["rigid_block_position"]
+        block_orientation = block_state["rigid_block_orientation"]
+        goal_state = self.stage.get_object_state('goal_block')
+        goal_position = goal_state["silhouette_goal_block_position"]
+        goal_orientation = goal_state["silhouette_goal_block_orientation"]
         position_distance = np.linalg.norm(goal_position - block_position)
         orientation_distance = np.linalg.norm(goal_orientation - block_orientation)
 
@@ -58,7 +60,7 @@ class PushingTask(Task):
 
         return reward
 
-    def is_terminated(self):
+    def is_done(self):
         return self.task_solved
 
     def filter_observations(self, robot_observations_dict,
@@ -79,16 +81,18 @@ class PushingTask(Task):
         # TODO: Refactor the orientation sampling into a general util method
 
         block_position = self.stage.random_position(height_limits=0.0435)
-        block_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
-                                                degrees=True).as_quat()
+        block_orientation = euler_to_quaternion([0, 0,
+                                                 np.random.uniform(-np.pi,
+                                                                   np.pi)])
 
         goal_position = self.stage.random_position(height_limits=0.0435)
-        goal_orientation = rotation.from_euler('z', np.random.uniform(0, 360),
-                                               degrees=True).as_quat()
-
-        self.stage.set_states(names=["block", "goal_block"],
-                              positions=[block_position, goal_position],
-                              orientations=[block_orientation, goal_orientation])
+        goal_orientation = euler_to_quaternion([0, 0,
+                                                np.random.uniform(-np.pi,
+                                                                  np.pi)])
+        self.stage.set_objects_pose(names=["block", "goal_block"],
+                                    positions=[block_position, goal_position],
+                                    orientations=[block_orientation,
+                                                  goal_orientation])
 
     def get_task_params(self):
         task_params_dict = dict()
@@ -102,3 +106,18 @@ class PushingTask(Task):
         task_params_dict["normalize_observations"] = self.robot.robot_observations.is_normalized()
         task_params_dict["max_episode_length"] = None
         return task_params_dict
+
+    def do_random_intervention(self):
+        #TODO: for now just intervention on a specific object
+        interventions_dict = dict()
+        new_block_position = self.stage.random_position(height_limits=0.0425)
+        new_colour = np.random.uniform([0], [1], size=[3, ])
+        interventions_dict["position"] = new_block_position
+        interventions_dict["colour"] = new_colour
+        self.stage.object_intervention("block", interventions_dict)
+        interventions_dict = dict()
+        gaol_block_position = self.stage.random_position(height_limits=0.0425)
+        interventions_dict["position"] = gaol_block_position
+        self.stage.object_intervention("goal_block", interventions_dict)
+        return
+
