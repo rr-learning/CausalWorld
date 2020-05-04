@@ -1,5 +1,6 @@
 import numpy as np
 import gym
+import pybullet
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.loggers.world_logger import WorldLogger
 from causal_rl_bench.envs.scene.stage import Stage
@@ -9,6 +10,9 @@ from causal_rl_bench.envs.env_utils import combine_spaces
 
 
 class World(gym.Env):
+    metadata = {'render.modes': ['human', 'rgb_array'],
+                'video.frames_per_second': 10}
+
     def __init__(self, task=None, task_id="picking", skip_frame=0.02,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
@@ -32,8 +36,7 @@ class World(gym.Env):
                                     skip_frame=skip_frame,
                                     camera_skip_frame=camera_skip_frame,
                                     normalize_actions=normalize_actions,
-                                    normalize_observations=normalize_observations
-                                    )
+                                    normalize_observations=normalize_observations)
         self.seed(seed)
         self.stage = Stage(observation_mode=observation_mode,
                            normalize_observations=normalize_observations)
@@ -43,8 +46,6 @@ class World(gym.Env):
             self.enforce_episode_length = True
         self.max_episode_length = max_episode_length
         self.episode_length = 0
-
-        self.metadata = {"render.modes": ["human"]}
         gym.Env.__init__(self)
         if task is None:
             if task_id == "picking":
@@ -66,6 +67,13 @@ class World(gym.Env):
         self.skip_frame = skip_frame
         #TODO: verify spaces here
         self.max_time_steps = 5000
+
+        self._cam_dist = 1
+        self._cam_yaw = 0
+        self._cam_pitch = -30
+        self._render_width = 960
+        self._render_height = 720
+        self._p = self.robot.get_pybullet_client()
         return
 
     def step(self, action):
@@ -122,9 +130,6 @@ class World(gym.Env):
             self.logger.save('{}.pickle'.format(self.task.id))
         self.robot.close()
 
-    def render(self, mode='human'):
-        raise Exception(" ")
-
     def enforce_max_episode_length(self, episode_length=2000):
         self.enforce_episode_length = True
         self.max_episode_length = episode_length
@@ -149,3 +154,25 @@ class World(gym.Env):
         self.robot.set_full_state(new_full_state[0:robot_state_size])
         self.stage.set_full_state(new_full_state[robot_state_size:])
         return
+
+    def render(self, mode="human"):
+        base_pos = [0, 0, 0]
+        view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
+            cameraTargetPosition=base_pos,
+            distance=self._cam_dist,
+            yaw=self._cam_yaw,
+            pitch=self._cam_pitch,
+            roll=0,
+            upAxisIndex=2)
+        proj_matrix = self._p.computeProjectionMatrixFOV(
+            fov=60, aspect=float(self._render_width)/self._render_height,
+            nearVal=0.1, farVal=100.0)
+        (_, _, px, _, _) = self._p.getCameraImage(
+            width=self._render_width, height=self._render_height,
+            viewMatrix=view_matrix,
+            projectionMatrix=proj_matrix,
+            renderer=pybullet.ER_BULLET_HARDWARE_OPENGL
+            )
+        rgb_array = np.array(px)
+        rgb_array = rgb_array[:, :, :3]
+        return rgb_array
