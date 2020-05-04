@@ -18,7 +18,7 @@ class World(gym.Env):
                  action_mode="joint_positions", observation_mode="structured",
                  camera_skip_frame=0.3, normalize_actions=True,
                  normalize_observations=True, max_episode_length=None,
-                 logging=True, **kwargs):
+                 logging=False, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
@@ -132,6 +132,8 @@ class World(gym.Env):
         return task_observations
 
     def close(self):
+        if self.logging:
+            self.logger.save('{}.pickle'.format(self.task.id))
         self.robot.close()
 
     def enforce_max_episode_length(self, episode_length=2000):
