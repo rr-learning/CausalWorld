@@ -11,7 +11,7 @@ from causal_rl_bench.envs.env_utils import combine_spaces
 
 class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
-                'video.frames_per_second': 10}
+                'video.frames_per_second': 50}
 
     def __init__(self, task=None, task_id="picking", skip_frame=0.02,
                  enable_visualization=True, seed=0,
@@ -70,7 +70,7 @@ class World(gym.Env):
 
         self._cam_dist = 1
         self._cam_yaw = 0
-        self._cam_pitch = -30
+        self._cam_pitch = -60
         self._render_width = 960
         self._render_height = 720
         self._p = self.robot.get_pybullet_client()
