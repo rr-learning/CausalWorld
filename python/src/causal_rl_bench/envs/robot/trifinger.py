@@ -35,6 +35,7 @@ class TriFingerRobot(object):
         self.last_action_applied = None
         self.latest_observation = None
         self.latest_full_state = None
+        self.state_size = 9
 
     def set_action_mode(self, action_mode):
         self.action_mode = action_mode
@@ -111,11 +112,12 @@ class TriFingerRobot(object):
 
     def get_full_state(self):
         # The full state is independent of the observation mode
-        full_state = {"joint_positions": self.latest_full_state.position,
-                      "joint_velocities": self.latest_full_state.velocity,
-                      "joint_torques": self.latest_full_state.torque}
+        #TODO: only returning positions since we cant set the velocity for now
+        # full_state = {"joint_positions": self.latest_full_state.position,
+        #               "joint_velocities": self.latest_full_state.velocity,
+        #               "joint_torques": self.latest_full_state.torque}
 
-        return full_state
+        return self.latest_full_state.position
 
     def set_full_state(self, joint_positions):
         self.latest_full_state = self.tri_finger.reset_finger(joint_positions)
@@ -179,4 +181,7 @@ class TriFingerRobot(object):
                 self.robot_observations.remove_observations([key])
 
     def close(self):
-        self.tri_finger.close()
+        self.tri_finger.disconnect_from_simulation()
+
+    def get_state_size(self):
+        return self.state_size

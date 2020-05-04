@@ -1,4 +1,4 @@
-from counterfactual.python.src.causal_rl_bench.tasks.task import Task
+from causal_rl_bench.tasks.task import Task
 from scipy.spatial.transform import Rotation as rotation
 import numpy as np
 

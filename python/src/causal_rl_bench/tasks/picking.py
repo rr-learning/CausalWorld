@@ -1,4 +1,5 @@
 from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.utils.state_utils import euler_to_quaternion
 import numpy as np
 
 
@@ -28,8 +29,8 @@ class PickingTask(Task):
         new_block_position = self.stage.random_position(height_limits=0.0425)
         #TODO: sample new orientation too
         new_orientation = [0, 0, 0, 1]
-        self.stage.set_states(["block_to_pick"], [new_block_position],
-                              [new_orientation])
+        self.stage.set_positions(["block_to_pick"], [new_block_position],
+                                  [new_orientation])
         return self.robot.get_current_full_observations()
 
     def get_description(self):
@@ -45,7 +46,7 @@ class PickingTask(Task):
     def reset_scene_objects(self):
         pass
 
-    def is_terminated(self):
+    def is_done(self):
         return False
 
     def filter_observations(self, robot_observations_dict,
@@ -58,4 +59,24 @@ class PickingTask(Task):
                 np.append(observations_filtered,
                           np.array(full_observations_dict[key]))
         return observations_filtered
+
+    def do_random_intervention(self):
+        #TODO: for now just intervention on a specific object
+        interventions_dict = dict()
+        new_block_position = self.stage.random_position(height_limits=0.0425)
+        new_block_orientation = euler_to_quaternion(np.random.uniform([-np.pi],
+                                                    [np.pi], size=[3,]))
+        new_mass = np.random.uniform([0], [1], size=[1,])
+        new_size = np.random.uniform([0.065], [0.15], size=[3, ])
+
+
+        new_colour = np.random.uniform([0], [1], size=[3, ])
+        new_linear_velocity = np.random.uniform([0], [1], size=[3, ])
+        new_angular_velocity = np.random.uniform([0], [1], size=[3, ])
+        interventions_dict["position"] = new_block_position
+        interventions_dict["linear_velocity"] = new_linear_velocity
+        interventions_dict["colour"] = new_colour
+        self.stage.object_intervention("block_to_pick", interventions_dict)
+
+
 

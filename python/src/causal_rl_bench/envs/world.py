@@ -72,7 +72,7 @@ class World(gym.Env):
         self.episode_length += 1
 
         robot_observations_dict = self.robot.apply_action(action)
-        stage_observations_dict = self.stage.get_full_state()
+        stage_observations_dict = self.stage.get_current_observations()
         task_observations = self.task.filter_observations(robot_observations_dict,
                                                           stage_observations_dict)
         reward = self.task.get_reward()
@@ -133,8 +133,17 @@ class World(gym.Env):
         else:
             return self.task.is_done()
 
-    def get_full_state(self):
-        raise Exception(" ")
+    def do_random_intervention(self):
+        self.task.do_random_intervention()
 
-    def set_full_state(self):
-        raise Exception(" ")
+    def get_full_state(self):
+        full_state = []
+        full_state.extend(self.robot.get_full_state())
+        full_state.extend(self.stage.get_full_state())
+        return np.array(full_state)
+
+    def set_full_state(self, new_full_state):
+        robot_state_size = self.robot.get_state_size()
+        self.robot.set_full_state(new_full_state[0:robot_state_size])
+        self.stage.set_full_state(new_full_state[robot_state_size:])
+        return

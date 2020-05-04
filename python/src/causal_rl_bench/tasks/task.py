@@ -29,3 +29,10 @@ class Task(object):
 
     def get_task_params(self):
         raise NotImplementedError()
+
+    def is_done(self):
+        raise NotImplementedError()
+
+    def do_random_intervention(self):
+        raise NotImplementedError()
+
