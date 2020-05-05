@@ -5,7 +5,7 @@ from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.picking import PickingTask
-from causal_rl_bench.tasks.cuboid_silhouettes import CuboidSilhouette
+from causal_rl_bench.tasks.cuboid_silhouette import CuboidSilhouette
 from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.envs.env_utils import combine_spaces
 
