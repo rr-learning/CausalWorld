@@ -32,16 +32,6 @@ def example():
             print(j)
             # env.render()
 
-
-    # Switching to a counterfactual variant of the task
-    # env.switch_task(task.get_counterfactual_variant(cube_color="green", unit_length=0.08))
-    # env.reset()
-    # for i in range(5):
-    #     env.reset()
-    #     for i in range(100):
-    #         env.step(
-    #             np.random.uniform(env.action_space.low, env.action_space.high,
-    #                               env.action_space.shape))
     recorder.capture_frame()
     recorder.close()
     env.close()
