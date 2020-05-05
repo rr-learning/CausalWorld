@@ -20,7 +20,7 @@ class CuboidSilhouette(Task):
         self.silhouette_position_mode = silhouette_position_mode
         self.silhouette_orientation = [0, 0, 0, 1]
         self.unit_length = unit_length
-        self.cube_color = cube_color
+        self.cube_color = np.array([1, 0, 0])
 
         self.task_solved = False
         self.observation_keys = []
@@ -56,7 +56,7 @@ class CuboidSilhouette(Task):
                                                 size=self.silhouette_size * self.unit_length,
                                                 position=self.silhouette_position,
                                                 orientation=self.silhouette_orientation,
-                                                colour="green",
+                                                colour=np.array([0, 1, 0]),
                                                 alpha=0.5)
 
         for i in range(self.num_of_rigid_cubes):

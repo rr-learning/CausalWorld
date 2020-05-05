@@ -7,7 +7,6 @@ def get_world_for_task_parmas(task_params_dict, enable_visualization=False):
     return World(task_id=task_params_dict["task_id"],
                  skip_frame=task_params_dict["skip_frame"],
                  enable_visualization=enable_visualization,
-                 seed=task_params_dict["seed"],
                  action_mode=task_params_dict["action_mode"],
                  observation_mode=task_params_dict["observation_mode"],
                  camera_skip_frame=task_params_dict["camera_skip_frame"],
@@ -21,7 +20,8 @@ class TaskViewer:
     def __init__(self, output_path=None):
         if output_path is None:
             self.path = os.path.join("output", "visualizations")
-            os.mkdir(self.path)
+            if not os.path.isdir(self.path):
+                os.makedirs(self.path)
         else:
             self.path = output_path
 

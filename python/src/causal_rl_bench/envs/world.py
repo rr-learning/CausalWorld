@@ -5,6 +5,7 @@ from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.loggers.world_logger import WorldLogger
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.picking import PickingTask
+from causal_rl_bench.tasks.cuboid_silhouettes import CuboidSilhouette
 from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.envs.env_utils import combine_spaces
 
@@ -51,6 +52,8 @@ class World(gym.Env):
                 self.task = PickingTask()
             elif task_id == "pushing":
                 self.task = PushingTask()
+            elif task_id == "cuboid_silhouette":
+                self.task = CuboidSilhouette()
         else:
             self.task = task
         self.task.init_task(self.robot, self.stage)
@@ -136,7 +139,7 @@ class World(gym.Env):
         self.episode_length = 0
         if self.logging:
             # TODO: Replace this with another task method in the future providing additional params for the reinit
-            self.logger.new_episode(task_params=self.task.get_description())
+            self.logger.new_episode(task_params=self.task.get_task_params())
         robot_observations_dict = self.task.reset_task()
         #TODO: make sure that stage observations returned are up to date
         stage_observations_dict = self.stage.get_current_observations()

@@ -13,7 +13,6 @@ def example():
     env.reset()
     for i in range(5):
         # env.reset()
-        # env.set_full_state(current_state)
         env.do_random_intervention()
         for i in range(100):
             env.step(
