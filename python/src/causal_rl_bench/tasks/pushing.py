@@ -33,7 +33,8 @@ class PushingTask(Task):
         sampled_positions = self.robot.sample_positions()
         self.robot.clear()
         self.stage.clear()
-        self.robot.set_full_state(sampled_positions)
+        self.robot.set_full_state(np.append(sampled_positions,
+                                            np.zeros(9)))
 
         self.task_solved = False
         self.reset_scene_objects()

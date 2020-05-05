@@ -106,10 +106,12 @@ class TriFingerRobot(object):
         #               "joint_velocities": self.latest_full_state.velocity,
         #               "joint_torques": self.latest_full_state.torque}
 
-        return self.latest_full_state.position
+        return np.append(self.latest_full_state.position,
+                         self.latest_full_state.velocity)
 
-    def set_full_state(self, joint_positions):
-        self.latest_full_state = self.tri_finger.reset_finger(joint_positions)
+    def set_full_state(self, state):
+        self.latest_full_state = self.tri_finger.\
+            reset_finger(state[:9], state[9:])
         observations_dict = self.robot_observations.get_current_observations(
             self.latest_full_state)
         self.latest_observation = observations_dict
@@ -122,15 +124,18 @@ class TriFingerRobot(object):
         self.control_index = -1
         return
 
-    def reset_state(self, joint_position=None):
+    def reset_state(self, joint_positions=None, joint_velocities=None):
         # This resets the robot fingers into a random position if nothing is provided
         self.last_action_applied = None
         self.latest_observation = None
         self.latest_full_state = None
         self.control_index = -1
-        if joint_position is None:
-            joint_position = self.robot_actions.sample_actions()
-        self.latest_full_state = self.tri_finger.reset_finger(joint_position)
+        if joint_positions is None:
+            joint_positions = self.robot_actions.sample_actions()
+        if joint_velocities is None:
+            joint_velocities = np.zeros(9)
+        self.latest_full_state = self.tri_finger.reset_finger(joint_positions,
+                                                              joint_velocities)
         observations_dict, observations_list = \
             self.robot_observations.get_current_observations\
                 (self.latest_full_state)
