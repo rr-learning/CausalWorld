@@ -28,7 +28,7 @@ class TriFingerRobot(object):
         self.last_action_applied = None
         self.latest_observation = None
         self.latest_full_state = None
-        self.state_size = 9
+        self.state_size = 18
 
     def set_action_mode(self, action_mode):
         self.action_mode = action_mode

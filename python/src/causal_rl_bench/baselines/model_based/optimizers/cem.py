@@ -34,6 +34,7 @@ class CrossEntropyMethod(object):
         current_actions_mean = np.array(self.actions_mean)
         current_actions_var = np.array(self.actions_variance)
         while iteration_index < self.max_iterations:
+            print("cem iteration number ", iteration_index)
             #TODO: change to truncated one
             action_samples = np.random.normal(current_actions_mean,
                                               np.sqrt(current_actions_var),

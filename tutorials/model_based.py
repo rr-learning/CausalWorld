@@ -33,12 +33,14 @@ def train_policy(num_of_envs):
     task = PushingTask()
     env = World(task=task, skip_frame=20, enable_visualization=True)
     env.reset()
-    num_of_particles = 15
+    num_of_particles = 500
     horizon_length = 100
-    num_elite = 5
+    parallel_agents = 20
+    num_elite = 50
     max_iterations = 5
     true_model = TrueModel(_make_env, num_of_envs,
-                           num_of_particles=num_of_particles)
+                           num_of_particles=num_of_particles,
+                           parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(planning_horizon=horizon_length,
                                    max_iterations=max_iterations,
                                    population_size=num_of_particles,
