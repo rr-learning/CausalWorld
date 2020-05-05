@@ -43,10 +43,6 @@ class TaskViewer:
         recorder.close()
         env.close()
 
-    def record_animation_batch_of_episodes(self, episodes):
-        for num, episode in enumerate(episodes):
-            self.record_animation_of_episode(episode, num)
-
     def view_episode(self, episode):
         task_params_dict = episode.task_params
         env = get_world_for_task_parmas(task_params_dict, enable_visualization=True)
@@ -58,10 +54,6 @@ class TaskViewer:
                                                      episode.robot_actions):
             env.step(action)
         env.close()
-
-    def view_batch_of_episodes(self, episodes):
-        for episode in episodes:
-            self.view_episode(episode)
 
     def record_animation_of_policy(self, task_params_dict, policy_wrapper, max_time_steps=100):
         env = get_world_for_task_parmas(task_params_dict, enable_visualization=False)
@@ -76,14 +68,6 @@ class TaskViewer:
         recorder.close()
         env.close()
 
-    def record_animation_batch_of_policies(self, task_params_dict,
-                                           list_policy_wrappers,
-                                           max_time_steps=100):
-        for policy_wrapper in list_policy_wrappers:
-            self.record_animation_of_policy(task_params_dict,
-                                            policy_wrapper=policy_wrapper,
-                                            max_time_steps=max_time_steps)
-
     def view_policy(self, task_params_dict, policy_wrapper, max_time_steps):
         env = get_world_for_task_parmas(task_params_dict, enable_visualization=True)
         obs = env.reset()
@@ -91,8 +75,3 @@ class TaskViewer:
             obs = env.step(action=policy_wrapper.get_action_for_observation(obs))
         env.close()
 
-    def view_batch_of_policies(self, task_params_dict, list_policy_wrappers, max_time_steps):
-        for policy_wrapper in list_policy_wrappers:
-            self.view_policy(task_params_dict,
-                             policy_wrapper=policy_wrapper,
-                             max_time_steps=max_time_steps)

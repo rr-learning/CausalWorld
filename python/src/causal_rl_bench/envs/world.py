@@ -2,7 +2,7 @@ import numpy as np
 import gym
 import pybullet
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
-from causal_rl_bench.loggers.world_logger import WorldLogger
+from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.picking import PickingTask
 from causal_rl_bench.tasks.cuboid_silhouettes import CuboidSilhouette
@@ -19,7 +19,7 @@ class World(gym.Env):
                  action_mode="joint_positions", observation_mode="structured",
                  camera_skip_frame=0.3, normalize_actions=True,
                  normalize_observations=True, max_episode_length=None,
-                 logging=False, episode_log_frequency=2, **kwargs):
+                 data_recorder=None, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
@@ -65,13 +65,7 @@ class World(gym.Env):
             combine_spaces(self.robot.get_observation_spaces(),
                            self.stage.get_observation_spaces())
         self.action_space = self.robot.get_action_spaces()
-        self.logging = logging
-        if self.logging:
-            self.logger = WorldLogger(self.task.id)
-            self.episode_log_frequency = episode_log_frequency
-        else:
-            self.logger = None
-            self.episode_log_frequency = None
+        self.data_recorder = data_recorder
         self.skip_frame = skip_frame
         #TODO: verify spaces here
         self.max_time_steps = 5000
@@ -95,11 +89,11 @@ class World(gym.Env):
         done = self._is_done()
         info = {}
 
-        if self.logging:
-            self.logger.append(robot_action=action,
-                               observation=task_observations,
-                               reward=reward,
-                               timestamp=self.episode_length * self.skip_frame)
+        if self.data_recorder:
+            self.data_recorder.append(robot_action=action,
+                                      observation=task_observations,
+                                      reward=reward,
+                                      timestamp=self.episode_length * self.skip_frame)
 
         return task_observations, reward, done, info
 
@@ -133,13 +127,13 @@ class World(gym.Env):
         task_observations = self.task.filter_observations(
             robot_observations_dict,
             stage_observations_dict)
-        if self.logging:
-            self.logger.new_episode(self.get_full_state(), task_params=self.task.get_task_params())
+        if self.data_recorder:
+            self.data_recorder.new_episode(self.get_full_state(), task_params=self.task.get_task_params())
         return task_observations
 
     def close(self):
-        if self.logging:
-            self.logger.save()
+        if self.data_recorder:
+            self.data_recorder.save()
         self.robot.close()
 
     def enforce_max_episode_length(self, episode_length=2000):

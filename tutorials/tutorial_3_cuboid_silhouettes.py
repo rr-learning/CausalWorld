@@ -1,4 +1,5 @@
 from causal_rl_bench.envs.world import World
+from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.tasks.cuboid_silhouettes import CuboidSilhouette
 import numpy as np
 import time
@@ -6,11 +7,12 @@ import time
 
 def example():
     task = CuboidSilhouette()
+    data_recorder = DataRecorder(rec_dumb_frequency=10)  # default rec_dumb_frequency is 1000
     env = World(task=task,
                 skip_frame=0.02,
                 enable_visualization=True,
-                logging=True)
-    for i in range(1):
+                data_recorder=data_recorder)
+    for i in range(35):
         env.reset()
         # env.do_random_intervention()
         for i in range(50):
