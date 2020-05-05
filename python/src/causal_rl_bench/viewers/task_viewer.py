@@ -1,4 +1,5 @@
 from causal_rl_bench.envs.world import World
+from gym.wrappers.monitoring.video_recorder import VideoRecorder
 import cv2
 import os
 
@@ -28,68 +29,44 @@ class TaskViewer:
     def record_animation_of_episode(self, episode, num=0):
         task_params_dict = episode.task_params
         env = get_world_for_task_parmas(task_params_dict, enable_visualization=False)
-        frames = []
-        image = env.render(mode="rgba_array")
-        size = image.shape
-        for time, world_state, reward, actions in zip(episode.timestamps,
-                                                      episode.world_states,
-                                                      episode.rewards,
-                                                      episode.actions):
-            env.set_full_state(world_state)
-            image = env.render(mode="rgba_array")
-            frames.append(image)
-        output_path = os.path.join(self.path, task_params_dict["task_id"], "episode_{}.mp4".format(num))
-        out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'DIVX'),
-                              fps=int(1. / task_params_dict["skip_frame"]), size=size)
+        env.set_full_state(episode.initial_full_state)
+        output_path = os.path.join(self.path, "{}_episode_{}.mp4".format(task_params_dict["task_id"], num))
+        recorder = VideoRecorder(env, output_path)
+        recorder.capture_frame()
+        for time, observation, reward, action in zip(episode.timestamps,
+                                                     episode.observations,
+                                                     episode.rewards,
+                                                     episode.robot_actions):
+            env.step(action)
+            recorder.capture_frame()
 
-        for i in range(len(frames)):
-            out.write(frames[i])
-        out.release()
-
-    def record_animation_batch_of_episodes(self, episodes):
-        for num, episode in enumerate(episodes):
-            self.record_animation_of_episode(episode, num)
+        recorder.close()
+        env.close()
 
     def view_episode(self, episode):
         task_params_dict = episode.task_params
         env = get_world_for_task_parmas(task_params_dict, enable_visualization=True)
-        for time, world_state, reward, actions in zip(episode.timestamps,
-                                                      episode.world_states,
-                                                      episode.rewards,
-                                                      episode.actions):
-            env.set_full_state(world_state)
+        env.reset()
+        env.set_full_state(episode.initial_full_state)
+        for time, observation, reward, action in zip(episode.timestamps,
+                                                     episode.observations,
+                                                     episode.rewards,
+                                                     episode.robot_actions):
+            env.step(action)
         env.close()
-
-    def view_batch_of_episodes(self, episodes):
-        for episode in episodes:
-            self.view_episode(episode)
 
     def record_animation_of_policy(self, task_params_dict, policy_wrapper, max_time_steps=100):
         env = get_world_for_task_parmas(task_params_dict, enable_visualization=False)
-        frames = []
         obs = env.reset()
-        image = env.render(mode="rgba_array")
-        size = image.shape
+        output_path = os.path.join(self.path, "{}_policy.mp4".format(task_params_dict["task_id"]))
+        recorder = VideoRecorder(env, output_path)
+        recorder.capture_frame()
         for time in range(max_time_steps):
-            env.step(action=policy_wrapper.get_action_for_observation(obs))
-            image = env.render(mode="rgba_array")
-            frames.append(image)
-        output_path = os.path.join(self.path, task_params_dict["task_id"],
-                                   "policy.mp4".format(policy_wrapper.get_identifier()))
-        out = cv2.VideoWriter(output_path, cv2.VideoWriter_fourcc(*'DIVX'),
-                              fps=int(1. / task_params_dict["skip_frame"]), size=size)
+            obs = env.step(action=policy_wrapper.get_action_for_observation(obs))
+            recorder.capture_frame()
 
-        for i in range(len(frames)):
-            out.write(frames[i])
-        out.release()
-
-    def record_animation_batch_of_policies(self, task_params_dict,
-                                           list_policy_wrappers,
-                                           max_time_steps=100):
-        for policy_wrapper in list_policy_wrappers:
-            self.record_animation_of_policy(task_params_dict,
-                                            policy_wrapper=policy_wrapper,
-                                            max_time_steps=max_time_steps)
+        recorder.close()
+        env.close()
 
     def view_policy(self, task_params_dict, policy_wrapper, max_time_steps):
         env = get_world_for_task_parmas(task_params_dict, enable_visualization=True)
@@ -98,8 +75,3 @@ class TaskViewer:
             obs = env.step(action=policy_wrapper.get_action_for_observation(obs))
         env.close()
 
-    def view_batch_of_policies(self, task_params_dict, list_policy_wrappers, max_time_steps):
-        for policy_wrapper in list_policy_wrappers:
-            self.view_policy(task_params_dict,
-                             policy_wrapper=policy_wrapper,
-                             max_time_steps=max_time_steps)

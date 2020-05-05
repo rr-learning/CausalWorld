@@ -1,26 +1,20 @@
-from causal_rl_bench.envs.world import World
-from causal_rl_bench.loggers.world_logger import WorldLogger
+from causal_rl_bench.loggers.data_loader import DataLoader
 from causal_rl_bench.viewers.task_viewer import TaskViewer
-from causal_rl_bench.tasks.cuboid_silhouettes import CuboidSilhouette
-import numpy as np
-import time
 
 
 def main():
-    world_log = WorldLogger("output/logs/cuboid_silhouette.pickle")
+    data = DataLoader(data_path="output/logs/episode_0_10")
     task_viewer = TaskViewer()
 
     # Record a specific episode
-    task_viewer.record_animation_of_episode(world_log.episodes[2])
+    task_viewer.record_animation_of_episode(data.get_episodes()[3], num=3)
 
-    # Record multiple episodes in individual files
-    task_viewer.record_animation_of_episode(world_log.episodes[2:4])
+    # Record a specific episode from another file
+    data.load_data(data_path="output/logs/episode_10_20")
+    task_viewer.record_animation_of_episode(data.get_episodes()[3], num=13)
 
     # Viewing a specific episode
-    task_viewer.view_episode(world_log.episodes[2])
-
-    # View multiple episodes one after another
-    task_viewer.view_episode(world_log.episodes[2:4])
+    task_viewer.view_episode(data.get_episodes()[3])
 
 
 if __name__ == '__main__':
