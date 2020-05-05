@@ -7,7 +7,7 @@ import numpy as np
 
 class TriFingerRobot(object):
     def __init__(self, action_mode, observation_mode, enable_visualization=True,
-                 camera_skip_frame=0.3, skip_frame=0.02, camera_turned_on=False,
+                 camera_skip_frame=40, skip_frame=20, camera_turned_on=False,
                  normalize_actions=True, normalize_observations=True):
         self.normalize_actions = normalize_actions
         self.normalize_observations = normalize_observations
@@ -16,19 +16,12 @@ class TriFingerRobot(object):
         self.camera_skip_frame = camera_skip_frame
         self.skip_frame = skip_frame
         self.camera_turned_on = camera_turned_on
-        self.simulation_rate = 0.001
+        self.simulation_time = 0.001
         self.control_index = -1
-
-        self.tri_finger = SimFinger(self.simulation_rate, enable_visualization,
+        if self.camera_turned_on:
+            assert ((float(self.camera_skip_frame) / self.skip_frame).is_integer())
+        self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
                                     "tri")
-
-        self.camera_skip_steps = int(round(self.camera_skip_frame / self.skip_frame))
-        self.steps_per_control = int(round(self.skip_frame / self.simulation_rate))
-        assert (abs(self.skip_frame - self.steps_per_control * self.simulation_rate)
-                <= 0.000001)
-        assert (abs(self.camera_skip_frame - self.camera_skip_steps * self.skip_frame)
-                <= 0.000001)
-
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
         self.robot_observations = TriFingerObservations(observation_mode)
 
@@ -55,22 +48,16 @@ class TriFingerRobot(object):
 
     def set_camera_skip_frame(self, camera_skip_frame):
         self.camera_skip_frame = camera_skip_frame
-        self.camera_skip_steps = int(
-            round(self.camera_skip_frame / self.skip_frame))
-        assert (abs(
-            self.camera_skip_frame - self.camera_skip_steps * self.skip_frame)
-                <= 0.000001)
+        if self.camera_turned_on:
+            assert ((float(self.camera_skip_frame) / self.skip_frame).is_integer())
 
     def get_camera_skip_frame(self):
         return self.camera_skip_frame
 
     def set_skip_frame(self, skip_frame):
         self.skip_frame = skip_frame
-        self.steps_per_control = int(
-            round(self.skip_frame / self.simulation_rate))
-        assert (abs(
-            self.skip_frame - self.steps_per_control * self.simulation_rate)
-                <= 0.000001)
+        if self.camera_turned_on:
+            assert ((float(self.camera_skip_frame)/self.skip_frame).is_integer())
 
     def get_skip_frame(self):
         return self.skip_frame
@@ -78,6 +65,7 @@ class TriFingerRobot(object):
     def turn_on_cameras(self):
         self.camera_turned_on = True
         self.robot_observations.add_observation("cameras")
+        assert ((float(self.camera_skip_frame) / self.skip_frame).is_integer())
 
     def turn_off_cameras(self):
         self.camera_turned_on = False
@@ -94,17 +82,18 @@ class TriFingerRobot(object):
             raise Exception("The action mode {} is not supported".
                             format(self.action_mode))
 
-        for _ in range(self.steps_per_control):
+        for _ in range(self.skip_frame):
             t = self.tri_finger.append_desired_action(finger_action)
             self.tri_finger.step_simulation()
         if self.camera_turned_on and \
-                self.control_index % self.camera_skip_steps == 0:
+                self.control_index % self.camera_skip_frame == 0:
             state = \
                 self.tri_finger.get_observation(t, update_images=True)
         else:
             state = \
                 self.tri_finger.get_observation(t, update_images=False)
-        observations_dict = self.robot_observations.get_current_observations(state)
+        observations_dict = self.robot_observations.get_current_observations(
+            state)
         self.latest_full_state = state
         self.last_action_applied = action
         self.latest_observation = observations_dict
@@ -175,7 +164,8 @@ class TriFingerRobot(object):
         return self.robot_actions.get_action_space()
 
     def select_observations(self, observation_keys):
-        current_observations_keys = list(self.robot_observations.observations_keys)
+        current_observations_keys = list(self.robot_observations.
+                                         observations_keys)
         for key in current_observations_keys:
             if key not in observation_keys:
                 self.robot_observations.remove_observations([key])

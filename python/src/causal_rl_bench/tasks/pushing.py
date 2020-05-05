@@ -41,7 +41,8 @@ class PushingTask(Task):
         return self.robot.get_current_full_observations()
 
     def get_description(self):
-        return "Task where the goal is to push an object towards a goal position"
+        return \
+            "Task where the goal is to push an object towards a goal position"
 
     def get_reward(self):
         block_state = self.stage.get_object_state('block')
@@ -101,9 +102,12 @@ class PushingTask(Task):
         task_params_dict["seed"] = self.seed
         task_params_dict["action_mode"] = self.robot.get_action_mode()
         task_params_dict["observation_mode"] = self.robot.get_action_mode()
-        task_params_dict["camera_skip_frame"] = self.robot.get_camera_skip_frame()
-        task_params_dict["normalize_actions"] = self.robot.robot_actions.is_normalized()
-        task_params_dict["normalize_observations"] = self.robot.robot_observations.is_normalized()
+        task_params_dict["camera_skip_frame"] = \
+            self.robot.get_camera_skip_frame()
+        task_params_dict["normalize_actions"] = \
+            self.robot.robot_actions.is_normalized()
+        task_params_dict["normalize_observations"] = \
+            self.robot.robot_observations.is_normalized()
         task_params_dict["max_episode_length"] = None
         return task_params_dict
 

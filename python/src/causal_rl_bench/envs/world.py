@@ -13,10 +13,10 @@ class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
                 'video.frames_per_second': 50}
 
-    def __init__(self, task=None, task_id="picking", skip_frame=0.02,
+    def __init__(self, task=None, task_id="picking", skip_frame=20,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
-                 camera_skip_frame=0.3, normalize_actions=True,
+                 camera_skip_frame=40, normalize_actions=True,
                  normalize_observations=True, max_episode_length=None,
                  logging=False, **kwargs):
         """
@@ -24,9 +24,7 @@ class World(gym.Env):
         and resets to begin training.
 
         Args:
-            skip_frame (float): the time step at which the env step runs
-            finger-type (str "single"/"tri"): to train on the "single"
-                or the "tri" finger
+            skip_frame (int): the number of frames to skip for control
             enable_visualization (bool): if the simulation env is to be
                 visualized
         """
@@ -46,6 +44,7 @@ class World(gym.Env):
             self.enforce_episode_length = True
         self.max_episode_length = max_episode_length
         self.episode_length = 0
+        self.simulation_time = 0.001
         gym.Env.__init__(self)
         if task is None:
             if task_id == "picking":
@@ -65,15 +64,28 @@ class World(gym.Env):
         self.logging = logging
         self.logger = WorldLogger()
         self.skip_frame = skip_frame
+        self.metadata['video.frames_per_second'] = \
+            (1 / self.simulation_time) / self.skip_frame
         #TODO: verify spaces here
         self.max_time_steps = 5000
 
         self._cam_dist = 1
         self._cam_yaw = 0
         self._cam_pitch = -60
-        self._render_width = 960
-        self._render_height = 720
+        self._render_width = 640
+        self._render_height = 480
         self._p = self.robot.get_pybullet_client()
+        base_pos = [0, 0, 0]
+        self.view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
+            cameraTargetPosition=base_pos,
+            distance=self._cam_dist,
+            yaw=self._cam_yaw,
+            pitch=self._cam_pitch,
+            roll=0,
+            upAxisIndex=2)
+        self.proj_matrix = self._p.computeProjectionMatrixFOV(
+                      fov=60, aspect=float(self._render_width) / self._render_height,
+                      nearVal=0.1, farVal=100.0)
         return
 
     def step(self, action):
@@ -92,7 +104,9 @@ class World(gym.Env):
             self.logger.append(robot_action=action,
                                world_state=stage_observations_dict,
                                reward=reward,
-                               timestamp=self.episode_length * self.skip_frame)
+                               timestamp=self.episode_length *
+                                         self.skip_frame *
+                                         self.simulation_time)
 
         return task_observations, reward, done, info
 
@@ -162,21 +176,10 @@ class World(gym.Env):
         return
 
     def render(self, mode="human"):
-        base_pos = [0, 0, 0]
-        view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
-            cameraTargetPosition=base_pos,
-            distance=self._cam_dist,
-            yaw=self._cam_yaw,
-            pitch=self._cam_pitch,
-            roll=0,
-            upAxisIndex=2)
-        proj_matrix = self._p.computeProjectionMatrixFOV(
-            fov=60, aspect=float(self._render_width)/self._render_height,
-            nearVal=0.1, farVal=100.0)
         (_, _, px, _, _) = self._p.getCameraImage(
             width=self._render_width, height=self._render_height,
-            viewMatrix=view_matrix,
-            projectionMatrix=proj_matrix,
+            viewMatrix=self.view_matrix,
+            projectionMatrix=self.proj_matrix,
             renderer=pybullet.ER_BULLET_HARDWARE_OPENGL
             )
         rgb_array = np.array(px)

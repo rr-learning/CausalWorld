@@ -52,6 +52,7 @@ class Cuboid(RigidObject):
             half_size (float): how large should this block be
             mass (float): how heavy should this block be
         """
+        #TODO: intervene on friction as well
         super(Cuboid, self).__init__(name)
         self.type_id = 0
         self.mass = mass
@@ -286,5 +287,6 @@ class Cuboid(RigidObject):
             self.block, position, orientation
         )
         return
+
 
 

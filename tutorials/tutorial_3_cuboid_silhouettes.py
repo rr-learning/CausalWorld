@@ -7,7 +7,7 @@ import time
 def example():
     task = CuboidSilhouette()
     env = World(task=task,
-                skip_frame=0.02,
+                skip_frame=20,
                 enable_visualization=True,
                 logging=True)
     env.reset()

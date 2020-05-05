@@ -12,7 +12,7 @@ seed = 0
 def _make_env(rank):
     def _init():
         task = PushingTask()
-        env = World(task=task, skip_frame=0.02,
+        env = World(task=task, skip_frame=20,
                     enable_visualization=False,
                     seed=seed + rank)
         env.enforce_max_episode_length(episode_length=50)
