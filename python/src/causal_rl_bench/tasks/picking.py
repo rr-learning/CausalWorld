@@ -25,7 +25,8 @@ class PickingTask(Task):
         sampled_positions = self.robot.sample_positions()
         self.robot.clear()
         self.stage.clear()
-        self.robot.set_full_state(sampled_positions)
+        self.robot.set_full_state(np.append(sampled_positions,
+                                            np.zeros(9)))
         self.reset_scene_objects()
         return self.robot.get_current_full_observations()
 

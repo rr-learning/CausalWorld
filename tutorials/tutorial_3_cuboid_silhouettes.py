@@ -9,7 +9,7 @@ def example():
     task = CuboidSilhouette()
     data_recorder = DataRecorder(rec_dumb_frequency=10)  # default rec_dumb_frequency is 1000
     env = World(task=task,
-                skip_frame=0.02,
+                skip_frame=20,
                 enable_visualization=True,
                 data_recorder=data_recorder)
     for i in range(35):
