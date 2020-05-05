@@ -4,15 +4,16 @@ class Episode:
         will be logged.
         """
 
-    def __init__(self, task_params):
+    def __init__(self, task_params, initial_full_state):
         self.task_params = task_params
+        self.initial_full_state = initial_full_state
         self.robot_actions = []
-        self.world_states = []
+        self.observations = []
         self.rewards = []
         self.timestamps = []
 
-    def append(self, robot_action, world_state, reward, timestamp):
+    def append(self, robot_action, observation, reward, timestamp):
         self.robot_actions.append(robot_action)
-        self.world_states.append(world_state)
+        self.observations.append(observation)
         self.rewards.append(reward)
         self.timestamps.append(timestamp)

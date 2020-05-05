@@ -19,7 +19,7 @@ class World(gym.Env):
                  action_mode="joint_positions", observation_mode="structured",
                  camera_skip_frame=0.3, normalize_actions=True,
                  normalize_observations=True, max_episode_length=None,
-                 logging=False, **kwargs):
+                 logging=False, episode_log_frequency=2, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
@@ -66,7 +66,12 @@ class World(gym.Env):
                            self.stage.get_observation_spaces())
         self.action_space = self.robot.get_action_spaces()
         self.logging = logging
-        self.logger = WorldLogger()
+        if self.logging:
+            self.logger = WorldLogger(self.task.id)
+            self.episode_log_frequency = episode_log_frequency
+        else:
+            self.logger = None
+            self.episode_log_frequency = None
         self.skip_frame = skip_frame
         #TODO: verify spaces here
         self.max_time_steps = 5000
@@ -91,9 +96,8 @@ class World(gym.Env):
         info = {}
 
         if self.logging:
-            # TODO: pass the full state to the logger in the future
             self.logger.append(robot_action=action,
-                               world_state=stage_observations_dict,
+                               observation=task_observations,
                                reward=reward,
                                timestamp=self.episode_length * self.skip_frame)
 
@@ -123,20 +127,19 @@ class World(gym.Env):
 
     def reset(self):
         self.episode_length = 0
-        if self.logging:
-            # TODO: Replace this with another task method in the future providing additional params for the reinit
-            self.logger.new_episode(task_params=self.task.get_task_params())
         robot_observations_dict = self.task.reset_task()
         #TODO: make sure that stage observations returned are up to date
         stage_observations_dict = self.stage.get_current_observations()
         task_observations = self.task.filter_observations(
             robot_observations_dict,
             stage_observations_dict)
+        if self.logging:
+            self.logger.new_episode(self.get_full_state(), task_params=self.task.get_task_params())
         return task_observations
 
     def close(self):
         if self.logging:
-            self.logger.save('{}.pickle'.format(self.task.id))
+            self.logger.save()
         self.robot.close()
 
     def enforce_max_episode_length(self, episode_length=2000):

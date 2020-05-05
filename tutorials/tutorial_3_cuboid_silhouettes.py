@@ -10,11 +10,10 @@ def example():
                 skip_frame=0.02,
                 enable_visualization=True,
                 logging=True)
-    env.reset()
-    for i in range(5):
-        # env.reset()
-        env.do_random_intervention()
-        for i in range(100):
+    for i in range(1):
+        env.reset()
+        # env.do_random_intervention()
+        for i in range(50):
             env.step(
                 np.random.uniform(env.action_space.low, env.action_space.high,
                                   env.action_space.shape))

@@ -7,20 +7,20 @@ import time
 
 
 def main():
-    world_log = WorldLogger("output/logs/cuboid_silhouette.pickle")
+    world_log = WorldLogger(filename="cuboid_silhouette")
     task_viewer = TaskViewer()
 
-    # Record a specific episode
-    task_viewer.record_animation_of_episode(world_log.episodes[2])
-
     # Record multiple episodes in individual files
-    task_viewer.record_animation_of_episode(world_log.episodes[2:4])
+    task_viewer.record_animation_batch_of_episodes(world_log.episodes[:2])
 
-    # Viewing a specific episode
-    task_viewer.view_episode(world_log.episodes[2])
+    # Record a specific episode
+    task_viewer.record_animation_of_episode(world_log.episodes[1], num=3)
 
     # View multiple episodes one after another
-    task_viewer.view_episode(world_log.episodes[2:4])
+    task_viewer.view_batch_of_episodes(world_log.episodes[0:3])
+
+    # Viewing a specific episode
+    task_viewer.view_episode(world_log.episodes[4])
 
 
 if __name__ == '__main__':
