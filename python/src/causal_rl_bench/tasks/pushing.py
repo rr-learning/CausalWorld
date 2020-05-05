@@ -102,7 +102,7 @@ class PushingTask(Task):
         task_params_dict["skip_frame"] = self.robot.get_skip_frame()
         task_params_dict["seed"] = self.seed
         task_params_dict["action_mode"] = self.robot.get_action_mode()
-        task_params_dict["observation_mode"] = self.robot.get_action_mode()
+        task_params_dict["observation_mode"] = self.robot.get_observation_mode()
         task_params_dict["camera_skip_frame"] = \
             self.robot.get_camera_skip_frame()
         task_params_dict["normalize_actions"] = \

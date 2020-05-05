@@ -106,6 +106,10 @@ class Cuboid(RigidObject):
                                       'orientation', 'linear_velocity',
                                       'angular_velocity', 'mass',
                                       'size', 'colour']
+        self._simplified_state_variable_names = ['position',
+                                                 'orientation',
+                                                 'linear_velocity',
+                                                 'angular_velocity']
         self._state_variable_sizes = []
         self.state_size = 0
         for state_variable_name in self._state_variable_names:
