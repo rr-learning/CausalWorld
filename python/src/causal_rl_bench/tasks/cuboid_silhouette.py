@@ -15,7 +15,7 @@ class CuboidSilhouette(Task):
         if silhouette_size is None:
             self.silhouette_size = np.array([1, 2, 3])
         else:
-            self.silhouette_size = silhouette_size
+            self.silhouette_size = np.array(silhouette_size)
         self.num_of_rigid_cubes = int(np.prod(self.silhouette_size))
         self.silhouette_position_mode = silhouette_position_mode
         self.silhouette_orientation = [0, 0, 0, 1]
@@ -41,12 +41,12 @@ class CuboidSilhouette(Task):
 
         if self.silhouette_position_mode == "center":
             self.silhouette_position = np.array([0, 0, 0.0115 + self.silhouette_size[2] / 2 * self.unit_length])
-            # TODO: this needs to be implemented for a general silhouette orientation
+            # TODO: this needs to be implemented for a general silhouette orientation and position
             self.s_xhigher = self.silhouette_size[0] / 2 * self.unit_length
             self.s_xlower = - self.silhouette_size[0] / 2 * self.unit_length
             self.s_yhigher = self.silhouette_size[1] / 2 * self.unit_length
             self.s_ylower = - self.silhouette_size[1] / 2 * self.unit_length
-            self.s_zhigher = 0.0115 + self.silhouette_size[2] / 2 * self.unit_length
+            self.s_zhigher = 0.0115 + self.silhouette_size[2] * self.unit_length
             self.s_zlower = 0.0115
         else:
             raise ValueError("please provide valid silhouette position argument")
@@ -161,18 +161,18 @@ class CuboidSilhouette(Task):
             vertex_distance = 0
             if vertex_coords[0] > self.s_xhigher:
                 vertex_distance += vertex_coords[0] - self.s_xhigher
-            elif vertex_coords[0] > self.s_xlower:
-                vertex_distance += vertex_coords[0] - self.s_xlower
+            elif vertex_coords[0] < self.s_xlower:
+                vertex_distance += self.s_xlower - vertex_coords[0]
 
             if vertex_coords[1] > self.s_yhigher:
                 vertex_distance += vertex_coords[1] - self.s_yhigher
-            elif vertex_coords[1] > self.s_ylower:
-                vertex_distance += vertex_coords[1] - self.s_ylower
+            elif vertex_coords[1] < self.s_ylower:
+                vertex_distance += self.s_ylower - vertex_coords[1]
 
             if vertex_coords[2] > self.s_zhigher:
                 vertex_distance += vertex_coords[2] - self.s_zhigher
-            elif vertex_coords[2] > self.s_zlower:
-                vertex_distance += vertex_coords[2] - self.s_zlower
+            elif vertex_coords[2] < self.s_zlower:
+                vertex_distance += self.s_zlower - vertex_coords[2]
             cuboid_reward -= vertex_distance
         return cuboid_reward
 

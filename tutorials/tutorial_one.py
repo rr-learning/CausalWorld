@@ -1,7 +1,7 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.tasks.picking import PickingTask
-from causal_rl_bench.tasks.cuboid_silhouettes import CuboidSilhouette
+from causal_rl_bench.tasks.cuboid_silhouette import CuboidSilhouette
 import numpy as np
 import time
 import gym
