@@ -8,15 +8,19 @@ from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.baselines.model_based.true_model import TrueModel
 from causal_rl_bench.baselines.model_based.optimizers.cem import \
     CrossEntropyMethod
+from gym.wrappers.monitoring.video_recorder import VideoRecorder
 import numpy as np
 
 seed = 0
 
 
+skip_frame = 50
+
+
 def _make_env(rank):
     def _init():
         task = PushingTask()
-        env = World(task=task, skip_frame=20,
+        env = World(task=task, skip_frame=skip_frame,
                     enable_visualization=False,
                     seed=seed + rank)
         env.enforce_max_episode_length(episode_length=50)
@@ -26,17 +30,16 @@ def _make_env(rank):
 
 
 def train_policy(num_of_envs):
-
-    total_time_steps = 10000
-    validate_every_timesteps = 1000
     #plan for the next horizon
     task = PushingTask()
-    env = World(task=task, skip_frame=20, enable_visualization=True)
+    env = World(task=task, skip_frame=skip_frame, enable_visualization=False)
+    recorder = VideoRecorder(env,
+                             'hi.mp4')
     env.reset()
-    num_of_particles = 500
+    num_of_particles = 1000
     horizon_length = 100
-    parallel_agents = 20
-    num_elite = 50
+    parallel_agents = 50
+    num_elite = 100
     max_iterations = 5
     true_model = TrueModel(_make_env, num_of_envs,
                            num_of_particles=num_of_particles,
@@ -55,14 +58,11 @@ def train_policy(num_of_envs):
     actions = optimizer.get_actions(current_states)
     for i in range(horizon_length):
         #TODO: set quick state?
+        recorder.capture_frame()
         env.step(actions[i, 0, :])
-    #sample action trajectories
-    # actions = np.random.uniform(np.random.uniform(env.action_space.low,
-    #                                               env.action_space.high,
-    #                                               [horizon_length, num_of_envs,
-    #                                                num_of_particles,
-    #                                                *env.action_space.shape]))
-    # true_model.evaluate_trajectories(np.array(current_states), actions)
+    recorder.capture_frame()
+    recorder.close()
+    env.close()
     return
 
 

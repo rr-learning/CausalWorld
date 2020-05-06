@@ -13,17 +13,15 @@ class PushingTask(Task):
 
         self.task_solved = False
 
-        self.observation_keys = ["joint_positions",
-                                 "rigid_block_position",
-                                 "rigid_block_orientation",
-                                 "silhouette_goal_block_position",
-                                 "silhouette_goal_block_orientation"]
+        self.observation_keys = ["end_effector_positions",
+                                 "rigid_block_position"]
 
     def init_task(self, robot, stage):
         self.robot = robot
+        self.robot.add_end_effector_postions_observations()
         self.stage = stage
         self.stage.add_rigid_general_object(name="block",
-                                            shape="cube")
+                                            shape="cube", mass=0.005)
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube")
         self.stage.finalize_stage()
@@ -47,19 +45,17 @@ class PushingTask(Task):
 
     def get_reward(self):
         block_state = self.stage.get_object_state('block')
+        # robot_observations = self.robot.get_current_full_observations()
         block_position = block_state["rigid_block_position"]
-        block_orientation = block_state["rigid_block_orientation"]
-        goal_state = self.stage.get_object_state('goal_block')
-        goal_position = goal_state["silhouette_goal_block_position"]
-        goal_orientation = goal_state["silhouette_goal_block_orientation"]
-        position_distance = np.linalg.norm(goal_position - block_position)
-        orientation_distance = np.linalg.norm(goal_orientation - block_orientation)
-
-        reward = - position_distance - orientation_distance
-
-        if position_distance < 0.02 and orientation_distance < 0.05:
-            self.task_solved = True
-
+        # end_effector_positions = robot_observations["end_effector_positions"].reshape(-1, 3)
+        # distance_from_block = np.sum(
+        #     (end_effector_positions - block_position) ** 2)
+        # reward = - 1.3 * distance_from_block
+        TARGET_HEIGHT = 0.1
+        z = block_position[-1]
+        x = block_position[0]
+        y = block_position[1]
+        reward = -abs(z - TARGET_HEIGHT) - (x ** 2 + y ** 2)
         return reward
 
     def is_done(self):
@@ -126,4 +122,5 @@ class PushingTask(Task):
         interventions_dict["size"] = new_size
         self.stage.object_intervention("goal_block", interventions_dict)
         return
+
 
