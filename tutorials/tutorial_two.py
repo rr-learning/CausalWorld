@@ -4,14 +4,14 @@ from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.tasks.pushing import PushingTask
+from causal_rl_bench.tasks.task import Task
 
 seed = 0
 
 
 def _make_env(rank):
     def _init():
-        task = PushingTask()
+        task = Task(task_id='pushing')
         env = World(task=task, skip_frame=20,
                     enable_visualization=False,
                     seed=seed + rank)
@@ -39,7 +39,7 @@ def train_policy(num_of_envs):
         model.learn(total_timesteps=validate_every_timesteps,
                     tb_log_name="ppo2_simple_reward",
                     reset_num_timesteps=False)
-        model.save('picking_model')
+        model.save('pushing_model')
     return model
 
 

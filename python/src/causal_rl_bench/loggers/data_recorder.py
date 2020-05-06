@@ -16,13 +16,13 @@ class DataRecorder:
             if not os.path.isdir(self.path):
                 os.makedirs(self.path)
         self.episodes = []
-        self.last_episode_number_dumbed = len(self.episodes)
+        self.last_episode_number_dumbed = len(self.episodes) - 1
         self._curr = None
 
-    def new_episode(self, initial_full_state, task_params=None):
+    def new_episode(self, initial_full_state, task_id, task_params=None, world_params=None):
         if self._curr:
             self.episodes.append(self._curr)
-        self._curr = Episode(task_params, initial_full_state)
+        self._curr = Episode(task_id, initial_full_state, task_params=task_params, world_params=world_params)
         if len(self.episodes) % self.rec_dumb_frequency == 0 and len(self.episodes) != 0:
             self.save()
 
@@ -33,7 +33,7 @@ class DataRecorder:
         if len(self._curr.observations):
             self.episodes.append(self._curr)
         new_episode_number_dumbed = self.last_episode_number_dumbed + len(self.episodes)
-        file_path = os.path.join(self.path, "episode_{}_{}".format(self.last_episode_number_dumbed,
+        file_path = os.path.join(self.path, "episode_{}_{}".format(self.last_episode_number_dumbed + 1,
                                                                    new_episode_number_dumbed))
         with open(file_path, "wb") as file_handle:
             pickle.dump(self.episodes, file_handle)

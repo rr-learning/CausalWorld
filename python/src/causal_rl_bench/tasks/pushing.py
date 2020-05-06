@@ -1,15 +1,14 @@
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.tasks.base_task import BaseTask
 from causal_rl_bench.utils.state_utils import euler_to_quaternion
 import numpy as np
 
 
-class PushingTask(Task):
-    def __init__(self):
+class PushingTask(BaseTask):
+    def __init__(self, task_params=None):
         super().__init__()
         self.id = "pushing"
         self.robot = None
         self.stage = None
-        self.seed = 0
 
         self.task_solved = False
 
@@ -76,9 +75,6 @@ class PushingTask(Task):
                           np.array(full_observations_dict[key]))
         return observations_filtered
 
-    def get_counterfactual_variant(self):
-        pass
-
     def reset_scene_objects(self):
         # TODO: Refactor the orientation sampling into a general util method
 
@@ -96,22 +92,6 @@ class PushingTask(Task):
                                     orientations=[block_orientation,
                                                   goal_orientation])
 
-    def get_task_params(self):
-        task_params_dict = dict()
-        task_params_dict["task_id"] = self.id
-        task_params_dict["skip_frame"] = self.robot.get_skip_frame()
-        task_params_dict["seed"] = self.seed
-        task_params_dict["action_mode"] = self.robot.get_action_mode()
-        task_params_dict["observation_mode"] = self.robot.get_observation_mode()
-        task_params_dict["camera_skip_frame"] = \
-            self.robot.get_camera_skip_frame()
-        task_params_dict["normalize_actions"] = \
-            self.robot.robot_actions.is_normalized()
-        task_params_dict["normalize_observations"] = \
-            self.robot.robot_observations.is_normalized()
-        task_params_dict["max_episode_length"] = None
-        return task_params_dict
-
     def do_random_intervention(self):
         #TODO: for now just intervention on a specific object
         interventions_dict = dict()
@@ -126,4 +106,8 @@ class PushingTask(Task):
         interventions_dict["size"] = new_size
         self.stage.object_intervention("goal_block", interventions_dict)
         return
+
+    def get_task_params(self):
+        # TODO: pass initialization params for this task here if we have several pushing variants in the future
+        return dict()
 

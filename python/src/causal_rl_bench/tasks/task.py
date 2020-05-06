@@ -1,38 +1,15 @@
-class Task(object):
-    def __init__(self):
-        pass
+from causal_rl_bench.tasks.pushing import PushingTask
+from causal_rl_bench.tasks.picking import PickingTask
+from causal_rl_bench.tasks.cuboid_silhouette import CuboidSilhouette
 
-    def init_task(self, robot, stage):
-        raise NotImplementedError()
 
-    def get_counterfactual_variant(self, **kwargs):
-        raise NotImplementedError()
-
-    def sample_counterfactual_variant(self):
-        raise NotImplementedError()
-
-    def get_reward(self):
-        raise NotImplementedError
-
-    def get_description(self):
-        raise NotImplementedError()
-
-    def reset_task(self):
-        raise NotImplementedError()
-
-    def filter_observations(self, robot_observations_dict,
-                            stage_observations_dict):
-        raise NotImplementedError()
-
-    def reset_scene_objects(self):
-        raise NotImplementedError()
-
-    def get_task_params(self):
-        raise NotImplementedError()
-
-    def is_done(self):
-        raise NotImplementedError()
-
-    def do_random_intervention(self):
-        raise NotImplementedError()
-
+def Task(task_id="picking", **kwargs):
+    if task_id == "picking":
+        task = PickingTask(**kwargs)
+    elif task_id == "pushing":
+        task = PushingTask(**kwargs)
+    elif task_id == "cuboid_silhouette":
+        task = CuboidSilhouette(**kwargs)
+    else:
+        raise Exception("No valid task_id")
+    return task
