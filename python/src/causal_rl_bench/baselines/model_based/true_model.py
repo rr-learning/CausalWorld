@@ -1,5 +1,6 @@
 from stable_baselines.common.vec_env import SubprocVecEnv
 import numpy as np
+import time
 
 
 class TrueModel(object):

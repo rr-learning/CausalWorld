@@ -25,10 +25,22 @@ class TriFingerRobot(object):
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
         self.robot_observations = TriFingerObservations(observation_mode)
 
+
         self.last_action_applied = None
         self.latest_observation = None
         self.latest_full_state = None
         self.state_size = 18
+
+    def add_end_effector_postions_observations(self):
+        self.robot_observations.add_observation("end_effector_positions",
+                                                observation_fn=self._compute_end_effector_positions)
+
+    def _compute_end_effector_positions(self, robot_state):
+        tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
+            robot_state.position
+        )
+        end_effector_position = np.concatenate(tip_positions)
+        return end_effector_position
 
     def set_action_mode(self, action_mode):
         self.action_mode = action_mode

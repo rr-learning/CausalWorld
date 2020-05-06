@@ -41,15 +41,16 @@ class CrossEntropyMethod(object):
                                               size=[self.population_size,
                                                     *self.actions_mean.shape])
             #shuffle some axis
-            costs = self.model.evaluate_trajectories(current_states,
-                                                     action_samples) #num_of_agents, particles
+            rewards = self.model.evaluate_trajectories(current_states,
+                                                       action_samples) #num_of_agents, particles
+            costs = -rewards
             elites_indicies = np.argpartition(costs, self.num_elite,
                                               axis=1)
             elites_indicies = elites_indicies[:, self.num_elite]
             # if np.min(costs, axis=1) < best_cost:
             elites = action_samples[elites_indicies]
-            new_mean = np.mean(elites, axis=1)
-            new_variance = np.var(elites, axis=1)
+            new_mean = np.mean(elites, axis=0)
+            new_variance = np.var(elites, axis=0)
             current_actions_mean = (self.alpha * current_actions_mean) + (
                                    (1 - self.alpha) * new_mean)
             current_actions_var = (self.alpha * current_actions_var) + (

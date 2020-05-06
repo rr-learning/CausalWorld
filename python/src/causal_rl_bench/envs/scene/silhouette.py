@@ -98,10 +98,14 @@ class SCuboid(SilhouetteObject):
     def set_full_state(self, new_state):
         #form dict first
         new_state_dict = dict()
+        current_state = self.get_state()
         start = 0
         for i in range(len(self._state_variable_sizes)):
             end = start + self._state_variable_sizes[i]
-            new_state_dict[self._state_variable_names[i]] = new_state[start:end]
+            if not np.all(current_state["silhouette_" + self.name + "_"
+                                        + self._state_variable_names[i]] ==
+                          new_state[start:end]):
+                new_state_dict[self._state_variable_names[i]] = new_state[start:end]
             start = end
         self.set_state(new_state_dict)
         return
