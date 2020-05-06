@@ -20,8 +20,7 @@ class Task(object):
     def reset_task(self):
         raise NotImplementedError()
 
-    def filter_observations(self, robot_observations_dict,
-                            stage_observations_dict):
+    def filter_observations(self):
         raise NotImplementedError()
 
     def reset_scene_objects(self):

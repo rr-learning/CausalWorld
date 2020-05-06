@@ -151,3 +151,7 @@ class Stage(object):
         else:
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
+
+    def add_observation(self, observation_key, low_bound=None,
+                        upper_bound=None):
+        self.stage_observations.add_observation(observation_key, low_bound, upper_bound)

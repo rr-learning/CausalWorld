@@ -13,10 +13,11 @@ class TriFingerAction(object):
         num_fingers = 3
         self.action_mode = action_mode
         if action_mode == "joint_positions":
-            lower_bounds = np.array([-math.radians(90), -math.radians(90),
-                                     -math.radians(172)] * 3)
-            upper_bounds = np.array([math.radians(90), math.radians(100),
+            lower_bounds = np.array([-math.radians(70), -math.radians(70),
+                                     -math.radians(160)] * 3)
+            upper_bounds = np.array([math.radians(70), 0,
                                      math.radians(-2)] * 3)
+
         elif action_mode == "joint_torques":
             lower_bounds = np.array([-self.max_motor_torque] * 3 * num_fingers)
             upper_bounds = np.array([self.max_motor_torque] * 3 * num_fingers)
@@ -67,6 +68,13 @@ class TriFingerAction(object):
             mode = self.action_mode
         if mode == "joint_positions" and \
                 sampling_strategy == "uniform":
-            return np.random.uniform(self.low, self.high)
+            list_to_return = []
+            for _ in range(3):
+                upper = np.random.uniform(-math.radians(30), math.radians(30))
+                middle = np.random.uniform(-math.radians(60), math.radians(60))
+                lower = np.random.uniform(-math.radians(100), -math.radians(2))
+                list_to_return += [upper, middle, lower]
+            return list_to_return
+            # return np.random.uniform(self.low, self.high)
         else:
             raise Exception("not yet implemented")

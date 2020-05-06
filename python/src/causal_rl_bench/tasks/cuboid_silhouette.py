@@ -31,9 +31,9 @@ class CuboidSilhouette(Task):
 
         if self.robot.get_observation_mode() == "structured":
             self.observation_keys = ["joint_positions",
-                                     "silhouette_cuboid_target_position",
-                                     "silhouette_cuboid_target_orientation",
-                                     "silhouette_cuboid_target_size"]
+                                     "cuboid_target_position",
+                                     "cuboid_target_orientation",
+                                     "cuboid_target_size"]
         elif self.robot.get_observation_mode() == "cameras":
             self.observation_keys = ["cameras"]
         else:
@@ -76,8 +76,8 @@ class CuboidSilhouette(Task):
                                                 colour=self.cube_color)
 
             if self.robot.get_observation_mode() == "structured":
-                self.observation_keys.append("rigid_cube_{}_position".format(i))
-                self.observation_keys.append("rigid_cube_{}_orientation".format(i))
+                self.observation_keys.append("cube_{}_position".format(i))
+                self.observation_keys.append("cube_{}_orientation".format(i))
 
         self.stage.finalize_stage()
 
@@ -100,8 +100,8 @@ class CuboidSilhouette(Task):
         reward = 0.0
         for i in range(self.num_of_rigid_cubes):
             state = self.stage.get_object_state("cube_{}".format(i))
-            cuboid_position = state["rigid_cube_{}_position".format(i)]
-            cuboid_orientation = state["rigid_cube_{}_orientation".format(i)]
+            cuboid_position = state["cube_{}_position".format(i)]
+            cuboid_orientation = state["cube_{}_orientation".format(i)]
             reward += self.reward_per_cuboid(cuboid_position=cuboid_position,
                                              cuboid_orientation=cuboid_orientation,
                                              cuboid_size=np.array([1, 1, 1]) * self.unit_length)

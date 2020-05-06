@@ -24,16 +24,13 @@ class TriFingerRobot(object):
                                     "tri")
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
         self.robot_observations = TriFingerObservations(observation_mode)
-
-
-        self.last_action_applied = None
-        self.latest_observation = None
-        self.latest_full_state = None
-        self.state_size = 18
-
-    def add_end_effector_postions_observations(self):
         self.robot_observations.add_observation("end_effector_positions",
                                                 observation_fn=self._compute_end_effector_positions)
+
+        self.last_action = None
+        self.last_clipped_action = None
+        self.latest_full_state = None
+        self.state_size = 18
 
     def _compute_end_effector_positions(self, robot_state):
         tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
@@ -85,15 +82,18 @@ class TriFingerRobot(object):
 
     def apply_action(self, action):
         self.control_index += 1
-        unscaled_action = self.robot_actions.denormalize_action(action)
+        # clip actions to get the one applied
+        clipped_action = self.robot_actions.clip_action(action)
+        action_to_apply = clipped_action
+        if self.normalize_actions:
+            action_to_apply = self.robot_actions.denormalize_action(clipped_action)
         if self.action_mode == "joint_positions":
-            finger_action = self.tri_finger.Action(position=unscaled_action)
+            finger_action = self.tri_finger.Action(position=action_to_apply)
         elif self.action_mode == "joint_torques":
-            finger_action = self.tri_finger.Action(torque=unscaled_action)
+            finger_action = self.tri_finger.Action(torque=action_to_apply)
         else:
             raise Exception("The action mode {} is not supported".
                             format(self.action_mode))
-
         for _ in range(self.skip_frame):
             t = self.tri_finger.append_desired_action(finger_action)
             self.tri_finger.step_simulation()
@@ -104,12 +104,10 @@ class TriFingerRobot(object):
         else:
             state = \
                 self.tri_finger.get_observation(t, update_images=False)
-        observations_dict = self.robot_observations.get_current_observations(
-            state)
         self.latest_full_state = state
-        self.last_action_applied = action
-        self.latest_observation = observations_dict
-        return observations_dict
+        self.last_action = action
+        self.last_clipped_action = clipped_action
+        return
 
     def get_full_state(self):
         # The full state is independent of the observation mode
@@ -124,22 +122,19 @@ class TriFingerRobot(object):
     def set_full_state(self, state):
         self.latest_full_state = self.tri_finger.\
             reset_finger(state[:9], state[9:])
-        observations_dict = self.robot_observations.get_current_observations(
-            self.latest_full_state)
-        self.latest_observation = observations_dict
         return
 
     def clear(self):
-        self.last_action_applied = None
-        self.latest_observation = None
+        self.last_action = None
+        self.last_clipped_action = None
         self.latest_full_state = None
         self.control_index = -1
         return
 
     def reset_state(self, joint_positions=None, joint_velocities=None):
         # This resets the robot fingers into a random position if nothing is provided
-        self.last_action_applied = None
-        self.latest_observation = None
+        self.last_action = None
+        self.last_clipped_action = None
         self.latest_full_state = None
         self.control_index = -1
         if joint_positions is None:
@@ -148,19 +143,12 @@ class TriFingerRobot(object):
             joint_velocities = np.zeros(9)
         self.latest_full_state = self.tri_finger.reset_finger(joint_positions,
                                                               joint_velocities)
-        observations_dict, observations_list = \
-            self.robot_observations.get_current_observations\
-                (self.latest_full_state)
-        self.latest_observation = observations_dict
 
-    def get_last_action_applied(self):
-        return self.last_action_applied
+    def get_last_action(self):
+        return self.last_action
 
-    def get_current_full_observations(self):
-        return self.latest_observation
-
-    def get_current_partial_observations(self, keys):
-        raise Exception("Not implemented")
+    def get_last_clippd_action(self):
+        return self.last_clipped_action
 
     def get_tip_positions(self, robot_state):
         return self.tri_finger.pinocchio_utils.forward_kinematics(
@@ -196,5 +184,16 @@ class TriFingerRobot(object):
     #TODO: refactor in the pybullet_fingers repo
     def get_pybullet_client(self):
         return self.tri_finger._p
+
+    def add_observation(self, observation_key, low_bound=None,
+                        upper_bound=None, observation_fn=None):
+        self.robot_observations.add_observation(observation_key,
+                                                low_bound,
+                                                upper_bound,
+                                                observation_fn)
+
+    def get_current_observations(self, observation_keys):
+        return self.robot_observations.get_current_observations(self.latest_full_state, observation_keys)
+
 
 

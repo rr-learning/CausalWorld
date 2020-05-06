@@ -1,6 +1,11 @@
 from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.utils.state_utils import euler_to_quaternion
 import numpy as np
+from causal_rl_bench.envs.world import World
+from gym.wrappers.monitoring.video_recorder import VideoRecorder
+import time
+import math
+from causal_rl_bench.utils.task_utils import calculate_end_effector_to_goal
 
 
 class PushingTask(Task):
@@ -13,18 +18,38 @@ class PushingTask(Task):
 
         self.task_solved = False
 
-        self.observation_keys = ["end_effector_positions",
+        #robot observations first
+        self.observation_keys = ["joint_positions",
+                                 "joint_velocities",
+                                 # "action_joint_positions",
+                                 # "goal_block_position",
                                  "block_position"]
+
+        self.selected_robot_observations = ["joint_positions",
+                                            "joint_velocities"]
 
     def init_task(self, robot, stage):
         self.robot = robot
-        self.robot.add_end_effector_postions_observations()
         self.stage = stage
         self.stage.add_rigid_general_object(name="block",
                                             shape="cube", mass=0.005)
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube")
+        # self.robot.add_observation(observation_key="end_effector_to_goal",
+        #                            low_bound=[-0.5] * 3 * 3,
+        #                            upper_bound=[0.5] * 3 * 3)
+        self.robot.add_observation(observation_key="action_joint_positions",
+                                   low_bound=np.array([-math.radians(70), -math.radians(70),
+                                                       -math.radians(160)] * 3),
+                                   upper_bound=np.array([math.radians(70), math.radians(0),
+                                                         math.radians(-2)] * 3))
+
         self.stage.finalize_stage()
+        # self.stage.add_observation(observation_key="action_joint_positions",
+        #                            low_bound=np.array([-math.radians(90), -math.radians(90),
+        #                                                -math.radians(172)] * 3),
+        #                            upper_bound=np.array([math.radians(90), math.radians(100),
+        #                                                  math.radians(-2)] * 3))
         return
 
     def reset_task(self):
@@ -33,11 +58,10 @@ class PushingTask(Task):
         self.stage.clear()
         self.robot.set_full_state(np.append(sampled_positions,
                                             np.zeros(9)))
-
         self.task_solved = False
         self.reset_scene_objects()
-
-        return self.robot.get_current_full_observations()
+        task_observations = self.filter_observations()
+        return task_observations
 
     def get_description(self):
         return \
@@ -61,15 +85,28 @@ class PushingTask(Task):
     def is_done(self):
         return self.task_solved
 
-    def filter_observations(self, robot_observations_dict,
-                            stage_observations_dict):
+    def filter_observations(self):
+        robot_observations_dict = self.robot.get_current_observations(self.selected_robot_observations)
+        stage_observations_dict = self.stage.get_current_observations()
         full_observations_dict = dict(robot_observations_dict)
         full_observations_dict.update(stage_observations_dict)
         observations_filtered = np.array([])
         for key in self.observation_keys:
-            observations_filtered = \
-                np.append(observations_filtered,
-                          np.array(full_observations_dict[key]))
+            if key == "end_effector_to_goal":
+                new_obs = calculate_end_effector_to_goal(end_effector_position=full_observations_dict['end_effector_positions'],
+                                               goal_position=full_observations_dict['goal_block_position'])
+                observations_filtered = \
+                    np.append(observations_filtered,
+                              np.array(new_obs))
+            elif key == "action_joint_positions":
+                new_obs = self.robot.get_last_clippd_action()
+                observations_filtered = \
+                    np.append(observations_filtered,
+                              np.array(new_obs))
+            else:
+                observations_filtered = \
+                    np.append(observations_filtered,
+                              np.array(full_observations_dict[key]))
         return observations_filtered
 
     def get_counterfactual_variant(self):
@@ -123,4 +160,42 @@ class PushingTask(Task):
         self.stage.object_intervention("goal_block", interventions_dict)
         return
 
+# import gym
+# env1 = gym.make("pybullet_fingers.gym_wrapper:pick-v0", control_rate_s=0.001, seed=0, enable_visualization=True)
+#
+# for i in range(2000):
+#     obs = env1.step(np.ones(9,))
+#     # obs, reward, done, info = env1.step(np.zeros(9,))
 
+
+task = PushingTask()
+# #TODO: modify skip frame
+env = World(task=task, skip_frame=1, enable_visualization=True, seed=2)
+start = time.time()
+for i in range(0, 2000):
+     obs = env.step(np.ones(9,))
+end = time.time()
+print(end-start)
+    # obs, reward, done, info = env.step(np.zeros(9,))
+# current_state = env.get_full_state()
+# for i in range(2):
+#     # env.reset()
+#     # env.set_full_state(current_state)
+#     env.do_random_intervention()
+#     for j in range(100):
+#         recorder.capture_frame()
+#         # recorder.capture_frame()
+#         # env.step(
+#         #     np.random.uniform(env.action_space.low, env.action_space.high,
+#         #                       env.action_space.shape))
+#         start = time.time()
+#         env.step(
+#             np.random.uniform(env.action_space.low, env.action_space.high,
+#                               env.action_space.shape))
+#         end = time.time()
+#         print(end - start)
+#         # env.render()
+#
+# recorder.capture_frame()
+# recorder.close()
+# env.close()

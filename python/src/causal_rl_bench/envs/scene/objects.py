@@ -71,36 +71,36 @@ class Cuboid(RigidObject):
         #specifying bounds
         self.lower_bounds = dict()
         self.upper_bounds = dict()
-        self.lower_bounds["rigid_" + self.name + "_type"] = np.array([0])
-        self.lower_bounds["rigid_" + self.name + "_position"] = \
+        self.lower_bounds[self.name + "_type"] = np.array([0])
+        self.lower_bounds[self.name + "_position"] = \
             np.array([-0.5] * 3)
-        self.lower_bounds["rigid_" + self.name + "_orientation"] = \
+        self.lower_bounds[self.name + "_orientation"] = \
             np.array([-10] * 4)
-        self.lower_bounds["rigid_" + self.name + "_linear_velocity"] = \
+        self.lower_bounds[self.name + "_linear_velocity"] = \
             np.array([-0.5] * 3)
-        self.lower_bounds["rigid_" + self.name + "_angular_velocity"] = \
+        self.lower_bounds[self.name + "_angular_velocity"] = \
             np.array([-0.5] * 3)
-        self.lower_bounds["rigid_" + self.name + "_mass"] = \
+        self.lower_bounds[self.name + "_mass"] = \
             np.array([0])
-        self.lower_bounds["rigid_" + self.name + "_size"] = \
+        self.lower_bounds[self.name + "_size"] = \
             np.array([0.065, 0.065, 0.065])
-        self.lower_bounds["rigid_" + self.name + "_colour"] = \
+        self.lower_bounds[self.name + "_colour"] = \
             np.array([0]*3)
 
-        self.upper_bounds["rigid_" + self.name + "_type"] = np.array([10])
-        self.upper_bounds["rigid_" + self.name + "_position"] = \
+        self.upper_bounds[self.name + "_type"] = np.array([10])
+        self.upper_bounds[self.name + "_position"] = \
             np.array([0.5] * 3 )
-        self.upper_bounds["rigid_" + self.name + "_orientation"] = \
+        self.upper_bounds[self.name + "_orientation"] = \
             np.array([10] * 4)
-        self.upper_bounds["rigid_" + self.name + "_linear_velocity"] = \
+        self.upper_bounds[self.name + "_linear_velocity"] = \
             np.array([0.5] * 3)
-        self.upper_bounds["rigid_" + self.name + "_angular_velocity"] = \
+        self.upper_bounds[self.name + "_angular_velocity"] = \
             np.array([0.5] * 3)
-        self.upper_bounds["rigid_" + self.name + "_mass"] = \
+        self.upper_bounds[self.name + "_mass"] = \
             np.array([0.2])
-        self.upper_bounds["rigid_" + self.name + "_size"] = \
+        self.upper_bounds[self.name + "_size"] = \
             np.array([0.1, 0.1, 0.1])
-        self.upper_bounds["rigid_" + self.name + "_colour"] = \
+        self.upper_bounds[self.name + "_colour"] = \
             np.array([1]*3)
         self._state_variable_names = ['type', 'position',
                                       'orientation', 'linear_velocity',
@@ -114,7 +114,7 @@ class Cuboid(RigidObject):
         self.state_size = 0
         for state_variable_name in self._state_variable_names:
             self._state_variable_sizes.append(
-                self.upper_bounds["rigid_" + self.name + "_" +
+                self.upper_bounds[self.name + "_" +
                                   state_variable_name].shape[0])
             self.state_size += self._state_variable_sizes[-1]
 
@@ -125,7 +125,7 @@ class Cuboid(RigidObject):
         start = 0
         for i in range(len(self._state_variable_sizes)):
             end = start + self._state_variable_sizes[i]
-            if not np.all(current_state["rigid_" + self.name + "_"
+            if not np.all(current_state[self.name + "_"
                                         + self._state_variable_names[i]] ==
                           new_state[start:end]):
                 new_state_dict[self._state_variable_names[i]] = new_state[start:end]
@@ -241,15 +241,15 @@ class Cuboid(RigidObject):
             position, orientation = pybullet.getBasePositionAndOrientation(
                 self.block
             )
-            state["rigid_" + self.name + "_type"] = self.type_id
-            state["rigid_" + self.name + "_position"] = np.array(position)
-            state["rigid_" + self.name + "_orientation"] = np.array(orientation)
+            state[self.name + "_type"] = self.type_id
+            state[self.name + "_position"] = np.array(position)
+            state[self.name + "_orientation"] = np.array(orientation)
             linear_velocity, angular_velocity = pybullet.getBaseVelocity(self.block)
-            state["rigid_" + self.name + "_linear_velocity"] = np.array(linear_velocity)
-            state["rigid_" + self.name + "_angular_velocity"] = np.array(angular_velocity)
-            state["rigid_" + self.name + "_mass"] = self.mass
-            state["rigid_" + self.name + "_size"] = self.size
-            state["rigid_" + self.name + "_colour"] = self.colour
+            state[self.name + "_linear_velocity"] = np.array(linear_velocity)
+            state[self.name + "_angular_velocity"] = np.array(angular_velocity)
+            state[self.name + "_mass"] = self.mass
+            state[self.name + "_size"] = self.size
+            state[self.name + "_colour"] = self.colour
         elif state_type == 'list':
             state = []
             position, orientation = pybullet.getBasePositionAndOrientation(

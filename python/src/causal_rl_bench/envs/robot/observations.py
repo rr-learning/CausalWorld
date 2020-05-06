@@ -135,12 +135,12 @@ class TriFingerObservations(object):
                 (low_bound is None or upper_bound is None):
             raise Exception("Observation key {} is not known please specify "
                             "the low and upper found".format(observation_key))
-        if observation_key not in self.observation_functions.keys() and \
-                (observation_fn is None) and observation_key not in \
-                ["joint_torques", "joint_positions", "joint_velocities",
-                 "cameras"]:
-            raise Exception("Observation function calculation for observation "
-                            "key {} is unknown".format(observation_key))
+        # if observation_key not in self.observation_functions.keys() and \
+        #         (observation_fn is None) and observation_key not in \
+        #         ["joint_torques", "joint_positions", "joint_velocities",
+        #          "cameras"]:
+        #     raise Exception("Observation function calculation for observation "
+        #                     "key {} is unknown".format(observation_key))
         if low_bound is not None and upper_bound is not None:
             self.lower_bounds[observation_key] = low_bound
             self.upper_bounds[observation_key] = upper_bound
@@ -159,9 +159,10 @@ class TriFingerObservations(object):
             self.observations_keys.remove(observation)
         self.set_observation_spaces()
 
-    def get_current_observations(self, robot_state):
+    #since task might need access to state elements that are not in the observation leys
+    def get_current_observations(self, robot_state, observations_keys):
         observations_dict = dict()
-        for observation in self.observations_keys:
+        for observation in observations_keys:
             if observation == "joint_positions":
                 observations_dict["joint_positions"] = robot_state.position
             elif observation == "joint_torques":
@@ -178,11 +179,10 @@ class TriFingerObservations(object):
                     self.observation_functions[observation](robot_state)
 
         if self.normalized_observations:
-            for key in self.observations_keys:
+            for key in observations_keys:
                 observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
 
         return observations_dict
-
 
 
 

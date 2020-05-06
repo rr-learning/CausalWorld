@@ -32,9 +32,13 @@ def _make_env(rank):
 def train_policy(num_of_envs):
     #plan for the next horizon
     task = PushingTask()
+<<<<<<< Updated upstream
     env = World(task=task, skip_frame=skip_frame, enable_visualization=False)
     recorder = VideoRecorder(env,
                              'hi.mp4')
+=======
+    env = World(task=task, skip_frame=20, enable_visualization=False)
+>>>>>>> Stashed changes
     env.reset()
     num_of_particles = 1000
     horizon_length = 100

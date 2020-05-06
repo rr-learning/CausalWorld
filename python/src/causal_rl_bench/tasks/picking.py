@@ -10,7 +10,7 @@ class PickingTask(Task):
         self.robot = None
         self.stage = None
         self.observation_keys = ["joint_positions",
-                                 "rigid_block_to_pick_position"]
+                                 "block_to_pick_position"]
         return
 
     def init_task(self, robot, stage):

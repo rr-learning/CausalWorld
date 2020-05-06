@@ -88,15 +88,14 @@ class World(gym.Env):
         self.proj_matrix = self._p.computeProjectionMatrixFOV(
                       fov=60, aspect=float(self._render_width) / self._render_height,
                       nearVal=0.1, farVal=100.0)
+        self.reset()
         return
 
     def step(self, action):
         self.episode_length += 1
 
-        robot_observations_dict = self.robot.apply_action(action)
-        stage_observations_dict = self.stage.get_current_observations()
-        task_observations = self.task.filter_observations(robot_observations_dict,
-                                                          stage_observations_dict)
+        self.robot.apply_action(action)
+        task_observations = self.task.filter_observations()
         reward = self.task.get_reward()
         done = self._is_done()
         info = {}
@@ -135,15 +134,12 @@ class World(gym.Env):
 
     def reset(self):
         self.episode_length = 0
-        robot_observations_dict = self.task.reset_task()
+        self.task.reset_task()
         #TODO: make sure that stage observations returned are up to date
-        stage_observations_dict = self.stage.get_current_observations()
-        task_observations = self.task.filter_observations(
-            robot_observations_dict,
-            stage_observations_dict)
+
         if self.data_recorder:
             self.data_recorder.new_episode(self.get_full_state(), task_params=self.task.get_task_params())
-        return task_observations
+        return self.task.filter_observations()
 
     def close(self):
         if self.data_recorder:

@@ -105,5 +105,16 @@ class StageObservations(object):
             self.observations_keys.remove(observation)
         self.set_observation_spaces()
 
+    def add_observation(self, observation_key, low_bound=None,
+                        upper_bound=None):
+        if observation_key not in self.lower_bounds.keys() and \
+                (low_bound is None or upper_bound is None):
+            raise Exception("Observation key {} is not known please specify "
+                            "the low and upper found".format(observation_key))
+        if low_bound is not None and upper_bound is not None:
+            self.lower_bounds[observation_key] = low_bound
+            self.upper_bounds[observation_key] = upper_bound
+        self.observations_keys.append(observation_key)
+        self.set_observation_spaces()
 
 
