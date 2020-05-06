@@ -176,6 +176,7 @@ for i in range(0, 2000):
      obs = env.step(np.ones(9,))
 end = time.time()
 print(end-start)
+env.close()
     # obs, reward, done, info = env.step(np.zeros(9,))
 # current_state = env.get_full_state()
 # for i in range(2):

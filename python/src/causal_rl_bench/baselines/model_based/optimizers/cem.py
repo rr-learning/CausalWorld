@@ -47,6 +47,7 @@ class CrossEntropyMethod(object):
             elites_indicies = np.argpartition(costs, self.num_elite,
                                               axis=1)
             elites_indicies = elites_indicies[:, self.num_elite]
+            print("current cost is ", np.min(costs, axis=1))
             # if np.min(costs, axis=1) < best_cost:
             elites = action_samples[elites_indicies]
             new_mean = np.mean(elites, axis=0)

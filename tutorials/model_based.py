@@ -14,7 +14,7 @@ import numpy as np
 seed = 0
 
 
-skip_frame = 50
+skip_frame = 125
 
 
 def _make_env(rank):
@@ -32,19 +32,15 @@ def _make_env(rank):
 def train_policy(num_of_envs):
     #plan for the next horizon
     task = PushingTask()
-<<<<<<< Updated upstream
     env = World(task=task, skip_frame=skip_frame, enable_visualization=False)
     recorder = VideoRecorder(env,
                              'hi.mp4')
-=======
-    env = World(task=task, skip_frame=20, enable_visualization=False)
->>>>>>> Stashed changes
     env.reset()
-    num_of_particles = 1000
-    horizon_length = 100
+    num_of_particles = 250
+    horizon_length = 8
     parallel_agents = 50
-    num_elite = 100
-    max_iterations = 5
+    num_elite = 25
+    max_iterations = 10
     true_model = TrueModel(_make_env, num_of_envs,
                            num_of_particles=num_of_particles,
                            parallel_agents=parallel_agents)

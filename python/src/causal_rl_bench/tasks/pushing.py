@@ -14,10 +14,12 @@ class PushingTask(BaseTask):
 
         self.observation_keys = ["end_effector_positions",
                                  "block_position"]
+        self.selected_robot_observations = ["joint_positions",
+                                            "joint_velocities",
+                                            "end_effector_positions"]
 
     def init_task(self, robot, stage):
         self.robot = robot
-        self.robot.add_end_effector_postions_observations()
         self.stage = stage
         self.stage.add_rigid_general_object(name="block",
                                             shape="cube", mass=0.005)
@@ -35,8 +37,8 @@ class PushingTask(BaseTask):
 
         self.task_solved = False
         self.reset_scene_objects()
-
-        return self.robot.get_current_full_observations()
+        task_observations = self.filter_observations()
+        return task_observations
 
     def get_description(self):
         return \
@@ -60,8 +62,9 @@ class PushingTask(BaseTask):
     def is_done(self):
         return self.task_solved
 
-    def filter_observations(self, robot_observations_dict,
-                            stage_observations_dict):
+    def filter_observations(self):
+        robot_observations_dict = self.robot.get_current_observations(self.selected_robot_observations)
+        stage_observations_dict = self.stage.get_current_observations()
         full_observations_dict = dict(robot_observations_dict)
         full_observations_dict.update(stage_observations_dict)
         observations_filtered = np.array([])

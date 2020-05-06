@@ -180,7 +180,8 @@ class TriFingerObservations(object):
 
         if self.normalized_observations:
             for key in observations_keys:
-                observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
+                if key in self.observations_keys:
+                    observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
 
         return observations_dict
 
