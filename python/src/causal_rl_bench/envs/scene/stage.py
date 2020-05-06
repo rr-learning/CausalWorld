@@ -99,8 +99,10 @@ class Stage(object):
     def random_position(self, height_limits=(0.05, 0.15),
                         angle_limits=(-2 * math.pi, 2 * math.pi),
                         radius_limits=(0.0, 0.15)):
+
         angle = np.random.uniform(*angle_limits)
-        radial_distance = np.random.uniform(*radius_limits)
+        # for uniform sampling with respect to the disc area use scaling
+        radial_distance = np.sqrt(np.random.uniform(radius_limits[0]**2, radius_limits[1]**2))
 
         if isinstance(height_limits, (int, float)):
             height_z = height_limits

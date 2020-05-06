@@ -1,7 +1,7 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.tasks.picking import PickingTask
-from causal_rl_bench.tasks.cuboid_silhouettes import CuboidSilhouette
+from causal_rl_bench.tasks.cuboid_silhouette import CuboidSilhouette
 import numpy as np
 import time
 import gym
@@ -36,16 +36,6 @@ def example():
             print(end - start)
             # env.render()
 
-
-    # Switching to a counterfactual variant of the task
-    # env.switch_task(task.get_counterfactual_variant(cube_color="green", unit_length=0.08))
-    # env.reset()
-    # for i in range(5):
-    #     env.reset()
-    #     for i in range(100):
-    #         env.step(
-    #             np.random.uniform(env.action_space.low, env.action_space.high,
-    #                               env.action_space.shape))
     recorder.capture_frame()
     recorder.close()
     env.close()
