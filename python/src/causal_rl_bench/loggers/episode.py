@@ -4,8 +4,10 @@ class Episode:
         will be logged.
         """
 
-    def __init__(self, task_params, initial_full_state):
+    def __init__(self, task_id, initial_full_state, task_params=None, world_params=None):
+        self.task_id = task_id
         self.task_params = task_params
+        self.world_params = world_params
         self.initial_full_state = initial_full_state
         self.robot_actions = []
         self.observations = []

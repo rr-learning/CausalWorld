@@ -1,4 +1,4 @@
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.tasks.base_task import BaseTask
 from causal_rl_bench.utils.state_utils import euler_to_quaternion
 import numpy as np
 from causal_rl_bench.envs.world import World
@@ -8,7 +8,7 @@ import math
 from causal_rl_bench.utils.task_utils import calculate_end_effector_to_goal
 
 
-class PushingTask(Task):
+class PushingTask(BaseTask):
     def __init__(self):
         super().__init__()
         self.id = "pushing"

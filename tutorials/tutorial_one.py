@@ -1,7 +1,5 @@
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.tasks.pushing import PushingTask
-from causal_rl_bench.tasks.picking import PickingTask
-from causal_rl_bench.tasks.cuboid_silhouette import CuboidSilhouette
+from causal_rl_bench.tasks.task import Task
 import numpy as np
 import time
 import gym
@@ -11,8 +9,7 @@ import time
 
 
 def example():
-    task = PushingTask()
-    #TODO: modify skip frame
+    task = Task(task_id='pushing')
     env = World(task=task, skip_frame=20, enable_visualization=True)
     recorder = VideoRecorder(env,
                              'video.mp4')

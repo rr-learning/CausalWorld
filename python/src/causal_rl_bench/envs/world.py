@@ -4,9 +4,7 @@ import pybullet
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.envs.scene.stage import Stage
-from causal_rl_bench.tasks.picking import PickingTask
-from causal_rl_bench.tasks.cuboid_silhouette import CuboidSilhouette
-from causal_rl_bench.tasks.pushing import PushingTask
+from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.envs.env_utils import combine_spaces
 
 
@@ -14,7 +12,7 @@ class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
                 'video.frames_per_second': 50}
 
-    def __init__(self, task=None, task_id="picking", skip_frame=20,
+    def __init__(self, task=None, skip_frame=20,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  camera_skip_frame=40, normalize_actions=True,
@@ -29,6 +27,7 @@ class World(gym.Env):
             enable_visualization (bool): if the simulation env is to be
                 visualized
         """
+        self.seed(seed)
         self.robot = TriFingerRobot(action_mode=action_mode,
                                     observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,
@@ -36,7 +35,6 @@ class World(gym.Env):
                                     camera_skip_frame=camera_skip_frame,
                                     normalize_actions=normalize_actions,
                                     normalize_observations=normalize_observations)
-        self.seed(seed)
         self.stage = Stage(observation_mode=observation_mode,
                            normalize_observations=normalize_observations)
         if max_episode_length is None:
@@ -48,14 +46,10 @@ class World(gym.Env):
         self.simulation_time = 0.001
         gym.Env.__init__(self)
         if task is None:
-            if task_id == "picking":
-                self.task = PickingTask()
-            elif task_id == "pushing":
-                self.task = PushingTask()
-            elif task_id == "cuboid_silhouette":
-                self.task = CuboidSilhouette()
+            self.task = Task()
         else:
             self.task = task
+
         self.task.init_task(self.robot, self.stage)
         selected_observations = self.task.observation_keys
         self.robot.select_observations(selected_observations)
@@ -138,8 +132,26 @@ class World(gym.Env):
         #TODO: make sure that stage observations returned are up to date
 
         if self.data_recorder:
-            self.data_recorder.new_episode(self.get_full_state(), task_params=self.task.get_task_params())
+            self.data_recorder.new_episode(self.get_full_state(),
+                                           task_id=self.task.id,
+                                           task_params=self.task.get_task_params(),
+                                           world_params=self.get_world_params())
         return self.task.filter_observations()
+
+    def get_world_params(self):
+        world_params = dict()
+        world_params["task_id"] = self.task.id
+        world_params["skip_frame"] = self.robot.get_skip_frame()
+        world_params["action_mode"] = self.robot.get_action_mode()
+        world_params["observation_mode"] = self.robot.get_observation_mode()
+        world_params["camera_skip_frame"] = \
+            self.robot.get_camera_skip_frame()
+        world_params["normalize_actions"] = \
+            self.robot.robot_actions.is_normalized()
+        world_params["normalize_observations"] = \
+            self.robot.robot_observations.is_normalized()
+        world_params["max_episode_length"] = None
+        return world_params
 
     def close(self):
         if self.data_recorder:

@@ -1,9 +1,9 @@
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.tasks.base_task import BaseTask
 from causal_rl_bench.utils.state_utils import euler_to_quaternion
 import numpy as np
 
 
-class PickingTask(Task):
+class PickingTask(BaseTask):
     def __init__(self, task_params=None):
         super().__init__()
         self.id = "picking"
@@ -79,5 +79,8 @@ class PickingTask(Task):
         interventions_dict["colour"] = new_colour
         self.stage.object_intervention("block_to_pick", interventions_dict)
 
+    def get_task_params(self):
+        # TODO: pass initialization params for this task here if we have several pushing variants in the future
+        return dict()
 
 

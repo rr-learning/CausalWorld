@@ -1,4 +1,4 @@
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.tasks.base_task import BaseTask
 from causal_rl_bench.utils.state_utils import euler_to_quaternion
 import numpy as np
 import math
@@ -6,8 +6,9 @@ import pybullet
 import itertools
 
 
-class CuboidSilhouette(Task):
-    def __init__(self, silhouette_size=None, silhouette_position_mode="center", unit_length=0.065, cube_color="red"):
+class CuboidSilhouette(BaseTask):
+    def __init__(self, silhouette_size=None, silhouette_position_mode="center", unit_length=0.065,
+                 cube_color=np.array([1, 0, 0])):
         super().__init__()
         self.id = "cuboid_silhouette"
         self.robot = None
@@ -20,7 +21,7 @@ class CuboidSilhouette(Task):
         self.silhouette_position_mode = silhouette_position_mode
         self.silhouette_orientation = [0, 0, 0, 1]
         self.unit_length = unit_length
-        self.cube_color = np.array([1, 0, 0])
+        self.cube_color = cube_color
 
         self.task_solved = False
         self.observation_keys = []
@@ -213,13 +214,9 @@ class CuboidSilhouette(Task):
         self.stage.object_intervention("cuboid_target", interventions_dict_target)
 
     def get_task_params(self):
-        task_params_dict = dict()
-        task_params_dict["task_id"] = self.id
-        task_params_dict["skip_frame"] = self.robot.get_skip_frame()
-        task_params_dict["action_mode"] = self.robot.get_action_mode()
-        task_params_dict["observation_mode"] = self.robot.get_observation_mode()
-        task_params_dict["camera_skip_frame"] = self.robot.get_camera_skip_frame()
-        task_params_dict["normalize_actions"] = self.robot.robot_actions.is_normalized()
-        task_params_dict["normalize_observations"] = self.robot.robot_observations.is_normalized()
-        task_params_dict["max_episode_length"] = None
-        return task_params_dict
+        task_params = dict()
+        task_params["silhouette_size"] = self.silhouette_size
+        task_params["silhouette_position_mode"] = self.silhouette_position_mode
+        task_params["unit_length"] = self.unit_length
+        task_params["cube_color"] = self.cube_color
+        return task_params
