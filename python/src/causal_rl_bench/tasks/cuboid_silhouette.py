@@ -114,8 +114,8 @@ class CuboidSilhouette(BaseTask):
         return self.task_solved
 
     def filter_observations(self):
-        robot_observations_dict = self.robot.get_current_observations(self.robot_observation_helper_keys)
-        stage_observations_dict = self.stage.get_current_observations(self.stage_observation_helper_keys)
+        robot_observations_dict = self.robot.get_current_observations()
+        stage_observations_dict = self.stage.get_current_observations()
         full_observations_dict = dict(robot_observations_dict)
         full_observations_dict.update(stage_observations_dict)
         observations_filtered = np.array([])
