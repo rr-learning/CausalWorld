@@ -38,7 +38,7 @@ def train_policy(num_of_envs):
     env.reset()
     num_of_particles = 500
     horizon_length = 6
-    parallel_agents = 50
+    parallel_agents = 1
     num_elite = 50
     max_iterations = 32
     true_model = TrueModel(_make_env,

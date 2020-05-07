@@ -76,9 +76,7 @@ class Stage(object):
             object.set_full_state(new_state[start:end])
             start = end
         self.latest_full_state = new_state
-        self.latest_observations = self.stage_observations.\
-            get_current_observations()
-        return self.latest_full_state
+        return
 
     def set_objects_pose(self, names, positions, orientations):
         for i in range(len(names)):
