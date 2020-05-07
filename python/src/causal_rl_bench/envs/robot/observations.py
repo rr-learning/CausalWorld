@@ -46,10 +46,10 @@ class TriFingerObservations(object):
             [20] * 3 * num_fingers
 
         self.lower_bounds["cameras"] = \
-            np.zeros(shape=(3, 540, 720, 3), dtype=np.uint8).flatten()
+            np.zeros(shape=(3, 540, 720, 3), dtype=np.uint8)
         self.upper_bounds["cameras"] = \
             np.full(shape=(3, 540, 720, 3), fill_value=255,
-                    dtype=np.uint8).flatten()
+                    dtype=np.uint8)
 
         self.observation_functions = dict()
 
@@ -208,6 +208,14 @@ class TriFingerObservations(object):
                 observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
 
         return observations_dict
+
+    def get_current_camera_observations(self, robot_state):
+        camera_obs = np.stack((robot_state.camera_60,
+                               robot_state.camera_180,
+                               robot_state.camera_300), axis=0)
+        if self.normalized_observations:
+            camera_obs = self.normalize_observation_for_key(camera_obs, "cameras")
+        return camera_obs
 
 
 

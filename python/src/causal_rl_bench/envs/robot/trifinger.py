@@ -190,5 +190,8 @@ class TriFingerRobot(object):
         return self.robot_observations.get_current_observations(self.latest_full_state,
                                                                 helper_keys)
 
+    def get_current_camera_observations(self):
+        return self.robot_observations.get_current_camera_observations(self.latest_full_state)
+
 
 
