@@ -12,7 +12,7 @@ class PushingTask(BaseTask):
 
         self.task_solved = False
 
-        self.observation_keys = ["end_effector_positions",
+        self.observation_keys = ["joint_positions",
                                  "block_position"]
         self.selected_robot_observations = ["joint_positions",
                                             "joint_velocities",
@@ -29,7 +29,9 @@ class PushingTask(BaseTask):
         return
 
     def reset_task(self):
-        sampled_positions = self.robot.sample_positions()
+        sampled_positions = np.array([0., -0.5, -0.6,
+                                     0., -0.4, -0.7,
+                                     0., -0.4, -0.7])
         self.robot.clear()
         self.stage.clear()
         self.robot.set_full_state(np.append(sampled_positions,
@@ -77,10 +79,8 @@ class PushingTask(BaseTask):
     def reset_scene_objects(self):
         # TODO: Refactor the orientation sampling into a general util method
 
-        block_position = self.stage.random_position(height_limits=0.0435)
-        block_orientation = euler_to_quaternion([0, 0,
-                                                 np.random.uniform(-np.pi,
-                                                                   np.pi)])
+        block_position = [0.0, -0.02, 0.045155]
+        block_orientation = euler_to_quaternion([0, 0, 0.0])
 
         goal_position = self.stage.random_position(height_limits=0.0435)
         goal_orientation = euler_to_quaternion([0, 0,
@@ -90,6 +90,8 @@ class PushingTask(BaseTask):
                                     positions=[block_position, goal_position],
                                     orientations=[block_orientation,
                                                   goal_orientation])
+
+
 
     def do_random_intervention(self):
         #TODO: for now just intervention on a specific object

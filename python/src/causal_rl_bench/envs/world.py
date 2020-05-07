@@ -6,6 +6,7 @@ from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.envs.env_utils import combine_spaces
+import time
 
 
 class World(gym.Env):
@@ -43,7 +44,7 @@ class World(gym.Env):
             self.enforce_episode_length = True
         self.max_episode_length = max_episode_length
         self.episode_length = 0
-        self.simulation_time = 0.001
+        self.simulation_time = 0.004
         gym.Env.__init__(self)
         if task is None:
             self.task = Task()
@@ -87,7 +88,6 @@ class World(gym.Env):
 
     def step(self, action):
         self.episode_length += 1
-
         self.robot.apply_action(action)
         task_observations = self.task.filter_observations()
         reward = self.task.get_reward()
@@ -181,7 +181,7 @@ class World(gym.Env):
         robot_state_size = self.robot.get_state_size()
         self.robot.set_full_state(new_full_state[0:robot_state_size])
         self.stage.set_full_state(new_full_state[robot_state_size:])
-        return
+        return self.task.filter_observations()
 
     def render(self, mode="human"):
         (_, _, px, _, _) = self._p.getCameraImage(

@@ -16,7 +16,7 @@ class TriFingerRobot(object):
         self.camera_skip_frame = camera_skip_frame
         self.skip_frame = skip_frame
         self.camera_turned_on = camera_turned_on
-        self.simulation_time = 0.001
+        self.simulation_time = 0.004
         self.control_index = -1
         if self.camera_turned_on:
             assert ((float(self.camera_skip_frame) / self.skip_frame).is_integer())
@@ -110,12 +110,6 @@ class TriFingerRobot(object):
         return
 
     def get_full_state(self):
-        # The full state is independent of the observation mode
-        #TODO: only returning positions since we cant set the velocity for now
-        # full_state = {"joint_positions": self.latest_full_state.position,
-        #               "joint_velocities": self.latest_full_state.velocity,
-        #               "joint_torques": self.latest_full_state.torque}
-
         return np.append(self.latest_full_state.position,
                          self.latest_full_state.velocity)
 
@@ -193,7 +187,8 @@ class TriFingerRobot(object):
                                                 observation_fn)
 
     def get_current_observations(self, observation_keys):
-        return self.robot_observations.get_current_observations(self.latest_full_state, observation_keys)
+        return self.robot_observations.get_current_observations(self.latest_full_state,
+                                                                observation_keys)
 
 
 

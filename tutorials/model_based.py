@@ -14,7 +14,7 @@ import numpy as np
 seed = 0
 
 
-skip_frame = 125
+skip_frame = 35
 
 
 def _make_env(rank):
@@ -32,16 +32,17 @@ def _make_env(rank):
 def train_policy(num_of_envs):
     #plan for the next horizon
     task = PushingTask()
-    env = World(task=task, skip_frame=skip_frame, enable_visualization=False)
+    env = World(task=task, skip_frame=skip_frame, enable_visualization=True,
+                seed=0)
     recorder = VideoRecorder(env,
                              'hi.mp4')
     env.reset()
-    num_of_particles = 250
-    horizon_length = 8
+    num_of_particles = 500
+    horizon_length = 6
     parallel_agents = 50
-    num_elite = 25
+    num_elite = 50
     max_iterations = 10
-    true_model = TrueModel(_make_env, num_of_envs,
+    true_model = TrueModel(_make_env,
                            num_of_particles=num_of_particles,
                            parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(planning_horizon=horizon_length,
@@ -52,17 +53,18 @@ def train_policy(num_of_envs):
                                    np.array(env.action_space.high),
                                    action_lower_bound=
                                    np.array(env.action_space.low),
-                                   model=true_model,
-                                   num_agents=num_of_envs)
-    current_states = np.expand_dims(env.get_full_state(), 0)
-    actions = optimizer.get_actions(current_states)
+                                   model=true_model)
+    current_state = env.get_full_state()
+    actions = optimizer.get_actions(current_state)
+    env.set_full_state(current_state)
     for i in range(horizon_length):
         #TODO: set quick state?
         recorder.capture_frame()
-        env.step(actions[i, 0, :])
+        env.step(actions[i])
     recorder.capture_frame()
     recorder.close()
     env.close()
+    true_model.end_sim()
     return
 
 
