@@ -108,6 +108,7 @@ class StageObservations(object):
             return np.clip(observation, self.low, self.high)
 
     def get_current_observations(self, helper_keys):
+        helper_keys = helper_keys.tolist()
         observations_dict = dict()
         for rigid_object in self.rigid_objects:
             observations_dict.update(rigid_object.get_state())

@@ -115,6 +115,8 @@ class TriFingerRobot(object):
     def set_full_state(self, state):
         self.latest_full_state = self.tri_finger.\
             reset_finger(state[:9], state[9:])
+        self.last_action = state[:9]
+        self.last_clipped_action = state[:9]
         return
 
     def clear(self):
@@ -126,8 +128,6 @@ class TriFingerRobot(object):
 
     def reset_state(self, joint_positions=None, joint_velocities=None):
         # This resets the robot fingers into a random position if nothing is provided
-        self.last_action = None
-        self.last_clipped_action = None
         self.latest_full_state = None
         self.control_index = -1
         if joint_positions is None:
@@ -136,6 +136,9 @@ class TriFingerRobot(object):
             joint_velocities = np.zeros(9)
         self.latest_full_state = self.tri_finger.reset_finger(joint_positions,
                                                               joint_velocities)
+        #TODO: deal with other action types and test them, only dealing with positions here
+        self.last_action = joint_positions
+        self.last_clipped_action = joint_positions
 
     def get_last_action(self):
         return self.last_action
@@ -189,6 +192,14 @@ class TriFingerRobot(object):
     def get_current_observations(self, helper_keys=np.array([])):
         return self.robot_observations.get_current_observations(self.latest_full_state,
                                                                 helper_keys)
+
+    def normalize_observation_for_key(self, observation, key):
+        return self.robot_observations.normalize_observation_for_key(observation,
+                                                                     key)
+
+    def denormalize_observation_for_key(self, observation, key):
+        return self.robot_observations.denormalize_observation_for_key(observation,
+                                                                     key)
 
 
 

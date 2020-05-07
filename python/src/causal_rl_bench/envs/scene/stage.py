@@ -126,13 +126,6 @@ class Stage(object):
         self.latest_full_state = None
         self.latest_observations = None
 
-    def select_observations(self, observation_keys):
-        current_observations_keys = \
-            list(self.stage_observations.observations_keys)
-        for key in current_observations_keys:
-            if key not in observation_keys:
-                self.stage_observations.remove_observations([key])
-
     def get_current_object_keys(self):
         return list(self.rigid_objects.keys()) +  \
                list(self.visual_objects.keys())
@@ -160,3 +153,11 @@ class Stage(object):
     def add_observation(self, observation_key, low_bound=None,
                         upper_bound=None):
         self.stage_observations.add_observation(observation_key, low_bound, upper_bound)
+
+    def normalize_observation_for_key(self, observation, key):
+        return self.stage_observations.normalize_observation_for_key(observation,
+                                                                     key)
+
+    def denormalize_observation_for_key(self, observation, key):
+        return self.stage_observations.denormalize_observation_for_key(observation,
+                                                                       key)

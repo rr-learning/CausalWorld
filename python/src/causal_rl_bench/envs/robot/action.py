@@ -68,13 +68,6 @@ class TriFingerAction(object):
             mode = self.action_mode
         if mode == "joint_positions" and \
                 sampling_strategy == "uniform":
-            # list_to_return = []
-            # for _ in range(3):
-            #     upper = np.random.uniform(-math.radians(30), math.radians(30))
-            #     middle = np.random.uniform(-math.radians(60), math.radians(60))
-            #     lower = np.random.uniform(-math.radians(100), -math.radians(2))
-            #     list_to_return += [upper, middle, lower]
-            # return list_to_return
             return np.random.uniform(self.low, self.high)
         else:
             raise Exception("not yet implemented")

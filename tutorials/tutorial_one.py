@@ -13,24 +13,25 @@ def example():
     env = World(task=task, skip_frame=20, enable_visualization=True, normalize_observations=False)
     recorder = VideoRecorder(env,
                              'video.mp4')
-    env.reset()
+    obs = env.reset()
     # current_state = env.get_full_state()
     for i in range(2):
         # env.reset()
         # env.set_full_state(current_state)
-        env.do_random_intervention()
-        for j in range(100):
+        # env.do_random_intervention()
+        for j in range(1000):
             recorder.capture_frame()
             # recorder.capture_frame()
             # env.step(
             #     np.random.uniform(env.action_space.low, env.action_space.high,
             #                       env.action_space.shape))
             start = time.time()
-            env.step(
+            obs, reward, done, info = env.step(
                 np.random.uniform(env.action_space.low, env.action_space.high,
                                   env.action_space.shape))
+            print(reward)
             end = time.time()
-            print(end - start)
+            # print(end - start)
             # env.render()
 
     recorder.capture_frame()
