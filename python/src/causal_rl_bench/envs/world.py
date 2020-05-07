@@ -29,10 +29,12 @@ class World(gym.Env):
                 visualized
         """
         self.seed(seed)
+        self.camera_turned_on = (observation_mode == "cameras")
         self.robot = TriFingerRobot(action_mode=action_mode,
                                     observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,
                                     skip_frame=skip_frame,
+                                    camera_turned_on=self.camera_turned_on,
                                     camera_skip_frame=camera_skip_frame,
                                     normalize_actions=normalize_actions,
                                     normalize_observations=normalize_observations)
@@ -62,7 +64,7 @@ class World(gym.Env):
         self.skip_frame = skip_frame
         self.metadata['video.frames_per_second'] = \
             (1 / self.simulation_time) / self.skip_frame
-        #TODO: verify spaces here
+        # TODO: verify spaces here
         self.max_time_steps = 5000
 
         self._cam_dist = 1
@@ -80,28 +82,31 @@ class World(gym.Env):
             roll=0,
             upAxisIndex=2)
         self.proj_matrix = self._p.computeProjectionMatrixFOV(
-                      fov=60, aspect=float(self._render_width) / self._render_height,
-                      nearVal=0.1, farVal=100.0)
+            fov=60, aspect=float(self._render_width) / self._render_height,
+            nearVal=0.1, farVal=100.0)
         self.reset()
         return
 
     def step(self, action):
         self.episode_length += 1
         self.robot.apply_action(action)
-        task_observations = self.task.filter_observations()
+        if self.camera_turned_on:
+            observation = self.robot.get_current_camera_observations()
+        else:
+            observation = self.task.filter_observations()
         reward = self.task.get_reward()
         done = self._is_done()
         info = {}
 
         if self.data_recorder:
             self.data_recorder.append(robot_action=action,
-                                      observation=task_observations,
+                                      observation=observation,
                                       reward=reward,
                                       timestamp=self.episode_length *
                                                 self.skip_frame *
                                                 self.simulation_time)
 
-        return task_observations, reward, done, info
+        return observation, reward, done, info
 
     def sample_new_task(self):
         raise Exception(" ")
@@ -127,14 +132,18 @@ class World(gym.Env):
     def reset(self):
         self.episode_length = 0
         self.task.reset_task()
-        #TODO: make sure that stage observations returned are up to date
+        # TODO: make sure that stage observations returned are up to date
 
         if self.data_recorder:
             self.data_recorder.new_episode(self.get_full_state(),
                                            task_id=self.task.id,
                                            task_params=self.task.get_task_params(),
                                            world_params=self.get_world_params())
-        return self.task.filter_observations()
+
+        if self.camera_turned_on:
+            return self.robot.get_current_camera_observations()
+        else:
+            return self.task.filter_observations()
 
     def get_world_params(self):
         world_params = dict()
@@ -187,7 +196,7 @@ class World(gym.Env):
             viewMatrix=self.view_matrix,
             projectionMatrix=self.proj_matrix,
             renderer=pybullet.ER_BULLET_HARDWARE_OPENGL
-            )
+        )
         rgb_array = np.array(px)
         rgb_array = rgb_array[:, :, :3]
         return rgb_array

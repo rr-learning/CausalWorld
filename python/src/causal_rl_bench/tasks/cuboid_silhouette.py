@@ -24,24 +24,23 @@ class CuboidSilhouette(BaseTask):
         self.cube_color = cube_color
 
         self.task_solved = False
-        self.observation_keys = []
-        self.selected_robot_observations = ["joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+        # observation spaces are always robot obs and then stage obs
+        self.task_robot_observation_keys = []
+        self.task_stage_observation_keys = []
+        # the helper keys are observations that are not included in the task observations but it will be needed in reward
+        # calculation or new observations calculation
+        self.robot_observation_helper_keys = []
+        self.stage_observation_helper_keys = []
 
     def init_task(self, robot, stage):
         self.robot = robot
         self.stage = stage
 
-        if self.robot.get_observation_mode() == "structured":
-            self.observation_keys = ["joint_positions",
-                                     "cuboid_target_position",
-                                     "cuboid_target_orientation",
-                                     "cuboid_target_size"]
-        elif self.robot.get_observation_mode() == "cameras":
-            self.observation_keys = ["cameras"]
-        else:
-            raise ValueError("Observation mode not supported for this task")
+        self.task_robot_observation_keys = ["joint_positions"]
+
+        self.task_stage_observation_keys = ["cuboid_target_position",
+                                            "cuboid_target_orientation",
+                                            "cuboid_target_size"]
 
         if self.silhouette_position_mode == "center":
             self.silhouette_position = np.array([0, 0, 0.0115 + self.silhouette_size[2] / 2 * self.unit_length])
@@ -79,9 +78,8 @@ class CuboidSilhouette(BaseTask):
                                                 orientation=cube_orientation,
                                                 colour=self.cube_color)
 
-            if self.robot.get_observation_mode() == "structured":
-                self.observation_keys.append("cube_{}_position".format(i))
-                self.observation_keys.append("cube_{}_orientation".format(i))
+            self.task_stage_observation_keys.append("cube_{}_position".format(i))
+            self.task_stage_observation_keys.append("cube_{}_orientation".format(i))
 
         self.stage.finalize_stage()
 
@@ -116,12 +114,16 @@ class CuboidSilhouette(BaseTask):
         return self.task_solved
 
     def filter_observations(self):
-        robot_observations_dict = self.robot.get_current_observations(self.selected_robot_observations)
-        stage_observations_dict = self.stage.get_current_observations()
+        robot_observations_dict = self.robot.get_current_observations(self.robot_observation_helper_keys)
+        stage_observations_dict = self.stage.get_current_observations(self.stage_observation_helper_keys)
         full_observations_dict = dict(robot_observations_dict)
         full_observations_dict.update(stage_observations_dict)
         observations_filtered = np.array([])
-        for key in self.observation_keys:
+        for key in self.task_robot_observation_keys:
+            observations_filtered = \
+                np.append(observations_filtered,
+                          np.array(full_observations_dict[key]))
+        for key in self.task_stage_observation_keys:
             observations_filtered = \
                 np.append(observations_filtered,
                           np.array(full_observations_dict[key]))
@@ -199,7 +201,7 @@ class CuboidSilhouette(BaseTask):
             interventions_dict["size"] = np.array([1, 1, 1]) * self.unit_length
             self.stage.object_intervention("cube_{}".format(i), interventions_dict)
 
-        #For target silhouette
+        # For target silhouette
 
         self.silhouette_position = np.array([0, 0, 0.0115 + self.silhouette_size[2] / 2 * self.unit_length])
         # TODO: this needs to be implemented for a general silhouette orientation

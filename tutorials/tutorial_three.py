@@ -4,21 +4,22 @@ from causal_rl_bench.tasks.task import Task
 import numpy as np
 import time
 
+import matplotlib.pyplot as plt
+
 
 def example():
-    task = Task(task_id='cuboid_silhouette', silhouette_size=[1, 2, 1])
+    task = Task(task_id='cuboid_silhouette', silhouette_size=[3, 2, 1])
     data_recorder = DataRecorder(rec_dumb_frequency=10)  # default rec_dumb_frequency is 1000
     env = World(task=task,
                 skip_frame=20,
                 seed=1,
-                enable_visualization=True,
-                data_recorder=data_recorder)
-    for i in range(24):
-        env.reset()
+                observation_mode="cameras",
+                normalize_observations=True,
+                enable_visualization=True)
+    for i in range(20):
+        obs = env.reset()
         for i in range(50):
-            env.step(
-                np.random.uniform(env.action_space.low, env.action_space.high,
-                                  env.action_space.shape))
+            obs, _, _, _ = env.step(np.random.uniform(env.action_space.sample()))
     env.close()
 
 

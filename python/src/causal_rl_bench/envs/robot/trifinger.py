@@ -200,6 +200,8 @@ class TriFingerRobot(object):
     def denormalize_observation_for_key(self, observation, key):
         return self.robot_observations.denormalize_observation_for_key(observation,
                                                                      key)
+    def get_current_camera_observations(self):
+        return self.robot_observations.get_current_camera_observations(self.latest_full_state)
 
 
 
