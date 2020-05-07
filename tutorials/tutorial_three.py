@@ -10,6 +10,7 @@ def example():
     data_recorder = DataRecorder(rec_dumb_frequency=10)  # default rec_dumb_frequency is 1000
     env = World(task=task,
                 skip_frame=20,
+                seed=1,
                 enable_visualization=True,
                 data_recorder=data_recorder)
     for i in range(24):
