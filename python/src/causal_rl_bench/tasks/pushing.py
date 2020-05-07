@@ -22,7 +22,7 @@ class PushingTask(BaseTask):
         self.robot = robot
         self.stage = stage
         self.stage.add_rigid_general_object(name="block",
-                                            shape="cube", mass=0.005)
+                                            shape="cube", mass=0.02)
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube")
         self.stage.finalize_stage()

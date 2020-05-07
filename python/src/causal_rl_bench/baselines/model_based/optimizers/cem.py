@@ -61,4 +61,5 @@ class CrossEntropyMethod(object):
             current_actions_var = (self.alpha * current_actions_var) + (
                     (1 - self.alpha) * new_variance)
             iteration_index += 1
+            print("best action is so far ", best_action)
         return best_action
