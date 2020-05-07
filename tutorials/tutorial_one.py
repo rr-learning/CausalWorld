@@ -10,7 +10,7 @@ import time
 
 def example():
     task = Task(task_id='pushing')
-    env = World(task=task, skip_frame=20, enable_visualization=True)
+    env = World(task=task, skip_frame=20, enable_visualization=True, normalize_observations=False)
     recorder = VideoRecorder(env,
                              'video.mp4')
     env.reset()

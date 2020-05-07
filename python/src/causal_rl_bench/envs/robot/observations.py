@@ -61,9 +61,7 @@ class TriFingerObservations(object):
         elif observation_mode == "structured":
             if observation_keys is None:
                 # Default structured observation space
-                self.observations_keys = ["joint_positions",
-                                          "joint_velocities",
-                                          "joint_torques"]
+                self.observations_keys = []
             elif all(key in self.lower_bounds.keys()
                      for key in observation_keys):
                 self.observations_keys = observation_keys
@@ -99,6 +97,10 @@ class TriFingerObservations(object):
 
     def is_normalized(self):
         return self.normalized_observations
+
+    def reset_observation_keys(self):
+        self.observations_keys = []
+        self.set_observation_spaces()
 
     def normalize_observation(self, observation):
         return 2.0 * (observation - self.low) / (self.high - self.low) - 1.0
@@ -149,20 +151,24 @@ class TriFingerObservations(object):
         self.observations_keys.append(observation_key)
         self.set_observation_spaces()
 
+    def is_observation_key_known(self, observation_key):
+        if observation_key not in self.lower_bounds.keys():
+            return False
+        else:
+            return True
+
     def remove_observations(self, observations):
         for observation in observations:
             if observation not in self.observations_keys:
                 raise Exception(
                     "Observation key {} is not known".format(observation))
-            del self.lower_bounds[observation]
-            del self.upper_bounds[observation]
             self.observations_keys.remove(observation)
         self.set_observation_spaces()
 
     #since task might need access to state elements that are not in the observation leys
-    def get_current_observations(self, robot_state, observations_keys):
+    def get_current_observations(self, robot_state, helper_keys):
         observations_dict = dict()
-        for observation in observations_keys:
+        for observation in self.observations_keys:
             if observation == "joint_positions":
                 observations_dict["joint_positions"] = robot_state.position
             elif observation == "joint_torques":
@@ -174,14 +180,32 @@ class TriFingerObservations(object):
                                       robot_state.camera_180,
                                       robot_state.camera_300), axis=0)
                 observations_dict["cameras"] = camera_obs
-            else:
+            elif observation in self.observation_functions:
                 observations_dict[observation] = \
                     self.observation_functions[observation](robot_state)
-
+            #else its in the spaces but will be handled by the task itself, the task also needs to check for normalization somehow
+        #add the helper observations as well
+        for observation in helper_keys:
+            if observation == "joint_positions":
+                observations_dict["joint_positions"] = robot_state.position
+            elif observation == "joint_torques":
+                observations_dict["joint_torques"] = robot_state.torque
+            elif observation == "joint_velocities":
+                observations_dict["joint_velocities"] = robot_state.velocity
+            elif observation == "cameras":
+                camera_obs = np.stack((robot_state.camera_60,
+                                      robot_state.camera_180,
+                                      robot_state.camera_300), axis=0)
+                observations_dict["cameras"] = camera_obs
+            elif observation in self.observation_functions:
+                observations_dict[observation] = \
+                    self.observation_functions[observation](robot_state)
+            else:
+                raise Exception("The robot doesn't know about observation key {}".format(observation))
+        #now normalize everything here
         if self.normalized_observations:
-            for key in observations_keys:
-                if key in self.observations_keys:
-                    observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
+            for key in observations_dict.keys():
+                observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
 
         return observations_dict
 

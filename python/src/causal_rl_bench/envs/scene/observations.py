@@ -19,8 +19,8 @@ class StageObservations(object):
         self.low = np.array([])
         self.high = np.array([])
         self.visual_objects_state = dict()
-        self.set_observation_spaces()
         self.initialize_observations()
+        self.set_observation_spaces()
         return
 
     def get_observation_spaces(self):
@@ -58,6 +58,16 @@ class StageObservations(object):
                 self.observations_keys.append(state_key)
         return
 
+    def reset_observation_keys(self):
+        self.observations_keys = []
+        self.set_observation_spaces()
+
+    def is_observation_key_known(self, observation_key):
+        if observation_key not in self.lower_bounds.keys():
+            return False
+        else:
+            return True
+
     def set_observation_spaces(self):
         self.low = np.array([])
         self.high = np.array([])
@@ -74,6 +84,16 @@ class StageObservations(object):
     def denormalize_observation(self, observation):
         return self.low + (observation + 1.0) / 2.0 * (self.high - self.low)
 
+    def normalize_observation_for_key(self, observation, key):
+        lower_key = np.array(self.lower_bounds[key])
+        higher_key = np.array(self.upper_bounds[key])
+        return 2.0 * (observation - lower_key) / (higher_key - lower_key) - 1.0
+
+    def denormalize_observation_for_key(self, observation, key):
+        lower_key = np.array(self.lower_bounds[key])
+        higher_key = np.array(self.upper_bounds[key])
+        return lower_key + (observation + 1.0) / 2.0 * (higher_key - lower_key)
+
     def satisfy_constraints(self, observation):
         if self.normalized_observations:
             return (observation > -1.).all() and (observation < 1.).all()
@@ -87,12 +107,19 @@ class StageObservations(object):
         else:
             return np.clip(observation, self.low, self.high)
 
-    def get_current_observations(self):
-        #TODO: scale if normalized
+    def get_current_observations(self, helper_keys):
         observations_dict = dict()
         for rigid_object in self.rigid_objects:
             observations_dict.update(rigid_object.get_state())
         observations_dict.update(self.visual_objects_state)
+        observation_dict_keys = list(observations_dict.keys())
+        for observation in observation_dict_keys:
+            if (observation not in self.observations_keys) and (observation not in helper_keys):
+                del observations_dict[observation]
+        # now normalize everything here
+        if self.normalized_observations:
+            for key in observations_dict.keys():
+                observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
         return observations_dict
 
     def remove_observations(self, observations):
@@ -100,8 +127,6 @@ class StageObservations(object):
             if observation not in self.observations_keys:
                 raise Exception(
                     "Observation key {} is not known".format(observation))
-            del self.lower_bounds[observation]
-            del self.upper_bounds[observation]
             self.observations_keys.remove(observation)
         self.set_observation_spaces()
 

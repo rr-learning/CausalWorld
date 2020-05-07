@@ -48,6 +48,11 @@ class Stage(object):
                                                     self.observation_mode,
                                                     self.normalize_observations)
 
+    def select_observations(self, observation_keys):
+        self.stage_observations.reset_observation_keys()
+        for key in observation_keys:
+            self.stage_observations.add_observation(key)
+
     def get_full_state(self):
         stage_state = []
         for name in self.name_keys:
@@ -88,9 +93,9 @@ class Stage(object):
         self.latest_full_state = self.get_full_state()
         return
 
-    def get_current_observations(self):
+    def get_current_observations(self, helper_keys=np.array([])):
         self.latest_observations = \
-            self.stage_observations.get_current_observations()
+            self.stage_observations.get_current_observations(helper_keys)
         return self.latest_observations
 
     def get_observation_spaces(self):

@@ -23,9 +23,8 @@ class TriFingerRobot(object):
         self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
                                     "tri")
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
-        self.robot_observations = TriFingerObservations(observation_mode)
-        self.robot_observations.add_observation("end_effector_positions",
-                                                observation_fn=self._compute_end_effector_positions)
+        self.robot_observations = TriFingerObservations(observation_mode, normalize_observations)
+
 
         self.last_action = None
         self.last_clipped_action = None
@@ -163,11 +162,12 @@ class TriFingerRobot(object):
         return self.robot_actions.get_action_space()
 
     def select_observations(self, observation_keys):
-        current_observations_keys = list(self.robot_observations.
-                                         observations_keys)
-        for key in current_observations_keys:
-            if key not in observation_keys:
-                self.robot_observations.remove_observations([key])
+        self.robot_observations.reset_observation_keys()
+        for key in observation_keys:
+            if key == "end_effector_positions":
+                self.robot_observations.add_observation("end_effector_positions",
+                                                         observation_fn=self._compute_end_effector_positions)
+            self.robot_observations.add_observation(key)
 
     def close(self):
         self.tri_finger.disconnect_from_simulation()
@@ -186,9 +186,9 @@ class TriFingerRobot(object):
                                                 upper_bound,
                                                 observation_fn)
 
-    def get_current_observations(self, observation_keys):
+    def get_current_observations(self, helper_keys=np.array([])):
         return self.robot_observations.get_current_observations(self.latest_full_state,
-                                                                observation_keys)
+                                                                helper_keys)
 
 
 

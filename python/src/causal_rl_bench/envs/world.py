@@ -52,9 +52,8 @@ class World(gym.Env):
             self.task = task
 
         self.task.init_task(self.robot, self.stage)
-        selected_observations = self.task.observation_keys
-        self.robot.select_observations(selected_observations)
-        self.stage.select_observations(selected_observations)
+        self.robot.select_observations(self.task.task_robot_observation_keys)
+        self.stage.select_observations(self.task.task_stage_observation_keys)
         self.observation_space = \
             combine_spaces(self.robot.get_observation_spaces(),
                            self.stage.get_observation_spaces())
@@ -110,9 +109,8 @@ class World(gym.Env):
     def switch_task(self, task):
         self.task = task
         self.task.init_task(self.robot, self.stage)
-        selected_observations = self.task.observation_keys
-        self.robot.select_observations(selected_observations)
-        self.stage.select_observations(selected_observations)
+        self.robot.select_observations(self.task.task_robot_observation_keys)
+        self.stage.select_observations(self.task.task_stage_observation_keys)
         self.observation_space = \
             combine_spaces(self.robot.get_observation_spaces(),
                            self.stage.get_observation_spaces())
