@@ -53,3 +53,22 @@ def test_determinism():
     assert all(not np.array_equal(observations_v1[i], observations_v3[i])
                for i in range(horizon))
     assert not rewards_v1 == rewards_v3
+
+
+def test_parallelism():
+    task = Task(task_id="pushing")
+    env1 = World(task=task,
+                 enable_visualization=True,
+                 seed=0)
+    env1.reset()
+    task2 = Task(task_id="pushing")
+    env2 = World(task=task2,
+                 enable_visualization=False,
+                 seed=0)
+    observations_env1_v1, rewards_env1_v1, _, _ = env1.step(env1.action_space.low)
+    env2.reset()
+    observations_env2_v1, rewards_env2_v1, _, _ = env2.step(env2.action_space.low)
+    assert np.array_equal(observations_env2_v1,  observations_env1_v1)
+    return
+
+test_parallelism()

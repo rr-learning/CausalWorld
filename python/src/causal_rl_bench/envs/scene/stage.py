@@ -6,11 +6,12 @@ import numpy as np
 
 
 class Stage(object):
-    def __init__(self, observation_mode,
+    def __init__(self, pybullet_client, observation_mode,
                  normalize_observations=True):
         self.rigid_objects = dict()
         self.visual_objects = dict()
         self.observation_mode = observation_mode
+        self.pybullet_client = pybullet_client
         self.normalize_observations = normalize_observations
         self.stage_observations = None
         self.latest_full_state = None
@@ -24,7 +25,7 @@ class Stage(object):
         else:
             self.name_keys.append(name)
         if shape == "cube":
-            self.rigid_objects[name] = Cuboid(name, **object_params)
+            self.rigid_objects[name] = Cuboid(self.pybullet_client, name, **object_params)
         return
 
     def add_rigid_mesh_object(self, name, file, **object_params):
@@ -36,7 +37,7 @@ class Stage(object):
         else:
             self.name_keys.append(name)
         if shape == "cube":
-            self.visual_objects[name] = SCuboid(name, **object_params)
+            self.visual_objects[name] = SCuboid(self.pybullet_client, name, **object_params)
         return
 
     def add_silhoutte_mesh_object(self, name, file, **object_params):

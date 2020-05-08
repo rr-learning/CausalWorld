@@ -3,7 +3,8 @@ import numpy as np
 
 
 class SilhouetteObject(object):
-    def __init__(self, name):
+    def __init__(self, pybullet_client, name):
+        self.pybullet_client = pybullet_client
         self.name = name
 
     def get_state(self, state_type='dict'):
@@ -34,22 +35,23 @@ class SilhouetteObject(object):
 class SCuboid(SilhouetteObject):
     def __init__(
             self,
+            pybullet_client,
             name, size=np.array([0.065, 0.065, 0.065]),
             position=np.array([0.0, 0.0, 0.0425]),
             orientation=np.array([0, 0, 0, 1]),
             alpha=0.3, colour=np.array([0, 1, 0])
     ):
-        super(SCuboid, self).__init__(name)
+        super(SCuboid, self).__init__(pybullet_client, name)
         self.type_id = 0
         self.size = size
         self.colour = colour
         self.alpha = alpha
-        self.block_id = pybullet.createVisualShape(
+        self.block_id = self.pybullet_client.createVisualShape(
             shapeType=pybullet.GEOM_BOX,
             halfExtents=np.array(size) / 2,
             rgbaColor=np.append(self.colour, alpha)
         )
-        self.block = pybullet.createMultiBody(
+        self.block = self.pybullet_client.createMultiBody(
             baseVisualShapeIndex=self.block_id,
             basePosition=position,
             baseOrientation=orientation
@@ -112,7 +114,7 @@ class SCuboid(SilhouetteObject):
 
     def set_state(self, state_dict):
         if 'position' not in state_dict or 'orientation' not in state_dict:
-            position, orientation = pybullet.getBasePositionAndOrientation(
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
                 self.block
             )
         if 'position' in state_dict:
@@ -120,65 +122,64 @@ class SCuboid(SilhouetteObject):
         if 'orientation' in state_dict:
             orientation = state_dict['orientation']
         if 'size' in state_dict:
-            pybullet.removeBody(self.block)
-            self.block_id = pybullet.createVisualShape(
+            self.pybullet_client.removeBody(self.block)
+            self.block_id = self.pybullet_client.createVisualShape(
                 shapeType=pybullet.GEOM_BOX,
                 halfExtents=np.array(state_dict['size']) / 2,
                 rgbaColor=np.append(self.colour, self.alpha)
             )
-            self.block = pybullet.createMultiBody(
+            self.block = self.pybullet_client.createMultiBody(
                 baseVisualShapeIndex=self.block_id,
                 basePosition=position,
                 baseOrientation=orientation
             )
         elif 'position' in state_dict or 'orientation' in state_dict:
-            pybullet.resetBasePositionAndOrientation(
+            self.pybullet_client.resetBasePositionAndOrientation(
                 self.block, position, orientation
             )
         if 'colour' in state_dict:
-            pybullet.changeVisualShape(self.block, -1,
-                                       rgbaColor=
-                                       np.append(state_dict['colour'], self.alpha))
+            self.pybullet_client.changeVisualShape(self.block, -1,
+                                                   rgbaColor= np.append(state_dict['colour'], self.alpha))
         return
 
     def do_intervention(self, variable_name, variable_value):
         # TODO: discuss handling collisions with fingers with Fred
         if variable_name == 'position':
-            position, orientation = pybullet.getBasePositionAndOrientation(
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
                 self.block
             )
-            pybullet.resetBasePositionAndOrientation(
+            self.pybullet_client.resetBasePositionAndOrientation(
                 self.block, variable_value, orientation
             )
         elif variable_name == 'orientation':
-            position, orientation = pybullet.getBasePositionAndOrientation(
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
                 self.block
             )
-            pybullet.resetBasePositionAndOrientation(
+            self.pybullet_client.resetBasePositionAndOrientation(
                 self.block, position, variable_value
             )
         elif variable_name == 'size':
-            position, orientation = pybullet.getBasePositionAndOrientation(
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
                 self.block
             )
-            pybullet.removeBody(self.block)
-            self.block_id = pybullet.createVisualShape(
+            self.pybullet_client.removeBody(self.block)
+            self.block_id = self.pybullet_client.createVisualShape(
                 shapeType=pybullet.GEOM_BOX,
                 halfExtents=np.array(variable_value) / 2,
                 rgbaColor=np.append(self.colour, self.alpha)
             )
-            self.block = pybullet.createMultiBody(
+            self.block = self.pybullet_client.createMultiBody(
                 baseVisualShapeIndex=self.block_id,
                 basePosition=position,
                 baseOrientation=orientation
             )
-            pybullet.changeVisualShape(self.block, -1,
-                                       rgbaColor=np.append(self.colour,
-                                                           self.alpha))
+            self.pybullet_client.changeVisualShape(self.block, -1,
+                                                   rgbaColor=np.append(self.colour,
+                                                   self.alpha))
         elif variable_name == 'colour':
-            pybullet.changeVisualShape(self.block, -1,
-                                       rgbaColor=np.append(variable_value,
-                                                           self.alpha))
+            self.pybullet_client.changeVisualShape(self.block, -1,
+                                                   rgbaColor=np.append(variable_value,
+                                                   self.alpha))
         # TODO: implement intervention on shape id itself
         return
 
@@ -189,7 +190,7 @@ class SCuboid(SilhouetteObject):
         """
         if state_type == 'dict':
             state = dict()
-            position, orientation = pybullet.getBasePositionAndOrientation(
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
                 self.block
             )
             state[self.name + "_type"] = self.type_id
@@ -199,7 +200,7 @@ class SCuboid(SilhouetteObject):
             state[self.name + "_colour"] = self.colour
         elif state_type == 'list':
             state = []
-            position, orientation = pybullet.getBasePositionAndOrientation(
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
                 self.block
             )
             for name in self._state_variable_names:
@@ -227,7 +228,7 @@ class SCuboid(SilhouetteObject):
         return self.state_size
 
     def set_pose(self, position, orientation):
-        pybullet.resetBasePositionAndOrientation(
+        self.pybullet_client.resetBasePositionAndOrientation(
             self.block, position, orientation
         )
         return

@@ -160,10 +160,11 @@ class CuboidSilhouette(BaseTask):
         cuboid_reward = 0
         for unit_vertex_tuple in itertools.product([-1, 1], repeat=3):
             vertex_position_in_cube_frame = np.multiply(np.array(unit_vertex_tuple), cuboid_size / 2)
-            vertex_coords, _ = pybullet.multiplyTransforms(positionA=cuboid_position,
-                                                           orientationA=[0, 0, 0, 1],
-                                                           positionB=vertex_position_in_cube_frame,
-                                                           orientationB=cuboid_orientation)
+            #TODO: avoid using pybullet directly get the pybullet client from robot or stage
+            vertex_coords, _ = self.robot.get_pybullet_client.multiplyTransforms(positionA=cuboid_position,
+                                                                                 orientationA=[0, 0, 0, 1],
+                                                                                 positionB=vertex_position_in_cube_frame,
+                                                                                 orientationB=cuboid_orientation)
             vertex_distance = 0
             if vertex_coords[0] > self.s_xhigher:
                 vertex_distance += vertex_coords[0] - self.s_xhigher

@@ -22,7 +22,7 @@ def _make_env(rank):
         task = PushingTask()
         env = World(task=task, skip_frame=skip_frame,
                     enable_visualization=False,
-                    seed=seed + rank)
+                    seed=seed)
         return env
     set_global_seeds(seed)
     return _init
@@ -34,12 +34,14 @@ def train_policy(num_of_envs):
     env = World(task=task, skip_frame=skip_frame, enable_visualization=False,
                 seed=0)
     recorder = VideoRecorder(env,
-                             'pick_up.mp4')
+                             'push.mp4')
     env.reset()
-    num_of_particles = 500
+    num_of_particles = 250
     horizon_length = 6
     parallel_agents = 1
     num_elite = 50
+    parallel_agents = 50
+    num_elite = 25
     max_iterations = 32
     true_model = TrueModel(_make_env,
                            num_of_particles=num_of_particles,

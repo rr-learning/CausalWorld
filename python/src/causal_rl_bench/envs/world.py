@@ -38,7 +38,9 @@ class World(gym.Env):
                                     camera_skip_frame=camera_skip_frame,
                                     normalize_actions=normalize_actions,
                                     normalize_observations=normalize_observations)
-        self.stage = Stage(observation_mode=observation_mode,
+        self.pybullet_client = self.robot.get_pybullet_client()
+        self.stage = Stage(pybullet_client=self.pybullet_client,
+                           observation_mode=observation_mode,
                            normalize_observations=normalize_observations)
         if max_episode_length is None:
             self.enforce_episode_length = False
@@ -72,16 +74,15 @@ class World(gym.Env):
         self._cam_pitch = -60
         self._render_width = 640
         self._render_height = 480
-        self._p = self.robot.get_pybullet_client()
         base_pos = [0, 0, 0]
-        self.view_matrix = self._p.computeViewMatrixFromYawPitchRoll(
+        self.view_matrix = self.pybullet_client.computeViewMatrixFromYawPitchRoll(
             cameraTargetPosition=base_pos,
             distance=self._cam_dist,
             yaw=self._cam_yaw,
             pitch=self._cam_pitch,
             roll=0,
             upAxisIndex=2)
-        self.proj_matrix = self._p.computeProjectionMatrixFOV(
+        self.proj_matrix = self.pybullet_client.computeProjectionMatrixFOV(
             fov=60, aspect=float(self._render_width) / self._render_height,
             nearVal=0.1, farVal=100.0)
         self.reset()
@@ -191,7 +192,7 @@ class World(gym.Env):
         return self.task.filter_observations()
 
     def render(self, mode="human"):
-        (_, _, px, _, _) = self._p.getCameraImage(
+        (_, _, px, _, _) = self.pybullet_client.getCameraImage(
             width=self._render_width, height=self._render_height,
             viewMatrix=self.view_matrix,
             projectionMatrix=self.proj_matrix,
