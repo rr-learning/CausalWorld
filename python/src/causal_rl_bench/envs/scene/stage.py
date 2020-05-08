@@ -92,7 +92,7 @@ class Stage(object):
         self.latest_full_state = self.get_full_state()
         return
 
-    def get_current_observations(self, helper_keys=[]):
+    def get_current_observations(self, helper_keys):
         self.latest_observations = \
             self.stage_observations.get_current_observations(helper_keys)
         return self.latest_observations
