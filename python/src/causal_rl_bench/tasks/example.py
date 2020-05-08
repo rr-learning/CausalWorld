@@ -4,14 +4,16 @@ import numpy as np
 
 
 class ExampleTask(BaseTask):
-    def __init__(self, task_params=None):
-        super().__init__(id="example_task")
+    def __init__(self, **kwargs):
+        super().__init__(task_name="example_task")
         self.task_robot_observation_keys = ["joint_positions",
                                             "whatever2"]
         self.task_stage_observation_keys = ["block_position",
                                             "whatever1"]
         self._robot_observation_helper_keys = ["joint_velocities"]
         self._stage_observation_helper_keys = ["block_linear_velocity"]
+        #define task params below
+        self.task_params["variable_1"] = 0
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="block",
@@ -61,8 +63,7 @@ class ExampleTask(BaseTask):
         return
 
     def get_description(self):
-        return \
-            "Task where the goal is to push an object towards a goal position"
+        return "example task"
 
     def get_reward(self):
         block_position = self.stage.get_object_state('block', 'position')
@@ -91,10 +92,6 @@ class ExampleTask(BaseTask):
         interventions_dict["size"] = new_size
         self.stage.object_intervention("goal_block", interventions_dict)
         return
-
-    def get_task_params(self):
-        # TODO: pass initialization params for this task here if we have several pushing variants in the future
-        return dict()
 
     def do_intervention(self, **kwargs):
         pass

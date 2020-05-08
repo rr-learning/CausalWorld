@@ -2,11 +2,11 @@ import numpy as np
 
 
 class BaseTask(object):
-    def __init__(self, id):
+    def __init__(self, task_name):
         self.robot = None
         self.stage = None
         self.task_solved = False
-        self.id = id
+        self.id = task_name
         self.task_robot_observation_keys = []
         self.task_stage_observation_keys = []
         # the helper keys are observations that are not included in the task observations but it will be needed in reward
@@ -16,6 +16,7 @@ class BaseTask(object):
         self._non_default_robot_observation_funcs = dict()
         self._non_default_stage_observation_funcs = dict()
         self.current_full_observations_dict = dict()
+        self.task_params = dict()
         return
 
     def init_task(self, robot, stage):
@@ -80,7 +81,7 @@ class BaseTask(object):
         return observations_filtered
 
     def get_task_params(self):
-        raise NotImplementedError()
+        return self.task_params
 
     def _reset_task(self):
         raise NotImplementedError()
