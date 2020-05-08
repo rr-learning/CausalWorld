@@ -27,17 +27,18 @@ class CameraObservationWrapper(gym.ObservationWrapper):
         if self.single_camera:
             height_multiplier = 1
         if self.env.robot.normalize_observations:
-            self.observation_space = spaces.Box(low=-np.ones(shape=(height*height_multiplier, width, 3)),
-                                                high=np.ones(shape=(height*height_multiplier, width, 3)),
+            self.observation_space = spaces.Box(low=-np.ones(shape=(height * height_multiplier, width, 3)),
+                                                high=np.ones(shape=(height * height_multiplier, width, 3)),
                                                 dtype=np.float64)
         else:
-            self.observation_space = spaces.Box(low=np.zeros(shape=(height*height_multiplier, width, 3)),
-                                                high=np.full(shape=(height*height_multiplier, width, 3), fill_value=255),
+            self.observation_space = spaces.Box(low=np.zeros(shape=(height * height_multiplier, width, 3)),
+                                                high=np.full(shape=(height * height_multiplier, width, 3),
+                                                             fill_value=255),
                                                 dtype=np.uint8)
 
     def observation(self, observation):
         if self.single_camera:
-            return observation[1, ::self.scaling_factor, ::self.scaling_factor,:]
+            return observation[1, ::self.scaling_factor, ::self.scaling_factor, :]
         else:
             return np.concatenate(observation[:, ::self.scaling_factor, ::self.scaling_factor, :])
 
@@ -53,6 +54,7 @@ def _make_env(rank):
         env.enforce_max_episode_length(episode_length=50)
         env = CameraObservationWrapper(env, single_camera=True)
         return env
+
     set_global_seeds(seed)
     return _init
 
@@ -73,6 +75,28 @@ def test_observation_wrapper():
     env.reset()
 
 
+def visualize_policy(path=None):
+    task = Task(task_id='pushing')
+    env = World(task=task, skip_frame=20,
+                enable_visualization=True
+                ,
+                observation_mode='cameras',
+                normalize_observations=False,
+                seed=seed)
+    env.enforce_max_episode_length(episode_length=50)
+    env = CameraObservationWrapper(env, single_camera=True)
+    model = PPO2.load('../../trained_models/pushing_model_cnn_sc_0.zip')
+
+    # Evaluate the agent
+    # mean_reward, std_reward = evaluate_policy(model, env,
+    #                                           n_eval_episodes=3)
+    for k in range(10):
+        obs = env.reset()
+        for i in range(1000):
+            action, _ = model.predict(obs)
+            obs, rewards, dones, info = env.step(action)
+
+
 def train_policy(num_of_envs):
     total_time_steps = 200000000
     validate_every_timesteps = 1000000
@@ -87,8 +111,7 @@ def train_policy(num_of_envs):
                  _init_setup_model=True,
                  verbose=1,
                  tensorboard_log='output/logs_cnn_sc')
-    for i in range(int(total_time_steps/validate_every_timesteps)):
-
+    for i in range(int(total_time_steps / validate_every_timesteps)):
         model.learn(total_timesteps=validate_every_timesteps,
                     tb_log_name="ppo2_simple_reward",
                     reset_num_timesteps=False)
@@ -97,5 +120,4 @@ def train_policy(num_of_envs):
 
 
 if __name__ == '__main__':
-    train_policy(40)
-
+    visualize_policy()

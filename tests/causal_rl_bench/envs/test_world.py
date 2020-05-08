@@ -50,6 +50,10 @@ def test_determinism():
         rewards_v3.append(reward)
     env_v3.close()
 
+    assert all(np.array_equal(observations_v1[i], observations_v2[i])
+               for i in range(horizon))
+    assert rewards_v1 == rewards_v2
+
     assert all(not np.array_equal(observations_v1[i], observations_v3[i])
                for i in range(horizon))
     assert not rewards_v1 == rewards_v3
