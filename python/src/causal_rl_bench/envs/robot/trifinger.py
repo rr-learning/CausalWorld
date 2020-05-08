@@ -7,25 +7,19 @@ import numpy as np
 
 class TriFingerRobot(object):
     def __init__(self, action_mode, observation_mode, enable_visualization=True,
-                 camera_skip_frame=40, skip_frame=20, camera_turned_on=False,
-                 normalize_actions=True, normalize_observations=True):
+                 skip_frame=20, normalize_actions=True,
+                 normalize_observations=True):
         self.normalize_actions = normalize_actions
         self.normalize_observations = normalize_observations
         self.action_mode = action_mode
         self.observation_mode = observation_mode
-        self.camera_skip_frame = camera_skip_frame
         self.skip_frame = skip_frame
-        self.camera_turned_on = camera_turned_on
         self.simulation_time = 0.004
         self.control_index = -1
-        if self.camera_turned_on:
-            assert ((float(self.camera_skip_frame) / self.skip_frame).is_integer())
         self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
                                     "tri")
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
         self.robot_observations = TriFingerObservations(observation_mode, normalize_observations)
-
-
         self.last_action = None
         self.last_clipped_action = None
         self.latest_full_state = None
@@ -37,6 +31,16 @@ class TriFingerRobot(object):
         )
         end_effector_position = np.concatenate(tip_positions)
         return end_effector_position
+
+    def _process_action_joint_positions(self, robot_state):
+        last_action_applied = self.get_last_clippd_action()
+        if self.normalize_actions and not self.normalize_observations:
+            last_action_applied = self.denormalize_observation_for_key(observation=last_action_applied,
+                                                                       key='action_joint_positions')
+        elif not self.normalize_actions and self.normalize_observations:
+            last_action_applied = self.normalize_observation_for_key(observation=last_action_applied,
+                                                                     key='action_joint_positions')
+        return last_action_applied
 
     def set_action_mode(self, action_mode):
         self.action_mode = action_mode
@@ -54,30 +58,11 @@ class TriFingerRobot(object):
     def get_observation_mode(self):
         return self.observation_mode
 
-    def set_camera_skip_frame(self, camera_skip_frame):
-        self.camera_skip_frame = camera_skip_frame
-        if self.camera_turned_on:
-            assert ((float(self.camera_skip_frame) / self.skip_frame).is_integer())
-
-    def get_camera_skip_frame(self):
-        return self.camera_skip_frame
-
     def set_skip_frame(self, skip_frame):
         self.skip_frame = skip_frame
-        if self.camera_turned_on:
-            assert ((float(self.camera_skip_frame)/self.skip_frame).is_integer())
 
     def get_skip_frame(self):
         return self.skip_frame
-
-    def turn_on_cameras(self):
-        self.camera_turned_on = True
-        self.robot_observations.add_observation("cameras")
-        assert ((float(self.camera_skip_frame) / self.skip_frame).is_integer())
-
-    def turn_off_cameras(self):
-        self.camera_turned_on = False
-        self.robot_observations.remove_observations(["cameras"])
 
     def apply_action(self, action):
         self.control_index += 1
@@ -96,8 +81,7 @@ class TriFingerRobot(object):
         for _ in range(self.skip_frame):
             t = self.tri_finger.append_desired_action(finger_action)
             self.tri_finger.step_simulation()
-        if self.camera_turned_on and \
-                self.control_index % self.camera_skip_frame == 0:
+        if self.observation_mode == "cameras":
             state = \
                 self.tri_finger.get_observation(t, update_images=True)
         else:
@@ -170,7 +154,11 @@ class TriFingerRobot(object):
             if key == "end_effector_positions":
                 self.robot_observations.add_observation("end_effector_positions",
                                                         observation_fn=self._compute_end_effector_positions)
-            self.robot_observations.add_observation(key)
+            elif key == "action_joint_positions":
+                self.robot_observations.add_observation("action_joint_positions",
+                                                        observation_fn=self._process_action_joint_positions)
+            else:
+                self.robot_observations.add_observation(key)
 
     def close(self):
         self.tri_finger.disconnect_from_simulation()
@@ -189,7 +177,7 @@ class TriFingerRobot(object):
                                                 upper_bound,
                                                 observation_fn)
 
-    def get_current_observations(self, helper_keys=[]):
+    def get_current_observations(self, helper_keys):
         return self.robot_observations.get_current_observations(self.latest_full_state,
                                                                 helper_keys)
 
@@ -199,7 +187,8 @@ class TriFingerRobot(object):
 
     def denormalize_observation_for_key(self, observation, key):
         return self.robot_observations.denormalize_observation_for_key(observation,
-                                                                     key)
+                                                                       key)
+
     def get_current_camera_observations(self):
         return self.robot_observations.get_current_camera_observations(self.latest_full_state)
 

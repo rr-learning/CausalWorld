@@ -9,8 +9,8 @@ import time
 
 
 def example():
-    task = Task(task_id='pushing')
-    env = World(task=task, skip_frame=35, enable_visualization=True, normalize_observations=False)
+    task = Task(task_id='cuboid_silhouette')
+    env = World(task=task, skip_frame=35, enable_visualization=True, observation_mode="cameras")
     recorder = VideoRecorder(env,
                              'video.mp4')
     obs = env.reset()

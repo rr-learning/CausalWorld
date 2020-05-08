@@ -72,6 +72,8 @@ def test_parallelism():
     observations_env1_v1, rewards_env1_v1, _, _ = env1.step(env1.action_space.low)
     env2.reset()
     observations_env2_v1, rewards_env2_v1, _, _ = env2.step(env2.action_space.low)
+    env1.close()
+    env2.close()
     assert np.array_equal(observations_env2_v1,  observations_env1_v1)
     return
 

@@ -16,8 +16,7 @@ class World(gym.Env):
     def __init__(self, task=None, skip_frame=20,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
-                 camera_skip_frame=40, normalize_actions=True,
-                 normalize_observations=True, max_episode_length=None,
+                 normalize_actions=True, normalize_observations=True, max_episode_length=None,
                  data_recorder=None, **kwargs):
         """
         Constructor sets up the physical world parameters,
@@ -28,14 +27,13 @@ class World(gym.Env):
             enable_visualization (bool): if the simulation env is to be
                 visualized
         """
+        self.observation_mode = observation_mode
+        self.action_mode = action_mode
         self.seed(seed)
-        self.camera_turned_on = (observation_mode == "cameras")
         self.robot = TriFingerRobot(action_mode=action_mode,
                                     observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,
                                     skip_frame=skip_frame,
-                                    camera_turned_on=self.camera_turned_on,
-                                    camera_skip_frame=camera_skip_frame,
                                     normalize_actions=normalize_actions,
                                     normalize_observations=normalize_observations)
         self.pybullet_client = self.robot.get_pybullet_client()
@@ -56,14 +54,14 @@ class World(gym.Env):
             self.task = task
 
         self.task.init_task(self.robot, self.stage)
-        if self.camera_turned_on:
-            self.observation_space = self.robot.select_observations(["cameras"])
-        else:
+        if not self.observation_mode == "cameras":
             self.robot.select_observations(self.task.task_robot_observation_keys)
             self.stage.select_observations(self.task.task_stage_observation_keys)
             self.observation_space = \
                 combine_spaces(self.robot.get_observation_spaces(),
                                self.stage.get_observation_spaces())
+        else:
+            self.observation_space = self.robot.get_observation_spaces()
         self.action_space = self.robot.get_action_spaces()
         self.data_recorder = data_recorder
         self.skip_frame = skip_frame
@@ -94,7 +92,7 @@ class World(gym.Env):
     def step(self, action):
         self.episode_length += 1
         self.robot.apply_action(action)
-        if self.camera_turned_on:
+        if self.observation_mode == "cameras":
             observation = self.robot.get_current_camera_observations()
         else:
             observation = self.task.filter_structured_observations()
@@ -118,14 +116,14 @@ class World(gym.Env):
     def switch_task(self, task):
         self.task = task
         self.task.init_task(self.robot, self.stage)
-        if self.camera_turned_on:
-            self.observation_space = self.robot.select_observations(["cameras"])
-        else:
+        if not self.observation_mode == "cameras":
             self.robot.select_observations(self.task.task_robot_observation_keys)
             self.stage.select_observations(self.task.task_stage_observation_keys)
             self.observation_space = \
                 combine_spaces(self.robot.get_observation_spaces(),
                                self.stage.get_observation_spaces())
+        else:
+            self.observation_space = self.robot.get_observation_spaces()
         self.action_space = self.robot.get_action_spaces()
 
     def get_counterfactual_world(self):
@@ -147,7 +145,7 @@ class World(gym.Env):
                                            task_params=self.task.get_task_params(),
                                            world_params=self.get_world_params())
 
-        if self.camera_turned_on:
+        if self.observation_mode == "cameras":
             return self.robot.get_current_camera_observations()
         else:
             return self.task.filter_structured_observations()
@@ -158,8 +156,6 @@ class World(gym.Env):
         world_params["skip_frame"] = self.robot.get_skip_frame()
         world_params["action_mode"] = self.robot.get_action_mode()
         world_params["observation_mode"] = self.robot.get_observation_mode()
-        world_params["camera_skip_frame"] = \
-            self.robot.get_camera_skip_frame()
         world_params["normalize_actions"] = \
             self.robot.robot_actions.is_normalized()
         world_params["normalize_observations"] = \

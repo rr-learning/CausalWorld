@@ -15,7 +15,7 @@ class PushingTask(BaseTask):
         self.task_params["block_mass"] = kwargs.get("block_mass", 0.02)
         self.task_params["randomize_joint_positions"] = kwargs.get("randomize_joint_positions", True)
         self.task_params["randomize_block_pose"] = kwargs.get("randomize_block_pose", True)
-        self.task_params["randomize_goal_block__pose"] = kwargs.get("randomize_goal_block__pose", True)
+        self.task_params["randomize_goal_block_pose"] = kwargs.get("randomize_goal_block_pose", True)
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="block",
@@ -23,23 +23,6 @@ class PushingTask(BaseTask):
                                             mass=self.task_params["block_mass"])
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube")
-        return
-
-    def _process_action_joint_positions(self):
-        last_action_applied = self.robot.get_last_clippd_action()
-        if self.robot.normalize_actions and not self.robot.normalize_observations:
-            last_action_applied = self.robot.denormalize_observation_for_key(observation=last_action_applied,
-                                                                             key='action_joint_positions')
-        elif not self.robot.normalize_actions and self.robot.normalize_observations:
-            last_action_applied = self.robot.normalize_observation_for_key(observation=last_action_applied,
-                                                                           key='action_joint_positions')
-        return last_action_applied
-
-    def _set_up_non_default_observations(self):
-        self._setup_non_default_robot_observation_key(observation_key="action_joint_positions",
-                                                      observation_function=self._process_action_joint_positions,
-                                                      lower_bound=None,
-                                                      upper_bound=None)
         return
 
     def _reset_task(self):
@@ -54,7 +37,7 @@ class PushingTask(BaseTask):
                                             np.zeros(9)))
 
         # reset stage next
-        # TODO: Refactor the orientation sampling into a general util method
+        #TODO: Refactor the orientation sampling into a general util method
         if self.task_params["randomize_block_pose"]:
             block_position = self.stage.random_position(height_limits=0.0435)
             block_orientation = euler_to_quaternion([0, 0,
@@ -64,7 +47,7 @@ class PushingTask(BaseTask):
             block_position = [0.0, -0.02, 0.045155]
             block_orientation = euler_to_quaternion([0, 0, 0.0])
 
-        if self.task_params["randomize_goal_block__pose"]:
+        if self.task_params["randomize_goal_block_pose"]:
             goal_position = self.stage.random_position(height_limits=0.0435)
             goal_orientation = euler_to_quaternion([0, 0,
                                                      np.random.uniform(-np.pi,
@@ -89,7 +72,7 @@ class PushingTask(BaseTask):
         position_distance = np.linalg.norm(goal_position - block_position)
         #TODO: orientation distance calculation
         reward = - position_distance
-        if position_distance < 0.02:
+        if position_distance < 0.01:
             self.task_solved = True
         return reward
 
