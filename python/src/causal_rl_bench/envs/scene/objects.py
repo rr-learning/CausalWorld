@@ -8,31 +8,34 @@ class RigidObject(object):
         self.name = name
 
     def get_state(self, state_type='dict'):
-        raise Exception("get_state not implemented")
+        raise NotImplementedError()
 
     def set_state(self, state_dict):
-        raise Exception("set_state not implemented")
+        raise NotImplementedError()
 
     def set_full_state(self, new_state):
-        raise Exception("set_state not implemented")
+        raise NotImplementedError()
 
     def get_bounds(self):
-        raise Exception("get_bounds not implemented")
+        raise NotImplementedError()
 
     def do_intervention(self, variable_name, variable_value):
-        raise Exception("do_intervention not implemented")
+        raise NotImplementedError()
 
     def get_state_variable_names(self):
-        raise Exception("get_state_variable_names not implemented")
+        raise NotImplementedError()
 
     def get_state_size(self):
-        raise Exception("get_state_size not implemented")
+        raise NotImplementedError()
 
     def set_pose(self, position, orientation):
-        raise Exception("set_pose not implemented")
+        raise NotImplementedError()
 
     def is_not_fixed(self):
-        raise Exception("is_not_fixed not implemented")
+        raise NotImplementedError()
+
+    def get_variable_state(self, variable_name):
+        raise NotImplementedError()
 
 
 class Cuboid(RigidObject):
@@ -279,6 +282,39 @@ class Cuboid(RigidObject):
         else:
             raise Exception("state type is not supported")
         return state
+
+    def get_variable_state(self, variable_name):
+        if variable_name == 'type':
+            return self.type_id
+        elif variable_name == 'position':
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
+                self.block
+            )
+            return position
+
+        elif variable_name == 'orientation':
+            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
+                self.block
+            )
+            return orientation
+        elif variable_name == 'linear_velocity':
+            linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(
+                self.block)
+            return linear_velocity
+
+        elif variable_name == 'angular_velocity':
+            linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(
+                self.block)
+            return angular_velocity
+
+        elif variable_name == 'mass':
+            return self.mass
+        elif variable_name == 'size':
+            return self.size
+        elif variable_name == 'colour':
+            return self.colour
+        else:
+            raise Exception("variable name is not supported")
 
     def get_state_variable_names(self):
         return self._state_variable_names

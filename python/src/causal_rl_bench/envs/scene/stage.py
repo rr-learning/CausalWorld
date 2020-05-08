@@ -92,7 +92,7 @@ class Stage(object):
         self.latest_full_state = self.get_full_state()
         return
 
-    def get_current_observations(self, helper_keys=np.array([])):
+    def get_current_observations(self, helper_keys=[]):
         self.latest_observations = \
             self.stage_observations.get_current_observations(helper_keys)
         return self.latest_observations
@@ -140,7 +140,7 @@ class Stage(object):
         object.set_state(interventions_dict)
         return
 
-    def get_object_state(self, key):
+    def get_object_full_state(self, key):
         if key in self.rigid_objects:
             return self.rigid_objects[key].get_state('dict')
         elif key in self.visual_objects:
@@ -149,9 +149,18 @@ class Stage(object):
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
 
-    def add_observation(self, observation_key, low_bound=None,
+    def get_object_state(self, key, state_variable):
+        if key in self.rigid_objects:
+            return self.rigid_objects[key].get_variable_state(state_variable)
+        elif key in self.visual_objects:
+            return self.visual_objects[key].get_variable_state(state_variable)
+        else:
+            raise Exception("The key {} passed doesn't exist in the stage yet"
+                            .format(key))
+
+    def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None):
-        self.stage_observations.add_observation(observation_key, low_bound, upper_bound)
+        self.stage_observations.add_observation(observation_key, lower_bound, upper_bound)
 
     def normalize_observation_for_key(self, observation, key):
         return self.stage_observations.normalize_observation_for_key(observation,

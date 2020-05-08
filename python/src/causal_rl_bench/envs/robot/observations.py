@@ -131,10 +131,10 @@ class TriFingerObservations(object):
         else:
             return np.clip(observation, self.low, self.high)
 
-    def add_observation(self, observation_key, low_bound=None,
+    def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):
         if observation_key not in self.lower_bounds.keys() and \
-                (low_bound is None or upper_bound is None):
+                (lower_bound is None or upper_bound is None):
             raise Exception("Observation key {} is not known please specify "
                             "the low and upper found".format(observation_key))
         # if observation_key not in self.observation_functions.keys() and \
@@ -143,8 +143,8 @@ class TriFingerObservations(object):
         #          "cameras"]:
         #     raise Exception("Observation function calculation for observation "
         #                     "key {} is unknown".format(observation_key))
-        if low_bound is not None and upper_bound is not None:
-            self.lower_bounds[observation_key] = low_bound
+        if lower_bound is not None and upper_bound is not None:
+            self.lower_bounds[observation_key] = lower_bound
             self.upper_bounds[observation_key] = upper_bound
         if observation_fn is not None:
             self.observation_functions[observation_key] = observation_fn

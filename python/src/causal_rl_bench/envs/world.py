@@ -56,11 +56,14 @@ class World(gym.Env):
             self.task = task
 
         self.task.init_task(self.robot, self.stage)
-        self.robot.select_observations(self.task.task_robot_observation_keys)
-        self.stage.select_observations(self.task.task_stage_observation_keys)
-        self.observation_space = \
-            combine_spaces(self.robot.get_observation_spaces(),
-                           self.stage.get_observation_spaces())
+        if self.camera_turned_on:
+            self.observation_space = self.robot.select_observations(["cameras"])
+        else:
+            self.robot.select_observations(self.task.task_robot_observation_keys)
+            self.stage.select_observations(self.task.task_stage_observation_keys)
+            self.observation_space = \
+                combine_spaces(self.robot.get_observation_spaces(),
+                               self.stage.get_observation_spaces())
         self.action_space = self.robot.get_action_spaces()
         self.data_recorder = data_recorder
         self.skip_frame = skip_frame
@@ -94,7 +97,7 @@ class World(gym.Env):
         if self.camera_turned_on:
             observation = self.robot.get_current_camera_observations()
         else:
-            observation = self.task.filter_observations()
+            observation = self.task.filter_structured_observations()
         reward = self.task.get_reward()
         done = self._is_done()
         info = {}
@@ -115,11 +118,14 @@ class World(gym.Env):
     def switch_task(self, task):
         self.task = task
         self.task.init_task(self.robot, self.stage)
-        self.robot.select_observations(self.task.task_robot_observation_keys)
-        self.stage.select_observations(self.task.task_stage_observation_keys)
-        self.observation_space = \
-            combine_spaces(self.robot.get_observation_spaces(),
-                           self.stage.get_observation_spaces())
+        if self.camera_turned_on:
+            self.observation_space = self.robot.select_observations(["cameras"])
+        else:
+            self.robot.select_observations(self.task.task_robot_observation_keys)
+            self.stage.select_observations(self.task.task_stage_observation_keys)
+            self.observation_space = \
+                combine_spaces(self.robot.get_observation_spaces(),
+                               self.stage.get_observation_spaces())
         self.action_space = self.robot.get_action_spaces()
 
     def get_counterfactual_world(self):
@@ -144,7 +150,7 @@ class World(gym.Env):
         if self.camera_turned_on:
             return self.robot.get_current_camera_observations()
         else:
-            return self.task.filter_observations()
+            return self.task.filter_structured_observations()
 
     def get_world_params(self):
         world_params = dict()
@@ -189,7 +195,7 @@ class World(gym.Env):
         robot_state_size = self.robot.get_state_size()
         self.robot.set_full_state(new_full_state[0:robot_state_size])
         self.stage.set_full_state(new_full_state[robot_state_size:])
-        return self.task.filter_observations()
+        return
 
     def render(self, mode="human"):
         (_, _, px, _, _) = self.pybullet_client.getCameraImage(

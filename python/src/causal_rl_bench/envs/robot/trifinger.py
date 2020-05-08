@@ -182,14 +182,14 @@ class TriFingerRobot(object):
     def get_pybullet_client(self):
         return self.tri_finger._p
 
-    def add_observation(self, observation_key, low_bound=None,
+    def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):
         self.robot_observations.add_observation(observation_key,
-                                                low_bound,
+                                                lower_bound,
                                                 upper_bound,
                                                 observation_fn)
 
-    def get_current_observations(self, helper_keys=np.array([])):
+    def get_current_observations(self, helper_keys=[]):
         return self.robot_observations.get_current_observations(self.latest_full_state,
                                                                 helper_keys)
 

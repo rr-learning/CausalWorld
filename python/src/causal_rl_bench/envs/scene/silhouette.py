@@ -8,28 +8,31 @@ class SilhouetteObject(object):
         self.name = name
 
     def get_state(self, state_type='dict'):
-        raise Exception("get_state not implemented")
+        raise NotImplementedError()
 
     def set_state(self, state_dict):
-        raise Exception("set_state not implemented")
+        raise NotImplementedError()
 
     def set_full_state(self, new_state):
-        raise Exception("set_state not implemented")
+        raise NotImplementedError()
 
     def get_bounds(self):
-        raise Exception("get_bounds not implemented")
+        raise NotImplementedError()
 
     def do_intervention(self, variable_name, variable_value):
-        raise Exception("do_intervention not implemented")
+        raise NotImplementedError()
 
     def get_state_variable_names(self):
-        raise Exception("get_state_variable_names not implemented")
+        raise NotImplementedError()
 
     def get_state_size(self):
-        raise Exception("get_state_size not implemented")
+        raise NotImplementedError()
 
     def set_pose(self, position, orientation):
-        raise Exception("get_state_size not implemented")
+        raise NotImplementedError()
+
+    def get_variable_state(self, variable_name):
+        raise NotImplementedError()
 
 
 class SCuboid(SilhouetteObject):
@@ -96,6 +99,8 @@ class SCuboid(SilhouetteObject):
                 self.upper_bounds[self.name + "_" +
                                   state_variable_name].shape[0])
             self.state_size += self._state_variable_sizes[-1]
+        self.position = position
+        self.orientation = orientation
 
     def set_full_state(self, new_state):
         # form dict first
@@ -113,14 +118,10 @@ class SCuboid(SilhouetteObject):
         return
 
     def set_state(self, state_dict):
-        if 'position' not in state_dict or 'orientation' not in state_dict:
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
-            )
         if 'position' in state_dict:
-            position = state_dict['position']
+            self.position = state_dict['position']
         if 'orientation' in state_dict:
-            orientation = state_dict['orientation']
+            self.orientation = state_dict['orientation']
         if 'size' in state_dict:
             self.pybullet_client.removeBody(self.block)
             self.block_id = self.pybullet_client.createVisualShape(
@@ -130,12 +131,12 @@ class SCuboid(SilhouetteObject):
             )
             self.block = self.pybullet_client.createMultiBody(
                 baseVisualShapeIndex=self.block_id,
-                basePosition=position,
-                baseOrientation=orientation
+                basePosition=self.position,
+                baseOrientation=self.orientation
             )
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, position, orientation
+                self.block, self.position, self.orientation
             )
         if 'colour' in state_dict:
             self.pybullet_client.changeVisualShape(self.block, -1,
@@ -145,23 +146,16 @@ class SCuboid(SilhouetteObject):
     def do_intervention(self, variable_name, variable_value):
         # TODO: discuss handling collisions with fingers with Fred
         if variable_name == 'position':
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
-            )
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, variable_value, orientation
+                self.block, variable_value, self.orientation
             )
+            self.position = variable_value
         elif variable_name == 'orientation':
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
-            )
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, position, variable_value
+                self.block, self.position, variable_value
             )
+            self.orientation = variable_value
         elif variable_name == 'size':
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
-            )
             self.pybullet_client.removeBody(self.block)
             self.block_id = self.pybullet_client.createVisualShape(
                 shapeType=pybullet.GEOM_BOX,
@@ -170,8 +164,8 @@ class SCuboid(SilhouetteObject):
             )
             self.block = self.pybullet_client.createMultiBody(
                 baseVisualShapeIndex=self.block_id,
-                basePosition=position,
-                baseOrientation=orientation
+                basePosition=self.position,
+                baseOrientation=self.orientation
             )
             self.pybullet_client.changeVisualShape(self.block, -1,
                                                    rgbaColor=np.append(self.colour,
@@ -190,26 +184,20 @@ class SCuboid(SilhouetteObject):
         """
         if state_type == 'dict':
             state = dict()
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
-            )
             state[self.name + "_type"] = self.type_id
-            state[self.name + "_position"] = np.array(position)
-            state[self.name + "_orientation"] = np.array(orientation)
+            state[self.name + "_position"] = np.array(self.position)
+            state[self.name + "_orientation"] = np.array(self.orientation)
             state[self.name + "_size"] = self.size
             state[self.name + "_colour"] = self.colour
         elif state_type == 'list':
             state = []
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
-            )
             for name in self._state_variable_names:
                 if name == 'type':
                     state.append(self.type_id)
                 elif name == 'position':
-                    state.extend(position)
+                    state.extend(self.position)
                 elif name == 'orientation':
-                    state.extend(orientation)
+                    state.extend(self.orientation)
                 elif name == 'size':
                     state.extend(self.size)
                 elif name == 'colour':
@@ -217,6 +205,20 @@ class SCuboid(SilhouetteObject):
         else:
             raise Exception("state type is not supported")
         return state
+
+    def get_variable_state(self, variable_name):
+        if variable_name == 'type':
+            return self.type_id
+        elif variable_name == 'position':
+            return self.position
+        elif variable_name == 'orientation':
+            return self.orientation
+        elif variable_name == 'size':
+            return self.size
+        elif variable_name == 'colour':
+            return self.colour
+        else:
+            raise Exception("variable name is not supported")
 
     def get_bounds(self):
         return self.lower_bounds, self.upper_bounds
@@ -232,3 +234,5 @@ class SCuboid(SilhouetteObject):
             self.block, position, orientation
         )
         return
+
+
