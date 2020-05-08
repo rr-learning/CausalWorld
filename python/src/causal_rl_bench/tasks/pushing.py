@@ -72,7 +72,7 @@ class PushingTask(BaseTask):
         position_distance = np.linalg.norm(goal_position - block_position)
         #TODO: orientation distance calculation
         reward = - position_distance
-        if position_distance < 0.02:
+        if position_distance < 0.01:
             self.task_solved = True
         return reward
 

@@ -1,5 +1,6 @@
 from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.tasks.example import ExampleTask
+from causal_rl_bench.tasks.picking import PickingTask
 from causal_rl_bench.tasks.cuboid_silhouette import CuboidSilhouette
 
 
