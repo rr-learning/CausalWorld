@@ -58,7 +58,7 @@ def test_determinism():
 def test_parallelism():
     task = Task(task_id="pushing")
     env1 = World(task=task,
-                 enable_visualization=True,
+                 enable_visualization=False,
                  seed=0)
     env1.reset()
     task2 = Task(task_id="pushing")
