@@ -46,18 +46,18 @@ class TriFingerObservations(object):
             [20] * 3 * num_fingers
 
         self.lower_bounds["cameras"] = \
-            np.zeros(shape=(3, 540, 720, 3), dtype=np.uint8)
+            np.zeros(shape=(3, 540, 720, 3), dtype=np.float64)
         self.upper_bounds["cameras"] = \
             np.full(shape=(3, 540, 720, 3), fill_value=255,
-                    dtype=np.uint8)
+                    dtype=np.float64)
 
         self.observation_functions = dict()
 
         if observation_mode == "cameras":
             self.observations_keys = ["cameras"]
-            self.low = np.zeros(shape=(3, 540, 720, 3), dtype=np.uint8)
+            self.low = np.zeros(shape=(3, 540, 720, 3), dtype=np.float64)
             self.high = np.full(shape=(3, 540, 720, 3), fill_value=255,
-                                dtype=np.uint8)
+                                dtype=np.float64)
         elif observation_mode == "structured":
             if observation_keys is None:
                 # Default structured observation space
@@ -86,7 +86,7 @@ class TriFingerObservations(object):
             else:
                 return spaces.Box(low=self.low,
                                   high=self.high,
-                                  dtype=np.uint8)
+                                  dtype=np.float64)
 
     def set_observation_spaces(self):
         self.low = np.array([])

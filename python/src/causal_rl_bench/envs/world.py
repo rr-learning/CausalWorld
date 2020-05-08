@@ -2,19 +2,16 @@ import numpy as np
 import gym
 import pybullet
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
-from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.task import Task
-from causal_rl_bench.envs.env_utils import combine_spaces
-import matplotlib.pyplot as plt
-import time
+from causal_rl_bench.utils.env_utils import combine_spaces
 
 
 class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
                 'video.frames_per_second': 50}
 
-    def __init__(self, task=None, skip_frame=20,
+    def __init__(self, task=None, skip_frame=1,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  normalize_actions=True, normalize_observations=True,
