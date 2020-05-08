@@ -9,7 +9,7 @@ import time
 
 
 def example():
-    task = Task(task_id='example')
+    task = Task(task_id='pushing')
     env = World(task=task, skip_frame=35, enable_visualization=True, normalize_observations=False)
     recorder = VideoRecorder(env,
                              'video.mp4')

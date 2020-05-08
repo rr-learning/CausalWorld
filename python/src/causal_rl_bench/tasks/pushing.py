@@ -25,6 +25,23 @@ class PushingTask(BaseTask):
                                                 shape="cube")
         return
 
+    def _process_action_joint_positions(self):
+        last_action_applied = self.robot.get_last_clippd_action()
+        if self.robot.normalize_actions and not self.robot.normalize_observations:
+            last_action_applied = self.robot.denormalize_observation_for_key(observation=last_action_applied,
+                                                                             key='action_joint_positions')
+        elif not self.robot.normalize_actions and self.robot.normalize_observations:
+            last_action_applied = self.robot.normalize_observation_for_key(observation=last_action_applied,
+                                                                           key='action_joint_positions')
+        return last_action_applied
+
+    def _set_up_non_default_observations(self):
+        self._setup_non_default_robot_observation_key(observation_key="action_joint_positions",
+                                                      observation_function=self._process_action_joint_positions,
+                                                      lower_bound=None,
+                                                      upper_bound=None)
+        return
+
     def _reset_task(self):
         #reset robot first
         if self.task_params["randomize_joint_positions"]:
