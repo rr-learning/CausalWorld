@@ -214,7 +214,8 @@ class TriFingerObservations(object):
                                robot_state.camera_180,
                                robot_state.camera_300), axis=0)
         if self.normalized_observations:
-            camera_obs = self.normalize_observation_for_key(camera_obs, "cameras")
+            camera_obs = self.normalize_observation_for_key(camera_obs,
+                                                            "cameras")
         return camera_obs
 
 

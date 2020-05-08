@@ -6,6 +6,7 @@ from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.envs.env_utils import combine_spaces
+import matplotlib.pyplot as plt
 import time
 
 
@@ -16,8 +17,9 @@ class World(gym.Env):
     def __init__(self, task=None, skip_frame=20,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
-                 normalize_actions=True, normalize_observations=True, max_episode_length=None,
-                 data_recorder=None, **kwargs):
+                 normalize_actions=True, normalize_observations=True,
+                 max_episode_length=None, data_recorder=None,
+                 enable_goal_image=False, **kwargs):
         """
         Constructor sets up the physical world parameters,
         and resets to begin training.
@@ -28,6 +30,7 @@ class World(gym.Env):
                 visualized
         """
         self.observation_mode = observation_mode
+        self.enable_goal_image = enable_goal_image
         self.action_mode = action_mode
         self.seed(seed)
         self.robot = TriFingerRobot(action_mode=action_mode,
@@ -35,11 +38,19 @@ class World(gym.Env):
                                     enable_visualization=enable_visualization,
                                     skip_frame=skip_frame,
                                     normalize_actions=normalize_actions,
-                                    normalize_observations=normalize_observations)
+                                    normalize_observations=normalize_observations,
+                                    enable_goal_image=enable_goal_image)
         self.pybullet_client = self.robot.get_pybullet_client()
-        self.stage = Stage(pybullet_client=self.pybullet_client,
-                           observation_mode=observation_mode,
-                           normalize_observations=normalize_observations)
+        if enable_goal_image:
+            self.stage = Stage(pybullet_client=self.pybullet_client,
+                               observation_mode=observation_mode,
+                               normalize_observations=normalize_observations,
+                               goal_image_pybullet_instance=self.robot.
+                               get_goal_image_instance_pybullet())
+        else:
+            self.stage = Stage(pybullet_client=self.pybullet_client,
+                               observation_mode=observation_mode,
+                               normalize_observations=normalize_observations)
         if max_episode_length is None:
             self.enforce_episode_length = False
         else:
@@ -60,6 +71,11 @@ class World(gym.Env):
             self.observation_space = \
                 combine_spaces(self.robot.get_observation_spaces(),
                                self.stage.get_observation_spaces())
+        elif self.observation_mode == "cameras" and self.enable_goal_image:
+            self.stage.select_observations(["goal_image"])
+            self.observation_space = combine_spaces(
+                self.robot.get_observation_spaces(),
+                self.stage.get_observation_spaces())
         else:
             self.observation_space = self.robot.get_observation_spaces()
         self.action_space = self.robot.get_action_spaces()
@@ -69,36 +85,24 @@ class World(gym.Env):
             (1 / self.simulation_time) / self.skip_frame
         # TODO: verify spaces here
         self.max_time_steps = 5000
-
-        self._cam_dist = 1
-        self._cam_yaw = 0
-        self._cam_pitch = -60
-        self._render_width = 640
-        self._render_height = 480
-        base_pos = [0, 0, 0]
-        self.view_matrix = self.pybullet_client.computeViewMatrixFromYawPitchRoll(
-            cameraTargetPosition=base_pos,
-            distance=self._cam_dist,
-            yaw=self._cam_yaw,
-            pitch=self._cam_pitch,
-            roll=0,
-            upAxisIndex=2)
-        self.proj_matrix = self.pybullet_client.computeProjectionMatrixFOV(
-            fov=60, aspect=float(self._render_width) / self._render_height,
-            nearVal=0.1, farVal=100.0)
+        self._setup_viewing_camera()
         self.reset()
         return
 
     def step(self, action):
         self.episode_length += 1
         self.robot.apply_action(action)
-        if self.observation_mode == "cameras":
+        if self.observation_mode == "cameras" and self.enable_goal_image:
+            current_images = self.robot.get_current_camera_observations()
+            goal_images = self.stage.get_current_goal_image()
+            observation = np.concatenate((current_images, goal_images), axis=0)
+        elif self.observation_mode == "cameras":
             observation = self.robot.get_current_camera_observations()
         else:
             observation = self.task.filter_structured_observations()
         reward = self.task.get_reward()
         done = self._is_done()
-        info = {}
+        info = self.task.get_info()
 
         if self.data_recorder:
             self.data_recorder.append(robot_action=action,
@@ -122,6 +126,11 @@ class World(gym.Env):
             self.observation_space = \
                 combine_spaces(self.robot.get_observation_spaces(),
                                self.stage.get_observation_spaces())
+        elif self.observation_mode == "cameras" and self.enable_goal_image:
+            self.stage.select_observations(["goal_image"])
+            self.observation_space = combine_spaces(
+                self.robot.get_observation_spaces(),
+                self.stage.get_observation_spaces())
         else:
             self.observation_space = self.robot.get_observation_spaces()
         self.action_space = self.robot.get_action_spaces()
@@ -145,7 +154,11 @@ class World(gym.Env):
                                            task_params=self.task.get_task_params(),
                                            world_params=self.get_world_params())
 
-        if self.observation_mode == "cameras":
+        if self.observation_mode == "cameras" and self.enable_goal_image:
+            current_images = self.robot.get_current_camera_observations()
+            goal_images = self.stage.get_current_goal_image()
+            return np.concatenate((current_images, goal_images), axis=0)
+        elif self.observation_mode == "cameras":
             return self.robot.get_current_camera_observations()
         else:
             return self.task.filter_structured_observations()
@@ -203,3 +216,21 @@ class World(gym.Env):
         rgb_array = np.array(px)
         rgb_array = rgb_array[:, :, :3]
         return rgb_array
+
+    def _setup_viewing_camera(self):
+        self._cam_dist = 1
+        self._cam_yaw = 0
+        self._cam_pitch = -60
+        self._render_width = 640
+        self._render_height = 480
+        base_pos = [0, 0, 0]
+        self.view_matrix = self.pybullet_client.computeViewMatrixFromYawPitchRoll(
+            cameraTargetPosition=base_pos,
+            distance=self._cam_dist,
+            yaw=self._cam_yaw,
+            pitch=self._cam_pitch,
+            roll=0,
+            upAxisIndex=2)
+        self.proj_matrix = self.pybullet_client.computeProjectionMatrixFOV(
+            fov=60, aspect=float(self._render_width) / self._render_height,
+            nearVal=0.1, farVal=100.0)

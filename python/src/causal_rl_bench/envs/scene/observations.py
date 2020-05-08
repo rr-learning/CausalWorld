@@ -11,6 +11,11 @@ class StageObservations(object):
 
         self.lower_bounds = dict()
         self.upper_bounds = dict()
+        self.lower_bounds["goal_image"] = \
+            np.zeros(shape=(3, 540, 720, 3), dtype=np.uint8)
+        self.upper_bounds["goal_image"] = \
+            np.full(shape=(3, 540, 720, 3), fill_value=255,
+                    dtype=np.uint8)
 
         self.rigid_objects = rigid_objects
         self.visual_objects = visual_objects
@@ -71,9 +76,15 @@ class StageObservations(object):
     def set_observation_spaces(self):
         self.low = np.array([])
         self.high = np.array([])
-        for key in self.observations_keys:
-            self.low = np.append(self.low, np.array(self.lower_bounds[key]))
-            self.high = np.append(self.high, np.array(self.upper_bounds[key]))
+        if "goal_image" in self.observations_keys:
+            self.low = self.lower_bounds["goal_image"]
+            self.high = self.upper_bounds["goal_image"]
+        else:
+            for key in self.observations_keys:
+                self.low = np.append(self.low,
+                                     np.array(self.lower_bounds[key]))
+                self.high = np.append(self.high,
+                                      np.array(self.upper_bounds[key]))
 
     def is_normalized(self):
         return self.normalized_observations
@@ -141,5 +152,14 @@ class StageObservations(object):
             self.upper_bounds[observation_key] = upper_bound
         self.observations_keys.append(observation_key)
         self.set_observation_spaces()
+
+    def get_current_goal_image(self, goal_instance_state):
+        camera_obs = np.stack((goal_instance_state.camera_60,
+                               goal_instance_state.camera_180,
+                               goal_instance_state.camera_300), axis=0)
+        if self.normalized_observations:
+            camera_obs = self.normalize_observation_for_key(camera_obs,
+                                                            "goal_image")
+        return camera_obs
 
 

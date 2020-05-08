@@ -7,7 +7,8 @@ import numpy as np
 
 class Stage(object):
     def __init__(self, pybullet_client, observation_mode,
-                 normalize_observations=True):
+                 normalize_observations=True,
+                 goal_image_pybullet_instance=None):
         self.rigid_objects = dict()
         self.visual_objects = dict()
         self.observation_mode = observation_mode
@@ -16,6 +17,12 @@ class Stage(object):
         self.stage_observations = None
         self.latest_full_state = None
         self.latest_observations = None
+        self.goal_image_pybullet_instance = goal_image_pybullet_instance
+        if self.goal_image_pybullet_instance is not None:
+            self.goal_image_visual_objects = dict()
+            self.goal_image_pybullet_client = \
+                self.goal_image_pybullet_instance._p
+            self.goal_image = None
         self.name_keys = []
         return
 
@@ -25,7 +32,8 @@ class Stage(object):
         else:
             self.name_keys.append(name)
         if shape == "cube":
-            self.rigid_objects[name] = Cuboid(self.pybullet_client, name, **object_params)
+            self.rigid_objects[name] = Cuboid(self.pybullet_client, name,
+                                              **object_params)
         return
 
     def add_rigid_mesh_object(self, name, file, **object_params):
@@ -37,7 +45,11 @@ class Stage(object):
         else:
             self.name_keys.append(name)
         if shape == "cube":
-            self.visual_objects[name] = SCuboid(self.pybullet_client, name, **object_params)
+            self.visual_objects[name] = SCuboid(self.pybullet_client, name,
+                                                **object_params)
+            if self.goal_image_pybullet_instance is not None:
+                self.goal_image_visual_objects[name] = SCuboid(
+                    self.goal_image_pybullet_client, name, **object_params)
         return
 
     def add_silhoutte_mesh_object(self, name, file, **object_params):
@@ -71,12 +83,19 @@ class Stage(object):
         for name in self.name_keys:
             if name in self.rigid_objects:
                 object = self.rigid_objects[name]
+                end = start + object.get_state_size()
+                object.set_full_state(new_state[start:end])
             elif name in self.visual_objects:
                 object = self.visual_objects[name]
-            end = start + object.get_state_size()
-            object.set_full_state(new_state[start:end])
+                end = start + object.get_state_size()
+                object.set_full_state(new_state[start:end])
+                if self.goal_image_pybullet_instance is not None:
+                    goal_image_object = self.goal_image_visual_objects[name]
+                    goal_image_object.set_full_state(new_state[start:end])
             start = end
         self.latest_full_state = new_state
+        if self.goal_image_pybullet_instance is not None:
+            self.update_goal_image()
         return
 
     def set_objects_pose(self, names, positions, orientations):
@@ -84,12 +103,18 @@ class Stage(object):
             name = names[i]
             if name in self.rigid_objects:
                 object = self.rigid_objects[name]
+                object.set_pose(positions[i], orientations[i])
             elif name in self.visual_objects:
                 object = self.visual_objects[name]
+                object.set_pose(positions[i], orientations[i])
+                if self.goal_image_pybullet_instance is not None:
+                    goal_image_object = self.goal_image_visual_objects[name]
+                    goal_image_object.set_pose(positions[i], orientations[i])
             else:
                 raise Exception("Object {} doesnt exist".format(name))
-            object.set_pose(positions[i], orientations[i])
         self.latest_full_state = self.get_full_state()
+        if self.goal_image_pybullet_instance is not None:
+            self.update_goal_image()
         return
 
     def get_current_observations(self, helper_keys):
@@ -132,12 +157,18 @@ class Stage(object):
     def object_intervention(self, key, interventions_dict):
         if key in self.rigid_objects:
             object = self.rigid_objects[key]
+            object.set_state(interventions_dict)
         elif key in self.visual_objects:
             object = self.visual_objects[key]
+            object.set_state(interventions_dict)
+            if self.goal_image_pybullet_instance is not None:
+                goal_image_object = self.goal_image_visual_objects[key]
+                goal_image_object.set_state(interventions_dict)
         else:
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
-        object.set_state(interventions_dict)
+        if self.goal_image_pybullet_instance is not None:
+            self.update_goal_image()
         return
 
     def get_object_full_state(self, key):
@@ -160,7 +191,8 @@ class Stage(object):
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None):
-        self.stage_observations.add_observation(observation_key, lower_bound, upper_bound)
+        self.stage_observations.add_observation(observation_key, lower_bound,
+                                                upper_bound)
 
     def normalize_observation_for_key(self, observation, key):
         return self.stage_observations.normalize_observation_for_key(observation,
@@ -169,3 +201,17 @@ class Stage(object):
     def denormalize_observation_for_key(self, observation, key):
         return self.stage_observations.denormalize_observation_for_key(observation,
                                                                        key)
+
+    def get_current_goal_image(self):
+        return self.goal_image
+
+    def update_goal_image(self):
+        if self.goal_image_pybullet_instance is not None:
+            current_state = \
+                self.goal_image_pybullet_instance.get_observation(0, update_images=True)
+            self.goal_image = self.stage_observations.get_current_goal_image(
+                current_state)
+            return
+        else:
+            raise Exception("goal image is not enabled")
+

@@ -6,20 +6,22 @@ import gym
 from pybullet_envs.bullet.cartpole_bullet import CartPoleBulletEnv
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 import time
+import matplotlib.pyplot as plt
 
 
 def example():
-    task = Task(task_id='cuboid_silhouette')
-    env = World(task=task, skip_frame=35, enable_visualization=True, observation_mode="cameras")
+    task = Task(task_id='pushing')
+    env = World(task=task, skip_frame=35, enable_visualization=True,
+                observation_mode="structured", enable_goal_image=False,
+                normalize_observations=True)
     recorder = VideoRecorder(env,
                              'video.mp4')
-    obs = env.reset()
     # current_state = env.get_full_state()
-    for i in range(2):
-        # env.reset()
+    for i in range(5):
+        env.reset()
         # env.set_full_state(current_state)
         # env.do_random_intervention()
-        for j in range(1000):
+        for j in range(2000):
             recorder.capture_frame()
             # recorder.capture_frame()
             # env.step(

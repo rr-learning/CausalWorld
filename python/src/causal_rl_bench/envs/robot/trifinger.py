@@ -6,20 +6,31 @@ import numpy as np
 
 
 class TriFingerRobot(object):
-    def __init__(self, action_mode, observation_mode, enable_visualization=True,
-                 skip_frame=20, normalize_actions=True,
-                 normalize_observations=True):
+    def __init__(self, action_mode, observation_mode,
+                 enable_visualization=True, skip_frame=20,
+                 normalize_actions=True, normalize_observations=True,
+                 enable_goal_image=False):
         self.normalize_actions = normalize_actions
         self.normalize_observations = normalize_observations
         self.action_mode = action_mode
+        self.enable_goal_image = enable_goal_image
         self.observation_mode = observation_mode
         self.skip_frame = skip_frame
         self.simulation_time = 0.004
         self.control_index = -1
         self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
                                     "tri")
+
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
-        self.robot_observations = TriFingerObservations(observation_mode, normalize_observations)
+        self.robot_observations = TriFingerObservations(observation_mode,
+                                                        normalize_observations)
+        if self.enable_goal_image:
+            self.goal_image_instance = SimFinger(self.simulation_time,
+                                                 enable_visualization=False,
+                                                 finger_type="tri")
+            self.goal_image_instance_state = \
+                self.goal_image_instance.reset_finger(self.robot_actions.low,
+                                                      np.zeros(9, ))
         self.last_action = None
         self.last_clipped_action = None
         self.latest_full_state = None
@@ -162,6 +173,8 @@ class TriFingerRobot(object):
 
     def close(self):
         self.tri_finger.disconnect_from_simulation()
+        if self.enable_goal_image:
+            self.goal_image_instance.disconnect_from_simulation()
 
     def get_state_size(self):
         return self.state_size
@@ -190,7 +203,14 @@ class TriFingerRobot(object):
                                                                        key)
 
     def get_current_camera_observations(self):
-        return self.robot_observations.get_current_camera_observations(self.latest_full_state)
+        return self.robot_observations.get_current_camera_observations(
+            self.latest_full_state)
+
+    def get_goal_image_instance_pybullet(self):
+        if self.enable_goal_image:
+            return self.goal_image_instance
+        else:
+            raise Exception("goal image is not enabled")
 
 
 

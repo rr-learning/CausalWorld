@@ -18,12 +18,8 @@ def unscale(y, space):
 
 
 def combine_spaces(space_1, space_2):
-    lower_bound = np.array([])
-    lower_bound = np.append(lower_bound, space_1.low)
-    lower_bound = np.append(lower_bound, space_2.low)
-    upper_bound = np.array([])
-    upper_bound = np.append(upper_bound, space_1.high)
-    upper_bound = np.append(upper_bound, space_2.high)
+    lower_bound = np.concatenate((space_1.low, space_2.low))
+    upper_bound = np.concatenate((space_1.high, space_2.high))
     return spaces.Box(low=lower_bound,
                       high=upper_bound,
                       dtype=np.float64)

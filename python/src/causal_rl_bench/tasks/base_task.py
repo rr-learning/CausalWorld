@@ -80,6 +80,9 @@ class BaseTask(object):
 
         return observations_filtered
 
+    def get_info(self):
+        return {}
+
     def get_task_params(self):
         return self.task_params
 
