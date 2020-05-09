@@ -26,8 +26,6 @@ class CrossEntropyMethod(object):
             [self.planning_horizon, 1])
 
     def get_actions(self, current_states):
-        # best_cost = np.zeros([self.num_agents])
-        # best_cost = best_cost.fill(np.float('inf'))
         best_cost = -np.float('inf')
         best_action = None
         iteration_index = 0
@@ -40,14 +38,9 @@ class CrossEntropyMethod(object):
                                               np.sqrt(current_actions_var),
                                               size=[self.population_size,
                                                     *self.actions_mean.shape])
-            #shuffle some axis
             rewards = self.model.evaluate_trajectories(current_states,
-                                                       action_samples) #num_of_agents, particles
-            # costs = -rewards
+                                                       action_samples)
             elites_indicies = rewards.argsort(axis=0)[-self.num_elite:][::-1]
-            # elites_indicies = np.argpartition(costs, self.num_elite,
-            #                                   axis=1)
-            # elites_indicies = elites_indicies[:, self.num_elite]
             best_current_cost = np.max(rewards)
             if best_current_cost > best_cost:
                 best_cost = best_current_cost
