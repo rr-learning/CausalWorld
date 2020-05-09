@@ -6,7 +6,7 @@ class BaseTask(object):
         self.robot = None
         self.stage = None
         self.task_solved = False
-        self.id = task_name
+        self.task_name = task_name
         self.task_robot_observation_keys = []
         self.task_stage_observation_keys = []
         # the helper keys are observations that are not included in the task observations but it will be needed in reward
