@@ -11,9 +11,10 @@ class PushingTask(BaseTask):
                                             "action_joint_positions",
                                             "end_effector_positions"]
         self.task_stage_observation_keys = ["block_position",
-                                            "block_position",
-                                            "goal_block_orientation",
+                                            "block_orientation",
+                                            "goal_block_position",
                                             "goal_block_orientation"]
+
         self.task_params["block_mass"] = kwargs.get("block_mass", 0.02)
         self.task_params["randomize_joint_positions"] = \
             kwargs.get("randomize_joint_positions", True)
@@ -86,12 +87,12 @@ class PushingTask(BaseTask):
         end_effector_positions = self.robot.compute_end_effector_positions(
             self.robot.latest_full_state)
         end_effector_positions = end_effector_positions.reshape(-1, 3)
-        distance_from_block = np.sum(
-            (end_effector_positions - block_position) ** 2)
+        distance_from_block = np.linalg.norm(end_effector_positions -
+                                             block_position)
 
         #TODO: orientation distance calculation
         reward = - (10. * position_distance + angle_diff[0] +
-                    distance_from_block)
+                    10. * distance_from_block)
 
         if position_distance < 0.01:
             self.task_solved = True
