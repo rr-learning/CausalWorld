@@ -160,6 +160,7 @@ class Cuboid(RigidObject):
                 baseOrientation=orientation,
                 baseMass=self.mass
             )
+            self.size = state_dict['size']
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
                 self.block, position, orientation
@@ -168,6 +169,7 @@ class Cuboid(RigidObject):
             self.pybullet_client.changeDynamics(self.block, -1, mass=self.mass)
 
         if 'colour' in  state_dict:
+            self.colour = state_dict['colour']
             self.pybullet_client.changeVisualShape(self.block, -1,
                                                    rgbaColor=np.append(state_dict['colour'], 1))
         if ('linear_velocity' in state_dict) ^ \
@@ -218,9 +220,11 @@ class Cuboid(RigidObject):
             )
             self.pybullet_client.changeVisualShape(self.block, -1,
                                                    rgbaColor=np.append(self.colour, 1))
+            self.size = variable_value
         elif variable_name == 'colour':
             self.pybullet_client.changeVisualShape(self.block, -1,
                                                    rgbaColor=np.append(variable_value, 1))
+            self.colour = variable_value
         elif variable_name == 'linear_velocity':
             _, angular_velocity = self.pybullet_client.getBaseVelocity(
                 self.block)

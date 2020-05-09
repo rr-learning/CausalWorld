@@ -32,7 +32,7 @@ class CrossEntropyMethod(object):
         current_actions_mean = np.array(self.actions_mean)
         current_actions_var = np.array(self.actions_variance)
         while iteration_index < self.max_iterations:
-            print("cem iteration number ", iteration_index)
+            print("cem iteration number: ", iteration_index)
             #TODO: change to truncated one
             action_samples = np.random.normal(current_actions_mean,
                                               np.sqrt(current_actions_var),
@@ -45,7 +45,7 @@ class CrossEntropyMethod(object):
             if best_current_cost > best_cost:
                 best_cost = best_current_cost
                 best_action = action_samples[np.argmax(rewards)]
-            print("current cost is ", best_current_cost)
+            print("iteration's best cost is ", best_current_cost)
             elites = action_samples[elites_indicies]
             new_mean = np.mean(elites, axis=0)
             new_variance = np.var(elites, axis=0)
@@ -54,5 +54,4 @@ class CrossEntropyMethod(object):
             current_actions_var = (self.alpha * current_actions_var) + (
                     (1 - self.alpha) * new_variance)
             iteration_index += 1
-            print("best action is so far ", best_action)
         return best_action

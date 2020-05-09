@@ -1,6 +1,5 @@
 from stable_baselines.common import set_global_seeds
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.baselines.model_based.true_model import TrueModel
 from causal_rl_bench.baselines.model_based.optimizers.cem import \
     CrossEntropyMethod
@@ -11,15 +10,20 @@ from causal_rl_bench.tasks.task import Task
 seed = 0
 skip_frame = 35
 num_of_particles = 250
-num_elite = 25
+num_elite = 12
 max_iterations = 5
-horizon_length = 6
+horizon_length = 4
 parallel_agents = 25
+randomize_joint_positions = True
+randomize_block_pose = True
+randomize_goal_block_pose = True
 
 
 def _make_env():
     def _init():
-        task = PushingTask()
+        task = Task(task_id='pushing', randomize_joint_positions=randomize_joint_positions,
+                    randomize_block_pose=randomize_block_pose,
+                    randomize_goal_block_pose=randomize_goal_block_pose)
         env = World(task=task, skip_frame=skip_frame,
                     enable_visualization=False,
                     seed=seed)
@@ -29,11 +33,11 @@ def _make_env():
 
 
 def run_mpc():
-    task = Task(task_id='pushing')
-    env = World(task=task, skip_frame=skip_frame, enable_visualization=False,
+    task = Task(task_id='pushing', randomize_joint_positions=randomize_joint_positions,
+                randomize_block_pose=randomize_block_pose,
+                randomize_goal_block_pose=randomize_goal_block_pose)
+    env = World(task=task, skip_frame=1, enable_visualization=True,
                 seed=seed)
-    recorder = VideoRecorder(env, 'pushing.mp4')
-    env.reset()
     true_model = TrueModel(_make_env, parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(planning_horizon=horizon_length,
                                    max_iterations=max_iterations,
@@ -44,13 +48,15 @@ def run_mpc():
                                    action_lower_bound=
                                    np.array(env.action_space.low),
                                    model=true_model)
+    env.reset()
     current_state = env.get_full_state()
     actions = optimizer.get_actions(current_state)
     true_model.end_sim()
-    env.set_full_state(current_state)
+    recorder = VideoRecorder(env, 'pushing.mp4')
     for i in range(horizon_length):
-        recorder.capture_frame()
-        env.step(actions[i])
+        for j in range(skip_frame):
+            recorder.capture_frame()
+            obs, reward, done, info = env.step(actions[i])
     recorder.capture_frame()
     recorder.close()
     env.close()
