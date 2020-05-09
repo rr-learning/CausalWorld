@@ -1,5 +1,5 @@
 from causal_rl_bench.tasks.base_task import BaseTask
-from causal_rl_bench.utils.state_utils import euler_to_quaternion
+from causal_rl_bench.utils.rotation_utils import euler_to_quaternion, quaternion_conjugate, quaternion_mul
 import numpy as np
 
 
@@ -70,8 +70,11 @@ class PushingTask(BaseTask):
         goal_position = self.stage.get_object_state('goal_block', 'position')
         goal_orientation = self.stage.get_object_state('goal_block', 'orientation')
         position_distance = np.linalg.norm(goal_position - block_position)
+        quat_diff = quaternion_mul(np.expand_dims(goal_orientation, 0),
+                                   quaternion_conjugate(np.expand_dims(block_orientation, 0)))
+        angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
         #TODO: orientation distance calculation
-        reward = - position_distance
+        reward = - (10. * position_distance + angle_diff[0])
         if position_distance < 0.01:
             self.task_solved = True
         return reward
