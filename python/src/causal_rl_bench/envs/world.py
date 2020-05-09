@@ -147,7 +147,7 @@ class World(gym.Env):
 
         if self.data_recorder:
             self.data_recorder.new_episode(self.get_full_state(),
-                                           task_id=self.task.name,
+                                           task_id=self.task.task_name,
                                            task_params=self.task.get_task_params(),
                                            world_params=self.get_world_params())
 

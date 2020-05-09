@@ -19,10 +19,11 @@ class DataRecorder:
         self.last_episode_number_dumbed = len(self.episodes) - 1
         self._curr = None
 
-    def new_episode(self, initial_full_state, task_id, task_params=None, world_params=None):
+    def new_episode(self, initial_full_state, task_name, task_params=None, world_params=None):
         if self._curr:
             self.episodes.append(self._curr)
-        self._curr = Episode(task_id, initial_full_state, task_params=task_params, world_params=world_params)
+        self._curr = Episode(task_name, initial_full_state,
+                             task_params=task_params, world_params=world_params)
         if len(self.episodes) % self.rec_dumb_frequency == 0 and len(self.episodes) != 0:
             self.save()
 

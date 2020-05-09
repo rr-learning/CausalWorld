@@ -74,12 +74,14 @@ class TaskViewer:
         env.close()
 
     def view_policy(self, task, world_params, policy_wrapper, max_time_steps):
-        env = get_world(task.name,
+        env = get_world(task.task_name,
                         task.get_task_params(),
                         world_params,
                         enable_visualization=True)
         obs = env.reset()
         for time in range(max_time_steps):
-            obs = env.step(action=policy_wrapper.get_action_for_observation(obs))
+            obs, reward, done, info = env.step(action=
+                                               policy_wrapper.
+                                               get_action_for_observation(obs))
         env.close()
 
