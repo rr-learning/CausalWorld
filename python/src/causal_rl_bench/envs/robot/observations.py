@@ -46,18 +46,23 @@ class TriFingerObservations(object):
             [20] * 3 * num_fingers
 
         self.lower_bounds["cameras"] = \
-            np.zeros(shape=(3, 540, 720, 3), dtype=np.float64)
+            np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
         self.upper_bounds["cameras"] = \
-            np.full(shape=(3, 540, 720, 3), fill_value=255,
+            np.full(shape=(3, 54, 72, 3), fill_value=255,
                     dtype=np.float64)
 
         self.observation_functions = dict()
 
+        self.low_norm = -1
+        self.high_norm = 1
+
         if observation_mode == "cameras":
             self.observations_keys = ["cameras"]
-            self.low = np.zeros(shape=(3, 540, 720, 3), dtype=np.float64)
-            self.high = np.full(shape=(3, 540, 720, 3), fill_value=255,
+            self.low = np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
+            self.high = np.full(shape=(3, 54, 72, 3), fill_value=255,
                                 dtype=np.float64)
+            self.low_norm = 0
+            self.high_norm = 1
         elif observation_mode == "structured":
             if observation_keys is None:
                 # Default structured observation space
@@ -75,8 +80,8 @@ class TriFingerObservations(object):
 
     def get_observation_spaces(self):
         if self.normalized_observations:
-            return spaces.Box(low=-np.ones(shape=self.low.shape),
-                              high=np.ones(shape=self.high.shape),
+            return spaces.Box(low=np.full(shape=self.low.shape, fill_value=self.low_norm, dtype=np.float64),
+                              high=np.full(shape=self.low.shape, fill_value=self.high_norm, dtype=np.float64),
                               dtype=np.float64)
         else:
             if self.observation_mode == "structured":
@@ -86,7 +91,7 @@ class TriFingerObservations(object):
             else:
                 return spaces.Box(low=self.low,
                                   high=self.high,
-                                  dtype=np.float64)
+                                  dtype=np.uint8)
 
     def set_observation_spaces(self):
         self.low = np.array([])
@@ -103,31 +108,32 @@ class TriFingerObservations(object):
         self.set_observation_spaces()
 
     def normalize_observation(self, observation):
-        return 2.0 * (observation - self.low) / (self.high - self.low) - 1.0
+        return (self.high_norm - self.low_norm) * (observation - self.low) / (self.high - self.low) \
+               + self.low_norm
 
     def normalize_observation_for_key(self, observation, key):
         lower_key = np.array(self.lower_bounds[key])
         higher_key = np.array(self.upper_bounds[key])
-        return 2.0 * (observation - lower_key) / (higher_key - lower_key) - 1.0
+        return (self.high_norm - self.low_norm) * (observation - lower_key) / (higher_key - lower_key) + self.low_norm
 
     def denormalize_observation(self, observation):
-        return self.low + (observation + 1.0) / 2.0 * (self.high - self.low)
+        return self.low + (observation - self.low_norm) / (self.high_norm - self.low_norm) * (self.high - self.low)
 
     def denormalize_observation_for_key(self, observation, key):
         lower_key = np.array(self.lower_bounds[key])
         higher_key = np.array(self.upper_bounds[key])
-        return lower_key + (observation + 1.0) / 2.0 * (higher_key - lower_key)
+        return lower_key + (observation - self.low_norm) / (self.high_norm - self.low_norm) * (higher_key - lower_key)
 
     def satisfy_constraints(self, observation):
         if self.normalized_observations:
-            return (observation > -1.).all() and (observation < 1.).all()
+            return (observation > self.low_norm).all() and (observation < self.high_norm).all()
         else:
             return (observation > self.low).all() and \
                    (observation < self.high).all()
 
     def clip_observation(self, observation):
         if self.normalized_observations:
-            return np.clip(observation, -1.0, 1.0)
+            return np.clip(observation, self.low_norm, self.high_norm)
         else:
             return np.clip(observation, self.low, self.high)
 
