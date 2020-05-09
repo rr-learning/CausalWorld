@@ -11,11 +11,11 @@ seed = 0
 skip_frame = 35
 num_of_particles = 250
 num_elite = 12
-max_iterations = 5
-horizon_length = 4
+max_iterations = 10
+horizon_length = 8
 parallel_agents = 25
-randomize_joint_positions = True
-randomize_block_pose = True
+randomize_joint_positions = False
+randomize_block_pose = False
 randomize_goal_block_pose = True
 
 
@@ -36,7 +36,7 @@ def run_mpc():
     task = Task(task_id='pushing', randomize_joint_positions=randomize_joint_positions,
                 randomize_block_pose=randomize_block_pose,
                 randomize_goal_block_pose=randomize_goal_block_pose)
-    env = World(task=task, skip_frame=1, enable_visualization=True,
+    env = World(task=task, skip_frame=1, enable_visualization=False,
                 seed=seed)
     true_model = TrueModel(_make_env, parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(planning_horizon=horizon_length,

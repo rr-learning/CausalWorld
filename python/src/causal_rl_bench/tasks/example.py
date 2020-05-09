@@ -1,5 +1,5 @@
 from causal_rl_bench.tasks.base_task import BaseTask
-from causal_rl_bench.utils.state_utils import euler_to_quaternion
+from causal_rl_bench.utils.rotation_utils import euler_to_quaternion
 import numpy as np
 
 
