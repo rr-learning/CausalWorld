@@ -1,6 +1,5 @@
 from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.envs.world import World
-
 import numpy as np
 
 
@@ -77,4 +76,46 @@ def test_parallelism():
     assert np.array_equal(observations_env2_v1,  observations_env1_v1)
     return
 
-test_parallelism()
+
+def timing_profile():
+    from pybullet_envs.bullet.kukaGymEnv import KukaGymEnv
+    import time
+
+    kuka_env = KukaGymEnv(renders=False, isDiscrete=False)#operates at 240 HZ
+    task = Task(task_id="pushing")
+    causal_rl_env = World(task=task,
+                          enable_visualization=False,
+                          seed=0,
+                          skip_frame=1,
+                          normalize_actions=False,
+                          normalize_observations=False)#operates at 250 HZ
+    start = time.time()
+    kuka_env.reset()
+    end = time.time()
+    print("kuka reset:", end-start)
+
+    start = time.time()
+    causal_rl_env.reset()
+    end = time.time()
+    print("causal_rl reset:", end - start)
+
+    start = time.time()
+    kuka_env.step(kuka_env.action_space.sample())
+    end = time.time()
+    print("kuka step:", end - start)
+
+    start = time.time()
+    causal_rl_env.step(causal_rl_env.action_space.sample())
+    end = time.time()
+    print("causal_rl step:", end - start)
+
+    start = time.time()
+    kuka_env.render()
+    end = time.time()
+    print("kuka render:", end - start)
+
+    start = time.time()
+    causal_rl_env.render()
+    end = time.time()
+    print("causal_rl render:", end - start)
+

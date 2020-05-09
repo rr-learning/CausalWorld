@@ -14,8 +14,7 @@ def _make_env(rank):
         task = Task(task_id='pushing')
         env = World(task=task, skip_frame=20,
                     enable_visualization=False,
-                    seed=seed + rank)
-        env.enforce_max_episode_length(episode_length=150)
+                    seed=seed + rank, max_episode_length=100)
         return env
     set_global_seeds(seed)
     return _init
@@ -44,5 +43,5 @@ def train_policy(num_of_envs):
 
 
 if __name__ == '__main__':
-    train_policy(num_of_envs=4)
+    train_policy(num_of_envs=25)
 
