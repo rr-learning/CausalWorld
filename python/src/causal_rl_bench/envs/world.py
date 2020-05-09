@@ -147,7 +147,7 @@ class World(gym.Env):
 
         if self.data_recorder:
             self.data_recorder.new_episode(self.get_full_state(),
-                                           task_id=self.task.name,
+                                           task_name=self.task.task_name,
                                            task_params=self.task.get_task_params(),
                                            world_params=self.get_world_params())
 
@@ -162,7 +162,7 @@ class World(gym.Env):
 
     def get_world_params(self):
         world_params = dict()
-        world_params["task_name"] = self.task.name
+        world_params["task_name"] = self.task.task_name
         world_params["skip_frame"] = self.robot.get_skip_frame()
         world_params["action_mode"] = self.robot.get_action_mode()
         world_params["observation_mode"] = self.robot.get_observation_mode()
