@@ -8,19 +8,26 @@ class PushingTask(BaseTask):
         super().__init__(task_name="pushing")
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
-                                            "action_joint_positions"]
+                                            "action_joint_positions",
+                                            "end_effector_positions"]
         self.task_stage_observation_keys = ["block_position",
+                                            "block_orientation",
                                             "goal_block_position",
                                             "goal_block_orientation"]
+
         self.task_params["block_mass"] = kwargs.get("block_mass", 0.02)
-        self.task_params["randomize_joint_positions"] = kwargs.get("randomize_joint_positions", True)
-        self.task_params["randomize_block_pose"] = kwargs.get("randomize_block_pose", True)
-        self.task_params["randomize_goal_block_pose"] = kwargs.get("randomize_goal_block_pose", True)
+        self.task_params["randomize_joint_positions"] = \
+            kwargs.get("randomize_joint_positions", True)
+        self.task_params["randomize_block_pose"] = \
+            kwargs.get("randomize_block_pose", True)
+        self.task_params["randomize_goal_block_pose"] = \
+            kwargs.get("randomize_goal_block_pose", True)
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="block",
                                             shape="cube",
-                                            mass=self.task_params["block_mass"])
+                                            mass=self.task_params[
+                                                "block_mass"])
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube")
         return
@@ -50,8 +57,8 @@ class PushingTask(BaseTask):
         if self.task_params["randomize_goal_block_pose"]:
             goal_position = self.stage.random_position(height_limits=0.0435)
             goal_orientation = euler_to_quaternion([0, 0,
-                                                     np.random.uniform(-np.pi,
-                                                                       np.pi)])
+                                                    np.random.uniform(-np.pi,
+                                                                      np.pi)])
         else:
             goal_position = [0.04, -0.02, 0.045155]
             goal_orientation = euler_to_quaternion([0, 0, 0.0])
@@ -62,19 +69,31 @@ class PushingTask(BaseTask):
         return
 
     def get_description(self):
-        return "Task where the goal is to push an object towards a goal position"
+        return \
+            "Task where the goal is to push an object towards a goal position"
 
     def get_reward(self):
         block_position = self.stage.get_object_state('block', 'position')
         block_orientation = self.stage.get_object_state('block', 'orientation')
         goal_position = self.stage.get_object_state('goal_block', 'position')
-        goal_orientation = self.stage.get_object_state('goal_block', 'orientation')
+        goal_orientation = self.stage.get_object_state('goal_block',
+                                                       'orientation')
         position_distance = np.linalg.norm(goal_position - block_position)
         quat_diff = quaternion_mul(np.expand_dims(goal_orientation, 0),
-                                   quaternion_conjugate(np.expand_dims(block_orientation, 0)))
+                                   quaternion_conjugate(np.expand_dims(
+                                       block_orientation, 0)))
         angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
+
+        end_effector_positions = self.robot.compute_end_effector_positions(
+            self.robot.latest_full_state)
+        end_effector_positions = end_effector_positions.reshape(-1, 3)
+        distance_from_block = np.linalg.norm(end_effector_positions -
+                                             block_position)
+
         #TODO: orientation distance calculation
-        reward = - (10. * position_distance + angle_diff[0])
+        reward = - (10. * position_distance + angle_diff[0] +
+                    10. * distance_from_block)
+
         if position_distance < 0.01:
             self.task_solved = True
         return reward

@@ -36,7 +36,7 @@ class TriFingerRobot(object):
         self.latest_full_state = None
         self.state_size = 18
 
-    def _compute_end_effector_positions(self, robot_state):
+    def compute_end_effector_positions(self, robot_state):
         tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
             robot_state.position
         )
@@ -164,7 +164,7 @@ class TriFingerRobot(object):
         for key in observation_keys:
             if key == "end_effector_positions":
                 self.robot_observations.add_observation("end_effector_positions",
-                                                        observation_fn=self._compute_end_effector_positions)
+                                                        observation_fn=self.compute_end_effector_positions)
             elif key == "action_joint_positions":
                 self.robot_observations.add_observation("action_joint_positions",
                                                         observation_fn=self._process_action_joint_positions)

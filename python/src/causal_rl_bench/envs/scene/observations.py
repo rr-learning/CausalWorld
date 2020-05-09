@@ -29,7 +29,6 @@ class StageObservations(object):
         self.observations_keys = []
         self.low = np.array([])
         self.high = np.array([])
-        self.visual_objects_state = dict()
         self.initialize_observations()
         self.set_observation_spaces()
         return
@@ -59,7 +58,6 @@ class StageObservations(object):
                     rigid_object.upper_bounds[state_key]
                 self.observations_keys.append(state_key)
         for visual_object in self.visual_objects:
-            self.visual_objects_state.update(visual_object.get_state())
             state_keys = visual_object.get_state().keys()
             for state_key in state_keys:
                 self.lower_bounds[state_key] = \
@@ -129,7 +127,8 @@ class StageObservations(object):
         observations_dict = dict()
         for rigid_object in self.rigid_objects:
             observations_dict.update(rigid_object.get_state())
-        observations_dict.update(self.visual_objects_state)
+        for visual_object in self.visual_objects:
+            observations_dict.update(visual_object.get_state())
         observation_dict_keys = list(observations_dict.keys())
         for observation in observation_dict_keys:
             if (observation not in self.observations_keys) and (observation not in helper_keys):
