@@ -171,6 +171,7 @@ class World(gym.Env):
         world_params["normalize_observations"] = \
             self.robot.robot_observations.is_normalized()
         world_params["max_episode_length"] = None
+        world_params["enable_goal_image"] = self.enable_goal_image
         return world_params
 
     def close(self):
