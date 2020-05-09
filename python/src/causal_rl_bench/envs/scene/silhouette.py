@@ -123,10 +123,11 @@ class SCuboid(SilhouetteObject):
         if 'orientation' in state_dict:
             self.orientation = state_dict['orientation']
         if 'size' in state_dict:
+            self.size = np.array(state_dict['size'])
             self.pybullet_client.removeBody(self.block)
             self.block_id = self.pybullet_client.createVisualShape(
                 shapeType=pybullet.GEOM_BOX,
-                halfExtents=np.array(state_dict['size']) / 2,
+                halfExtents=self.size / 2,
                 rgbaColor=np.append(self.colour, self.alpha)
             )
             self.block = self.pybullet_client.createMultiBody(
@@ -139,8 +140,9 @@ class SCuboid(SilhouetteObject):
                 self.block, self.position, self.orientation
             )
         if 'colour' in state_dict:
+            self.colour = state_dict['colour']
             self.pybullet_client.changeVisualShape(self.block, -1,
-                                                   rgbaColor= np.append(state_dict['colour'], self.alpha))
+                                                   rgbaColor=np.append(state_dict['colour'], self.alpha))
         return
 
     def do_intervention(self, variable_name, variable_value):
@@ -170,10 +172,12 @@ class SCuboid(SilhouetteObject):
             self.pybullet_client.changeVisualShape(self.block, -1,
                                                    rgbaColor=np.append(self.colour,
                                                    self.alpha))
+            self.size = variable_value
         elif variable_name == 'colour':
             self.pybullet_client.changeVisualShape(self.block, -1,
                                                    rgbaColor=np.append(variable_value,
                                                    self.alpha))
+            self.colour = variable_value
         # TODO: implement intervention on shape id itself
         return
 
@@ -233,6 +237,8 @@ class SCuboid(SilhouetteObject):
         self.pybullet_client.resetBasePositionAndOrientation(
             self.block, position, orientation
         )
+        self.position = position
+        self.orientation = orientation
         return
 
 

@@ -182,9 +182,9 @@ class Stage(object):
 
     def get_object_state(self, key, state_variable):
         if key in self.rigid_objects:
-            return self.rigid_objects[key].get_variable_state(state_variable)
+            return np.array(self.rigid_objects[key].get_variable_state(state_variable))
         elif key in self.visual_objects:
-            return self.visual_objects[key].get_variable_state(state_variable)
+            return np.array(self.visual_objects[key].get_variable_state(state_variable))
         else:
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
