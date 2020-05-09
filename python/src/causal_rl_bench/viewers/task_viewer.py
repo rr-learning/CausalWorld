@@ -58,7 +58,7 @@ class TaskViewer:
         env.close()
 
     def record_animation_of_policy(self, task, world_params, policy_wrapper, max_time_steps=100):
-        env = get_world(task.id,
+        env = get_world(task.name,
                         task.get_task_params(),
                         world_params,
                         enable_visualization=False)
@@ -74,7 +74,7 @@ class TaskViewer:
         env.close()
 
     def view_policy(self, task, world_params, policy_wrapper, max_time_steps):
-        env = get_world(task.id,
+        env = get_world(task.name,
                         task.get_task_params(),
                         world_params,
                         enable_visualization=True)
