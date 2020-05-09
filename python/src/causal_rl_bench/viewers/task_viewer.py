@@ -14,6 +14,21 @@ def get_world(task_id, task_params, world_params, enable_visualization=False):
                  enable_visualization=enable_visualization)
 
 
+def view_episode(episode):
+    env = get_world(episode.task_name,
+                    episode.task_params,
+                    episode.world_params,
+                    enable_visualization=True)
+    env.reset()
+    env.set_full_state(episode.initial_full_state)
+    for time, observation, reward, action in zip(episode.timestamps,
+                                                 episode.observations,
+                                                 episode.rewards,
+                                                 episode.robot_actions):
+        env.step(action)
+    env.close()
+
+
 class TaskViewer:
     def __init__(self, output_path=None):
         if output_path is None:
@@ -41,20 +56,6 @@ class TaskViewer:
             recorder.capture_frame()
 
         recorder.close()
-        env.close()
-
-    def view_episode(self, episode):
-        env = get_world(episode.task_id,
-                        episode.task_params,
-                        episode.world_params,
-                        enable_visualization=True)
-        env.reset()
-        env.set_full_state(episode.initial_full_state)
-        for time, observation, reward, action in zip(episode.timestamps,
-                                                     episode.observations,
-                                                     episode.rewards,
-                                                     episode.robot_actions):
-            env.step(action)
         env.close()
 
     def record_animation_of_policy(self, task, world_params, policy_wrapper, max_time_steps=100):
