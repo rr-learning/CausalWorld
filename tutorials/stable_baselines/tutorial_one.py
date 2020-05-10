@@ -51,7 +51,7 @@ if __name__ == '__main__':
                     help="seed number")
     ap.add_argument("--skip_frame", required=False, default=10,
                     help="skip frame")
-    ap.add_argument("--max_episode_length", required=False, default=2000,
+    ap.add_argument("--max_episode_length", required=False, default=2500,
                     help="maximum episode length")
     ap.add_argument("--total_time_steps_per_update", required=False,
                     default=150000, help="total time steps per update")
@@ -85,6 +85,6 @@ if __name__ == '__main__':
                  skip_frame=skip_frame,
                  seed_num=seed_num,
                  ppo_config=ppo_config,
-                 total_time_steps=6000,
-                 validate_every_timesteps=1000)
+                 total_time_steps=6000000,
+                 validate_every_timesteps=1000000)
 
