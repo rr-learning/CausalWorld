@@ -118,4 +118,3 @@ def timing_profile():
     causal_rl_env.render()
     end = time.time()
     print("causal_rl render:", end - start)
-

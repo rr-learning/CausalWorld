@@ -46,7 +46,7 @@ class PushingTask(BaseTask):
         # reset stage next
         #TODO: Refactor the orientation sampling into a general util method
         if self.task_params["randomize_block_pose"]:
-            block_position = self.stage.random_position(height_limits=0.0435)
+            block_position = self.stage.random_position(height_limits=0.0425)
             block_orientation = euler_to_quaternion([0, 0,
                                                      np.random.uniform(-np.pi,
                                                                        np.pi)])
@@ -55,7 +55,7 @@ class PushingTask(BaseTask):
             block_orientation = euler_to_quaternion([0, 0, 0.0])
 
         if self.task_params["randomize_goal_block_pose"]:
-            goal_position = self.stage.random_position(height_limits=0.0435)
+            goal_position = self.stage.random_position(height_limits=0.0425)
             goal_orientation = euler_to_quaternion([0, 0,
                                                     np.random.uniform(-np.pi,
                                                                       np.pi)])
@@ -91,8 +91,9 @@ class PushingTask(BaseTask):
                                              block_position)
 
         #TODO: orientation distance calculation
-        reward = - (10. * position_distance + angle_diff[0] +
-                    10. * distance_from_block)
+        # reward = - (10. * position_distance + angle_diff[0] +
+        #             10. * distance_from_block)
+        reward = -(distance_from_block)
 
         if position_distance < 0.01:
             self.task_solved = True

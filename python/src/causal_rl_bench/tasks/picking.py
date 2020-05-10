@@ -9,11 +9,12 @@ class PickingTask(BaseTask):
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions"]
-        self.task_stage_observation_keys = ["block_position",
-                                            "goal_height"]
+        self.task_stage_observation_keys = ["block_position"]
         self.task_params["block_mass"] = kwargs.get("block_mass", 0.02)
-        self.task_params["randomize_joint_positions"] = kwargs.get("randomize_joint_positions", True)
-        self.task_params["randomize_block_pose"] = kwargs.get("randomize_block_pose", True)
+        self.task_params["randomize_joint_positions"] = kwargs.get(
+            "randomize_joint_positions", True)
+        self.task_params["randomize_block_pose"] = kwargs.get(
+            "randomize_block_pose", True)
         self.task_params["goal_height"] = kwargs.get("goal_height", 0.1)
 
     def _set_up_stage_arena(self):
@@ -34,7 +35,7 @@ class PickingTask(BaseTask):
 
         # reset stage next
         if self.task_params["randomize_block_pose"]:
-            block_position = self.stage.random_position(height_limits=0.0435)
+            block_position = self.stage.random_position(height_limits=0.0425)
             block_orientation = euler_to_quaternion([0, 0,
                                                      np.random.uniform(-np.pi,
                                                                        np.pi)])

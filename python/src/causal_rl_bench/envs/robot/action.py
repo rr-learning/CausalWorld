@@ -60,14 +60,5 @@ class TriFingerAction(object):
         return 2.0 * (action - self.low) / (self.high - self.low) - 1.0
 
     def denormalize_action(self, action):
-        return self.low + (action + 1.0) / 2.0 * (self.high - self.low)
-
-    def sample_actions(self, sampling_strategy="seperated", mode=None):
-        #TODO: why are the numbers different from the bounds?
-        if mode is None:
-            mode = self.action_mode
-        if mode == "joint_positions" and \
-                sampling_strategy == "uniform":
-            return np.random.uniform(self.low, self.high)
-        else:
-            raise Exception("not yet implemented")
+        return self.low + (action + 1.0) / 2.0 * \
+               (self.high - self.low)
