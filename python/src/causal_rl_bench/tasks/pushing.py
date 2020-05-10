@@ -93,7 +93,7 @@ class PushingTask(BaseTask):
         #TODO: orientation distance calculation
         # reward = - (10. * position_distance + angle_diff[0] +
         #             10. * distance_from_block)
-        reward = -(distance_from_block)
+        reward = -(distance_from_block + 2*position_distance)
 
         if position_distance < 0.01:
             self.task_solved = True
