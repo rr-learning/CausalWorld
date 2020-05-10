@@ -11,7 +11,7 @@ def example():
     world_params = dict()
     world_params["skip_frame"] = 10
     world_params["seed"] = 200
-    stable_baselines_policy_path = "./pushing_model.zip"
+    stable_baselines_policy_path = "./saved_model.zip"
     model = PPO2.load(stable_baselines_policy_path)
 
     # define a method for the policy fn of your trained model
@@ -29,7 +29,8 @@ def example():
     viewer.view_policy(task=task,
                        world_params=world_params,
                        policy_fn=policy_fn,
-                       max_time_steps=2000)
+                       max_time_steps=10000,
+                       number_of_resets=10)
 
 
 if __name__ == '__main__':

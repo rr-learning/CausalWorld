@@ -85,6 +85,6 @@ if __name__ == '__main__':
                  skip_frame=skip_frame,
                  seed_num=seed_num,
                  ppo_config=ppo_config,
-                 total_time_steps=6000000,
+                 total_time_steps=60000000,
                  validate_every_timesteps=1000000)
 

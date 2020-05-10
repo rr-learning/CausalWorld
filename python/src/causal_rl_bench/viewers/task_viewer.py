@@ -31,16 +31,18 @@ def view_episode(episode):
     env.close()
 
 
-def view_policy(task, world_params, policy_fn, max_time_steps):
+def view_policy(task, world_params, policy_fn, max_time_steps,
+                number_of_resets):
     actual_skip_frame = world_params["skip_frame"]
     env = get_world(task.task_name,
                     task.get_task_params(),
                     world_params,
                     enable_visualization=True)
-    obs = env.reset()
-    for time in range(max_time_steps):
-        for _ in range(actual_skip_frame):
-            obs, reward, done, info = env.step(action=policy_fn(obs))
+    for reset_idx in range(number_of_resets):
+        obs = env.reset()
+        for time in range(int(max_time_steps/number_of_resets)):
+            for _ in range(actual_skip_frame):
+                obs, reward, done, info = env.step(action=policy_fn(obs))
     env.close()
 
 
