@@ -71,7 +71,7 @@ class SCuboid(SilhouetteObject):
         self.upper_bounds = dict()
         self.lower_bounds[self.name + "_type"] = np.array([0])
         self.lower_bounds[self.name + "_position"] = \
-            np.array([-0.5] * 3)
+            np.array([-0.5, -0.5, 0])
         self.lower_bounds[self.name + "_orientation"] = \
             np.array([-10] * 4)
         self.lower_bounds[self.name + "_size"] = \

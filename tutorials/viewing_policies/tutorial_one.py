@@ -22,7 +22,7 @@ def example():
     task = Task(task_id='pushing')
     world_params = dict()
     world_params["skip_frame"] = 1
-    world_params["seed"] = 200
+    world_params["seed"] = 77
     task_viewer = TaskViewer()
     policy_wrapper = StableBaselinePPOPolicy(path="pushing_model.zip")
     task_viewer.view_policy(task=task,

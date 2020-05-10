@@ -146,6 +146,26 @@ class Stage(object):
 
         return object_position
 
+    def legacy_random_position(self, height_limits=(0.05, 0.15),
+                                angle_limits=(-2 * math.pi, 2 * math.pi),
+                                radius_limits=(0.0, 0.15)):
+
+        angle = np.random.uniform(*angle_limits)
+        radial_distance = np.random.uniform(*radius_limits)
+
+        if isinstance(height_limits, (int, float)):
+            height_z = height_limits
+        else:
+            height_z = np.random.uniform(*height_limits)
+
+        object_position = [
+            radial_distance * math.cos(angle),
+            radial_distance * math.sin(angle),
+            height_z,
+        ]
+
+        return object_position
+
     def clear(self):
         self.latest_full_state = None
         self.latest_observations = None

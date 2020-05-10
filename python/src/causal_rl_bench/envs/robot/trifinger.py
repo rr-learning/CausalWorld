@@ -148,12 +148,42 @@ class TriFingerRobot(object):
     def get_observation_spaces(self):
         return self.robot_observations.get_observation_spaces()
 
-    def sample_actions(self, sampling_strategy="uniform"):
-        self.robot_actions.sample_actions(sampling_strategy)
+    def sample_positions(self, sampling_strategy="separated"):
+        if sampling_strategy == "uniform":
+            positions = np.random.uniform(self.robot_actions.low,
+                                          self.robot_actions.high)
+        elif sampling_strategy == "separated":
+            def sample_point_in_angle_limits():
+                while True:
+                    joint_pos = np.random.uniform(
+                        low=[-np.pi / 2, np.deg2rad(-77.5), np.deg2rad(-172)],
+                        high=[np.pi / 2, np.deg2rad(257.5), np.deg2rad(-2)],
+                    )
+                    tip_pos = self.tri_finger.pinocchio_utils.forward_kinematics(
+                        np.concatenate(
+                            [joint_pos for i in
+                             range(3)]
+                        ),
+                    )[0]
+                    dist_to_center = np.linalg.norm(tip_pos[:2])
+                    angle = np.arccos(tip_pos[0] / dist_to_center)
+                    if (
+                            (np.pi / 6 < angle < 5 / 6 * np.pi)
+                            and (tip_pos[1] > 0)
+                            and (0.02 < dist_to_center < 0.2)
+                            and np.all(self.robot_actions.low[0:3] < joint_pos)
+                            and np.all(self.robot_actions.high[0:3] > joint_pos)
+                    ):
+                        return joint_pos
 
-    def sample_positions(self, sampling_strategy="uniform"):
-        positions = self.robot_actions.sample_actions(sampling_strategy,
-                                                      mode="joint_positions")
+            positions = np.concatenate(
+                [
+                    sample_point_in_angle_limits()
+                    for i in range(3)
+                ]
+            )
+        else:
+            raise Exception("not yet implemented")
         return positions
 
     def get_action_spaces(self):

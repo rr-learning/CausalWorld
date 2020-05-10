@@ -78,7 +78,7 @@ class Cuboid(RigidObject):
         self.upper_bounds = dict()
         self.lower_bounds[self.name + "_type"] = np.array([0])
         self.lower_bounds[self.name + "_position"] = \
-            np.array([-0.5] * 3)
+            np.array([-0.5, -0.5, 0])
         self.lower_bounds[self.name + "_orientation"] = \
             np.array([-10] * 4)
         self.lower_bounds[self.name + "_linear_velocity"] = \
@@ -94,7 +94,7 @@ class Cuboid(RigidObject):
 
         self.upper_bounds[self.name + "_type"] = np.array([10])
         self.upper_bounds[self.name + "_position"] = \
-            np.array([0.5] * 3 )
+            np.array([0.5] * 3)
         self.upper_bounds[self.name + "_orientation"] = \
             np.array([10] * 4)
         self.upper_bounds[self.name + "_linear_velocity"] = \
@@ -140,7 +140,8 @@ class Cuboid(RigidObject):
 
     def set_state(self, state_dict):
         if 'position' not in state_dict or 'orientation' not in state_dict:
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
+            position, orientation = self.pybullet_client.\
+                getBasePositionAndOrientation(
                 self.block
             )
         if 'position' in state_dict:

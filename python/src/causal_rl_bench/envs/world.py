@@ -11,7 +11,7 @@ class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
                 'video.frames_per_second': 50}
 
-    def __init__(self, task=None, skip_frame=1,
+    def __init__(self, task=None, skip_frame=10,
                  enable_visualization=True, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  normalize_actions=True, normalize_observations=True,
