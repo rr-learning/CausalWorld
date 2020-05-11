@@ -22,6 +22,11 @@ class PushingTask(BaseTask):
             kwargs.get("randomize_block_pose", True)
         self.task_params["randomize_goal_block_pose"] = \
             kwargs.get("randomize_goal_block_pose", True)
+        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
+        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 10)
+        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 0)
+        self.previous_end_effector_positions = None
+        self.previous_object_position = None
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="block",
@@ -66,6 +71,9 @@ class PushingTask(BaseTask):
                                     positions=[block_position, goal_position],
                                     orientations=[block_orientation,
                                                   goal_orientation])
+        self.previous_end_effector_positions = self.robot.compute_end_effector_positions(self.robot.latest_full_state)
+        self.previous_end_effector_positions = self.previous_end_effector_positions.reshape(-1, 3)
+        self.previous_object_position = block_position
         return
 
     def get_description(self):
@@ -78,25 +86,39 @@ class PushingTask(BaseTask):
         goal_position = self.stage.get_object_state('goal_block', 'position')
         goal_orientation = self.stage.get_object_state('goal_block',
                                                        'orientation')
-        position_distance = np.linalg.norm(goal_position - block_position)
+        end_effector_positions = self.robot.compute_end_effector_positions(
+            self.robot.latest_full_state)
+        end_effector_positions = end_effector_positions.reshape(-1, 3)
+
+        #calculate first reward term
+        current_distance_from_block = np.linalg.norm(end_effector_positions -
+                                                     block_position)
+        previous_distance_from_block = np.linalg.norm(self.previous_end_effector_positions -
+                                                      self.previous_object_position)
+        reward_term_1 = previous_distance_from_block - current_distance_from_block
+
+        #calculate second reward term
+        previous_dist_to_goal = np.linalg.norm(goal_position - self.previous_object_position)
+        current_dist_to_goal = np.linalg.norm(goal_position - goal_position)
+        reward_term_2 = previous_dist_to_goal - current_dist_to_goal
+
+        # calculate third reward term
         quat_diff = quaternion_mul(np.expand_dims(goal_orientation, 0),
                                    quaternion_conjugate(np.expand_dims(
                                        block_orientation, 0)))
         angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
+        reward_term_3 = angle_diff
 
-        end_effector_positions = self.robot.compute_end_effector_positions(
-            self.robot.latest_full_state)
-        end_effector_positions = end_effector_positions.reshape(-1, 3)
-        distance_from_block = np.linalg.norm(end_effector_positions -
-                                             block_position)
+        #calculate final_reward
+        reward = self.task_params["reward_weight_1"]*reward_term_1 + self.task_params["reward_weight_2"]*reward_term_2 \
+                 + self.task_params["reward_weight_3"] * reward_term_3
 
-        #TODO: orientation distance calculation
-        # reward = - (10. * position_distance + angle_diff[0] +
-        #             10. * distance_from_block)
-        reward = -(distance_from_block + 2*position_distance)
+        self.previous_end_effector_positions = end_effector_positions
+        self.previous_object_position = block_position
 
-        if position_distance < 0.01:
-            self.task_solved = True
+        # if position_distance < 0.01:
+        #     self.task_solved = True
+
         return reward
 
     def is_done(self):
@@ -115,6 +137,10 @@ class PushingTask(BaseTask):
         new_size = np.random.uniform([0.065], [0.15], size=[3, ])
         interventions_dict["size"] = new_size
         self.stage.object_intervention("goal_block", interventions_dict)
+        self.previous_end_effector_positions = \
+            self.robot.compute_end_effector_positions(self.robot.latest_full_state)
+        self.previous_end_effector_positions = self.previous_end_effector_positions.reshape(-1, 3)
+        self.previous_object_position = new_block_position
         return
 
     def do_intervention(self, **kwargs):
