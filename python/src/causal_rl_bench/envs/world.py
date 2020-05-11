@@ -81,7 +81,6 @@ class World(gym.Env):
         self.metadata['video.frames_per_second'] = \
             (1 / self.simulation_time) / self.skip_frame
         # TODO: verify spaces here
-        self.max_time_steps = 5000
         self._setup_viewing_camera()
         self.reset()
         return
@@ -191,6 +190,9 @@ class World(gym.Env):
 
     def do_random_intervention(self):
         self.task.do_random_intervention()
+
+    def do_intervention(self, **kwargs):
+        self.task.do_intervention(**kwargs)
 
     def get_full_state(self):
         full_state = []

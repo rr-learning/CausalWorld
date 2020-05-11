@@ -182,4 +182,31 @@ class CuboidSilhouette(BaseTask):
         self.stage.object_intervention("cuboid_target", interventions_dict_target)
 
     def do_intervention(self, **kwargs):
-        pass
+        # TODO: For now we only support color for testing reasons
+        if ["cube_color"] != kwargs.keys():
+            raise Exception("Only intervention on cube color allowed at the moment")
+
+        if "cube_color" in kwargs.keys():
+            interventions_dict = dict()
+            for i in range(self.num_of_rigid_cubes):
+                min_angle = i / self.num_of_rigid_cubes * 2 * math.pi
+                max_angle = (i + 1) / self.num_of_rigid_cubes * 2 * math.pi
+                cube_position = self.stage.random_position(height_limits=0.0115 + self.task_params["unit_length"] / 2,
+                                                           angle_limits=(min_angle, max_angle))
+                cube_orientation = euler_to_quaternion([0, 0,
+                                                        np.random.uniform(-np.pi, np.pi)])
+                interventions_dict["position"] = cube_position
+                interventions_dict["orientation"] = cube_orientation
+                interventions_dict["colour"] = kwargs["cube_color"]
+                interventions_dict["size"] = np.array([1, 1, 1]) * self.task_params["unit_length"]
+                self.stage.object_intervention("cube_{}".format(i), interventions_dict)
+
+    def get_visual_variables(self):
+        variables = {"cube_color": [np.array([1, 0, 0]),
+                                    np.array([0, 1, 0]),
+                                    np.array([0, 0, 1]),
+                                    np.array([1, 1, 0]),
+                                    np.array([1, 0, 1]),
+                                    np.array([0, 1, 1]),
+                                    np.array([1, 1, 1])]}
+        return variables
