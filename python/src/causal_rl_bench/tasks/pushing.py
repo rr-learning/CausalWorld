@@ -97,8 +97,9 @@ class PushingTask(BaseTask):
         reward_term_1 = previous_distance_from_block - current_distance_from_block
 
         #calculate second reward term
-        previous_dist_to_goal = np.linalg.norm(goal_position - self.previous_object_position)
-        current_dist_to_goal = np.linalg.norm(goal_position - goal_position)
+        previous_dist_to_goal = np.linalg.norm(goal_position -
+                                               self.previous_object_position)
+        current_dist_to_goal = np.linalg.norm(goal_position - block_position)
         reward_term_2 = previous_dist_to_goal - current_dist_to_goal
 
         # calculate third reward term
