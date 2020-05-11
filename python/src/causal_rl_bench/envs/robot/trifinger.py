@@ -9,14 +9,14 @@ class TriFingerRobot(object):
     def __init__(self, action_mode, observation_mode,
                  enable_visualization=True, skip_frame=20,
                  normalize_actions=True, normalize_observations=True,
-                 enable_goal_image=False):
+                 enable_goal_image=False, simulation_time=0.004):
         self.normalize_actions = normalize_actions
         self.normalize_observations = normalize_observations
         self.action_mode = action_mode
         self.enable_goal_image = enable_goal_image
         self.observation_mode = observation_mode
         self.skip_frame = skip_frame
-        self.simulation_time = 0.004
+        self.simulation_time = simulation_time
         self.control_index = -1
         self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
                                     "tri")

@@ -10,12 +10,11 @@ class PushingTask(BaseTask):
                                             "joint_velocities",
                                             "action_joint_positions",
                                             "end_effector_positions"]
-        self.task_stage_observation_keys = ["block_position",
-                                            "block_orientation",
-                                            "goal_block_position",
-                                            "goal_block_orientation"]
+        self.task_stage_observation_keys = ["goal_block_position",
+                                            "block_position",
+                                            "block_orientation"]
 
-        self.task_params["block_mass"] = kwargs.get("block_mass", 0.02)
+        self.task_params["block_mass"] = kwargs.get("block_mass", 0.08)
         self.task_params["randomize_joint_positions"] = \
             kwargs.get("randomize_joint_positions", True)
         self.task_params["randomize_block_pose"] = \
@@ -107,10 +106,11 @@ class PushingTask(BaseTask):
                                    quaternion_conjugate(np.expand_dims(
                                        block_orientation, 0)))
         angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
-        reward_term_3 = angle_diff
+        reward_term_3 = angle_diff[0]
 
         #calculate final_reward
-        reward = self.task_params["reward_weight_1"]*reward_term_1 + self.task_params["reward_weight_2"]*reward_term_2 \
+        reward = self.task_params["reward_weight_1"]*reward_term_1 + \
+                 self.task_params["reward_weight_2"]*reward_term_2 \
                  + self.task_params["reward_weight_3"] * reward_term_3
 
         self.previous_end_effector_positions = end_effector_positions
