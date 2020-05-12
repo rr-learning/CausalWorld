@@ -4,6 +4,7 @@ import pybullet
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
 
 
@@ -76,12 +77,15 @@ class World(gym.Env):
         else:
             self.observation_space = self.robot.get_observation_spaces()
         self.action_space = self.robot.get_action_spaces()
-        self.data_recorder = data_recorder
         self.skip_frame = skip_frame
         self.metadata['video.frames_per_second'] = \
             (1 / self.simulation_time) / self.skip_frame
         # TODO: verify spaces here
         self._setup_viewing_camera()
+
+        self.data_recorder = data_recorder
+        self.tracker = Tracker(task=self.task, world_params=self.get_world_params())
+
         self.reset()
         return
 
@@ -140,6 +144,7 @@ class World(gym.Env):
         return [seed]
 
     def reset(self):
+        self.tracker.add_episode_experience(self.episode_length)
         self.episode_length = 0
         self.task.reset_task()
         # TODO: make sure that stage observations returned are up to date
@@ -161,6 +166,7 @@ class World(gym.Env):
 
     def get_world_params(self):
         world_params = dict()
+        # TODO: task name is probably a redundant parameter as this is not bound to the world and could change
         world_params["task_name"] = self.task.task_name
         world_params["skip_frame"] = self.robot.get_skip_frame()
         world_params["action_mode"] = self.robot.get_action_mode()
@@ -169,7 +175,7 @@ class World(gym.Env):
             self.robot.robot_actions.is_normalized()
         world_params["normalize_observations"] = \
             self.robot.robot_observations.is_normalized()
-        world_params["max_episode_length"] = None
+        world_params["max_episode_length"] = self.max_episode_length
         world_params["enable_goal_image"] = self.enable_goal_image
         return world_params
 
@@ -177,6 +183,9 @@ class World(gym.Env):
         if self.data_recorder:
             self.data_recorder.save()
         self.robot.close()
+
+    def get_tracker(self):
+        return self.tracker
 
     def enforce_max_episode_length(self, episode_length=2000):
         self.enforce_episode_length = True
@@ -189,10 +198,18 @@ class World(gym.Env):
             return self.task.is_done()
 
     def do_random_intervention(self):
+        self.tracker.add_episode_experience(self.episode_length)
+        # TODO: Set episode length after intervention to zero?
+        self.episode_length = 0
         self.task.do_random_intervention()
+        self.tracker.do_intervention(self.task)
 
     def do_intervention(self, **kwargs):
+        self.tracker.add_episode_experience(self.episode_length)
+        # TODO: Set episode length after intervention to zero?
+        self.episode_length = 0
         self.task.do_intervention(**kwargs)
+        self.tracker.do_intervention(self.task)
 
     def get_full_state(self):
         full_state = []

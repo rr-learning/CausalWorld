@@ -11,7 +11,7 @@ class CuboidSilhouette(BaseTask):
         self.task_params["silhouette_size"] = kwargs.get("silhouette_size", np.array([1, 2, 3]))
         self.task_params["silhouette_position_mode"] = kwargs.get("silhouette_position_mode", "center")
         self.task_params["unit_length"] = kwargs.get("unit_length", 0.065)
-        self.task_params["cube_color"] = kwargs.get("cube_color", np.array([1, 0, 0]))
+        self.task_params["cube_color"] = kwargs.get("cube_color", "FF0000")
         self.num_of_rigid_cubes = int(np.prod(self.task_params["silhouette_size"]))
         self.silhouette_orientation = [0, 0, 0, 1]
         self.silhouette_position = None
@@ -56,13 +56,13 @@ class CuboidSilhouette(BaseTask):
                                                        angle_limits=(min_angle, max_angle))
             cube_orientation = euler_to_quaternion([0, 0,
                                                     np.random.uniform(-np.pi, np.pi)])
-
+            r, g, b = bytes.fromhex(self.task_params["cube_color"])
             self.stage.add_rigid_general_object(name="cube_{}".format(i),
                                                 shape="cube",
                                                 size=np.array([1, 1, 1]) * self.task_params["unit_length"],
                                                 position=cube_position,
                                                 orientation=cube_orientation,
-                                                colour=self.task_params["cube_color"])
+                                                colour=np.array([r, g, b]))
 
             self.task_stage_observation_keys.append("cube_{}_position".format(i))
             self.task_stage_observation_keys.append("cube_{}_orientation".format(i))
@@ -183,11 +183,13 @@ class CuboidSilhouette(BaseTask):
 
     def do_intervention(self, **kwargs):
         # TODO: For now we only support color for testing reasons
-        if ["cube_color"] != kwargs.keys():
+        if "cube_color" not in kwargs.keys():
             raise Exception("Only intervention on cube color allowed at the moment")
 
         if "cube_color" in kwargs.keys():
             interventions_dict = dict()
+            self.task_params["cube_color"] = kwargs.get("cube_color")
+            r, g, b = bytes.fromhex(self.task_params["cube_color"])
             for i in range(self.num_of_rigid_cubes):
                 min_angle = i / self.num_of_rigid_cubes * 2 * math.pi
                 max_angle = (i + 1) / self.num_of_rigid_cubes * 2 * math.pi
@@ -197,16 +199,12 @@ class CuboidSilhouette(BaseTask):
                                                         np.random.uniform(-np.pi, np.pi)])
                 interventions_dict["position"] = cube_position
                 interventions_dict["orientation"] = cube_orientation
-                interventions_dict["colour"] = kwargs["cube_color"]
+                interventions_dict["colour"] = np.array([r, g, b])
                 interventions_dict["size"] = np.array([1, 1, 1]) * self.task_params["unit_length"]
                 self.stage.object_intervention("cube_{}".format(i), interventions_dict)
 
     def get_visual_variables(self):
-        variables = {"cube_color": [np.array([1, 0, 0]),
-                                    np.array([0, 1, 0]),
-                                    np.array([0, 0, 1]),
-                                    np.array([1, 1, 0]),
-                                    np.array([1, 0, 1]),
-                                    np.array([0, 1, 1]),
-                                    np.array([1, 1, 1])]}
+        variables = {"cube_color": ["FF0000",
+                                    "00FF00",
+                                    "0000FF"]}
         return variables
