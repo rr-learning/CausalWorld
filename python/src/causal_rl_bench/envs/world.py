@@ -222,8 +222,8 @@ class World(gym.Env):
         self._cam_dist = 1
         self._cam_yaw = 0
         self._cam_pitch = -60
-        self._render_width = 640
-        self._render_height = 480
+        self._render_width = 320
+        self._render_height = 240
         base_pos = [0, 0, 0]
         self.view_matrix = self.pybullet_client.computeViewMatrixFromYawPitchRoll(
             cameraTargetPosition=base_pos,
