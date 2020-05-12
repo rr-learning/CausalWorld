@@ -30,7 +30,7 @@ class World(gym.Env):
         self.enable_goal_image = enable_goal_image
         self.action_mode = action_mode
         self.seed(seed)
-        self.simulation_time = 0.001
+        self.simulation_time = 0.004
         self.robot = TriFingerRobot(action_mode=action_mode,
                                     observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,
@@ -174,6 +174,7 @@ class World(gym.Env):
             self.robot.robot_observations.is_normalized()
         world_params["max_episode_length"] = None
         world_params["enable_goal_image"] = self.enable_goal_image
+        world_params["simulation_time"] = self.simulation_time
         return world_params
 
     def close(self):
