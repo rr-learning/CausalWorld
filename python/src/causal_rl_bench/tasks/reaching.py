@@ -11,7 +11,7 @@ class ReachingTask(BaseTask):
                                             "end_effector_positions"]
 
         self.task_params["randomize_joint_positions"] = \
-            kwargs.get("randomize_joint_positions", False)
+            kwargs.get("randomize_joint_positions", True)
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
         self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 10)
         self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 0)
@@ -25,7 +25,6 @@ class ReachingTask(BaseTask):
 
             positions = [0, -deg45, -deg45]
             positions = positions * 3
-            positions = self.robot.robot_actions.joint_positions_lower_bounds
         self.robot.set_full_state(np.append(positions,
                                             np.zeros(9)))
         return

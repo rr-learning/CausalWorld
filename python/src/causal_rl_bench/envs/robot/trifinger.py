@@ -1,6 +1,5 @@
 from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
-from causal_rl_bench.envs.robot.temp_inverse_kinemetics import apply_inverse_kinemetics
 from pybullet_fingers.sim_finger import SimFinger
 import numpy as np
 
@@ -44,7 +43,7 @@ class TriFingerRobot(object):
         return end_effector_position
 
     def _process_action_joint_positions(self, robot_state):
-        last_action_applied = self.get_last_clippd_action()
+        last_action_applied = self.get_last_clipped_action()
         if self.normalize_actions and not self.normalize_observations:
             last_action_applied = self.denormalize_observation_for_key(observation=last_action_applied,
                                                                        key='action_joint_positions')
@@ -85,34 +84,12 @@ class TriFingerRobot(object):
         if self.action_mode == "joint_positions":
             finger_action = self.tri_finger.Action(position=action_to_apply)
         elif self.action_mode == "joint_torques":
+            #TODO: deal with clipped action here and observation part too
             finger_action = self.tri_finger.Action(torque=action_to_apply)
         elif self.action_mode == "end_effector_positions":
-            # joint_positions = self.tri_finger.pybullet_inverse_kinematics([action_to_apply[:3],
-            #                                                                action_to_apply[3:6],
-            #                                                                action_to_apply[6:]])
-            #TODO: only applies it to the first finger to avoid collision for now
-            # filtered_action = self.robot_actions.joint_positions_lower_bounds
-            # filtered_action[:3] = action_to_apply[:3]
-            joint_positions = apply_inverse_kinemetics(self.get_pybullet_client(),
-                                                       self.tri_finger.finger_id,
-                                                       self.tri_finger.finger_tip_ids,
-                                                       action_to_apply,
-                                                       list(self.latest_full_state.position))
-            finger_action = self.tri_finger.Action(position=joint_positions)
-        elif self.action_mode == "delta_end_effector_positions":
-            # joint_positions = self.tri_finger.pybullet_inverse_kinematics([action_to_apply[:3],
-            #                                                                action_to_apply[3:6],
-            #                                                                action_to_apply[6:]])
-            #TODO: only applies it to the first finger to avoid collision for now
-            # filtered_action = self.robot_actions.joint_positions_lower_bounds
-            # filtered_action[:3] = action_to_apply[:3]
-            current_end_effector_positions = self.compute_end_effector_positions(self.latest_full_state)
-            action_to_apply = current_end_effector_positions + action_to_apply
-            joint_positions = apply_inverse_kinemetics(self.get_pybullet_client(),
-                                                       self.tri_finger.finger_id,
-                                                       self.tri_finger.finger_tip_ids,
-                                                       action_to_apply,
-                                                       list(self.latest_full_state.position))
+            #TODO: check if the desired tip positions are in the feasible set
+            joint_positions = self.tri_finger.pybullet_inverse_kinematics(action_to_apply,
+                                                                          list(self.latest_full_state.position))
             finger_action = self.tri_finger.Action(position=joint_positions)
         else:
             raise Exception("The action mode {} is not supported".
@@ -166,7 +143,7 @@ class TriFingerRobot(object):
     def get_last_action(self):
         return self.last_action
 
-    def get_last_clippd_action(self):
+    def get_last_clipped_action(self):
         return self.last_clipped_action
 
     def get_tip_positions(self, robot_state):
@@ -210,6 +187,14 @@ class TriFingerRobot(object):
                     for i in range(3)
                 ]
             )
+        elif sampling_strategy == "middle_stage":
+            tip_positions = np.random.uniform([0.1, 0.1, 0.15, 0.1, -0.15, 0.15, -0.15, -0.15, 0.15],
+                                              [0.15, 0.15, 0.15, 0.15, -0.1, 0.15, -0.1, -0.1, 0.15])
+            #red is 300, green is 60, blue is 180
+            #perform inverse kinemetics
+            positions = self.tri_finger.pybullet_inverse_kinematics(tip_positions, list(self.get_rest_pose()[0]))
+            #TODO:add heuristics if the points are in the reachabe sets or not.
+
         else:
             raise Exception("not yet implemented")
         return positions

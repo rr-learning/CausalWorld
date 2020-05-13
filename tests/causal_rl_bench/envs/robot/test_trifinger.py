@@ -156,40 +156,33 @@ def test_inverse_kinemetics():
     np.random.seed(0)
     skip_frame = 1
 
-    # task = Task(task_id='reaching')
-    # env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
-    #             normalize_actions=False, seed=0, action_mode="delta_end_effector_positions")
-    # for _ in range(50):
-    #     obs = env.reset()
-    #     current_end_effector_positions = obs[18:]
-    #     for _ in range(1000):
-    #         desired_delta_action = np.random.uniform(env.action_space.low, env.action_space.high)
-    #         obs, reward, done, info = env.step(desired_delta_action)
-    #         if ((np.abs(obs[18:] - (current_end_effector_positions + desired_delta_action)) > 0.02).any()):
-    #             raise AssertionError("The inverse kinemtics failed to reach these values {} but reached instead {}".
-    #                                  format((current_end_effector_positions + desired_delta_action), obs[18:]))
-    #         current_end_effector_positions = obs[18:]
-
-    skip_frame = 100
     task = Task(task_id='reaching')
     env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
                 normalize_actions=False, seed=0, action_mode="end_effector_positions")
 
-    _, end_effectors = env.robot.get_rest_pose()
+    #test 1 stay at the same place
     for _ in range(50):
         obs = env.reset()
-        print(obs[18:])
-        #put the second and third finger in rest pose
-        for _ in range(1000):
-            desired_action = end_effectors
-            # desired_action[3:] = np.array(end_effectors[3:])
-            for _ in range(skip_frame):
+        current_end_effector_positions = obs[18:]
+        desired_action = np.zeros([9, ]) + current_end_effector_positions
+        for _ in range(250):
+            obs, reward, done, info = env.step(desired_action)
+        if ((np.abs(obs[18:] - desired_action) > 0.01).any()):
+            raise AssertionError("The inverse kinemtics failed to reach these values {} but reached instead {}".
+                                 format(current_end_effector_positions*100, obs[18:]*100))
+    print("Staying at the same place passed")
+
+    #test n random deltas with different episodes
+    for i in range(50):
+        obs = env.reset()
+        current_end_effector_positions = obs[18:]
+        for j in range(100):
+            #TODO: need to check if its in the feasible set or not
+            desired_action = current_end_effector_positions + np.random.uniform(-0.02, 0.02)
+            for _ in range(250):
                 obs, reward, done, info = env.step(desired_action)
-            print("hello")
-            if ((np.abs(obs[18:] - desired_action) > 0.02).any()):
-                raise AssertionError("The inverse kinemtics failed to reach these values {} but reached instead {}".
-                                     format(desired_action, obs[18:]))
-    # env.close()
-
-
-test_inverse_kinemetics()
+            # if ((np.abs(obs[18:] - desired_action) > 0.03).any()):
+            #     raise AssertionError("The inverse kinemtics failed to reach these values {} but reached instead {} "
+            #                          "with delta {}".
+            #                          format(desired_action, obs[18:], np.abs(obs[18:] - desired_action)))
+    env.close()

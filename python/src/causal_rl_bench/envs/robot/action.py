@@ -25,12 +25,8 @@ class TriFingerAction(object):
             upper_bounds = np.array([self.max_motor_torque] * 3 * num_fingers)
 
         elif action_mode == "end_effector_positions":
-            lower_bounds = np.array([-0.2, -0.2, 0] * 3)
-            upper_bounds = np.array([0.2, 0.2, 0.2] * 3)
-
-        elif action_mode == "delta_end_effector_positions":
-            lower_bounds = np.array([-0.01, -0.01, -0.01] * 3)
-            upper_bounds = np.array([0.01, 0.01, 0.01] * 3)
+            lower_bounds = np.array([-0.5, -0.5, 0] * 3)
+            upper_bounds = np.array([0.5, 0.5, 0.5] * 3)
 
         else:
             raise ValueError("No valid action_mode specified: {}".
