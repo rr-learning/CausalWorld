@@ -101,4 +101,53 @@ def test_get_action_spaces():
     assert False
 
 
+def test_pd_gains():
+    #control the robot using pd controller
+    from causal_rl_bench.envs.world import World
+    from causal_rl_bench.tasks.task import Task
+    import numpy as np
+    np.random.seed(0)
+    task = Task(task_id='pushing')
+    skip_frame = 1
+    env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
+                normalize_actions=False, seed=0)
+    zero_hold = int(5000 / skip_frame) #reach desired position in 4 secs?
+    obs = env.reset()
+    #test bounds first
+
+    for _ in range(zero_hold):
+        chosen_action = env.action_space.high
+        obs, reward, done, info = env.step(chosen_action)
+    current_joint_positions = obs[:9]
+    if (((current_joint_positions - chosen_action) > 0.1).any()):
+        raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
+                             format(chosen_action, current_joint_positions))
+    print("verified upper bound")
+
+    for _ in range(zero_hold):
+        chosen_action = env.action_space.low
+        obs, reward, done, info = env.step(chosen_action)
+    current_joint_positions = obs[:9]
+    if (((current_joint_positions - chosen_action) > 0.1).any()):
+        raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
+                             format(chosen_action, current_joint_positions))
+    print("verified lower bound")
+    
+    for i in range(200):
+        #check for first finger
+        chosen_action = np.random.uniform(env.action_space.low, env.action_space.high)
+        chosen_action[3:] = env.action_space.low[3:]
+        chosen_action[1] = 0
+        chosen_action[2] = 0
+        for _ in range(zero_hold):
+            chosen_action = chosen_action
+            obs, reward, done, info = env.step(chosen_action)
+        current_joint_positions = obs[:9]
+        if(((current_joint_positions - chosen_action) > 0.1).any()):
+            raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
+                                 format(chosen_action, current_joint_positions))
+    env.close()
+
+
+test_pd_gains()
 
