@@ -1,0 +1,21 @@
+<?xml version="1.0.0"?>
+<package format="2">
+  <name>causal_rl_bench</name>
+  <version>0.0.1</version>
+  <description>
+      Causal RL Benchmark.
+  </description>
+
+  <maintainer email="ossama.ahmed@tue.mpg.de">Ossama Ahmed</maintainer>
+  <license>TODO</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <depend>robot_interfaces</depend>
+  <depend>eigen</depend>
+
+  <build_depend>mpi_cmake_modules</build_depend>
+  <build_depend>pybind11_catkin</build_depend>
+  <export>
+  </export>
+</package>
