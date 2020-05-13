@@ -43,7 +43,7 @@ class ExampleTask(BaseTask):
 
     def _reset_task(self):
         #reset robot first
-        sampled_positions = self.robot.sample_positions()
+        sampled_positions = self.robot.sample_joint_positions()
         self.robot.set_full_state(np.append(sampled_positions,
                                             np.zeros(9)))
 

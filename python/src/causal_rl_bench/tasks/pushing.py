@@ -11,6 +11,7 @@ class PushingTask(BaseTask):
                                             "action_joint_positions",
                                             "end_effector_positions"]
         self.task_stage_observation_keys = ["goal_block_position",
+                                            "goal_block_orientation",
                                             "block_position",
                                             "block_orientation"]
 
@@ -23,9 +24,10 @@ class PushingTask(BaseTask):
             kwargs.get("randomize_goal_block_pose", True)
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
         self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 10)
-        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 0)
+        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 1)
         self.previous_end_effector_positions = None
         self.previous_object_position = None
+        self.previous_object_orientation = None
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="block",
@@ -37,17 +39,13 @@ class PushingTask(BaseTask):
         return
 
     def _reset_task(self):
-        #reset robot first
         if self.task_params["randomize_joint_positions"]:
-            positions = self.robot.sample_positions()
+            positions = self.robot.sample_joint_positions()
         else:
-            positions = [0, -0.5, -0.6,
-                         0, -0.4, -0.7,
-                         0, -0.4, -0.7]
+            positions = self.robot.get_rest_pose()[0]
         self.robot.set_full_state(np.append(positions,
                                             np.zeros(9)))
 
-        # reset stage next
         #TODO: Refactor the orientation sampling into a general util method
         if self.task_params["randomize_block_pose"]:
             block_position = self.stage.random_position(height_limits=0.0425)
@@ -55,8 +53,8 @@ class PushingTask(BaseTask):
                                                      np.random.uniform(-np.pi,
                                                                        np.pi)])
         else:
-            block_position = [0.0, -0.02, 0.045155]
-            block_orientation = euler_to_quaternion([0, 0, 0.0])
+            block_position = [0, 0, 0.0425]
+            block_orientation = euler_to_quaternion([0, 0, 0])
 
         if self.task_params["randomize_goal_block_pose"]:
             goal_position = self.stage.random_position(height_limits=0.0425)
@@ -64,15 +62,19 @@ class PushingTask(BaseTask):
                                                     np.random.uniform(-np.pi,
                                                                       np.pi)])
         else:
-            goal_position = [0.04, -0.02, 0.045155]
-            goal_orientation = euler_to_quaternion([0, 0, 0.0])
+            goal_position = [0.04, 0.08, 0.0425]
+            goal_orientation = euler_to_quaternion([0, 0, 0])
         self.stage.set_objects_pose(names=["block", "goal_block"],
                                     positions=[block_position, goal_position],
                                     orientations=[block_orientation,
                                                   goal_orientation])
-        self.previous_end_effector_positions = self.robot.compute_end_effector_positions(self.robot.latest_full_state)
-        self.previous_end_effector_positions = self.previous_end_effector_positions.reshape(-1, 3)
+        self.previous_end_effector_positions = \
+            self.robot.compute_end_effector_positions(
+                self.robot.latest_full_state.position)
+        self.previous_end_effector_positions = \
+            self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = block_position
+        self.previous_object_orientation = block_orientation
         return
 
     def get_description(self):
@@ -86,7 +88,7 @@ class PushingTask(BaseTask):
         goal_orientation = self.stage.get_object_state('goal_block',
                                                        'orientation')
         end_effector_positions = self.robot.compute_end_effector_positions(
-            self.robot.latest_full_state)
+            self.robot.latest_full_state.position)
         end_effector_positions = end_effector_positions.reshape(-1, 3)
 
         #calculate first reward term
@@ -103,11 +105,18 @@ class PushingTask(BaseTask):
         reward_term_2 = previous_dist_to_goal - current_dist_to_goal
 
         # calculate third reward term
+        quat_diff_old = quaternion_mul(np.expand_dims(goal_orientation, 0),
+                                       quaternion_conjugate(np.expand_dims(
+                                    self.previous_object_orientation, 0)))
+        angle_diff_old = 2 * np.arccos(np.clip(quat_diff_old[:, 3], -1., 1.))
+
         quat_diff = quaternion_mul(np.expand_dims(goal_orientation, 0),
-                                   quaternion_conjugate(np.expand_dims(
-                                       block_orientation, 0)))
-        angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
-        reward_term_3 = angle_diff[0]
+                                       quaternion_conjugate(np.expand_dims(
+                                           block_orientation,
+                                           0)))
+        current_angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
+
+        reward_term_3 = angle_diff_old[0] - current_angle_diff[0]
 
         #calculate final_reward
         reward = self.task_params["reward_weight_1"]*reward_term_1 + \
@@ -116,6 +125,7 @@ class PushingTask(BaseTask):
 
         self.previous_end_effector_positions = end_effector_positions
         self.previous_object_position = block_position
+        self.previous_object_orientation = block_orientation
 
         # if position_distance < 0.01:
         #     self.task_solved = True
@@ -139,8 +149,10 @@ class PushingTask(BaseTask):
         interventions_dict["size"] = new_size
         self.stage.object_intervention("goal_block", interventions_dict)
         self.previous_end_effector_positions = \
-            self.robot.compute_end_effector_positions(self.robot.latest_full_state)
-        self.previous_end_effector_positions = self.previous_end_effector_positions.reshape(-1, 3)
+            self.robot.compute_end_effector_positions(
+                self.robot.latest_full_state.position)
+        self.previous_end_effector_positions = \
+            self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = new_block_position
         return
 

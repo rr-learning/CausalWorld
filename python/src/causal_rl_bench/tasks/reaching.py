@@ -1,32 +1,48 @@
 from causal_rl_bench.tasks.base_task import BaseTask
 import numpy as np
-import math
 
 
 class ReachingTask(BaseTask):
     def __init__(self, **kwargs):
-        super().__init__(task_name="pushing")
+        super().__init__(task_name="reaching")
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
-                                            "end_effector_positions"]
+                                            "end_effector_positions",
+                                            "action_joint_positions",
+                                            "end_effector_positions_goal"]
 
         self.task_params["randomize_joint_positions"] = \
             kwargs.get("randomize_joint_positions", True)
-        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
-        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 10)
-        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 0)
+        #TODO: implement non randomization of goal
+        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1",
+                                                         1)
+        self.end_effector_positions_goal = None
+
+    def _set_up_non_default_observations(self):
+        self._setup_non_default_robot_observation_key(
+            observation_key="end_effector_positions_goal",
+            observation_function=self._set_end_effector_positions_goal,
+            lower_bound=[-0.5, -0.5, 0]*3,
+            upper_bound=[0.5, 0.5, 0.5]*3)
+        return
+
+    def _set_end_effector_positions_goal(self):
+        return self.end_effector_positions_goal
 
     def _reset_task(self):
         #reset robot first
         if self.task_params["randomize_joint_positions"]:
-            positions = self.robot.sample_positions()
+            positions = self.robot.sample_joint_positions()
         else:
-            deg45 = np.pi / 4
-
-            positions = [0, -deg45, -deg45]
-            positions = positions * 3
+            positions = self.robot.get_rest_pose()[0]
         self.robot.set_full_state(np.append(positions,
                                             np.zeros(9)))
+        self.previous_end_effector_positions = \
+            self.robot.compute_end_effector_positions(
+                self.robot.latest_full_state.position)
+        joints_goal = self.robot.sample_joint_positions()
+        self.end_effector_positions_goal = self.robot.\
+            compute_end_effector_positions(joints_goal)
         return
 
     def get_description(self):
@@ -34,7 +50,17 @@ class ReachingTask(BaseTask):
             "Task where the goal is to reach a point for each finger"
 
     def get_reward(self):
-        reward = 0
+        current_end_effector_positions = \
+            self.robot.compute_end_effector_positions(
+                self.robot.latest_full_state.position)
+        previous_dist_to_goal = np.linalg.norm(
+            self.end_effector_positions_goal -
+            self.previous_end_effector_positions)
+        current_dist_to_goal = np.linalg.norm(self.end_effector_positions_goal
+                                              - current_end_effector_positions)
+        reward_term_1 = previous_dist_to_goal - current_dist_to_goal
+        reward = self.task_params["reward_weight_1"] * reward_term_1
+        self.end_effector_positions_goal = current_end_effector_positions
         return reward
 
     def is_done(self):

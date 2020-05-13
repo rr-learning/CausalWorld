@@ -34,10 +34,10 @@ class TriFingerObservations(object):
             [0.36, 0.36, 0.36] * num_fingers
 
         self.lower_bounds["joint_positions"] = \
-            [-math.radians(90), -math.radians(90),
-             -math.radians(172)] * num_fingers
+            [-math.radians(70), -math.radians(70),
+             -math.radians(160)] * num_fingers
         self.upper_bounds["joint_positions"] = \
-            [math.radians(90), math.radians(100), math.radians(-2)] * \
+            [math.radians(70), 0, math.radians(-2)] * \
             num_fingers
 
         self.lower_bounds["joint_velocities"] = \
@@ -80,8 +80,12 @@ class TriFingerObservations(object):
 
     def get_observation_spaces(self):
         if self.normalized_observations:
-            return spaces.Box(low=np.full(shape=self.low.shape, fill_value=self.low_norm, dtype=np.float64),
-                              high=np.full(shape=self.low.shape, fill_value=self.high_norm, dtype=np.float64),
+            return spaces.Box(low=np.full(shape=self.low.shape,
+                                          fill_value=self.low_norm,
+                                          dtype=np.float64),
+                              high=np.full(shape=self.low.shape,
+                                           fill_value=self.high_norm,
+                                           dtype=np.float64),
                               dtype=np.float64)
         else:
             if self.observation_mode == "structured":
@@ -108,25 +112,30 @@ class TriFingerObservations(object):
         self.set_observation_spaces()
 
     def normalize_observation(self, observation):
-        return (self.high_norm - self.low_norm) * (observation - self.low) / (self.high - self.low) \
+        return (self.high_norm - self.low_norm) * (observation - self.low) / \
+               (self.high - self.low) \
                + self.low_norm
 
     def normalize_observation_for_key(self, observation, key):
         lower_key = np.array(self.lower_bounds[key])
         higher_key = np.array(self.upper_bounds[key])
-        return (self.high_norm - self.low_norm) * (observation - lower_key) / (higher_key - lower_key) + self.low_norm
+        return (self.high_norm - self.low_norm) * (observation - lower_key) / \
+               (higher_key - lower_key) + self.low_norm
 
     def denormalize_observation(self, observation):
-        return self.low + (observation - self.low_norm) / (self.high_norm - self.low_norm) * (self.high - self.low)
+        return self.low + (observation - self.low_norm) / \
+               (self.high_norm - self.low_norm) * (self.high - self.low)
 
     def denormalize_observation_for_key(self, observation, key):
         lower_key = np.array(self.lower_bounds[key])
         higher_key = np.array(self.upper_bounds[key])
-        return lower_key + (observation - self.low_norm) / (self.high_norm - self.low_norm) * (higher_key - lower_key)
+        return lower_key + (observation - self.low_norm) / \
+               (self.high_norm - self.low_norm) * (higher_key - lower_key)
 
     def satisfy_constraints(self, observation):
         if self.normalized_observations:
-            return (observation > self.low_norm).all() and (observation < self.high_norm).all()
+            return (observation > self.low_norm).all() and \
+                   (observation < self.high_norm).all()
         else:
             return (observation > self.low).all() and \
                    (observation < self.high).all()
@@ -143,12 +152,6 @@ class TriFingerObservations(object):
                 (lower_bound is None or upper_bound is None):
             raise Exception("Observation key {} is not known please specify "
                             "the low and upper found".format(observation_key))
-        # if observation_key not in self.observation_functions.keys() and \
-        #         (observation_fn is None) and observation_key not in \
-        #         ["joint_torques", "joint_positions", "joint_velocities",
-        #          "cameras"]:
-        #     raise Exception("Observation function calculation for observation "
-        #                     "key {} is unknown".format(observation_key))
         if lower_bound is not None and upper_bound is not None:
             self.lower_bounds[observation_key] = lower_bound
             self.upper_bounds[observation_key] = upper_bound
@@ -189,7 +192,8 @@ class TriFingerObservations(object):
             elif observation in self.observation_functions:
                 observations_dict[observation] = \
                     self.observation_functions[observation](robot_state)
-            #else its in the spaces but will be handled by the task itself, the task also needs to check for normalization somehow
+            #else its in the spaces but will be handled by the task itself,
+            # the task also needs to check for normalization somehow
         #add the helper observations as well
         for observation in helper_keys:
             if observation == "joint_positions":
@@ -207,11 +211,14 @@ class TriFingerObservations(object):
                 observations_dict[observation] = \
                     self.observation_functions[observation](robot_state)
             else:
-                raise Exception("The robot doesn't know about observation key {}".format(observation))
+                raise Exception("The robot doesn't know about observation "
+                                "key {}".format(observation))
         #now normalize everything here
         if self.normalized_observations:
             for key in observations_dict.keys():
-                observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
+                observations_dict[key] = \
+                    self.normalize_observation_for_key(observations_dict[key],
+                                                       key)
 
         return observations_dict
 

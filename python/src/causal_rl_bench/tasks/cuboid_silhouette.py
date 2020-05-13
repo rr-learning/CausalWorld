@@ -69,7 +69,7 @@ class CuboidSilhouette(BaseTask):
         return
 
     def _reset_task(self):
-        sampled_positions = self.robot.sample_positions()
+        sampled_positions = self.robot.sample_joint_positions()
         self.robot.set_full_state(np.append(sampled_positions,
                                             np.zeros(9)))
         for i in range(self.num_of_rigid_cubes):

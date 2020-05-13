@@ -67,7 +67,7 @@ def test_pd_gains():
         real_positions = perform_step_real_robot(frontend, desired_action, zero_hold_real_robot)
         for j in range(100):
             desired_action = default_desired_action
-            desired_action[i*3:(i+1)*3] = env.robot.sample_positions()[i*3:(i+1)*3]
+            desired_action[i*3:(i+1)*3] = env.robot.sample_joint_positions()[i*3:(i+1)*3]
             simulated_positions = perform_step_simulated_robot(env, desired_action, zero_hold_simulator)
             real_positions = perform_step_real_robot(frontend, desired_action, zero_hold_real_robot)
             if (np.abs(real_positions - simulated_positions) > threshold).any():
@@ -75,7 +75,7 @@ def test_pd_gains():
 
     # check random positions now with possible collisions
     for i in range(100):
-        desired_action = env.robot.sample_positions()
+        desired_action = env.robot.sample_joint_positions()
         simulated_positions = perform_step_simulated_robot(env, desired_action, zero_hold_simulator)
         real_positions = perform_step_real_robot(frontend, desired_action, zero_hold_real_robot)
         if (np.abs(real_positions - simulated_positions) > threshold).any():

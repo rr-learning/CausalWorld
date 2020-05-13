@@ -4,8 +4,8 @@ import numpy as np
 
 
 def example():
-    task = Task(task_id='reaching')
-    env = World(task=task, enable_visualization=True, skip_frame=10, action_mode="delta_end_effector_positions")
+    task = Task(task_id='pushing')
+    env = World(task=task, enable_visualization=True)
     env.reset()
     for _ in range(2000):
         env.reset()

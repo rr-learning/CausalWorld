@@ -186,3 +186,5 @@ def test_inverse_kinemetics():
             #                          "with delta {}".
             #                          format(desired_action, obs[18:], np.abs(obs[18:] - desired_action)))
     env.close()
+
+test_inverse_kinemetics()
