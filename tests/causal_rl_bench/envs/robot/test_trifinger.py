@@ -149,5 +149,47 @@ def test_pd_gains():
     env.close()
 
 
-test_pd_gains()
+def test_inverse_kinemetics():
+    from causal_rl_bench.envs.world import World
+    from causal_rl_bench.tasks.task import Task
+    import numpy as np
+    np.random.seed(0)
+    skip_frame = 1
 
+    # task = Task(task_id='reaching')
+    # env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
+    #             normalize_actions=False, seed=0, action_mode="delta_end_effector_positions")
+    # for _ in range(50):
+    #     obs = env.reset()
+    #     current_end_effector_positions = obs[18:]
+    #     for _ in range(1000):
+    #         desired_delta_action = np.random.uniform(env.action_space.low, env.action_space.high)
+    #         obs, reward, done, info = env.step(desired_delta_action)
+    #         if ((np.abs(obs[18:] - (current_end_effector_positions + desired_delta_action)) > 0.02).any()):
+    #             raise AssertionError("The inverse kinemtics failed to reach these values {} but reached instead {}".
+    #                                  format((current_end_effector_positions + desired_delta_action), obs[18:]))
+    #         current_end_effector_positions = obs[18:]
+
+    skip_frame = 100
+    task = Task(task_id='reaching')
+    env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
+                normalize_actions=False, seed=0, action_mode="end_effector_positions")
+
+    _, end_effectors = env.robot.get_rest_pose()
+    for _ in range(50):
+        obs = env.reset()
+        print(obs[18:])
+        #put the second and third finger in rest pose
+        for _ in range(1000):
+            desired_action = end_effectors
+            # desired_action[3:] = np.array(end_effectors[3:])
+            for _ in range(skip_frame):
+                obs, reward, done, info = env.step(desired_action)
+            print("hello")
+            if ((np.abs(obs[18:] - desired_action) > 0.02).any()):
+                raise AssertionError("The inverse kinemtics failed to reach these values {} but reached instead {}".
+                                     format(desired_action, obs[18:]))
+    # env.close()
+
+
+test_inverse_kinemetics()

@@ -1,12 +1,14 @@
 from causal_rl_bench.tasks.base_task import BaseTask
 import numpy as np
+import math
 
 
 class ReachingTask(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(task_name="pushing")
         self.task_robot_observation_keys = ["joint_positions",
-                                            "joint_velocities"]
+                                            "joint_velocities",
+                                            "end_effector_positions"]
 
         self.task_params["randomize_joint_positions"] = \
             kwargs.get("randomize_joint_positions", False)
@@ -23,6 +25,7 @@ class ReachingTask(BaseTask):
 
             positions = [0, -deg45, -deg45]
             positions = positions * 3
+            positions = self.robot.robot_actions.joint_positions_lower_bounds
         self.robot.set_full_state(np.append(positions,
                                             np.zeros(9)))
         return
