@@ -1,15 +1,14 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.tasks.task import Task
-import numpy as np
 
 
 def example():
-    task = Task(task_id='pushing')
+    task = Task(task_id='pick_and_place')
     env = World(task=task, enable_visualization=True)
-    env.reset()
-    for _ in range(2000):
+    for _ in range(200):
         env.reset()
-        obs, reward, done, info = env.step(np.zeros([9,]))
+        for _ in range(200):
+            obs, reward, done, info = env.step(env.action_space.sample())
     env.close()
 
 

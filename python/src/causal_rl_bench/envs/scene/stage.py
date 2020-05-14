@@ -1,5 +1,5 @@
 from causal_rl_bench.envs.scene.observations import StageObservations
-from causal_rl_bench.envs.scene.objects import Cuboid
+from causal_rl_bench.envs.scene.objects import Cuboid, StaticCuboid
 from causal_rl_bench.envs.scene.silhouette import SCuboid
 import math
 import numpy as np
@@ -34,6 +34,11 @@ class Stage(object):
         if shape == "cube":
             self.rigid_objects[name] = Cuboid(self.pybullet_client, name,
                                               **object_params)
+        elif shape == "static_cube":
+            self.rigid_objects[name] = StaticCuboid(self.pybullet_client, name,
+                                                    **object_params)
+        else:
+            raise Exception("shape is not yet implemented")
         return
 
     def add_rigid_mesh_object(self, name, file, **object_params):
@@ -127,22 +132,28 @@ class Stage(object):
 
     def random_position(self, height_limits=(0.05, 0.15),
                         angle_limits=(-2 * math.pi, 2 * math.pi),
-                        radius_limits=(0.0, 0.15)):
+                        radius_limits=(0.0, 0.15),
+                        allowed_section=np.array([[-0.5, -0.5, 0], [0.5, 0.5, 0.5]])):
 
-        angle = np.random.uniform(*angle_limits)
-        # for uniform sampling with respect to the disc area use scaling
-        radial_distance = np.sqrt(np.random.uniform(radius_limits[0]**2, radius_limits[1]**2))
+        satisfying_constraints = False
+        while not satisfying_constraints:
+            angle = np.random.uniform(*angle_limits)
+            # for uniform sampling with respect to the disc area use scaling
+            radial_distance = np.sqrt(np.random.uniform(radius_limits[0]**2, radius_limits[1]**2))
 
-        if isinstance(height_limits, (int, float)):
-            height_z = height_limits
-        else:
-            height_z = np.random.uniform(*height_limits)
+            if isinstance(height_limits, (int, float)):
+                height_z = height_limits
+            else:
+                height_z = np.random.uniform(*height_limits)
 
-        object_position = [
-            radial_distance * math.cos(angle),
-            radial_distance * math.sin(angle),
-            height_z,
-        ]
+            object_position = [
+                radial_distance * math.cos(angle),
+                radial_distance * math.sin(angle),
+                height_z,
+            ]
+            #check if satisfying_constraints
+            if np.all(object_position > allowed_section[0]) and np.all(object_position < allowed_section[1]):
+                satisfying_constraints = True
 
         return object_position
 
