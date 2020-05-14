@@ -27,18 +27,11 @@ def test_observation_mode_switch(robot_jp_structured):
     assert robot_jp_structured.get_observation_mode() == "structured"
 
 
-def test_camera_skip_frame(robot_jp_structured):
-    assert robot_jp_structured.get_camera_skip_frame() == 0.3
-    robot_jp_structured.set_camera_skip_frame(0.8)
-    assert robot_jp_structured.get_camera_skip_frame() == 0.8
-    robot_jp_structured.set_camera_skip_frame(0.3)
-
-
 def test_skip_frame(robot_jp_structured):
-    assert robot_jp_structured.get_skip_frame() == 0.02
-    robot_jp_structured.set_skip_frame(0.03)
-    assert robot_jp_structured.get_skip_frame() == 0.03
-    robot_jp_structured.set_skip_frame(0.02)
+    assert robot_jp_structured.get_skip_frame() == 20
+    robot_jp_structured.set_skip_frame(30)
+    assert robot_jp_structured.get_skip_frame() == 30
+    robot_jp_structured.set_skip_frame(20)
 
 
 @pytest.mark.skip
@@ -187,4 +180,3 @@ def test_inverse_kinemetics():
             #                          format(desired_action, obs[18:], np.abs(obs[18:] - desired_action)))
     env.close()
 
-test_inverse_kinemetics()
