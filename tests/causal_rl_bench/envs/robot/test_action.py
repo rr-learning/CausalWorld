@@ -46,8 +46,8 @@ lower_101_normalized_action = np.array([-1.01] * 9)
 upper_100_denormalized_jt_action = np.array([0.36] * 9)
 lower_100_denormalized_jt_action = np.array([-0.36] * 9)
 
-lower_100_denormalized_jp_action = ([-math.radians(90), -math.radians(90), -math.radians(172)] * 3)
-upper_100_denormalized_jp_action = np.array([math.radians(90), math.radians(100), math.radians(-2)] * 3)
+lower_100_denormalized_jp_action = np.array([-math.radians(70), -math.radians(70), -math.radians(160)] * 3)
+upper_100_denormalized_jp_action = np.array([math.radians(70), 0, math.radians(-2)] * 3)
 
 normalized_action_to_be_clipped = np.array([-1.01, 2.0, 0.5, 0.4, 1.3, -6.0, 0.0, 0.3, 1.1])
 normalized_action_clipped = np.array([-1.0, 1.0, 0.5, 0.4, 1.0, -1.0, 0.0, 0.3, 1.0])

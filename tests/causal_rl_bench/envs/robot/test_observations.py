@@ -12,7 +12,11 @@ def os_camera_full():
 
 @pytest.fixture(scope='module')
 def os_structured_full():
-    return TriFingerObservations(observation_mode="structured", normalize_observations=False)
+    return TriFingerObservations(observation_mode="structured",
+                                 observation_keys=["action_joint_positions",
+                                                   "joint_velocities",
+                                                   "joint_torques"],
+                                 normalize_observations=False)
 
 
 @pytest.fixture(scope='module')
@@ -27,10 +31,10 @@ def os_custom_keys_norm():
                                                    "action_joint_positions"])
 
 
-lower_obs_space_structured_full = np.array([-math.radians(90), -math.radians(90),
-                                            - math.radians(172)] * 3 + [-20] * 3 * 3 +[-0.36, -0.36, -0.36] * 3)
-upper_obs_space_structured_full = np.array([math.radians(90), math.radians(100),
-                                            math.radians(-2)] * 3 + [20] * 3 * 3 +[0.36, 0.36, 0.36] * 3)
+lower_obs_space_structured_full = np.array([-math.radians(70), -math.radians(70),
+                                            -math.radians(160)] * 3 + [-20] * 3 * 3 +[-0.36, -0.36, -0.36] * 3)
+upper_obs_space_structured_full = np.array([math.radians(70), 0, math.radians(-2)] * 3
+                                           + [20] * 3 * 3 +[0.36, 0.36, 0.36] * 3)
 
 upper_99_structured_norm = np.array([0.99] * 27)
 upper_100_structured_norm = np.array([1.0] * 27)
@@ -133,7 +137,7 @@ def test_add_and_remove_observation(os_custom_keys_norm):
     def dummy_fn(robot):
         return [1, 1, 1]
 
-    os_custom_keys_norm.add_observation("dummy_key", low_bound=[-4, -4, -4], upper_bound=[2, 2, 2],
+    os_custom_keys_norm.add_observation("dummy_key", lower_bound=[-4, -4, -4], upper_bound=[2, 2, 2],
                                         observation_fn=dummy_fn)
     assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
                                                      "action_joint_positions",
