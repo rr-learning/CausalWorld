@@ -343,7 +343,7 @@ class StaticCuboid(RigidObject):
         name, size=np.array([0.065, 0.065, 0.065]),
         position=np.array([0.0, 0.0, 0.0425]),
         orientation=np.array([0, 0, 0, 1]),
-        colour=np.array([1, 0, 0])
+        colour=np.array([0, 0, 0])
     ):
         """
         Import the block

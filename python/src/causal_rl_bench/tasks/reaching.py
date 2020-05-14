@@ -18,6 +18,18 @@ class ReachingTask(BaseTask):
                                                          1)
         self.end_effector_positions_goal = None
 
+    def _set_up_stage_arena(self):
+        self.stage.add_silhoutte_general_object(name="goal_1",
+                                                shape="sphere",
+                                                colour=np.array([1, 0, 0]))
+        self.stage.add_silhoutte_general_object(name="goal_2",
+                                                shape="sphere",
+                                                colour=np.array([0, 1, 0]))
+        self.stage.add_silhoutte_general_object(name="goal_3",
+                                                shape="sphere",
+                                                colour=np.array([0, 0, 1]))
+        return
+
     def _set_up_non_default_observations(self):
         self._setup_non_default_robot_observation_key(
             observation_key="end_effector_positions_goal",
@@ -43,6 +55,13 @@ class ReachingTask(BaseTask):
         joints_goal = self.robot.sample_joint_positions()
         self.end_effector_positions_goal = self.robot.\
             compute_end_effector_positions(joints_goal)
+        self.stage.set_objects_pose(names=["goal_1", "goal_2", "goal_3"],
+                                    positions=[self.end_effector_positions_goal[:3],
+                                               self.end_effector_positions_goal[3:6],
+                                               self.end_effector_positions_goal[6:]],
+                                    orientations=[None,
+                                                  None,
+                                                  None])
         return
 
     def get_description(self):
