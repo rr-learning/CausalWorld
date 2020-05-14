@@ -47,6 +47,7 @@ def save_config_file(ppo_config, env, file_path):
 
 if __name__ == '__main__':
     ap = argparse.ArgumentParser()
+    #TODO: pass reward weights here!!
     ap.add_argument("--seed_num", required=False, default=0,
                     help="seed number")
     ap.add_argument("--skip_frame", required=False, default=10,

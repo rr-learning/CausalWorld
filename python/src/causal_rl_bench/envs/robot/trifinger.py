@@ -308,6 +308,3 @@ class TriFingerRobot(object):
                                   0.00057646, -0.05971867,  0.32112874,
                                   -0.05200612,  0.02936011,  0.32112874]
         return joint_positions, end_effector_positions
-
-
-
