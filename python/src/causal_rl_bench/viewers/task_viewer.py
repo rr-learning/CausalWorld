@@ -66,6 +66,25 @@ def record_video_of_policy(task, world_params, policy_fn, file_name,
     env.close()
 
 
+def record_video_of_random_policy(task, world_params, file_name,
+                                  number_of_resets, max_time_steps=100):
+    #TODO: discuss the speed of the current render method since it takes a long time to render a frame
+    actual_skip_frame = world_params["skip_frame"]
+    env = get_world(task.task_name,
+                    task.get_task_params(),
+                    world_params,
+                    enable_visualization=False)
+    recorder = VideoRecorder(env, "{}.mp4".format(file_name))
+    for reset_idx in range(number_of_resets):
+        obs = env.reset()
+        recorder.capture_frame()
+        for i in range(max_time_steps):
+            for _ in range(actual_skip_frame):
+                obs, reward, done, info = env.step(action=env.action_space.sample())
+                recorder.capture_frame()
+    env.close()
+
+
 def record_video_of_episode(episode, file_name):
     actual_skip_frame = episode.world_params["skip_frame"]
     env = get_world(episode.task_name,
