@@ -32,7 +32,7 @@ class PyBulletFingersPickingTask(BaseTask):
         self.stage.set_objects_pose(names=["block"],
                                     positions=[block_position],
                                     orientations=[block_orientation])
-        positions = self.robot.sample_positions(
+        positions = self.robot.sample_joint_positions(
             sampling_strategy="separated")
         self.robot.set_full_state(np.append(positions,
                                             np.zeros(9)))

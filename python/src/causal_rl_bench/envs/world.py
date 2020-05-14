@@ -30,13 +30,15 @@ class World(gym.Env):
         self.enable_goal_image = enable_goal_image
         self.action_mode = action_mode
         self.seed(seed)
+        self.simulation_time = 0.004
         self.robot = TriFingerRobot(action_mode=action_mode,
                                     observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,
                                     skip_frame=skip_frame,
                                     normalize_actions=normalize_actions,
                                     normalize_observations=normalize_observations,
-                                    enable_goal_image=enable_goal_image)
+                                    enable_goal_image=enable_goal_image,
+                                    simulation_time=self.simulation_time)
         self.pybullet_client = self.robot.get_pybullet_client()
         if enable_goal_image:
             self.stage = Stage(pybullet_client=self.pybullet_client,
@@ -54,7 +56,7 @@ class World(gym.Env):
             self.enforce_episode_length = True
         self.max_episode_length = max_episode_length
         self.episode_length = 0
-        self.simulation_time = 0.004
+
         gym.Env.__init__(self)
         if task is None:
             self.task = Task()
@@ -172,6 +174,7 @@ class World(gym.Env):
             self.robot.robot_observations.is_normalized()
         world_params["max_episode_length"] = None
         world_params["enable_goal_image"] = self.enable_goal_image
+        world_params["simulation_time"] = self.simulation_time
         return world_params
 
     def close(self):
@@ -219,8 +222,8 @@ class World(gym.Env):
         self._cam_dist = 1
         self._cam_yaw = 0
         self._cam_pitch = -60
-        self._render_width = 640
-        self._render_height = 480
+        self._render_width = 320
+        self._render_height = 240
         base_pos = [0, 0, 0]
         self.view_matrix = self.pybullet_client.computeViewMatrixFromYawPitchRoll(
             cameraTargetPosition=base_pos,

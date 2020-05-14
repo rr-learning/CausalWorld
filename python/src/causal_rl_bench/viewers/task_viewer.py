@@ -1,6 +1,7 @@
 from causal_rl_bench.envs.world import World
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 from causal_rl_bench.tasks.task import Task
+import time
 
 
 def get_world(task_id, task_params, world_params, enable_visualization=False):
@@ -56,10 +57,14 @@ def record_video_of_policy(task, world_params, policy_fn, file_name, max_time_st
     obs = env.reset()
     recorder = VideoRecorder(env, "{}.mp4".format(file_name))
     recorder.capture_frame()
-    for time in range(max_time_steps):
+    for i in range(max_time_steps):
+        print(i)
         for _ in range(actual_skip_frame):
+            start = time.time()
             obs, reward, done, info = env.step(action=policy_fn(obs))
             recorder.capture_frame()
+            end = time.time()
+            print(end-start)
 
     env.close()
 

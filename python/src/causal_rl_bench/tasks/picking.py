@@ -8,14 +8,29 @@ class PickingTask(BaseTask):
         super().__init__(task_name="picking")
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
-                                            "action_joint_positions"]
+                                            "action_joint_positions",
+                                            "end_effector_positions",
+                                            "goal_height"]
         self.task_stage_observation_keys = ["block_position"]
         self.task_params["block_mass"] = kwargs.get("block_mass", 0.02)
         self.task_params["randomize_joint_positions"] = kwargs.get(
             "randomize_joint_positions", True)
         self.task_params["randomize_block_pose"] = kwargs.get(
             "randomize_block_pose", True)
-        self.task_params["goal_height"] = kwargs.get("goal_height", 0.1)
+        self.task_params["goal_height"] = kwargs.get("goal_height", 0.15)
+        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
+        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 1)
+        self.previous_object_position = None
+
+    def _set_up_non_default_observations(self):
+        self._setup_non_default_robot_observation_key(
+            observation_key="goal_height",
+            observation_function=self._set_goal_height,
+            lower_bound=[0.04], upper_bound=[0.3])
+        return
+
+    def _set_goal_height(self):
+        return self.task_params["goal_height"]
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="block",
@@ -25,11 +40,9 @@ class PickingTask(BaseTask):
 
     def _reset_task(self):
         if self.task_params["randomize_joint_positions"]:
-            positions = self.robot.sample_positions()
+            positions = self.robot.sample_joint_positions()
         else:
-            positions = [0, -0.5, -0.6,
-                         0, -0.4, -0.7,
-                         0, -0.4, -0.7]
+            positions = self.robot.get_rest_pose()[0]
         self.robot.set_full_state(np.append(positions,
                                             np.zeros(9)))
 
@@ -40,25 +53,41 @@ class PickingTask(BaseTask):
                                                      np.random.uniform(-np.pi,
                                                                        np.pi)])
         else:
-            block_position = [0.0, -0.02, 0.045155]
-            block_orientation = euler_to_quaternion([0, 0, 0.0])
+            block_position = [0, 0, 0.0425]
+            block_orientation = euler_to_quaternion([0, 0, 0])
         self.stage.set_objects_pose(names=["block"],
                                     positions=[block_position],
                                     orientations=[block_orientation])
+        self.previous_object_position = block_position
         return
 
     def get_description(self):
-        return "Task where the goal is to push an object towards a goal position"
+        return "Task where the goal is to pick a " \
+               "cube towards a goal height"
 
     def get_reward(self):
         block_position = self.stage.get_object_state('block', 'position')
         target_height = self.task_params["goal_height"]
-        x = block_position[0]
-        y = block_position[1]
-        z = block_position[2]
-        reward = -abs(z - target_height) - (x**2 + y**2)
-        if abs(z - target_height) < 0.02:
-            self.task_solved = True
+
+        #reward term one
+        previous_block_to_goal = -abs(self.previous_object_position[2] -
+                                      target_height)
+        current_block_to_goal = -abs(block_position[2] - target_height)
+        reward_term_1 = previous_block_to_goal - current_block_to_goal
+
+        # reward term two
+        previous_block_to_center = -(self.previous_object_position[0]**2 +
+                                    self.previous_object_position[1]**2)
+        current_block_to_center = -(block_position[0] ** 2 +
+                                    block_position[1] ** 2)
+        reward_term_2 = previous_block_to_center - current_block_to_center
+
+        reward = self.task_params["reward_weight_1"] * reward_term_1 + \
+                 self.task_params["reward_weight_2"] * reward_term_2
+        #TODO: discuss termination conditions
+        # if abs(z - target_height) < 0.02:
+        #     self.task_solved = True
+        self.previous_object_position = block_position
         return reward
 
     def is_done(self):
@@ -73,6 +102,7 @@ class PickingTask(BaseTask):
         new_size = np.random.uniform([0.065], [0.15], size=[3, ])
         interventions_dict["size"] = new_size
         self.stage.object_intervention("block", interventions_dict)
+        self.previous_object_position = new_block_position
         return
 
     def do_intervention(self, **kwargs):
