@@ -1,5 +1,11 @@
 __pycache__/
 *.py[cod]
+
+*.egg-info/
+*.egg
+*.DS_Store
+dist/
+
 tutorials/output/
 python/src/__pycache__/
 python/src/causal_rl_bench/envs/__pycache__/
