@@ -11,10 +11,10 @@ import json
 
 
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
-                 skip_frame, seed_num, ppo_config, total_time_steps, validate_every_timesteps):
+                 skip_frame, seed_num, ppo_config, total_time_steps, validate_every_timesteps, task_name):
     def _make_env(rank):
         def _init():
-            task = Task(task_id='pushing')
+            task = Task(task_id=task_name)
             env = World(task=task, skip_frame=skip_frame,
                         enable_visualization=False,
                         seed=seed_num + rank, max_episode_length=maximum_episode_length)
@@ -57,6 +57,8 @@ if __name__ == '__main__':
                     default=150000, help="total time steps per update")
     ap.add_argument("--num_of_envs", required=False,
                     default=30, help="number of parallel environments")
+    ap.add_argument("--task_name", required=False,
+                    default="pushing", help="the task nam for training")
     ap.add_argument("--log_relative_path", required=True,
                     help="log folder")
     args = vars(ap.parse_args())
@@ -66,6 +68,7 @@ if __name__ == '__main__':
     maximum_episode_length = int(args['max_episode_length'])
     skip_frame = int(args['skip_frame'])
     seed_num = int(args['seed_num'])
+    task_name = str(args['task_name'])
     assert (((float(total_time_steps_per_update) /
              num_of_envs)/5).is_integer())
     ppo_config = {"gamma": 0.9988,
@@ -86,5 +89,6 @@ if __name__ == '__main__':
                  seed_num=seed_num,
                  ppo_config=ppo_config,
                  total_time_steps=60000000,
-                 validate_every_timesteps=1000000)
+                 validate_every_timesteps=1000000,
+                 task_name=task_name)
 
