@@ -1,6 +1,6 @@
 from causal_rl_bench.envs.scene.observations import StageObservations
 from causal_rl_bench.envs.scene.objects import Cuboid, StaticCuboid
-from causal_rl_bench.envs.scene.silhouette import SCuboid
+from causal_rl_bench.envs.scene.silhouette import SCuboid, SSphere
 import math
 import numpy as np
 
@@ -55,6 +55,14 @@ class Stage(object):
             if self.goal_image_pybullet_instance is not None:
                 self.goal_image_visual_objects[name] = SCuboid(
                     self.goal_image_pybullet_client, name, **object_params)
+        elif shape == "sphere":
+            self.visual_objects[name] = SSphere(self.pybullet_client, name,
+                                                **object_params)
+            if self.goal_image_pybullet_instance is not None:
+                self.goal_image_visual_objects[name] = SSphere(
+                    self.goal_image_pybullet_client, name, **object_params)
+        else:
+            raise Exception("shape is not implemented yet")
         return
 
     def add_silhoutte_mesh_object(self, name, file, **object_params):

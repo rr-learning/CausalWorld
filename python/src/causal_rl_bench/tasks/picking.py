@@ -36,6 +36,8 @@ class PickingTask(BaseTask):
         self.stage.add_rigid_general_object(name="block",
                                             shape="cube",
                                             mass=self.task_params["block_mass"])
+        self.stage.add_silhoutte_general_object(name="goal_position",
+                                                shape="cube")
         return
 
     def _reset_task(self):
@@ -55,9 +57,11 @@ class PickingTask(BaseTask):
         else:
             block_position = [0, 0, 0.0425]
             block_orientation = euler_to_quaternion([0, 0, 0])
-        self.stage.set_objects_pose(names=["block"],
-                                    positions=[block_position],
-                                    orientations=[block_orientation])
+        goal_position = [0, 0, self.task_params["goal_height"]]
+        goal_orientation = euler_to_quaternion([0, 0, 0])
+        self.stage.set_objects_pose(names=["block", "goal_position"],
+                                    positions=[block_position, goal_position],
+                                    orientations=[block_orientation, goal_orientation])
         self.previous_object_position = block_position
         return
 
