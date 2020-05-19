@@ -304,3 +304,9 @@ class Stage(object):
         else:
             raise Exception("goal image is not enabled")
 
+    def check_feasiblity_of_stage(self):
+        for contact in self.pybullet_client.getContactPoints():
+            if contact[8] < 0:
+                return False
+        return True
+

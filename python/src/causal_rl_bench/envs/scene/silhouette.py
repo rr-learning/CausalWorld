@@ -3,9 +3,10 @@ import numpy as np
 
 
 class SilhouetteObject(object):
-    def __init__(self, pybullet_client, name):
+    def __init__(self, pybullet_client, name, block_id):
         self.pybullet_client = pybullet_client
         self.name = name
+        self.block_id = block_id
 
     def get_state(self, state_type='dict'):
         raise NotImplementedError()
@@ -34,6 +35,10 @@ class SilhouetteObject(object):
     def get_variable_state(self, variable_name):
         raise NotImplementedError()
 
+    def get_bounding_box(self):
+        #TODO: this returns a point instead
+        return self.pybullet_client.getAABB(self.block_id)
+
 
 class SCuboid(SilhouetteObject):
     def __init__(
@@ -44,21 +49,21 @@ class SCuboid(SilhouetteObject):
             orientation=np.array([0, 0, 0, 1]),
             alpha=0.3, colour=np.array([0, 1, 0])
     ):
-        super(SCuboid, self).__init__(pybullet_client, name)
         self.type_id = 20
         self.size = size
         self.colour = colour
         self.alpha = alpha
-        self.shape_id = self.pybullet_client.createVisualShape(
+        self.shape_id = pybullet_client.createVisualShape(
             shapeType=pybullet.GEOM_BOX,
             halfExtents=np.array(size) / 2,
             rgbaColor=np.append(self.colour, alpha)
         )
-        self.block_id = self.pybullet_client.createMultiBody(
+        self.block_id = pybullet_client.createMultiBody(
             baseVisualShapeIndex=self.shape_id,
             basePosition=position,
             baseOrientation=orientation
         )
+        super(SCuboid, self).__init__(pybullet_client, name, self.block_id)
         self.state = dict()
         self.state[self.name + "_type"] = self.type_id
         self.state[self.name + "_position"] = position
@@ -247,21 +252,21 @@ class SSphere(SilhouetteObject):
             position=np.array([0.0, 0.0, 0.0425]),
             alpha=0.3, colour=np.array([0, 1, 0])
     ):
-        super(SSphere, self).__init__(pybullet_client, name)
         self.type_id = 21
         self.radius = radius
         self.colour = colour
         self.alpha = alpha
-        self.shape_id = self.pybullet_client.createVisualShape(
+        self.shape_id = pybullet_client.createVisualShape(
             shapeType=pybullet.GEOM_SPHERE,
             radius=radius,
             rgbaColor=np.append(self.colour, alpha)
         )
-        self.block_id = self.pybullet_client.createMultiBody(
+        self.block_id = pybullet_client.createMultiBody(
             baseVisualShapeIndex=self.shape_id,
             basePosition=position,
             baseOrientation=[0, 0, 0, 1]
         )
+        super(SSphere, self).__init__(pybullet_client, name, self.block_id)
         self.state = dict()
         self.state[self.name + "_type"] = self.type_id
         self.state[self.name + "_position"] = position

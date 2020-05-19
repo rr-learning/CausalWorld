@@ -3,9 +3,10 @@ import numpy as np
 
 
 class RigidObject(object):
-    def __init__(self, pybullet_client, name):
+    def __init__(self, pybullet_client, name, block_id):
         self.pybullet_client = pybullet_client
         self.name = name
+        self.block_id = block_id
 
     def get_state(self, state_type='dict'):
         raise NotImplementedError()
@@ -37,6 +38,9 @@ class RigidObject(object):
     def get_variable_state(self, variable_name):
         raise NotImplementedError()
 
+    def get_bounding_box(self):
+        return self.pybullet_client.getAABB(self.block_id)
+
 
 class Cuboid(RigidObject):
     def __init__(
@@ -58,20 +62,20 @@ class Cuboid(RigidObject):
             mass (float): how heavy should this block be
         """
         #TODO: intervene on friction as well
-        super(Cuboid, self).__init__(pybullet_client, name)
         self.type_id = 0
         self.mass = mass
         self.size = size
         self.not_fixed = True
         self.colour = colour
-        self.shape_id = self.pybullet_client.createCollisionShape(
+        self.shape_id = pybullet_client.createCollisionShape(
             shapeType=pybullet.GEOM_BOX, halfExtents=np.array(size)/2)
-        self.block_id = self.pybullet_client.createMultiBody(
+        self.block_id = pybullet_client.createMultiBody(
             baseCollisionShapeIndex=self.shape_id,
             basePosition=position,
             baseOrientation=orientation,
             baseMass=mass
         )
+        super(Cuboid, self).__init__(pybullet_client, name, self.block_id)
         self.pybullet_client.changeVisualShape(self.block_id, -1, rgbaColor=np.append(self.colour, 1))
         #specifying bounds
         self.lower_bounds = dict()
@@ -356,19 +360,19 @@ class StaticCuboid(RigidObject):
             mass (float): how heavy should this block be
         """
         #TODO: intervene on friction as well
-        super(StaticCuboid, self).__init__(pybullet_client, name)
         self.type_id = 10 #TODO: static objects ids start from 10
         self.size = size
         self.not_fixed = False
         self.colour = colour
-        self.shape_id = self.pybullet_client.createCollisionShape(
+        self.shape_id = pybullet_client.createCollisionShape(
             shapeType=pybullet.GEOM_BOX, halfExtents=np.array(size)/2)
-        self.block_id = self.pybullet_client.createMultiBody(
+        self.block_id = pybullet_client.createMultiBody(
             baseCollisionShapeIndex=self.shape_id,
             basePosition=position,
             baseOrientation=orientation,
             baseMass=0
         )
+        super(StaticCuboid, self).__init__(pybullet_client, name, self.block_id)
         self.pybullet_client.changeVisualShape(self.block_id, -1, rgbaColor=np.append(self.colour, 1))
         self.lower_bounds = dict()
         self.upper_bounds = dict()
