@@ -59,12 +59,47 @@ class TriFingerRobot(object):
                 return True
         return False
 
-    def get_contact_force_with_block(self, block):
+    def get_normal_interaction_force_with_block(self, block, finger_tip_number):
+        # TODO: doesnt account for several contacts per body
+        if finger_tip_number == 0:
+            idx = 4
+        elif finger_tip_number == 1:
+            idx = 9
+        elif finger_tip_number == 2:
+            idx = 14
+        else:
+            raise Exception("finger tip number doesnt exist")
+
         for contact in self.tri_finger._p.getContactPoints():
             if (contact[1] == self.tri_finger.finger_id and contact[2] == block.block_id) or \
                     (contact[2] == self.tri_finger.finger_id and contact[1] == block.block_id):
-                return contact[9]
+                return contact[9]*np.array(contact[7])
+            for contact in self.tri_finger._p.getContactPoints():
+                if (contact[1] == self.tri_finger.finger_id and contact[2] == block.block_id
+                    and contact[3] == idx) or  (contact[2] == self.tri_finger.finger_id and contact[1] == block.block_id
+                     and contact[4] == idx):
+                    return contact[9] * np.array(contact[7])
         return None
+
+    def get_tip_contact_states(self):
+        #TODO: only support open and closed states (should support slipping too)
+        contact_tips = [0, 0, 0] #all are open
+        for contact in self.tri_finger._p.getContactPoints():
+            if contact[1] == self.tri_finger.finger_id:
+                if contact[3] == 4:
+                    contact_tips[0] = 1
+                elif contact[3] == 9:
+                    contact_tips[1] = 1
+                elif contact[3] == 14:
+                    contact_tips[2] = 1
+            elif contact[2] == self.tri_finger.finger_id:
+                if contact[4] == 4:
+                    contact_tips[0] = 1
+                elif contact[4] == 9:
+                    contact_tips[1] = 1
+                elif contact[4] == 14:
+                    contact_tips[2] = 1
+        return contact_tips
 
     def compute_end_effector_positions(self, joint_positions):
         tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(

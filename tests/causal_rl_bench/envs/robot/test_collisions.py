@@ -22,8 +22,7 @@ class CrossReferenceWPybulletFingers(unittest.TestCase):
             for _ in range(1000):
                 action = self.causal_rl_env.action_space.sample()
                 obs2, reward2, done, info = self.causal_rl_env.step(action)
-                if self.causal_rl_env.robot.is_colliding_with_stage():
-                    print("hello")
+
 
     def tearDown(self):
         self.causal_rl_env.close()

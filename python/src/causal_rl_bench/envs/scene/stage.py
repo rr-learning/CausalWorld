@@ -165,7 +165,8 @@ class Stage(object):
                 height_z,
             ]
             #check if satisfying_constraints
-            if np.all(object_position > allowed_section[0]) and np.all(object_position < allowed_section[1]):
+            if np.all(object_position > allowed_section[0]) and \
+                    np.all(object_position < allowed_section[1]):
                 satisfying_constraints = True
 
         return object_position
@@ -250,6 +251,12 @@ class Stage(object):
                 return True
         return False
 
+    def check_stage_free_of_colliding_blocks(self):
+        for contact in self.pybullet_client.getContactPoints():
+            if contact[1] > 3 and contact[2] > 3:
+                return False
+        return True
+
     def is_colliding_with_stage(self, block1):
         for contact in self.pybullet_client.getContactPoints():
             if (contact[1] == block1.block_id and contact[2] == self.stage_id) or \
@@ -264,11 +271,11 @@ class Stage(object):
                 return True
         return False
 
-    def get_contact_force_between_blocks(self, block1, block2):
+    def get_normal_interaction_force_between_blocks(self, block1, block2):
         for contact in self.pybullet_client.getContactPoints():
             if (contact[1] == block1.block_id and contact[2] == block2.block_id) or \
                     (contact[2] == block1.block_id and contact[1] == block2.block_id):
-                return contact[9]
+                return contact[9]*np.array(contact[7])
         return None
 
     def add_observation(self, observation_key, lower_bound=None,
