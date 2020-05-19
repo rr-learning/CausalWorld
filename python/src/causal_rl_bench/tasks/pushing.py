@@ -34,6 +34,10 @@ class PushingTask(BaseTask):
                                             shape="cube",
                                             mass=self.task_params[
                                                 "block_mass"])
+        self.stage.add_rigid_general_object(name="block_2",
+                                            shape="cube",
+                                            mass=self.task_params[
+                                                "block_mass"])
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube")
         return
@@ -64,10 +68,20 @@ class PushingTask(BaseTask):
         else:
             goal_position = [0.04, 0.08, 0.0425]
             goal_orientation = euler_to_quaternion([0, 0, 0])
-        self.stage.set_objects_pose(names=["block", "goal_block"],
-                                    positions=[block_position, goal_position],
-                                    orientations=[block_orientation,
+        new_block_position = list(block_position)
+        new_block_position[-1] = 0.0425*2
+        self.stage.set_objects_pose(names=["block", "block_2", "goal_block"],
+                                    positions=[block_position, new_block_position, goal_position],
+                                    orientations=[block_orientation, block_orientation,
                                                   goal_orientation])
+        # self.stage.set_objects_pose(names=["block", "goal_block"],
+        #                             positions=[block_position, goal_position],
+        #                             orientations=[block_orientation,
+        #                                           goal_orientation])
+        # self.stage.set_objects_pose(names=["block", "goal_block"],
+        #                             positions=[block_position, goal_position],
+        #                             orientations=[block_orientation,
+        #                                           goal_orientation])
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
@@ -75,6 +89,7 @@ class PushingTask(BaseTask):
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = block_position
         self.previous_object_orientation = block_orientation
+        self.robot.get_pybullet_client().getContactPoints()
         return
 
     def get_description(self):

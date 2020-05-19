@@ -64,15 +64,15 @@ class Cuboid(RigidObject):
         self.size = size
         self.not_fixed = True
         self.colour = colour
-        self.block_id = self.pybullet_client.createCollisionShape(
+        self.shape_id = self.pybullet_client.createCollisionShape(
             shapeType=pybullet.GEOM_BOX, halfExtents=np.array(size)/2)
-        self.block = self.pybullet_client.createMultiBody(
-            baseCollisionShapeIndex=self.block_id,
+        self.block_id = self.pybullet_client.createMultiBody(
+            baseCollisionShapeIndex=self.shape_id,
             basePosition=position,
             baseOrientation=orientation,
             baseMass=mass
         )
-        self.pybullet_client.changeVisualShape(self.block, -1, rgbaColor=np.append(self.colour, 1))
+        self.pybullet_client.changeVisualShape(self.block_id, -1, rgbaColor=np.append(self.colour, 1))
         #specifying bounds
         self.lower_bounds = dict()
         self.upper_bounds = dict()
@@ -138,7 +138,7 @@ class Cuboid(RigidObject):
         if 'position' not in state_dict or 'orientation' not in state_dict:
             position, orientation = self.pybullet_client.\
                 getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
         if 'position' in state_dict:
             position = state_dict['position']
@@ -147,12 +147,12 @@ class Cuboid(RigidObject):
         if 'mass' in state_dict:
             self.mass = state_dict['mass']
         if 'size' in state_dict:
-            self.pybullet_client.removeBody(self.block)
-            self.block_id = self.pybullet_client.createCollisionShape(
+            self.pybullet_client.removeBody(self.block_id)
+            self.shape_id = self.pybullet_client.createCollisionShape(
                 shapeType=pybullet.GEOM_BOX,
                 halfExtents=np.array(state_dict['size']) / 2)
-            self.block = self.pybullet_client.createMultiBody(
-                baseCollisionShapeIndex=self.block_id,
+            self.block_id = self.pybullet_client.createMultiBody(
+                baseCollisionShapeIndex=self.shape_id,
                 basePosition=position,
                 baseOrientation=orientation,
                 baseMass=self.mass
@@ -160,25 +160,25 @@ class Cuboid(RigidObject):
             self.size = state_dict['size']
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, position, orientation
+                self.block_id, position, orientation
             )
         elif 'mass' in state_dict:
-            self.pybullet_client.changeDynamics(self.block, -1, mass=self.mass)
+            self.pybullet_client.changeDynamics(self.block_id, -1, mass=self.mass)
 
         if 'colour' in  state_dict:
             self.colour = state_dict['colour']
-            self.pybullet_client.changeVisualShape(self.block, -1,
+            self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(state_dict['colour'], 1))
         if ('linear_velocity' in state_dict) ^ \
                 ('angular_velocity' in state_dict):
             linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(
-                self.block)
+                self.block_id)
         if 'linear_velocity' in state_dict:
             linear_velocity = state_dict['linear_velocity']
         if 'angular_velocity' in state_dict:
             angular_velocity = state_dict['angular_velocity']
         if 'angular_velocity' in state_dict or 'linear_velocity' in state_dict:
-            self.pybullet_client.resetBaseVelocity(self.block,
+            self.pybullet_client.resetBaseVelocity(self.block_id,
                                                    linear_velocity,
                                                    angular_velocity)
         return
@@ -187,51 +187,51 @@ class Cuboid(RigidObject):
         #TODO: discuss handling collisions with fingers with Fred
         if variable_name == 'position':
             position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, variable_value, orientation
+                self.block_id, variable_value, orientation
             )
         elif variable_name == 'orientation':
             position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, position, variable_value
+                self.block_id, position, variable_value
             )
         elif variable_name == 'mass':
-            self.pybullet_client.changeDynamics(self.block, -1, mass=variable_value)
+            self.pybullet_client.changeDynamics(self.block_id, -1, mass=variable_value)
             self.mass = variable_value
         elif variable_name == 'size':
             position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
-            self.pybullet_client.removeBody(self.block)
-            self.block_id = self.pybullet_client.createCollisionShape(
+            self.pybullet_client.removeBody(self.block_id)
+            self.shape_id = self.pybullet_client.createCollisionShape(
                 shapeType=pybullet.GEOM_BOX, halfExtents=np.array(variable_value) / 2)
-            self.block = self.pybullet_client.createMultiBody(
-                baseCollisionShapeIndex=self.block_id,
+            self.block_id = self.pybullet_client.createMultiBody(
+                baseCollisionShapeIndex=self.shape_id,
                 basePosition=position,
                 baseOrientation=orientation,
                 baseMass=self.mass
             )
-            self.pybullet_client.changeVisualShape(self.block, -1,
+            self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(self.colour, 1))
             self.size = variable_value
         elif variable_name == 'colour':
-            self.pybullet_client.changeVisualShape(self.block, -1,
+            self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(variable_value, 1))
             self.colour = variable_value
         elif variable_name == 'linear_velocity':
             _, angular_velocity = self.pybullet_client.getBaseVelocity(
-                self.block)
-            self.pybullet_client.resetBaseVelocity(self.block,
+                self.block_id)
+            self.pybullet_client.resetBaseVelocity(self.block_id,
                                                    variable_value,
                                                    angular_velocity)
         elif variable_name == 'angular_velocity':
             linear_velocity, _ = self.pybullet_client.getBaseVelocity(
-                self.block)
-            self.pybullet_client.resetBaseVelocity(self.block,
+                self.block_id)
+            self.pybullet_client.resetBaseVelocity(self.block_id,
                                                    linear_velocity,
                                                    variable_value)
         #TODO: implement intervention on shape id itself
@@ -245,12 +245,12 @@ class Cuboid(RigidObject):
         if state_type == 'dict':
             state = dict()
             position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
             state[self.name + "_type"] = self.type_id
             state[self.name + "_position"] = np.array(position)
             state[self.name + "_orientation"] = np.array(orientation)
-            linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(self.block)
+            linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(self.block_id)
             state[self.name + "_linear_velocity"] = np.array(linear_velocity)
             state[self.name + "_angular_velocity"] = np.array(angular_velocity)
             state[self.name + "_mass"] = self.mass
@@ -259,10 +259,10 @@ class Cuboid(RigidObject):
         elif state_type == 'list':
             state = []
             position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
             linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(
-                self.block)
+                self.block_id)
             for name in self._state_variable_names:
                 if name == 'type':
                     state.append(self.type_id)
@@ -289,23 +289,23 @@ class Cuboid(RigidObject):
             return self.type_id
         elif variable_name == 'position':
             position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
             return position
 
         elif variable_name == 'orientation':
             position, orientation = self.pybullet_client.getBasePositionAndOrientation(
-                self.block
+                self.block_id
             )
             return orientation
         elif variable_name == 'linear_velocity':
             linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(
-                self.block)
+                self.block_id)
             return linear_velocity
 
         elif variable_name == 'angular_velocity':
             linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(
-                self.block)
+                self.block_id)
             return angular_velocity
 
         elif variable_name == 'mass':
@@ -331,7 +331,7 @@ class Cuboid(RigidObject):
 
     def set_pose(self, position, orientation):
         self.pybullet_client.resetBasePositionAndOrientation(
-            self.block, position, orientation
+            self.block_id, position, orientation
         )
         return
 
@@ -361,15 +361,15 @@ class StaticCuboid(RigidObject):
         self.size = size
         self.not_fixed = False
         self.colour = colour
-        self.block_id = self.pybullet_client.createCollisionShape(
+        self.shape_id = self.pybullet_client.createCollisionShape(
             shapeType=pybullet.GEOM_BOX, halfExtents=np.array(size)/2)
-        self.block = self.pybullet_client.createMultiBody(
-            baseCollisionShapeIndex=self.block_id,
+        self.block_id = self.pybullet_client.createMultiBody(
+            baseCollisionShapeIndex=self.shape_id,
             basePosition=position,
             baseOrientation=orientation,
             baseMass=0
         )
-        self.pybullet_client.changeVisualShape(self.block, -1, rgbaColor=np.append(self.colour, 1))
+        self.pybullet_client.changeVisualShape(self.block_id, -1, rgbaColor=np.append(self.colour, 1))
         self.lower_bounds = dict()
         self.upper_bounds = dict()
         self.lower_bounds[self.name + "_type"] = np.array([0])
@@ -425,12 +425,12 @@ class StaticCuboid(RigidObject):
         if 'orientation' in state_dict:
             self.orientation = state_dict['orientation']
         if 'size' in state_dict:
-            self.pybullet_client.removeBody(self.block)
-            self.block_id = self.pybullet_client.createCollisionShape(
+            self.pybullet_client.removeBody(self.block_id)
+            self.shape_id = self.pybullet_client.createCollisionShape(
                 shapeType=pybullet.GEOM_BOX,
                 halfExtents=np.array(state_dict['size']) / 2)
-            self.block = self.pybullet_client.createMultiBody(
-                baseCollisionShapeIndex=self.block_id,
+            self.block_id = self.pybullet_client.createMultiBody(
+                baseCollisionShapeIndex=self.shape_id,
                 basePosition=self.position,
                 baseOrientation=self.orientation,
                 baseMass=0
@@ -438,11 +438,11 @@ class StaticCuboid(RigidObject):
             self.size = state_dict['size']
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, self.position, self.orientation
+                self.block_id, self.position, self.orientation
             )
         if 'colour' in state_dict:
             self.colour = state_dict['colour']
-            self.pybullet_client.changeVisualShape(self.block, -1,
+            self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(state_dict['colour'], 1))
         return
 
@@ -451,28 +451,28 @@ class StaticCuboid(RigidObject):
         if variable_name == 'position':
             self.position = variable_value
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, self.position, self.orientation
+                self.block_id, self.position, self.orientation
             )
         elif variable_name == 'orientation':
             self.orientation = variable_value
             self.pybullet_client.resetBasePositionAndOrientation(
-                self.block, self.position, self.orientation
+                self.block_id, self.position, self.orientation
             )
         elif variable_name == 'size':
-            self.pybullet_client.removeBody(self.block)
-            self.block_id = self.pybullet_client.createCollisionShape(
+            self.pybullet_client.removeBody(self.block_id)
+            self.shape_id = self.pybullet_client.createCollisionShape(
                 shapeType=pybullet.GEOM_BOX, halfExtents=np.array(variable_value) / 2)
-            self.block = self.pybullet_client.createMultiBody(
-                baseCollisionShapeIndex=self.block_id,
+            self.block_id = self.pybullet_client.createMultiBody(
+                baseCollisionShapeIndex=self.shape_id,
                 basePosition=self.position,
                 baseOrientation=self.orientation,
                 baseMass=0
             )
-            self.pybullet_client.changeVisualShape(self.block, -1,
+            self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(self.colour, 1))
             self.size = variable_value
         elif variable_name == 'colour':
-            self.pybullet_client.changeVisualShape(self.block, -1,
+            self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(variable_value, 1))
             self.colour = variable_value
         #TODO: implement intervention on shape id itself
@@ -535,7 +535,7 @@ class StaticCuboid(RigidObject):
 
     def set_pose(self, position, orientation):
         self.pybullet_client.resetBasePositionAndOrientation(
-            self.block, position, orientation
+            self.block_id, position, orientation
         )
         self.position = position
         self.orientation = orientation

@@ -38,6 +38,34 @@ class TriFingerRobot(object):
         self.latest_full_state = None
         self.state_size = 18
 
+    def is_self_colliding(self):
+        for contact in self.tri_finger._p.getContactPoints():
+            if contact[1] == self.tri_finger.finger_id and \
+                    contact[2] == self.tri_finger.finger_id:
+                return True
+        return False
+
+    def is_colliding_with_stage(self):
+        for contact in self.tri_finger._p.getContactPoints():
+            if (contact[1] == self.tri_finger.finger_id and contact[2] == self.tri_finger.stage_id) or \
+                    (contact[2] == self.tri_finger.finger_id and contact[1] == self.tri_finger.stage_id):
+                return True
+        return False
+
+    def is_in_contact_with_block(self, block):
+        for contact in self.tri_finger._p.getContactPoints():
+            if (contact[1] == self.tri_finger.finger_id and contact[2] == block.block_id) or \
+                    (contact[2] == self.tri_finger.finger_id and contact[1] == block.block_id):
+                return True
+        return False
+
+    def get_contact_force_with_block(self, block):
+        for contact in self.tri_finger._p.getContactPoints():
+            if (contact[1] == self.tri_finger.finger_id and contact[2] == block.block_id) or \
+                    (contact[2] == self.tri_finger.finger_id and contact[1] == block.block_id):
+                return contact[9]
+        return None
+
     def compute_end_effector_positions(self, joint_positions):
         tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
             joint_positions

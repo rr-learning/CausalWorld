@@ -13,6 +13,9 @@ class Stage(object):
         self.visual_objects = dict()
         self.observation_mode = observation_mode
         self.pybullet_client = pybullet_client
+        #TODO: move the ids from here
+        self.floor_id = 2
+        self.stage_id = 3
         self.normalize_observations = normalize_observations
         self.stage_observations = None
         self.latest_full_state = None
@@ -109,6 +112,7 @@ class Stage(object):
         self.latest_full_state = new_state
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
+        self.pybullet_client.stepSimulation()
         return
 
     def set_objects_pose(self, names, positions, orientations):
@@ -128,6 +132,7 @@ class Stage(object):
         self.latest_full_state = self.get_full_state()
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
+        self.pybullet_client.stepSimulation()
         return
 
     def get_current_observations(self, helper_keys):
@@ -208,6 +213,7 @@ class Stage(object):
                             .format(key))
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
+        self.pybullet_client.stepSimulation()
         return
 
     def get_object_full_state(self, key):
@@ -227,6 +233,43 @@ class Stage(object):
         else:
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
+
+    def get_object(self, key):
+        if key in self.rigid_objects:
+            return self.rigid_objects[key]
+        elif key in self.visual_objects:
+            return self.visual_objects[key]
+        else:
+            raise Exception("The key {} passed doesn't exist in the stage yet"
+                            .format(key))
+
+    def are_blocks_colliding(self, block1, block2):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == block2.block_id) or \
+                    (contact[2] == block1.block_id and contact[1] == block2.block_id):
+                return True
+        return False
+
+    def is_colliding_with_stage(self, block1):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == self.stage_id) or \
+                    (contact[2] == block1.block_id and contact[1] == self.stage_id):
+                return True
+        return False
+
+    def is_colliding_with_floor(self, block1):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == self.floor_id) or \
+                    (contact[2] == block1.block_id and contact[1] == self.floor_id):
+                return True
+        return False
+
+    def get_contact_force_between_blocks(self, block1, block2):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == block2.block_id) or \
+                    (contact[2] == block1.block_id and contact[1] == block2.block_id):
+                return contact[9]
+        return None
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None):
