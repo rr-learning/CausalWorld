@@ -76,7 +76,9 @@ class Cuboid(RigidObject):
             baseMass=mass
         )
         super(Cuboid, self).__init__(pybullet_client, name, self.block_id)
-        self.pybullet_client.changeVisualShape(self.block_id, -1, rgbaColor=np.append(self.colour, 1))
+        self.pybullet_client.changeVisualShape(self.block_id, -1,
+                                               rgbaColor=np.append(
+                                                   self.colour, 1))
         #specifying bounds
         self.lower_bounds = dict()
         self.upper_bounds = dict()

@@ -1,5 +1,6 @@
 import pybullet
 import numpy as np
+from causal_rl_bench.utils.rotation_utils import rotate_points
 
 
 class SilhouetteObject(object):
@@ -106,6 +107,10 @@ class SCuboid(SilhouetteObject):
             self.state_size += self._state_variable_sizes[-1]
         self.position = position
         self.orientation = orientation
+        self.vertices = None
+        self.bounding_box = None
+        self._set_vertices()
+        self._set_bounding_box()
 
     def set_full_state(self, new_state):
         # form dict first
@@ -140,14 +145,21 @@ class SCuboid(SilhouetteObject):
                 basePosition=self.position,
                 baseOrientation=self.orientation
             )
+            self._set_vertices()
+            self._set_bounding_box()
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
                 self.block_id, self.position, self.orientation
             )
+            self._set_vertices()
+            self._set_bounding_box()
         if 'colour' in state_dict:
             self.colour = state_dict['colour']
             self.pybullet_client.changeVisualShape(self.block_id, -1,
-                                                   rgbaColor=np.append(state_dict['colour'], self.alpha))
+                                                   rgbaColor=
+                                                   np.append(
+                                                       state_dict['colour'],
+                                                       self.alpha))
         return
 
     def do_intervention(self, variable_name, variable_value):
@@ -157,11 +169,15 @@ class SCuboid(SilhouetteObject):
                 self.block_id, variable_value, self.orientation
             )
             self.position = variable_value
+            self._set_vertices()
+            self._set_bounding_box()
         elif variable_name == 'orientation':
             self.pybullet_client.resetBasePositionAndOrientation(
                 self.block_id, self.position, variable_value
             )
             self.orientation = variable_value
+            self._set_vertices()
+            self._set_bounding_box()
         elif variable_name == 'size':
             self.pybullet_client.removeBody(self.block_id)
             self.shape_id = self.pybullet_client.createVisualShape(
@@ -175,6 +191,8 @@ class SCuboid(SilhouetteObject):
                 baseOrientation=self.orientation
             )
             self.size = variable_value
+            self._set_vertices()
+            self._set_bounding_box()
         elif variable_name == 'colour':
             self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(variable_value,
@@ -241,7 +259,36 @@ class SCuboid(SilhouetteObject):
         )
         self.position = position
         self.orientation = orientation
+        self._set_vertices()
+        self._set_bounding_box()
         return
+
+    def _set_vertices(self):
+        vertices = [[1, 1, -1],
+                    [1, -1, -1],
+                    [-1, 1, -1],
+                    [-1, -1, -1],
+                    [1, 1, 1],
+                    [1, -1, 1],
+                    [-1, 1, 1],
+                    [-1, -1, 1]]
+        vertices = [self.position + (point*self.size/2)
+                    for point in vertices]
+        self.vertices = rotate_points(np.array(vertices), self.orientation)
+        return
+
+    def _set_bounding_box(self):
+        # low values for each axis
+        low_bound = [np.min(self.vertices[:, 0]), np.min(self.vertices[:, 1]),
+                     np.min(self.vertices[:, 2])]
+        upper_bound = [np.max(self.vertices[:, 0]),
+                       np.max(self.vertices[:, 1]),
+                       np.max(self.vertices[:, 2])]
+        self.bounding_box = (tuple(low_bound), tuple(upper_bound))
+
+    def get_bounding_box(self):
+        #low values for each axis
+        return self.bounding_box
 
 
 class SSphere(SilhouetteObject):

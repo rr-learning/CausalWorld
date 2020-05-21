@@ -31,3 +31,10 @@ def quaternion_mul(q0, q1):
     q = q.swapaxes(0, 1)
     return q
 
+
+def rotate_points(points_batch, r_quaternion):
+    r = R.from_quat(r_quaternion)
+    return np.transpose(np.matmul(r.as_matrix(),
+                                  np.transpose(points_batch)))
+
+
