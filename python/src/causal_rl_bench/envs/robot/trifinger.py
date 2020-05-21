@@ -31,6 +31,7 @@ class TriFingerRobot(object):
                 self.goal_image_instance.reset_finger(
                     self.robot_actions.joint_positions_lower_bounds,
                     np.zeros(9, ))
+        #TODO: go through the last action and last clipped action assignments!!!! might be wrong in some places
         self.last_action = None
         self.last_clipped_action = None
         if action_mode != "joint_torques":

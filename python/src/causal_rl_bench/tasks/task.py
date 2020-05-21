@@ -2,6 +2,7 @@ from causal_rl_bench.tasks.pushing import PushingTask
 from causal_rl_bench.tasks.example import ExampleTask
 from causal_rl_bench.tasks.picking import PickingTask
 from causal_rl_bench.tasks.reaching import ReachingTask
+from causal_rl_bench.tasks.stacked_blocks import StackedBlocksTask
 from causal_rl_bench.tasks.pyramid import PyramidTask
 from causal_rl_bench.tasks.arch import ArchTask
 from causal_rl_bench.tasks.pick_and_place import PickAndPlaceTask
@@ -25,6 +26,8 @@ def Task(task_id="picking", **kwargs):
         task = ExampleTask(**kwargs)
     elif task_id == "pick_and_place":
         task = PickAndPlaceTask(**kwargs)
+    elif task_id == "stacked_blocks":
+        task = StackedBlocksTask(**kwargs)
     else:
         raise Exception("No valid task_id")
     return task
