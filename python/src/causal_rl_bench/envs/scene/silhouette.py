@@ -40,6 +40,9 @@ class SilhouetteObject(object):
         #TODO: this returns a point instead
         return self.pybullet_client.getAABB(self.block_id)
 
+    def get_area(self):
+        raise NotImplementedError()
+
 
 class SCuboid(SilhouetteObject):
     def __init__(
@@ -111,6 +114,8 @@ class SCuboid(SilhouetteObject):
         self.bounding_box = None
         self._set_vertices()
         self._set_bounding_box()
+        self.area = None
+        self._set_area()
 
     def set_full_state(self, new_state):
         # form dict first
@@ -147,6 +152,7 @@ class SCuboid(SilhouetteObject):
             )
             self._set_vertices()
             self._set_bounding_box()
+            self._set_area()
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
                 self.block_id, self.position, self.orientation
@@ -193,6 +199,7 @@ class SCuboid(SilhouetteObject):
             self.size = variable_value
             self._set_vertices()
             self._set_bounding_box()
+            self._set_area()
         elif variable_name == 'colour':
             self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(variable_value,
@@ -290,8 +297,16 @@ class SCuboid(SilhouetteObject):
         #low values for each axis
         return self.bounding_box
 
+    def _set_area(self):
+        self.area = self.size[0] * self.size[1] * self.size[2]
+        return
+
+    def get_area(self):
+        return self.area
+
 
 class SSphere(SilhouetteObject):
+    #TODO: implement get bounding box and get area
     def __init__(
             self,
             pybullet_client,

@@ -25,10 +25,10 @@ class CrossReferenceWPybulletFingers(unittest.TestCase):
             for _ in range(1000):
                 action = self.causal_rl_env.action_space.sample()
                 obs2, reward2, done, info = self.causal_rl_env.step(action)
-                print(get_iou(self.causal_rl_env.stage.get_object(
-                                'block').get_bounding_box(),
-                              self.causal_rl_env.stage.get_object(
-                                  'goal_position').get_bounding_box()))
+                print(get_iou(self.causal_rl_env.stage.get_object('goal_position').get_bounding_box(),
+                              self.causal_rl_env.stage.get_object('block').get_bounding_box(),
+                              self.causal_rl_env.stage.get_object('goal_position').get_area(),
+                              self.causal_rl_env.stage.get_object('goal_position').get_area()))
 
     def tearDown(self):
         self.causal_rl_env.close()

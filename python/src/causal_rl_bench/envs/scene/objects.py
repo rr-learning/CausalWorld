@@ -41,6 +41,9 @@ class RigidObject(object):
     def get_bounding_box(self):
         return self.pybullet_client.getAABB(self.block_id)
 
+    def get_area(self):
+        raise NotImplementedError()
+
 
 class Cuboid(RigidObject):
     def __init__(
@@ -124,6 +127,8 @@ class Cuboid(RigidObject):
                 self.upper_bounds[self.name + "_" +
                                   state_variable_name].shape[0])
             self.state_size += self._state_variable_sizes[-1]
+        self.area = None
+        self._set_area()
 
     def set_full_state(self, new_state):
         #form dict first
@@ -164,6 +169,7 @@ class Cuboid(RigidObject):
                 baseMass=self.mass
             )
             self.size = state_dict['size']
+            self._set_area()
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
                 self.block_id, position, orientation
@@ -224,6 +230,7 @@ class Cuboid(RigidObject):
             self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(self.colour, 1))
             self.size = variable_value
+            self._set_area()
         elif variable_name == 'colour':
             self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(variable_value, 1))
@@ -341,8 +348,16 @@ class Cuboid(RigidObject):
         )
         return
 
+    def _set_area(self):
+        self.area = self.size[0] * self.size[1] * self.size[2]
+        return
+
+    def get_area(self):
+        return self.area
+
 
 class StaticCuboid(RigidObject):
+    # TODO: implement get bounding box and get area
     def __init__(
         self,
         pybullet_client,

@@ -1,4 +1,4 @@
-def get_iou(bb1, bb2):
+def get_intersection(bb1, bb2):
     x_left = max(bb1[0][0], bb2[0][0])
     x_right = min(bb1[1][0], bb2[1][0])
 
@@ -13,4 +13,9 @@ def get_iou(bb1, bb2):
 
     intersection_area = (x_right - x_left) * (y_bottom - y_top) * (z_down - z_up)
 
-    return  intersection_area
+    return intersection_area
+
+
+def get_iou(bb1, bb2, area1, area2):
+    intersection_area = get_intersection(bb1, bb2)
+    return intersection_area / float(area1 + area2 - intersection_area)
