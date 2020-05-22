@@ -38,101 +38,54 @@ class StackedBlocksTask(BaseTask):
     #     position[-1] = allowed_base_section[0][2] + size[-2]/2
     #     return size, position
 
-    def _generate_random_level_block(self, allowed_center_position):
+    def _generate_random_level_block(self, allowed_center_position,
+                                     start_z, min_size=np.array([0.035, 0.035, 0.035])):
         #modify allowed center position to fit the stage and minimum size
-        allowed_center_position[0][0] = max(-0.1475, allowed_center_position[0][0])
-        allowed_center_position[1][0] = min(0.1475, allowed_center_position[1][0])
+        allowed_center_position[0][0] = max(self.stage.floor_inner_bounding_box[0][0] + min_size[0],
+                                            allowed_center_position[0][0])
+        allowed_center_position[1][0] = min(self.stage.floor_inner_bounding_box[1][0] + min_size[0],
+                                            allowed_center_position[1][0])
 
-        allowed_center_position[0][1] = max(-0.1475, allowed_center_position[0][1])
-        allowed_center_position[1][1] = min(0.1475, allowed_center_position[1][1])
+        allowed_center_position[0][1] = max(self.stage.floor_inner_bounding_box[0][1] + min_size[1],
+                                            allowed_center_position[0][1])
+        allowed_center_position[1][1] = min(self.stage.floor_inner_bounding_box[1][1] + min_size[1],
+                                            allowed_center_position[1][1])
         #first choose the center position
         position_x_y = np.random.uniform(allowed_center_position[0][:2], allowed_center_position[1][:2])
         #choose size width, depth, height
-        allowed_max_width = min(0.1825 - position_x_y[0], position_x_y[0] + 0.1825) * 2
-        allowed_max_depth = min(0.1825 - position_x_y[1], position_x_y[1] + 0.1825) * 2
-        allowed_max_height = allowed_center_position[1][2] - allowed_center_position[0][2]
-        # size = np.random.uniform([0.035, 0.035, 0.035], [allowed_max_width, allowed_max_depth,
-        #                                                  allowed_max_height])
-        size = np.random.uniform([0.035, 0.035, 0.035], [allowed_max_width, 0.035,
-                                                         0.035])
-        position_z = allowed_center_position[0][2] + size[-1]/2
+        allowed_max_width = min(self.stage.floor_inner_bounding_box[1][0] - position_x_y[0],
+                                position_x_y[0] - self.stage.floor_inner_bounding_box[0][0]) * 2
+        size = np.random.uniform(min_size, [allowed_max_width, min_size[1], min_size[2]])
+        position_z = start_z + size[-1]/2
         position = np.array([position_x_y[0], position_x_y[1], position_z])
         return size, position
 
+    def _generate_random_target(self, levels_num=4, min_size=np.array([0.035, 0.035, 0.035])):
+        #generate first level
+        current_limits = np.array(self.stage.floor_inner_bounding_box)
+        start_z = self.stage.floor_height
+        level_index = 0
+        size, position = self._generate_random_level_block(allowed_center_position=current_limits,
+                                                           start_z=start_z, min_size=min_size)
+        self.stage.add_silhoutte_general_object(name="level_"+str(level_index),
+                                                shape="cube",
+                                                position=position,
+                                                size=size)
+        for level_index in range(1, levels_num):
+            start_z = start_z + size[-1]
+            new_limits = [position[:2] - size[:2] / 2, position[:2] + size[:2] / 2]
+            current_limits = [np.maximum(current_limits[0], new_limits[0]),
+                              np.minimum(current_limits[1], new_limits[1])]
+            size, position = self._generate_random_level_block(allowed_center_position=current_limits,
+                                                               start_z=start_z,
+                                                               min_size=min_size)
+            self.stage.add_silhoutte_general_object(name="level_" + str(level_index),
+                                                    shape="cube",
+                                                    position=position,
+                                                    size=size)
+
     def _set_up_stage_arena(self):
-        # self.stage.add_rigid_general_object(name="block",
-        #                                     shape="cube",
-        #                                     mass=self.task_params["block_mass"])
-        #generate new level block
-        size, position = self._generate_random_level_block(allowed_center_position=[[-0.1825, -0.1825, 0.01],
-                                                                                   [0.1825, 0.1825, 0.1]])
-        self.stage.add_silhoutte_general_object(name="goal_position",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
-        #next level
-        new_limits = [position - size/2, position + size/2]
-        new_limits[0][-1] = new_limits[1][-1]
-        new_limits[1][-1] = new_limits[0][-1] + 0.1
-        size, position = self._generate_random_level_block(allowed_center_position=new_limits)
-        self.stage.add_silhoutte_general_object(name="goal_position_2",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
-        # next level
-        new_limits = [position - size / 2, position + size / 2]
-        new_limits[0][-1] = new_limits[1][-1]
-        new_limits[1][-1] = new_limits[0][-1] + 0.1
-        size, position = self._generate_random_level_block(allowed_center_position=new_limits)
-        self.stage.add_silhoutte_general_object(name="goal_position_3",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
-        # next level
-        new_limits = [position - size / 2, position + size / 2]
-        new_limits[0][-1] = new_limits[1][-1]
-        new_limits[1][-1] = new_limits[0][-1] + 0.1
-        size, position = self._generate_random_level_block(allowed_center_position=new_limits)
-        self.stage.add_silhoutte_general_object(name="goal_position_4",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
-        # next level
-        new_limits = [position - size / 2, position + size / 2]
-        new_limits[0][-1] = new_limits[1][-1]
-        new_limits[1][-1] = new_limits[0][-1] + 0.1
-        size, position = self._generate_random_level_block(allowed_center_position=new_limits)
-        self.stage.add_silhoutte_general_object(name="goal_position_5",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
-        # next level
-        new_limits = [position - size / 2, position + size / 2]
-        new_limits[0][-1] = new_limits[1][-1]
-        new_limits[1][-1] = new_limits[0][-1] + 0.1
-        size, position = self._generate_random_level_block(allowed_center_position=new_limits)
-        self.stage.add_silhoutte_general_object(name="goal_position_6",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
-        # next level
-        new_limits = [position - size / 2, position + size / 2]
-        new_limits[0][-1] = new_limits[1][-1]
-        new_limits[1][-1] = new_limits[0][-1] + 0.1
-        size, position = self._generate_random_level_block(allowed_center_position=new_limits)
-        self.stage.add_silhoutte_general_object(name="goal_position_7",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
-        # next level
-        new_limits = [position - size / 2, position + size / 2]
-        new_limits[0][-1] = new_limits[1][-1]
-        new_limits[1][-1] = new_limits[0][-1] + 0.1
-        size, position = self._generate_random_level_block(allowed_center_position=new_limits)
-        self.stage.add_silhoutte_general_object(name="goal_position_8",
-                                                shape="cube",
-                                                position=position,
-                                                size=size)
+        self._generate_random_target(levels_num=4, min_size=np.array([0.065, 0.065, 0.065]))
         return
 
     def _reset_task(self):
