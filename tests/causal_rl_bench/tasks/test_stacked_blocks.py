@@ -13,6 +13,7 @@ def test_task_sampler():
                 obs, reward, done, info = env.step(env.action_space.sample())
                 print(reward)
             env.do_intervention(variable_name='stack_levels', variable_value=2)
+            env.do_random_intervention()
             for _ in range(200):
                 obs, reward, done, info = env.step(env.action_space.sample())
                 print(reward)

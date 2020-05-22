@@ -212,10 +212,22 @@ class StackedBlocksTask(BaseTask):
         return self.task_solved
 
     def do_random_intervention(self):
-        raise Exception("Not implemented yet")
+        #choose random variable one intervention  only and intervene
+        variable_name = np.random.choice(list(self.intervention_spaces.keys()))
+        variable_space = self.intervention_spaces[variable_name]
+        sub_variable_name = None
+        #if its a block then choose a property
+        if isinstance(variable_space, dict):
+            sub_variable_name = np.random.choice(list(variable_space.keys()))
+            variable_space = variable_space[sub_variable_name]
+        self.do_intervention(variable_name, np.random.uniform(variable_space[0], variable_space[1]),
+                             sub_variable_name=sub_variable_name)
+        return
 
     def do_intervention(self, variable_name, variable_value, sub_variable_name=None):
         if sub_variable_name is not None:
+            if sub_variable_name == "orientation":
+                variable_value = euler_to_quaternion(variable_value)
             interventions_dict = dict()
             interventions_dict[sub_variable_name] = variable_value
             self.stage.object_intervention(variable_name, interventions_dict)
