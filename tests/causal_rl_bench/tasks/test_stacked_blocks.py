@@ -11,11 +11,11 @@ def test_task_sampler():
             obs = env.reset()
             for _ in range(200):
                 obs, reward, done, info = env.step(env.action_space.sample())
+                print(reward)
             env.do_intervention(variable_name='stack_levels', variable_value=2)
             for _ in range(200):
                 obs, reward, done, info = env.step(env.action_space.sample())
-        if i==1:
-            print("hi")
+                print(reward)
         env.task.generate_new_goal()
     env.close()
 

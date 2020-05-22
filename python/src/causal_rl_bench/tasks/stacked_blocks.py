@@ -3,7 +3,7 @@ from causal_rl_bench.utils.rotation_utils import euler_to_quaternion
 import numpy as np
 import copy
 from itertools import compress
-from causal_rl_bench.utils.state_utils import get_iou
+from causal_rl_bench.utils.state_utils import get_intersection
 
 
 class StackedBlocksTask(BaseTask):
@@ -188,48 +188,31 @@ class StackedBlocksTask(BaseTask):
         return
 
     def get_description(self):
-        return "Task where the goal is to pick a " \
-               "cube towards a goal height"
+        return "Task where the goal is to stack arbitrary shapes of cuboids"
 
     def get_reward(self):
-        # block_position = self.stage.get_object_state('block', 'position')
-        # target_height = self.task_params["goal_height"]
-        #
-        # #reward term one
-        # previous_block_to_goal = -abs(self.previous_object_position[2] -
-        #                               target_height)
-        # current_block_to_goal = -abs(block_position[2] - target_height)
-        # reward_term_1 = previous_block_to_goal - current_block_to_goal
-        #
-        # # reward term two
-        # previous_block_to_center = -(self.previous_object_position[0]**2 +
-        #                             self.previous_object_position[1]**2)
-        # current_block_to_center = -(block_position[0] ** 2 +
-        #                             block_position[1] ** 2)
-        # reward_term_2 = previous_block_to_center - current_block_to_center
-        #
-        # reward = self.task_params["reward_weight_1"] * reward_term_1 + \
-        #          self.task_params["reward_weight_2"] * reward_term_2
+        #intersection areas / union of all visual_objects
+        intersection_area = 0
+        union_area = 0 #TODO: under the assumption that the visual objects dont intersect
+        for visual_object_key in self.stage.visual_objects:
+            #TODO: distibuish between fixed and not
+            visual_object = self.stage.get_object(visual_object_key)
+            union_area += visual_object.get_area()
+            for rigid_object_key in self.stage.rigid_objects:
+                rigid_object = self.stage.get_object(rigid_object_key)
+                if rigid_object.is_not_fixed:
+                    intersection_area += get_intersection(visual_object.get_bounding_box(),
+                                                          rigid_object.get_bounding_box())
         # #TODO: discuss termination conditions
         # # if abs(z - target_height) < 0.02:
         # #     self.task_solved = True
-        # self.previous_object_position = block_position
-        return 0
+        return intersection_area / float(union_area)
 
     def is_done(self):
         return self.task_solved
 
     def do_random_intervention(self):
-        interventions_dict = dict()
-        new_block_position = self.stage.random_position(height_limits=0.0425)
-        new_colour = np.random.uniform([0], [1], size=[3, ])
-        interventions_dict["position"] = new_block_position
-        interventions_dict["colour"] = new_colour
-        new_size = np.random.uniform([0.065], [0.15], size=[3, ])
-        interventions_dict["size"] = new_size
-        self.stage.object_intervention("block", interventions_dict)
-        self.previous_object_position = new_block_position
-        return
+        raise Exception("Not implemented yet")
 
     def do_intervention(self, variable_name, variable_value, sub_variable_name=None):
         if sub_variable_name is not None:
