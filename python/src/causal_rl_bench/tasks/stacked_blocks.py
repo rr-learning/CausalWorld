@@ -8,7 +8,7 @@ from causal_rl_bench.utils.state_utils import get_intersection
 
 class StackedBlocksTask(BaseTask):
     def __init__(self, **kwargs):
-        super().__init__(task_name="picking")
+        super().__init__(task_name="stacked_tower")
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -20,7 +20,7 @@ class StackedBlocksTask(BaseTask):
         self.task_params["levels_num"] = kwargs.get(
             "levels_num", 6)
         self.task_params["blocks_min_size"] = kwargs.get(
-            "levels_num", np.array([0.035, 0.035, 0.035]))
+            "blocks_min_size", np.array([0.035, 0.035, 0.035]))
         self.task_params["block_mass"] = kwargs.get("block_mass", 0.08)
         self.current_stack_levels = self.task_params["levels_num"]
         self.intervention_spaces = None
@@ -132,7 +132,7 @@ class StackedBlocksTask(BaseTask):
     def _set_up_stage_arena(self):
         self.current_stack_levels = self.task_params["levels_num"]
         block_sizes = self._generate_random_target(levels_num=self.task_params["levels_num"],
-                                                   min_size=np.array([0.035, 0.035, 0.035]))
+                                                   min_size=self.task_params["blocks_min_size"])
         for level_num in range(len(block_sizes)):
             for i in range(len(block_sizes[level_num])):
                 self.stage.add_rigid_general_object(name="block_" + "level_" + str(level_num) + "_num_" + str(i),
