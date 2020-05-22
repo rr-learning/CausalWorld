@@ -21,7 +21,7 @@ class Stage(object):
         self.latest_full_state = None
         self.latest_observations = None
         self.goal_image_pybullet_instance = goal_image_pybullet_instance
-        self.floor_inner_bounding_box = np.array([[-0.1825, -0.1825], [0.1825, 0.1825]])
+        self.floor_inner_bounding_box = np.array([[-0.15, -0.15], [0.15, 0.15]])
         self.floor_height = 0.01
         if self.goal_image_pybullet_instance is not None:
             self.goal_image_visual_objects = dict()
@@ -44,6 +44,27 @@ class Stage(object):
                                                     **object_params)
         else:
             raise Exception("shape is not yet implemented")
+        return
+
+    def remove_general_object(self, name):
+        if name not in self.name_keys:
+            raise Exception("name does not exists as key for scene objects")
+        else:
+            self.name_keys.remove(name)
+        if name in self.rigid_objects.keys():
+            block_id = self.rigid_objects[name].block_id
+            del self.rigid_objects[name]
+            self.pybullet_client.removeBody(block_id)
+        elif name in self.visual_objects.keys():
+            block_id = self.visual_objects[name].block_id
+            del self.visual_objects[name]
+            self.pybullet_client.removeBody(block_id)
+        return
+
+    def remove_everything(self):
+        current_objects = list(self.rigid_objects.keys()) + list(self.visual_objects.keys())
+        for name in current_objects:
+            self.remove_general_object(name)
         return
 
     def add_rigid_mesh_object(self, name, file, **object_params):
@@ -197,6 +218,7 @@ class Stage(object):
         self.latest_full_state = None
         self.latest_observations = None
 
+
     def get_current_object_keys(self):
         return list(self.rigid_objects.keys()) +  \
                list(self.visual_objects.keys())
@@ -308,7 +330,7 @@ class Stage(object):
 
     def check_feasiblity_of_stage(self):
         for contact in self.pybullet_client.getContactPoints():
-            if contact[8] < 0:
+            if contact[8] < -0.005:
                 return False
         return True
 
