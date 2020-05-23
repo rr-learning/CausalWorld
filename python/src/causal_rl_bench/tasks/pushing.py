@@ -126,7 +126,6 @@ class PushingTask(BaseTask):
         self.previous_end_effector_positions = end_effector_positions
         self.previous_object_position = block_position
         self.previous_object_orientation = block_orientation
-
         # if position_distance < 0.01:
         #     self.task_solved = True
 

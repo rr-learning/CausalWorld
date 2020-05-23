@@ -13,11 +13,16 @@ class Stage(object):
         self.visual_objects = dict()
         self.observation_mode = observation_mode
         self.pybullet_client = pybullet_client
+        #TODO: move the ids from here
+        self.floor_id = 2
+        self.stage_id = 3
         self.normalize_observations = normalize_observations
         self.stage_observations = None
         self.latest_full_state = None
         self.latest_observations = None
         self.goal_image_pybullet_instance = goal_image_pybullet_instance
+        self.floor_inner_bounding_box = np.array([[-0.15, -0.15], [0.15, 0.15]])
+        self.floor_height = 0.01
         if self.goal_image_pybullet_instance is not None:
             self.goal_image_visual_objects = dict()
             self.goal_image_pybullet_client = \
@@ -39,6 +44,27 @@ class Stage(object):
                                                     **object_params)
         else:
             raise Exception("shape is not yet implemented")
+        return
+
+    def remove_general_object(self, name):
+        if name not in self.name_keys:
+            raise Exception("name does not exists as key for scene objects")
+        else:
+            self.name_keys.remove(name)
+        if name in self.rigid_objects.keys():
+            block_id = self.rigid_objects[name].block_id
+            del self.rigid_objects[name]
+            self.pybullet_client.removeBody(block_id)
+        elif name in self.visual_objects.keys():
+            block_id = self.visual_objects[name].block_id
+            del self.visual_objects[name]
+            self.pybullet_client.removeBody(block_id)
+        return
+
+    def remove_everything(self):
+        current_objects = list(self.rigid_objects.keys()) + list(self.visual_objects.keys())
+        for name in current_objects:
+            self.remove_general_object(name)
         return
 
     def add_rigid_mesh_object(self, name, file, **object_params):
@@ -109,6 +135,7 @@ class Stage(object):
         self.latest_full_state = new_state
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
+        self.pybullet_client.stepSimulation()
         return
 
     def set_objects_pose(self, names, positions, orientations):
@@ -128,6 +155,7 @@ class Stage(object):
         self.latest_full_state = self.get_full_state()
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
+        self.pybullet_client.stepSimulation()
         return
 
     def get_current_observations(self, helper_keys):
@@ -160,7 +188,8 @@ class Stage(object):
                 height_z,
             ]
             #check if satisfying_constraints
-            if np.all(object_position > allowed_section[0]) and np.all(object_position < allowed_section[1]):
+            if np.all(object_position > allowed_section[0]) and \
+                    np.all(object_position < allowed_section[1]):
                 satisfying_constraints = True
 
         return object_position
@@ -189,6 +218,7 @@ class Stage(object):
         self.latest_full_state = None
         self.latest_observations = None
 
+
     def get_current_object_keys(self):
         return list(self.rigid_objects.keys()) +  \
                list(self.visual_objects.keys())
@@ -208,6 +238,7 @@ class Stage(object):
                             .format(key))
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
+        self.pybullet_client.stepSimulation()
         return
 
     def get_object_full_state(self, key):
@@ -227,6 +258,49 @@ class Stage(object):
         else:
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
+
+    def get_object(self, key):
+        if key in self.rigid_objects:
+            return self.rigid_objects[key]
+        elif key in self.visual_objects:
+            return self.visual_objects[key]
+        else:
+            raise Exception("The key {} passed doesn't exist in the stage yet"
+                            .format(key))
+
+    def are_blocks_colliding(self, block1, block2):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == block2.block_id) or \
+                    (contact[2] == block1.block_id and contact[1] == block2.block_id):
+                return True
+        return False
+
+    def check_stage_free_of_colliding_blocks(self):
+        for contact in self.pybullet_client.getContactPoints():
+            if contact[1] > 3 and contact[2] > 3:
+                return False
+        return True
+
+    def is_colliding_with_stage(self, block1):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == self.stage_id) or \
+                    (contact[2] == block1.block_id and contact[1] == self.stage_id):
+                return True
+        return False
+
+    def is_colliding_with_floor(self, block1):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == self.floor_id) or \
+                    (contact[2] == block1.block_id and contact[1] == self.floor_id):
+                return True
+        return False
+
+    def get_normal_interaction_force_between_blocks(self, block1, block2):
+        for contact in self.pybullet_client.getContactPoints():
+            if (contact[1] == block1.block_id and contact[2] == block2.block_id) or \
+                    (contact[2] == block1.block_id and contact[1] == block2.block_id):
+                return contact[9]*np.array(contact[7])
+        return None
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None):
@@ -253,4 +327,10 @@ class Stage(object):
             return
         else:
             raise Exception("goal image is not enabled")
+
+    def check_feasiblity_of_stage(self):
+        for contact in self.pybullet_client.getContactPoints():
+            if contact[8] < -0.005:
+                return False
+        return True
 
