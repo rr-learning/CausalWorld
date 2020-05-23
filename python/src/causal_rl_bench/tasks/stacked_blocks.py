@@ -43,7 +43,7 @@ class StackedBlocksTask(BaseTask):
         #choose size width, depth, height
         allowed_max_width = min(self.stage.floor_inner_bounding_box[1][0] - position_x_y[0],
                                 position_x_y[0] - self.stage.floor_inner_bounding_box[0][0]) * 2
-        size = np.random.uniform(min_size, [allowed_max_width, min_size[1], min_size[2]])
+        size = np.random.uniform(min_size, [min_size[0], min_size[1], min_size[2]])
         position_z = start_z + size[-1]/2
         position = np.array([position_x_y[0], position_x_y[1], position_z])
         return size, position

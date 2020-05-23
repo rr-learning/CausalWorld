@@ -82,6 +82,21 @@ class Cuboid(RigidObject):
         self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                rgbaColor=np.append(
                                                    self.colour, 1))
+        self.pybullet_client.changeDynamics(
+            bodyUniqueId=self.block_id,
+            linkIndex=-1,
+            # maxJointVelocity=1e3,
+            restitution=0,
+            # jointDamping=1.e-5,
+            lateralFriction=1,
+            spinningFriction=0.001,
+            # rollingFriction=0,
+            # # linearDamping=0.04,
+            # # angularDamping=0.04,
+            # contactStiffness=1.e+5,
+            # contactDamping=800.,
+            # frictionAnchor=1
+        )
         #specifying bounds
         self.lower_bounds = dict()
         self.upper_bounds = dict()
