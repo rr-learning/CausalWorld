@@ -12,9 +12,9 @@ class TriFingerAction(object):
         self.high = None
         num_fingers = 3
         self.action_mode = action_mode
-        self.joint_positions_lower_bounds = np.array([-math.radians(70), -math.radians(70),
-                                                      -math.radians(160)] * 3)
-        self.joint_positions_upper_bounds = np.array([math.radians(70), 0,
+        self.joint_positions_lower_bounds = np.array([-math.radians(90), -math.radians(90),
+                                                      -math.radians(172)] * 3)
+        self.joint_positions_upper_bounds = np.array([math.radians(90), 100,
                                                       math.radians(-2)] * 3)
         if action_mode == "joint_positions":
             lower_bounds = self.joint_positions_lower_bounds

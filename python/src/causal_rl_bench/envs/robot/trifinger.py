@@ -31,7 +31,9 @@ class TriFingerRobot(object):
                 self.goal_image_instance.reset_finger(
                     self.robot_actions.joint_positions_lower_bounds,
                     np.zeros(9, ))
-        #TODO: go through the last action and last clipped action assignments!!!! might be wrong in some places
+        #Take care with the following last action and last clipped action always follow the action mode normalization
+        #last_applied_joint_positions is always saved here as denormalized but when its part of the obs space then it follows
+        #the observation mode
         self.last_action = None
         self.last_clipped_action = None
         if action_mode != "joint_torques":
@@ -117,14 +119,13 @@ class TriFingerRobot(object):
         return end_effector_position
 
     def _process_action_joint_positions(self, robot_state):
-        last_action_applied = self.get_last_applied_joint_positions()
-        if self.normalize_actions and not self.normalize_observations:
-            last_action_applied = self.denormalize_observation_for_key(
-                observation=last_action_applied, key='action_joint_positions')
-        elif not self.normalize_actions and self.normalize_observations:
-            last_action_applied = self.normalize_observation_for_key(
-                observation=last_action_applied, key='action_joint_positions')
-        return last_action_applied
+        #This returns the absolute joint positions command sent in position control mode (end effector and joint positions)
+        #this observation shouldnt be used in torque control
+        last_joints_action_applied = self.get_last_applied_joint_positions() #always denormalized by default
+        if self.normalize_observations:
+            last_joints_action_applied = self.normalize_observation_for_key(
+                observation=last_joints_action_applied, key='action_joint_positions')
+        return last_joints_action_applied
 
     def set_action_mode(self, action_mode):
         self.action_mode = action_mode
@@ -190,8 +191,11 @@ class TriFingerRobot(object):
     def set_full_state(self, state):
         self.latest_full_state = self.tri_finger.\
             reset_finger(state[:9], state[9:])
-        self.last_action = state[:9]
-        self.last_clipped_action = state[:9]
+        # here the previous actions will all be zeros to avoid dealing with different action modes for now
+        self.last_action = np.zeros(9, )
+        self.last_clipped_action = np.zeros(9, )
+        if self.action_mode != "joint_torques":
+            self.last_applied_joint_positions = list(state[:9])
         return
 
     def clear(self):
@@ -216,9 +220,12 @@ class TriFingerRobot(object):
             joint_velocities = np.zeros(9)
         self.latest_full_state = self.tri_finger.reset_finger(joint_positions,
                                                               joint_velocities)
-        self.last_action = joint_positions
-        self.last_clipped_action = joint_positions
-        self.last_applied_joint_positions = joint_positions
+        #here the previous actions will all be zeros to avoid dealing with different action modes for now
+        self.last_action = np.zeros(9,)
+        self.last_clipped_action = np.zeros(9,)
+        if self.action_mode != "joint_torques":
+            self.last_applied_joint_positions = list(joint_positions)
+        return
 
     def get_last_action(self):
         return self.last_action
@@ -227,7 +234,7 @@ class TriFingerRobot(object):
         return self.last_clipped_action
 
     def get_last_applied_joint_positions(self):
-        return self.last_clipped_action
+        return self.last_applied_joint_positions
     
     def get_observation_spaces(self):
         return self.robot_observations.get_observation_spaces()
