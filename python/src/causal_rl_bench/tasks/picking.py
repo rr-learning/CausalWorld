@@ -51,9 +51,8 @@ class PickingTask(BaseTask):
         # reset stage next
         if self.task_params["randomize_block_pose"]:
             block_position = self.stage.random_position(height_limits=0.0425)
-            block_orientation = euler_to_quaternion([0, 0,
-                                                     np.random.uniform(-np.pi,
-                                                                       np.pi)])
+            block_orientation = euler_to_quaternion([0, 0, np.random.uniform(0,
+                                                                             np.pi)])
         else:
             block_position = [0, 0, 0.0425]
             block_orientation = euler_to_quaternion([0, 0, 0])

@@ -1,6 +1,6 @@
 import pybullet
 import numpy as np
-
+from causal_rl_bench.utils.rotation_utils import rotate_points, get_transformation_matrix, get_rotation_matrix
 
 class RigidObject(object):
     def __init__(self, pybullet_client, name, block_id):
@@ -369,6 +369,36 @@ class Cuboid(RigidObject):
 
     def get_area(self):
         return self.area
+
+    def get_vertices(self):
+        position, orientation = self.pybullet_client.getBasePositionAndOrientation(
+            self.block_id
+        )
+        vertices = [[1, 1, -1],
+                    [1, -1, -1],
+                    [-1, 1, -1],
+                    [-1, -1, -1],
+                    [1, 1, 1],
+                    [1, -1, 1],
+                    [-1, 1, 1],
+                    [-1, -1, 1]]
+        vertices = [position + (point * self.size / 2)
+                    for point in vertices]
+        return rotate_points(np.array(vertices), orientation)
+
+    def world_to_cube_r_matrix(self):
+        position, orientation = self.pybullet_client.getBasePositionAndOrientation(
+            self.block_id
+        )
+        #TODO: double check if its not the inverse
+        return get_transformation_matrix(position, orientation)
+
+    def get_rotation_matrix(self):
+        position, orientation = self.pybullet_client.getBasePositionAndOrientation(
+            self.block_id
+        )
+        #TODO: double check if its not the inverse
+        return get_rotation_matrix(orientation)
 
 
 class StaticCuboid(RigidObject):

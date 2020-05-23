@@ -1,5 +1,29 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.utils.task_utils import get_suggested_grip_locations
+
+
+def grip_block(env):
+    grip_locations = get_suggested_grip_locations(env.task.stage.get_object('block').size,
+                                                  env.task.stage.get_object('block').world_to_cube_r_matrix())
+    desired_action = env.action_space.low
+    desired_action[:3] = grip_locations[0]
+    desired_action[3:6] = grip_locations[1]
+    print("wants to reach", desired_action)
+    # grasp the block now
+    for _ in range(1000):
+        obs, reward, done, info = env.step(desired_action)
+    print("reached instead ", obs[27:27+9])
+    return desired_action
+
+
+def lift_block(env, desired_grip):
+    desired_action = desired_grip
+    for _ in range(30):
+        desired_action[2] += 0.005
+        desired_action[5] += 0.005
+        for _ in range(250):
+            obs, reward, done, info = env.step(desired_action)
 
 
 def test_mass():
@@ -11,29 +35,15 @@ def test_mass():
                 normalize_actions=False,
                 normalize_observations=False,
                 max_episode_length=10000)
-    obs = env.reset()
-    desired_action = obs[27:27+9]
-    desired_action[:2] = [0, 0.036]
-    desired_action[3:5] = [0, -0.036]
-    desired_action[2] = 0.0425
-    desired_action[5] = 0.0425
-    desired_action[-1] = 0.0425
-    #grasp the block now
-    for _ in range(1000):
-        obs, reward, done, info = env.step(desired_action)
-
-    desired_action = obs[27:27 + 9]
-    desired_action[:2] = [0, 0.036]
-    desired_action[3:5] = [0, -0.036]
-
-    #NOW lets move up a bit by bit (1 cm each second?)
-    for _ in range(1000):
-        desired_action[2] += 0.005
-        desired_action[5] += 0.005
-        for _ in range(250):
-            obs, reward, done, info = env.step(desired_action)
-
+    for _ in range(10):
+        obs = env.reset()
+        desired_grip = grip_block(env)
+        print(env.robot.get_tip_contact_states())
+        lift_block(env, desired_grip)
     env.close()
 
 
 test_mass()
+
+
+

@@ -17,10 +17,10 @@ class TriFingerObservations(object):
         self.upper_bounds = dict()
         #TODO: add previous action space here!!!!
         self.lower_bounds["action_joint_positions"] = \
-            [-math.radians(90), -math.radians(90),
-             -math.radians(172)] * num_fingers
+            [-math.radians(70), -math.radians(70),
+             -math.radians(160)] * num_fingers
         self.upper_bounds["action_joint_positions"] = \
-            [math.radians(90), math.radians(100),
+            [math.radians(70), 0,
              math.radians(-2)] * num_fingers
 
         self.lower_bounds["end_effector_positions"] = \
@@ -34,10 +34,11 @@ class TriFingerObservations(object):
             [0.36, 0.36, 0.36] * num_fingers
 
         self.lower_bounds["joint_positions"] = \
-            [-math.radians(90), -math.radians(90),
-             -math.radians(172)] * num_fingers
+            [-math.radians(70), -math.radians(70),
+             -math.radians(160)] * num_fingers
         self.upper_bounds["joint_positions"] = \
-            [math.radians(90), 100, math.radians(-2)] * \
+            [math.radians(70),
+             0, math.radians(-2)] * \
             num_fingers
 
         self.lower_bounds["joint_velocities"] = \

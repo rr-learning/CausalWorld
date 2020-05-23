@@ -38,3 +38,18 @@ def rotate_points(points_batch, r_quaternion):
                                   np.transpose(points_batch)))
 
 
+def get_transformation_matrix(translation, r_quaternion):
+    r = R.from_quat(r_quaternion)
+    r_matrix = np.zeros([4, 4])
+    r_matrix[:3, :3] = r.as_matrix()
+    r_matrix[:3, 3] = translation
+    r_matrix[3, 3] = 1
+    return r_matrix
+
+
+def get_rotation_matrix(r_quaternion):
+    r = R.from_quat(r_quaternion)
+    return r.as_matrix()
+
+
+
