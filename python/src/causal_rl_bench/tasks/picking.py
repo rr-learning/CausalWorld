@@ -56,9 +56,6 @@ class PickingTask(BaseTask):
         else:
             block_position = [0, 0, 0.0425]
             block_orientation = euler_to_quaternion([0, 0, 0])
-            # block_position = [np.random.uniform(-0.06, 0.06), 0, 0.0425]
-            # block_orientation = euler_to_quaternion([0, 0, np.random.uniform(0,
-            #                                                                  np.pi / 5)])
         goal_position = [0, 0, self.task_params["goal_height"]]
         goal_orientation = euler_to_quaternion([0, 0, 0])
         self.stage.set_objects_pose(names=["block", "goal_position"],

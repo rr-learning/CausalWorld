@@ -17,6 +17,7 @@ class ReachingTask(BaseTask):
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1",
                                                          1)
         self.end_effector_positions_goal = None
+        self.previous_end_effector_positions = None
 
     def _set_up_stage_arena(self):
         self.stage.add_silhoutte_general_object(name="goal_1",
@@ -79,7 +80,7 @@ class ReachingTask(BaseTask):
                                               - current_end_effector_positions)
         reward_term_1 = previous_dist_to_goal - current_dist_to_goal
         reward = self.task_params["reward_weight_1"] * reward_term_1
-        self.end_effector_positions_goal = current_end_effector_positions
+        self.previous_end_effector_positions = current_end_effector_positions
         return reward
 
     def is_done(self):
