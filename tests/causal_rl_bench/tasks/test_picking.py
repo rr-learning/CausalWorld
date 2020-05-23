@@ -15,17 +15,21 @@ def test_mass():
     desired_action = obs[27:27+9]
     desired_action[:2] = [0, 0.036]
     desired_action[3:5] = [0, -0.036]
-    desired_action[2] = 0.05
-    desired_action[5] = 0.05
-    desired_action[-1] = 0.05
+    desired_action[2] = 0.0425
+    desired_action[5] = 0.0425
+    desired_action[-1] = 0.0425
     #grasp the block now
-    for _ in range(250):
+    for _ in range(1000):
         obs, reward, done, info = env.step(desired_action)
 
+    desired_action = obs[27:27 + 9]
+    desired_action[:2] = [0, 0.036]
+    desired_action[3:5] = [0, -0.036]
+
     #NOW lets move up a bit by bit (1 cm each second?)
-    for _ in range(40):
-        desired_action[2] += 0.01
-        desired_action[5] += 0.01
+    for _ in range(1000):
+        desired_action[2] += 0.005
+        desired_action[5] += 0.005
         for _ in range(250):
             obs, reward, done, info = env.step(desired_action)
 
