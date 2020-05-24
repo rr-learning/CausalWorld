@@ -16,8 +16,15 @@ class ReachingTask(BaseTask):
         #TODO: implement non randomization of goal
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1",
                                                          1)
+        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2",
+                                                         0)
+        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3",
+                                                         0)
+        self.task_params["reward_weight_4"] = kwargs.get("reward_weight_4",
+                                                         0)
         self.end_effector_positions_goal = None
         self.previous_end_effector_positions = None
+        self.previous_joint_velocities = None
 
     def _set_up_stage_arena(self):
         self.stage.add_silhoutte_general_object(name="goal_1",
@@ -53,6 +60,7 @@ class ReachingTask(BaseTask):
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
+        self.previous_joint_velocities = np.copy(self.robot.latest_full_state.velocity)
         joints_goal = self.robot.sample_joint_positions()
         self.end_effector_positions_goal = self.robot.\
             compute_end_effector_positions(joints_goal)
@@ -79,8 +87,16 @@ class ReachingTask(BaseTask):
         current_dist_to_goal = np.linalg.norm(self.end_effector_positions_goal
                                               - current_end_effector_positions)
         reward_term_1 = previous_dist_to_goal - current_dist_to_goal
-        reward = self.task_params["reward_weight_1"] * reward_term_1
+        reward_term_2 = -current_dist_to_goal
+        reward_term_3 = -np.linalg.norm(self.robot.latest_full_state.torque)
+        reward_term_4 = -np.linalg.norm(np.abs(self.robot.latest_full_state.velocity - self.previous_joint_velocities),
+                                        ord=2)
+        reward = self.task_params["reward_weight_1"] * reward_term_1 + \
+                 self.task_params["reward_weight_2"] * reward_term_2 + \
+                 self.task_params["reward_weight_3"] * reward_term_3 + \
+                 self.task_params["reward_weight_4"] * reward_term_4
         self.previous_end_effector_positions = current_end_effector_positions
+        self.previous_joint_velocities = np.copy(self.robot.latest_full_state.velocity)
         return reward
 
     def is_done(self):

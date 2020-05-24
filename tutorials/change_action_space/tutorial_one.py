@@ -8,8 +8,8 @@ def apply_delta_action():
     task = Task(task_id='reaching', randomize_joint_positions=True)
     env = World(task=task, enable_visualization=True,
                 action_mode="joint_positions",
-                normalize_actions=False,
-                normalize_observations=False, skip_frame=1)
+                normalize_actions=True,
+                normalize_observations=True, skip_frame=1)
     #TODO:discuss with Manuel if the pd gains needs tuning, I tuned them but
     #they are very senstive
     env = DeltaAction(env)
