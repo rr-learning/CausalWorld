@@ -1,4 +1,5 @@
 import gym
+import numpy as np
 
 
 class DeltaAction(gym.ActionWrapper):
@@ -20,7 +21,7 @@ class DeltaAction(gym.ActionWrapper):
         if self.env.robot.normalize_actions:
             offset = self.env.robot.normalize_observation_for_key(
                     observation=offset, key=self.env.action_mode)
-        return action + offset
+        return action + np.around(offset, decimals=2)
 
     def reverse_action(self, action):
         if self.env.action_mode == "joint_positions":
@@ -35,4 +36,4 @@ class DeltaAction(gym.ActionWrapper):
         if self.env.robot.normalize_actions:
             offset = self.env.robot.normalize_observation_for_key(
                     observation=offset, key=self.env.action_mode)
-        return action - offset
+        return action - np.around(offset, decimals=2)
