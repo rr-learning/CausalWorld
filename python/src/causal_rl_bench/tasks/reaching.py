@@ -15,13 +15,13 @@ class ReachingTask(BaseTask):
             kwargs.get("randomize_joint_positions", True)
         #TODO: implement non randomization of goal
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1",
-                                                         1)
+                                                         0)
         self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2",
-                                                         0)
+                                                         10)
         self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3",
-                                                         0)
+                                                         0.01)
         self.task_params["reward_weight_4"] = kwargs.get("reward_weight_4",
-                                                         0)
+                                                         0.001)
         self.end_effector_positions_goal = None
         self.previous_end_effector_positions = None
         self.previous_joint_velocities = None
