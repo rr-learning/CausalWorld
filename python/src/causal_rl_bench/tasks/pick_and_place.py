@@ -15,7 +15,7 @@ class PickAndPlaceTask(BaseTask):
                                             "block_position",
                                             "block_orientation"]
 
-        self.task_params["block_mass"] = kwargs.get("block_mass", 0.08)
+        self.task_params["block_mass"] = kwargs.get("block_mass", 0.02)
         self.task_params["randomize_joint_positions"] = \
             kwargs.get("randomize_joint_positions", True)
         self.task_params["randomize_block_pose"] = \
@@ -24,8 +24,9 @@ class PickAndPlaceTask(BaseTask):
             kwargs.get("randomize_goal_block_pose", True)
         self.task_params["randomize_side"] = \
             kwargs.get("randomize_side", True)
-        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
-        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 10)
+        self.task_params["reward_weight_0"] = kwargs.get("reward_weight_0", 1)
+        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 10)
+        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 1)
         self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 1)
         self.previous_end_effector_positions = None
         self.previous_object_position = None
@@ -111,6 +112,11 @@ class PickAndPlaceTask(BaseTask):
                "cube and then place it in the other side of the wall"
 
     def get_reward(self):
+        reward_term_0 = self._compute_sparse_reward(
+            achieved_goal=None,
+            desired_goal=None,
+            info=self.get_info())
+
         block_position = self.stage.get_object_state('block', 'position')
         block_orientation = self.stage.get_object_state('block', 'orientation')
         goal_position = self.stage.get_object_state('goal_block', 'position')
@@ -148,21 +154,15 @@ class PickAndPlaceTask(BaseTask):
         reward_term_3 = angle_diff_old[0] - current_angle_diff[0]
 
         # calculate final_reward
-        reward = self.task_params["reward_weight_1"] * reward_term_1 + \
-                 self.task_params["reward_weight_2"] * reward_term_2 \
-                 + self.task_params["reward_weight_3"] * reward_term_3
+        reward = self.task_params["reward_weight_0"] * reward_term_0 + \
+                 self.task_params["reward_weight_1"] * reward_term_1 \
+                 + self.task_params["reward_weight_2"] * reward_term_2 + \
+                 self.task_params["reward_weight_3"] * reward_term_3
 
         self.previous_end_effector_positions = end_effector_positions
         self.previous_object_position = block_position
         self.previous_object_orientation = block_orientation
-
-        # if position_distance < 0.01:
-        #     self.task_solved = True
-
         return reward
-
-    def is_done(self):
-        return self.task_solved
 
     def do_random_intervention(self):
         # TODO: for now just intervention on a specific object

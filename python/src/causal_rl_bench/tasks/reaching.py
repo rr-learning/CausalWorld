@@ -16,11 +16,13 @@ class ReachingTask(BaseTask):
         #TODO: implement non randomization of goal
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1",
                                                          0)
-        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2",
-                                                         10)
-        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3",
+        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_1",
                                                          0)
-        self.task_params["reward_weight_4"] = kwargs.get("reward_weight_4",
+        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_2",
+                                                         10)
+        self.task_params["reward_weight_4"] = kwargs.get("reward_weight_3",
+                                                         0)
+        self.task_params["reward_weight_5"] = kwargs.get("reward_weight_4",
                                                          0)
         self.end_effector_positions_goal = None
         self.previous_end_effector_positions = None
@@ -87,22 +89,26 @@ class ReachingTask(BaseTask):
             self.previous_end_effector_positions)
         current_dist_to_goal = np.linalg.norm(self.end_effector_positions_goal
                                               - current_end_effector_positions)
-        reward_term_1 = previous_dist_to_goal - current_dist_to_goal
-        reward_term_2 = -current_dist_to_goal
-        reward_term_3 = -np.linalg.norm(self.robot.latest_full_state.torque)
-        reward_term_4 = -np.linalg.norm(np.abs(
+        #TODO: now you need to call this to compute the done flag, maybe discuss this
+        reward_term_1 = self._compute_sparse_reward(
+            achieved_goal=current_end_effector_positions,
+            desired_goal=self.end_effector_positions_goal,
+            info=self.get_info())
+        reward_term_2 = previous_dist_to_goal - current_dist_to_goal
+        reward_term_3 = -current_dist_to_goal
+        reward_term_4 = -np.linalg.norm(self.robot.latest_full_state.torque)
+        reward_term_5 = -np.linalg.norm(np.abs(
             self.robot.latest_full_state.velocity - self.previous_joint_velocities),
                                         ord=2)
         reward = self.task_params["reward_weight_1"] * reward_term_1 + \
                  self.task_params["reward_weight_2"] * reward_term_2 + \
                  self.task_params["reward_weight_3"] * reward_term_3 + \
-                 self.task_params["reward_weight_4"] * reward_term_4
+                 self.task_params["reward_weight_4"] * reward_term_4 + \
+                 self.task_params["reward_weight_5"] * reward_term_5
         self.previous_end_effector_positions = current_end_effector_positions
-        self.previous_joint_velocities = np.copy(self.robot.latest_full_state.velocity)
+        self.previous_joint_velocities = np.copy(
+            self.robot.latest_full_state.velocity)
         return reward
-
-    def is_done(self):
-        return self.task_solved
 
     def do_random_intervention(self):
         return

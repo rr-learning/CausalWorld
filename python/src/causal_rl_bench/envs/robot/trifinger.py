@@ -16,6 +16,7 @@ class TriFingerRobot(object):
         self.observation_mode = observation_mode
         self.skip_frame = skip_frame
         self.simulation_time = simulation_time
+        self.dt = self.simulation_time * self.skip_frame
         self.control_index = -1
         self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
                                     "tri")
