@@ -31,7 +31,7 @@ class World(gym.Env):
         self.enable_goal_image = enable_goal_image
         self.action_mode = action_mode
         self.seed(seed)
-        self.simulation_time = 1./240
+        self.simulation_time = 1./250
         self.robot = TriFingerRobot(action_mode=action_mode,
                                     observation_mode=observation_mode,
                                     enable_visualization=enable_visualization,

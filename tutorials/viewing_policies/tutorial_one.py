@@ -7,9 +7,9 @@ import causal_rl_bench.viewers.task_viewer as viewer
 def example():
     # This tutorial shows how to view policies of trained agents
 
-    task = Task(task_id='reaching')
+    task = Task(task_id='reaching', randomize_joint_positions=True)
     world_params = dict()
-    world_params["skip_frame"] = 10
+    world_params["skip_frame"] = 1
     world_params["seed"] = 0
     stable_baselines_policy_path = "./saved_model.zip"
     model = PPO2.load(stable_baselines_policy_path)
@@ -30,8 +30,8 @@ def example():
     viewer.view_policy(task=task,
                        world_params=world_params,
                        policy_fn=policy_fn,
-                       max_time_steps=10*2500,
-                       number_of_resets=10)
+                       max_time_steps=40*960,
+                       number_of_resets=40)
 
 
 if __name__ == '__main__':
