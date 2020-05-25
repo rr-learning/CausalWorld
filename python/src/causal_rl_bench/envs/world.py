@@ -80,6 +80,7 @@ class World(gym.Env):
             self.observation_space = self.robot.get_observation_spaces()
         self.action_space = self.robot.get_action_spaces()
         self.skip_frame = skip_frame
+        self.dt = self.simulation_time * self.skip_frame
         self.metadata['video.frames_per_second'] = \
             (1 / self.simulation_time) / self.skip_frame
         # TODO: verify spaces here
@@ -102,7 +103,7 @@ class World(gym.Env):
             observation = self.robot.get_current_camera_observations()
         else:
             observation = self.task.filter_structured_observations()
-        reward = self.task.get_reward()
+        reward = self.task.get_reward() * self.dt
         done = self._is_done()
         info = self.task.get_info()
 

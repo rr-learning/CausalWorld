@@ -99,7 +99,6 @@ class ReachingTask(BaseTask):
                  self.task_params["reward_weight_4"] * reward_term_4
         self.previous_end_effector_positions = current_end_effector_positions
         self.previous_joint_velocities = np.copy(self.robot.latest_full_state.velocity)
-        print(reward)
         return reward
 
     def is_done(self):
