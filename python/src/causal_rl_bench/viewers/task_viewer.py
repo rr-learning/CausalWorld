@@ -2,6 +2,7 @@ from causal_rl_bench.envs.world import World
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 from causal_rl_bench.tasks.task import Task
 import time
+from causal_rl_bench.utils.delta_action_wrapper import DeltaAction
 
 
 def get_world(task_id, task_params, world_params, enable_visualization=False):
@@ -39,11 +40,14 @@ def view_policy(task, world_params, policy_fn, max_time_steps,
                     task.get_task_params(),
                     world_params,
                     enable_visualization=True)
+    # env = DeltaAction(env)
     for reset_idx in range(number_of_resets):
         obs = env.reset()
         for time in range(int(max_time_steps/number_of_resets)):
+            #compute next action
+            desired_action = policy_fn(obs)
             for _ in range(actual_skip_frame):
-                obs, reward, done, info = env.step(action=policy_fn(obs))
+                obs, reward, done, info = env.step(action=desired_action)
     env.close()
 
 
@@ -60,8 +64,9 @@ def record_video_of_policy(task, world_params, policy_fn, file_name,
         obs = env.reset()
         recorder.capture_frame()
         for i in range(max_time_steps):
+            desired_action = policy_fn(obs)
             for _ in range(actual_skip_frame):
-                obs, reward, done, info = env.step(action=policy_fn(obs))
+                obs, reward, done, info = env.step(action=desired_action)
                 recorder.capture_frame()
     env.close()
 
