@@ -24,10 +24,10 @@ class PickAndPlaceTask(BaseTask):
             kwargs.get("randomize_goal_block_pose", True)
         self.task_params["randomize_side"] = \
             kwargs.get("randomize_side", True)
-        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
-        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 10)
+        self.task_params["reward_weight_0"] = kwargs.get("reward_weight_0", 1)
+        self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 10)
+        self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 1)
         self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 1)
-        self.task_params["reward_weight_4"] = kwargs.get("reward_weight_4", 1)
         self.previous_end_effector_positions = None
         self.previous_object_position = None
         self.previous_object_orientation = None
@@ -112,7 +112,7 @@ class PickAndPlaceTask(BaseTask):
                "cube and then place it in the other side of the wall"
 
     def get_reward(self):
-        reward_term_1 = self._compute_sparse_reward(
+        reward_term_0 = self._compute_sparse_reward(
             achieved_goal=None,
             desired_goal=None,
             info=self.get_info())
@@ -131,13 +131,13 @@ class PickAndPlaceTask(BaseTask):
                                                      block_position)
         previous_distance_from_block = np.linalg.norm(self.previous_end_effector_positions -
                                                       self.previous_object_position)
-        reward_term_2 = previous_distance_from_block - current_distance_from_block
+        reward_term_1 = previous_distance_from_block - current_distance_from_block
 
         # calculate second reward term
         previous_dist_to_goal = np.linalg.norm(goal_position -
                                                self.previous_object_position)
         current_dist_to_goal = np.linalg.norm(goal_position - block_position)
-        reward_term_3 = previous_dist_to_goal - current_dist_to_goal
+        reward_term_2 = previous_dist_to_goal - current_dist_to_goal
 
         # calculate third reward term
         quat_diff_old = quaternion_mul(np.expand_dims(goal_orientation, 0),
@@ -151,13 +151,13 @@ class PickAndPlaceTask(BaseTask):
                                        0)))
         current_angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
 
-        reward_term_4 = angle_diff_old[0] - current_angle_diff[0]
+        reward_term_3 = angle_diff_old[0] - current_angle_diff[0]
 
         # calculate final_reward
-        reward = self.task_params["reward_weight_1"] * reward_term_1 + \
-                 self.task_params["reward_weight_2"] * reward_term_2 \
-                 + self.task_params["reward_weight_3"] * reward_term_3 + \
-                 self.task_params["reward_weight_4"] * reward_term_4
+        reward = self.task_params["reward_weight_0"] * reward_term_0 + \
+                 self.task_params["reward_weight_1"] * reward_term_1 \
+                 + self.task_params["reward_weight_2"] * reward_term_2 + \
+                 self.task_params["reward_weight_3"] * reward_term_3
 
         self.previous_end_effector_positions = end_effector_positions
         self.previous_object_position = block_position

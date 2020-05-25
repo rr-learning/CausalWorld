@@ -150,9 +150,6 @@ class StackedTowerImproperTask(BaseTask):
         # #     self.task_solved = True
         return intersection_area / float(union_area)
 
-    def is_done(self):
-        return self.task_solved
-
     # def do_random_intervention(self):
     #     #choose random variable one intervention  only and intervene
     #     variable_name = np.random.choice(list(self.intervention_spaces.keys()))

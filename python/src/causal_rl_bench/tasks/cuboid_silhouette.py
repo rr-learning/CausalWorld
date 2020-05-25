@@ -99,8 +99,6 @@ class CuboidSilhouette(BaseTask):
                                              cuboid_size=np.array([1, 1, 1]) * self.task_params["unit_length"])
         return reward
 
-    def is_done(self):
-        return self.task_solved
 
     #TODO: discuss whats the difference between this and do random intervention
     def get_counterfactual_variant(self, **kwargs):

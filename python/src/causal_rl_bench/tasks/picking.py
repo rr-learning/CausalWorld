@@ -18,9 +18,9 @@ class PickingTask(BaseTask):
         self.task_params["randomize_block_pose"] = kwargs.get(
             "randomize_block_pose", True)
         self.task_params["goal_height"] = kwargs.get("goal_height", 0.15)
+        self.task_params["reward_weight_0"] = kwargs.get("reward_weight_0", 1)
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
         self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 1)
-        self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 1)
         self.previous_object_position = None
 
     def _set_up_non_default_observations(self):
@@ -72,7 +72,7 @@ class PickingTask(BaseTask):
     def get_reward(self):
         # TODO: now we dont provide a structured observations for
         # the sparse reward of this task
-        reward_term_1 = self._compute_sparse_reward(
+        reward_term_0 = self._compute_sparse_reward(
             achieved_goal=None,
             desired_goal=None,
             info=self.get_info())
@@ -83,18 +83,18 @@ class PickingTask(BaseTask):
         previous_block_to_goal = -abs(self.previous_object_position[2] -
                                       target_height)
         current_block_to_goal = -abs(block_position[2] - target_height)
-        reward_term_2 = previous_block_to_goal - current_block_to_goal
+        reward_term_1 = previous_block_to_goal - current_block_to_goal
 
         # reward term two
         previous_block_to_center = -(self.previous_object_position[0]**2 +
                                     self.previous_object_position[1]**2)
         current_block_to_center = -(block_position[0] ** 2 +
                                     block_position[1] ** 2)
-        reward_term_3 = previous_block_to_center - current_block_to_center
+        reward_term_2 = previous_block_to_center - current_block_to_center
 
-        reward = self.task_params["reward_weight_1"] * reward_term_1 + \
-                 self.task_params["reward_weight_2"] * reward_term_2 + \
-                 self.task_params["reward_weight_3"] * reward_term_3
+        reward = self.task_params["reward_weight_0"] * reward_term_0 + \
+                 self.task_params["reward_weight_1"] * reward_term_1 + \
+                 self.task_params["reward_weight_2"] * reward_term_2
         self.previous_object_position = block_position
         return reward
 
