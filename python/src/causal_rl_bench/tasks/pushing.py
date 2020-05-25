@@ -25,6 +25,7 @@ class PushingTask(BaseTask):
         self.task_params["reward_weight_1"] = kwargs.get("reward_weight_1", 1)
         self.task_params["reward_weight_2"] = kwargs.get("reward_weight_2", 10)
         self.task_params["reward_weight_3"] = kwargs.get("reward_weight_3", 1)
+        self.task_params["reward_weight_4"] = kwargs.get("reward_weight_4", 1)
         self.previous_end_effector_positions = None
         self.previous_object_position = None
         self.previous_object_orientation = None
@@ -82,6 +83,10 @@ class PushingTask(BaseTask):
             "Task where the goal is to push an object towards a goal position"
 
     def get_reward(self):
+        reward_term_1 = self._compute_sparse_reward(
+            achieved_goal=None,
+            desired_goal=None,
+            info=self.get_info())
         block_position = self.stage.get_object_state('block', 'position')
         block_orientation = self.stage.get_object_state('block', 'orientation')
         goal_position = self.stage.get_object_state('goal_block', 'position')
@@ -96,13 +101,13 @@ class PushingTask(BaseTask):
                                                      block_position)
         previous_distance_from_block = np.linalg.norm(self.previous_end_effector_positions -
                                                       self.previous_object_position)
-        reward_term_1 = previous_distance_from_block - current_distance_from_block
+        reward_term_2 = previous_distance_from_block - current_distance_from_block
 
         #calculate second reward term
         previous_dist_to_goal = np.linalg.norm(goal_position -
                                                self.previous_object_position)
         current_dist_to_goal = np.linalg.norm(goal_position - block_position)
-        reward_term_2 = previous_dist_to_goal - current_dist_to_goal
+        reward_term_3 = previous_dist_to_goal - current_dist_to_goal
 
         # calculate third reward term
         quat_diff_old = quaternion_mul(np.expand_dims(goal_orientation, 0),
@@ -116,23 +121,18 @@ class PushingTask(BaseTask):
                                            0)))
         current_angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
 
-        reward_term_3 = angle_diff_old[0] - current_angle_diff[0]
+        reward_term_4 = angle_diff_old[0] - current_angle_diff[0]
 
         #calculate final_reward
         reward = self.task_params["reward_weight_1"]*reward_term_1 + \
                  self.task_params["reward_weight_2"]*reward_term_2 \
-                 + self.task_params["reward_weight_3"] * reward_term_3
+                 + self.task_params["reward_weight_3"] * reward_term_3 + \
+                self.task_params["reward_weight_4"]*reward_term_4
 
         self.previous_end_effector_positions = end_effector_positions
         self.previous_object_position = block_position
         self.previous_object_orientation = block_orientation
-        # if position_distance < 0.01:
-        #     self.task_solved = True
-
         return reward
-
-    def is_done(self):
-        return self.task_solved
 
     def do_random_intervention(self):
         # TODO: for now just intervention on a specific object

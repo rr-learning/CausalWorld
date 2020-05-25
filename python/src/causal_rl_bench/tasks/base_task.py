@@ -1,4 +1,5 @@
 import numpy as np
+from causal_rl_bench.utils.state_utils import get_intersection
 
 
 class BaseTask(object):
@@ -17,6 +18,9 @@ class BaseTask(object):
         self._non_default_stage_observation_funcs = dict()
         self.current_full_observations_dict = dict()
         self.task_params = dict()
+        self.time_steps_elapsed_since_success = 0
+        self.time_threshold_in_goal_state_secs = 0.5
+        self.current_time_secs = 0
         return
 
     def init_task(self, robot, stage):
@@ -46,10 +50,56 @@ class BaseTask(object):
         self._non_default_stage_observation_funcs[observation_key] = observation_function
         return
 
+    def _compute_sparse_reward(self, achieved_goal, desired_goal, info):
+        self.current_time += self.robot.dt
+        if self.task_name == "reaching":
+            current_end_effector_positions = \
+                self.robot.compute_end_effector_positions(
+                    self.robot.latest_full_state.position)
+            current_dist_to_goal = np.abs(desired_goal -
+                                          current_end_effector_positions)
+            current_dist_to_goal_mean = np.mean(current_dist_to_goal)
+            if current_dist_to_goal_mean < 0.01:
+                self.task_solved = True
+                self.time_steps_elapsed_since_success += 1
+                return 1
+            else:
+                self.task_solved = False
+                #restart again
+                self.time_steps_elapsed_since_success = 0
+                return 0
+        else:
+            # intersection areas / union of all visual_objects
+            intersection_area = 0
+            #TODO: under the assumption that the visual objects dont intersect
+            #TODO: deal with structured data for silhouettes
+            union_area = 0
+            for visual_object_key in self.stage.visual_objects:
+                visual_object = self.stage.get_object(visual_object_key)
+                union_area += visual_object.get_area()
+                for rigid_object_key in self.stage.rigid_objects:
+                    rigid_object = self.stage.get_object(rigid_object_key)
+                    if rigid_object.is_not_fixed:
+                        intersection_area += get_intersection(
+                            visual_object.get_bounding_box(),
+                            rigid_object.get_bounding_box())
+            sparse_reward = intersection_area / float(union_area)
+            if sparse_reward > 0.9:
+                self.task_solved = True
+                self.time_steps_elapsed_since_success += 1
+                return 1
+            else:
+                self.task_solved = False
+                # restart again
+                self.time_steps_elapsed_since_success = 0
+                return 0
+
     def reset_task(self):
         self.robot.clear()
         self.stage.clear()
         self.task_solved = False
+        self.time_steps_elapsed_since_success = 0
+        self.current_time = 0
         self._reset_task()
         return
 
@@ -90,7 +140,13 @@ class BaseTask(object):
         raise NotImplementedError()
 
     def is_done(self):
-        raise NotImplementedError()
+        #here we consider that you succeeded if u stayed 0.5 sec in
+        #the goal position
+        if self.time_threshold_in_goal_state_secs >= \
+                (self.robot.dt * self.time_steps_elapsed_since_success):
+            return True
+        else:
+            return False
 
     def do_random_intervention(self):
         raise NotImplementedError()

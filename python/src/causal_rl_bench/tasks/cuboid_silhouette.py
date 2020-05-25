@@ -97,7 +97,6 @@ class CuboidSilhouette(BaseTask):
             reward += self.reward_per_cuboid(cuboid_position=cuboid_position,
                                              cuboid_orientation=cuboid_orientation,
                                              cuboid_size=np.array([1, 1, 1]) * self.task_params["unit_length"])
-        print(reward)
         return reward
 
     def is_done(self):
