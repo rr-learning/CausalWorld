@@ -52,8 +52,17 @@ class ReachingTask(BaseTask):
     def _reset_task(self, interventions_dict=None):
         #if there is not interventions dict passed then I
         # just apply the default one
-        if interventions_dict is not None:
-            self._apply_interventions(interventions_dict,
+        interventions_dict_copy = interventions_dict
+        if interventions_dict_copy is not None:
+            non_changed_variables = \
+                set(self.initial_state) - set(interventions_dict_copy)
+            if len(non_changed_variables) > 0:
+                interventions_dict_copy = dict(interventions_dict)
+            for non_changed_variable in non_changed_variables:
+                interventions_dict_copy[non_changed_variable] = \
+                    self.initial_state[non_changed_variable]
+
+            self._apply_interventions(interventions_dict_copy,
                                       initial_state_latch=True)
         else:
             self._apply_interventions(self.initial_state,

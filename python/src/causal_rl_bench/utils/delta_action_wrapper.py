@@ -16,7 +16,6 @@ class DeltaAction(gym.ActionWrapper):
         elif self.env.action_mode == "joint_torques":
             offset = self.env.robot.latest_full_state.torques
         elif self.env.action_mode == "end_effector_positions":
-            # The delta is wrt the last equivilant
             # applied joint positions that were sent to the pd controller
             offset = self.env.robot.compute_end_effector_positions(
                 self.env.robot.last_applied_joint_positions)
