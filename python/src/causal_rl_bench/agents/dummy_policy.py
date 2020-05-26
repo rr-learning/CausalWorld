@@ -1,11 +1,9 @@
-from stable_baselines import PPO2
 from causal_rl_bench.agents.policy_base import PolicyBase
-import os
 
 
-class DummpyPolicy(PolicyBase):
+class DummyPolicy(PolicyBase):
     def __init__(self):
-        super(DummpyPolicy, self).__init__()
+        super(DummyPolicy, self).__init__()
         self.action = None
         return
 

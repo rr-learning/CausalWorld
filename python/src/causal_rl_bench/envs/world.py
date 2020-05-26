@@ -111,6 +111,8 @@ class World(gym.Env):
             self.data_recorder.append(robot_action=action,
                                       observation=observation,
                                       reward=reward,
+                                      done=done,
+                                      info=info,
                                       timestamp=self.episode_length *
                                                 self.skip_frame *
                                                 self.simulation_time)
@@ -159,6 +161,8 @@ class World(gym.Env):
     def reset(self, interventions_dict=None):
         self.tracker.add_episode_experience(self.episode_length)
         self.episode_length = 0
+        if interventions_dict is not None:
+            self.tracker.do_intervention(self.task, interventions_dict)
         self.task.reset_task(interventions_dict)
         # TODO: make sure that stage observations returned are up to date
 
@@ -215,15 +219,15 @@ class World(gym.Env):
         self.tracker.add_episode_experience(self.episode_length)
         # TODO: Set episode length after intervention to zero?
         self.episode_length = 0
-        self.task.do_random_intervention()
-        self.tracker.do_intervention(self.task)
+        interventions_dict = self.task.do_random_intervention()
+        self.tracker.do_intervention(self.task, interventions_dict)
 
-    def do_intervention(self, **kwargs):
+    def do_intervention(self, interventions_dict):
         self.tracker.add_episode_experience(self.episode_length)
         # TODO: Set episode length after intervention to zero?
         self.episode_length = 0
-        self.task.do_intervention(**kwargs)
-        self.tracker.do_intervention(self.task)
+        self.task.do_intervention(interventions_dict)
+        self.tracker.do_intervention(self.task, interventions_dict)
 
     def get_full_state(self):
         full_state = []

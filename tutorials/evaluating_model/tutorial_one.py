@@ -1,4 +1,4 @@
-from causal_rl_bench.evaluation_metrics.evaluation import EvaluationPipeline
+from causal_rl_bench.evaluation_pipelines.evaluation import EvaluationPipeline
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.envs.world import World

@@ -106,7 +106,7 @@ class ReachingTask(BaseTask):
         rewards.append(-np.linalg.norm(np.abs(
             self.robot.latest_full_state.velocity - self.previous_joint_velocities),
                                         ord=2))
-        reward = np.array(rewards) * self.task_params["dense_reward_weights"] \
+        reward = np.sum(np.array(rewards) * self.task_params["dense_reward_weights"]) \
                  + sparse_reward * self.task_params["sparse_reward_weight"]
         self.previous_end_effector_positions = current_end_effector_positions
         self.previous_joint_velocities = np.copy(

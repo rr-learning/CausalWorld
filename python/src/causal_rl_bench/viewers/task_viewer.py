@@ -2,7 +2,7 @@ from causal_rl_bench.envs.world import World
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 from causal_rl_bench.tasks.task import Task
 import time
-from causal_rl_bench.utils.delta_action_wrapper import DeltaAction
+from causal_rl_bench.wrappers.action_wrappers import DeltaAction
 
 
 def get_world(task_id, task_params, world_params, enable_visualization=False):

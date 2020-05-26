@@ -1,5 +1,6 @@
+from causal_rl_bench.wrappers.policy_wrappers import MovingAverageActionPolicyWrapper
+from causal_rl_bench.agents.dummy_policy import DummyPolicy
 import gym
-import numpy as np
 
 
 class DeltaAction(gym.ActionWrapper):
@@ -40,3 +41,20 @@ class DeltaAction(gym.ActionWrapper):
             offset = self.env.robot.normalize_observation_for_key(
                     observation=offset, key=self.env.action_mode)
         return action - offset
+
+
+class MovingAverageActionEnvWrapper(gym.ActionWrapper):
+    def __init__(self, env, widow_size=8, initial_value=0):
+        super(MovingAverageActionEnvWrapper, self).__init__(env)
+        self.__policy = DummyPolicy()
+        self.__policy = MovingAverageActionPolicyWrapper(self.__policy,
+                                                         widow_size=widow_size,
+                                                         initial_value=initial_value)
+        return
+
+    def action(self, action):
+        self.__policy.policy.add_action(action) #hack now
+        return self.__policy.act(observation=None)
+
+    def reverse_action(self, action):
+        raise Exception("not implemented yet")

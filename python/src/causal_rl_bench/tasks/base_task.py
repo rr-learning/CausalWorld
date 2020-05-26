@@ -24,6 +24,7 @@ class BaseTask(object):
         self.training_intervention_spaces = None
         self.testing_intervention_spaces = None
         self.initial_state = dict()
+        self.finished_episode = False
         return
 
     def init_task(self, robot, stage):
@@ -109,6 +110,7 @@ class BaseTask(object):
         self.robot.clear()
         self.stage.clear()
         self.task_solved = False
+        self.finished_episode = False
         self.time_steps_elapsed_since_success = 0
         self.current_time = 0
         self._reset_task(interventions_dict)
@@ -154,11 +156,12 @@ class BaseTask(object):
     def is_done(self):
         #here we consider that you succeeded if u stayed 0.5 sec in
         #the goal position
-        if self.time_threshold_in_goal_state_secs >= \
-                (self.robot.dt * self.time_steps_elapsed_since_success):
+        if self.finished_episode:
             return True
-        else:
-            return False
+        if self.time_threshold_in_goal_state_secs <= \
+                (self.robot.dt * self.time_steps_elapsed_since_success):
+            self.finished_episode = True
+        return self.finished_episode
 
     def do_random_intervention(self, training_space=True):
         if training_space:

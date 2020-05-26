@@ -8,6 +8,7 @@ from causal_rl_bench.tasks.task import Task
 import argparse
 import os
 import json
+import numpy as np
 
 
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
@@ -38,6 +39,9 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
 
 def save_config_file(ppo_config, env, file_path):
     task_config = env.task.get_task_params()
+    for task_param in task_config:
+        if not isinstance(task_config[task_param], str):
+            task_config[task_param] = str(task_config[task_param])
     env_config = env.get_world_params()
     env.close()
     configs_to_save = [task_config, env_config, ppo_config]
@@ -59,7 +63,7 @@ if __name__ == '__main__':
     ap.add_argument("--num_of_envs", required=False,
                     default=30, help="number of parallel environments")
     ap.add_argument("--task_name", required=False,
-                    default="pushing", help="the task nam for training")
+                    default="reaching", help="the task nam for training")
     ap.add_argument("--log_relative_path", required=True,
                     help="log folder")
     args = vars(ap.parse_args())

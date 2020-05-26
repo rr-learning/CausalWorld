@@ -1,6 +1,6 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.tasks.task import Task
-from causal_rl_bench.utils.delta_action_wrapper import DeltaAction
+from causal_rl_bench.wrappers.action_wrappers import DeltaAction
 import numpy as np
 
 
@@ -28,3 +28,4 @@ def apply_delta_action():
 
 if __name__ == '__main__':
     apply_delta_action()
+

@@ -1,9 +1,8 @@
-from stable_baselines import PPO2
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.agents.reacher_policy import ReacherPolicy
-from causal_rl_bench.utils.smoothing_action_wrapper import MovingAverageActionPolicyWrapper, \
-    MovingAverageActionEnvWrapper
+from causal_rl_bench.wrappers.action_wrappers import MovingAverageActionEnvWrapper
+from causal_rl_bench.wrappers.policy_wrappers import MovingAverageActionPolicyWrapper
 from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculumWrapper
 from causal_rl_bench.intervention_policies.random import StudentRandomInterventionPolicy, \
     TeacherRandomInterventionPolicy

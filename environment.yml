@@ -1,0 +1,21 @@
+name: causal_rl_bench
+channels:
+- pytorch
+- anaconda
+- conda-forge
+dependencies:
+- python=3.7.0
+- cython
+- ipython
+- numpy==1.18.1
+- pinocchio==2.3.1
+- pip:
+  - pybullet
+  - gym
+  - tensorflow==1.14.0
+  - namegenerator
+  - pandas
+  - mpi4py
+  - joblib
+  - opencv-python
+  - catkin_pkg

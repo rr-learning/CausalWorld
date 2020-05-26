@@ -12,10 +12,14 @@ class Episode:
         self.robot_actions = []
         self.observations = []
         self.rewards = []
+        self.infos = []
+        self.dones = []
         self.timestamps = []
 
-    def append(self, robot_action, observation, reward, timestamp):
+    def append(self, robot_action, observation, reward, info, done, timestamp):
         self.robot_actions.append(robot_action)
         self.observations.append(observation)
         self.rewards.append(reward)
         self.timestamps.append(timestamp)
+        self.infos.append(info)
+        self.dones.append(done)
