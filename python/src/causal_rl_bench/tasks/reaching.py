@@ -1,9 +1,14 @@
+"""
+causal_rl_bench/tasks/reaching.py
+==================================
+"""
 from causal_rl_bench.tasks.base_task import BaseTask
 import numpy as np
 import math
 
 
 class ReachingTask(BaseTask):
+    """Dummy"""
     def __init__(self, **kwargs):
         super().__init__(task_name="reaching")
         self.task_robot_observation_keys = ["joint_positions",
@@ -128,6 +133,26 @@ class ReachingTask(BaseTask):
 
     def do_intervention(self, variable_name, variable_value,
                         sub_variable_name=None, training=True):
+        """
+       Dummy.
+
+       Parameters
+       ---------
+       variable_name: tf.float32
+           Defines the current state of the system, (dims=num_of_agents X dim_S)
+       variable_value: tf.float32
+           Defines the current timestep of the episode.
+       sub_variable_name: tf.bool
+           Define if the optimal action should have some noise added to it before returning it.
+       training: bool
+        dummy
+
+
+       Returns
+        -------
+        flag: bool
+            heello
+       """
         #TODO: maybe allow intervention on joint velocities
         #TODO:check for feasibility of intervention here
         if training and sub_variable_name is None:

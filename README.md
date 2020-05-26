@@ -1,4 +1,4 @@
-# CausalRlBenchmark {#mainpage}
+# CausalRLBenchmark {#mainpage}
 
 [TOC]
 
@@ -20,7 +20,7 @@ or used in a catkin workspace.
   cd ..
   ```
 
-2. Install the pybullet_fingers package inside the (pybullet_fingers) conda env.
+2. Install the causal_rl_bench package inside the (causal_rl_bench) conda env.
 
   ```bash
   conda activate causal_rl_bench
@@ -30,4 +30,12 @@ or used in a catkin workspace.
   (causal_rl_bench) python -m pip install .
   ```
 
+2. Make the docs.
+
+  ```bash
+  (causal_rl_bench) cd ../counterfactual/docs
+  (causal_rl_bench) make html
+  (causal_rl_bench) cd ../pybullet_fingers
+  (causal_rl_bench) python -m pip install .
+  ```
 
