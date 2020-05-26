@@ -286,13 +286,17 @@ class TriFingerRobot(object):
             raise Exception("not yet implemented")
         return positions
 
-    def sample_end_effector_positions(self, sampling_strategy="middle_stage"):
+    def sample_end_effector_positions(self, sampling_strategy="from_joints"):
         if sampling_strategy == "middle_stage":
             tip_positions = np.random.uniform(
                 [0.1, 0.1, 0.15, 0.1, -0.15, 0.15, -0.15, -0.15, 0.15],
                 [0.15, 0.15, 0.15, 0.15, -0.1, 0.15, -0.1, -0.1, 0.15])
             # TODO:add heuristics if the points are in the reachabe sets or not.
             #red is 300, green is 60, blue is 180
+        elif sampling_strategy == "from_joints":
+            joints_goal = self.sample_joint_positions()
+            tip_positions = self.\
+                compute_end_effector_positions(joints_goal)
         else:
             raise Exception("not yet implemented")
             #perform inverse kinemetics

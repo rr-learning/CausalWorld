@@ -127,7 +127,7 @@ class PushingTask(BaseTask):
         reward = self.task_params["reward_weight_1"]*reward_term_1 + \
                  self.task_params["reward_weight_2"]*reward_term_2 \
                  + self.task_params["reward_weight_3"] * reward_term_3 + \
-                self.task_params["reward_weight_0"]*reward_term_0
+                 self.task_params["reward_weight_0"] * reward_term_0
 
         self.previous_end_effector_positions = end_effector_positions
         self.previous_object_position = block_position

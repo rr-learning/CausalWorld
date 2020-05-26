@@ -21,6 +21,9 @@ class BaseTask(object):
         self.time_steps_elapsed_since_success = 0
         self.time_threshold_in_goal_state_secs = 0.5
         self.current_time_secs = 0
+        self.training_intervention_spaces = None
+        self.testing_intervention_spaces = None
+        self.initial_state = dict()
         return
 
     def init_task(self, robot, stage):
@@ -29,6 +32,8 @@ class BaseTask(object):
         self._set_up_stage_arena()
         self.stage.finalize_stage()
         self._set_up_non_default_observations()
+        self._set_training_intervention_spaces()
+        self._set_testing_intervention_spaces()
         return
 
     def _set_up_stage_arena(self):
@@ -37,17 +42,23 @@ class BaseTask(object):
     def _set_up_non_default_observations(self):
         return
 
-    def _setup_non_default_robot_observation_key(self, observation_key, observation_function, lower_bound, upper_bound):
+    def _setup_non_default_robot_observation_key(self, observation_key,
+                                                 observation_function,
+                                                 lower_bound, upper_bound):
         # observation function takes in full observations dict and returns a numpy array
         self.robot.add_observation(observation_key, lower_bound=lower_bound,
                                    upper_bound=upper_bound)
-        self._non_default_robot_observation_funcs[observation_key] = observation_function
+        self._non_default_robot_observation_funcs[observation_key] = \
+            observation_function
         return
 
-    def _setup_non_default_stage_observation_key(self, observation_key, observation_function, lower_bound, upper_bound):
+    def _setup_non_default_stage_observation_key(self, observation_key,
+                                                 observation_function,
+                                                 lower_bound, upper_bound):
         self.stage.add_observation(observation_key, lower_bound=lower_bound,
                                    upper_bound=upper_bound)
-        self._non_default_stage_observation_funcs[observation_key] = observation_function
+        self._non_default_stage_observation_funcs[observation_key] = \
+            observation_function
         return
 
     def _compute_sparse_reward(self, achieved_goal, desired_goal, info):
@@ -94,26 +105,29 @@ class BaseTask(object):
                 self.time_steps_elapsed_since_success = 0
                 return 0
 
-    def reset_task(self):
+    def reset_task(self, interventions_dict=None):
         self.robot.clear()
         self.stage.clear()
         self.task_solved = False
         self.time_steps_elapsed_since_success = 0
         self.current_time = 0
-        self._reset_task()
+        self._reset_task(interventions_dict)
         return
 
     def filter_structured_observations(self):
-        robot_observations_dict = self.robot.get_current_observations(self._robot_observation_helper_keys)
-        stage_observations_dict = self.stage.get_current_observations(self._stage_observation_helper_keys)
+        robot_observations_dict = self.robot.\
+            get_current_observations(self._robot_observation_helper_keys)
+        stage_observations_dict = self.stage.\
+            get_current_observations(self._stage_observation_helper_keys)
         self.current_full_observations_dict = dict(robot_observations_dict)
         self.current_full_observations_dict.update(stage_observations_dict)
         observations_filtered = np.array([])
         for key in self.task_robot_observation_keys:
             # dont forget to handle non standard observation here
             if key in self._non_default_robot_observation_funcs:
-                observations_filtered = np.append(observations_filtered,
-                                                  self._non_default_robot_observation_funcs[key]())
+                observations_filtered =\
+                    np.append(observations_filtered,
+                              self._non_default_robot_observation_funcs[key]())
             else:
                 observations_filtered = \
                     np.append(observations_filtered,
@@ -121,8 +135,9 @@ class BaseTask(object):
 
         for key in self.task_stage_observation_keys:
             if key in self._non_default_stage_observation_funcs:
-                observations_filtered = np.append(observations_filtered,
-                                                  self._non_default_stage_observation_funcs[key]())
+                observations_filtered = \
+                    np.append(observations_filtered,
+                              self._non_default_stage_observation_funcs[key]())
             else:
                 observations_filtered = \
                     np.append(observations_filtered,
@@ -136,9 +151,6 @@ class BaseTask(object):
     def get_task_params(self):
         return self.task_params
 
-    def _reset_task(self):
-        raise NotImplementedError()
-
     def is_done(self):
         #here we consider that you succeeded if u stayed 0.5 sec in
         #the goal position
@@ -148,15 +160,74 @@ class BaseTask(object):
         else:
             return False
 
-    def do_random_intervention(self):
+    def do_random_intervention(self, training_space=True):
+        if training_space:
+            intervention_space = self.training_intervention_spaces
+        else:
+            intervention_space = self.testing_intervention_spaces
+        # choose random variable one intervention  only and intervene
+        variable_name = np.random.choice(list(intervention_space))
+        variable_space = intervention_space[variable_name]
+        sub_variable_name = None
+        # if its a block then choose a property
+        if isinstance(variable_space, dict):
+            sub_variable_name = np.random.choice(list(variable_space.keys()))
+            variable_space = variable_space[sub_variable_name]
+        self.do_intervention(variable_name,
+                             np.random.uniform(variable_space[0],
+                                               variable_space[1]),
+                             sub_variable_name=sub_variable_name)
+        return
+
+    def _apply_interventions(self, interventions_dict, initial_state_latch=True):
+        for intervention_key, intervention_value in interventions_dict.items():
+            # if its a block then choose a property
+            if isinstance(intervention_value, dict):
+                for sub_intervention_key, sub_intervention_value in \
+                        intervention_value.items():
+                    self.do_intervention(intervention_key,
+                                         sub_intervention_value,
+                                         sub_variable_name=sub_intervention_key)
+                    if intervention_key in self.initial_state.keys() and \
+                            sub_intervention_key in \
+                            self.initial_state[intervention_key].keys() and \
+                            initial_state_latch:
+                        self.initial_state[intervention_key][sub_intervention_key] \
+                            = intervention_value
+            else:
+                sub_variable_name = None
+                self.do_intervention(intervention_key,
+                                     intervention_value,
+                                     sub_variable_name=sub_variable_name)
+                if intervention_key in self.initial_state.keys() and \
+                        initial_state_latch:
+                    self.initial_state[intervention_key] \
+                        = intervention_value
+        return
+
+    def do_intervention(self, variable_name, variable_value,
+                        sub_variable_name=None):
+        #TODO: this now only supports two levels of variables
         raise NotImplementedError()
 
-    def do_intervention(self, **kwargs):
-        raise NotImplementedError()
+    def get_training_intervention_spaces(self):
+        return self.training_intervention_spaces
+
+    def get_testing_intervention_spaces(self):
+        return self.testing_intervention_spaces
 
     def get_reward(self):
         raise NotImplementedError
 
     def get_description(self):
+        raise NotImplementedError()
+
+    def _reset_task(self, interventions_dict):
+        raise NotImplementedError()
+
+    def _set_training_intervention_spaces(self):
+        raise NotImplementedError()
+
+    def _set_testing_intervention_spaces(self):
         raise NotImplementedError()
 

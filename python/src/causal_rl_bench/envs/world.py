@@ -87,8 +87,8 @@ class World(gym.Env):
         self._setup_viewing_camera()
 
         self.data_recorder = data_recorder
-        self.tracker = Tracker(task=self.task, world_params=self.get_world_params())
-
+        self.tracker = Tracker(task=self.task,
+                               world_params=self.get_world_params())
         self.reset()
         return
 
@@ -116,6 +116,16 @@ class World(gym.Env):
                                                 self.simulation_time)
 
         return observation, reward, done, info
+
+    def get_current_student_params(self):
+        return self.task.get_current_student_params()
+
+    def get_current_teacher_params(self):
+        return self.task.get_current_teacher_params()
+
+    def get_current_master_params(self):
+        #TODO: this wont be task specific since it can be general
+        raise Exception(" ")
 
     def sample_new_task(self):
         raise Exception(" ")
@@ -146,10 +156,10 @@ class World(gym.Env):
         np.random.seed(seed)
         return [seed]
 
-    def reset(self):
+    def reset(self, interventions_dict=None):
         self.tracker.add_episode_experience(self.episode_length)
         self.episode_length = 0
-        self.task.reset_task()
+        self.task.reset_task(interventions_dict)
         # TODO: make sure that stage observations returned are up to date
 
         if self.data_recorder:
