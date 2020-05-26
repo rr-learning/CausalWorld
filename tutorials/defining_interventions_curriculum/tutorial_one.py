@@ -1,10 +1,7 @@
-from causal_rl_bench.tasks.task import Task
-from causal_rl_bench.utils.policy_wrapper import PolicyWrapper
 from stable_baselines import PPO2
-import causal_rl_bench.viewers.task_viewer as viewer
 from causal_rl_bench.envs.world import World
-from gym.wrappers.monitoring.video_recorder import VideoRecorder
 from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.agents.reacher_policy import ReacherPolicy
 from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculumWrapper
 from causal_rl_bench.intervention_policies.random import StudentRandomInterventionPolicy, \
     TeacherRandomInterventionPolicy
@@ -12,11 +9,10 @@ from causal_rl_bench.intervention_policies.random import StudentRandomInterventi
 
 def without_interventions():
     task = Task(task_id='reaching')
-    stable_baselines_policy_path = "./saved_model.zip"
-    model = PPO2.load(stable_baselines_policy_path)
+    reacher_policy = ReacherPolicy()
 
     def policy_fn(obs):
-        return model.predict(obs, deterministic=True)[0]
+        return reacher_policy.act(obs)
 
     env = World(task, skip_frame=1,
                 enable_visualization=True)
@@ -30,11 +26,10 @@ def without_interventions():
 
 def with_interventions():
     task = Task(task_id='reaching')
-    stable_baselines_policy_path = "./saved_model.zip"
-    model = PPO2.load(stable_baselines_policy_path)
+    reacher_policy = ReacherPolicy()
 
     def policy_fn(obs):
-        return model.predict(obs, deterministic=True)[0]
+        return reacher_policy.act(obs)
 
     env = World(task, skip_frame=1,
                 enable_visualization=True)
