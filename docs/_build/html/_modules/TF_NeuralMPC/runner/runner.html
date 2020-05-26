@@ -1,0 +1,760 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tf_neuralmpc.runner.runner &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/tf_neuralmpc.html">TF-NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tf_neuralmpc.runner.runner</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tf_neuralmpc.runner.runner</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">tf_neuralmpc/runner/runner.py</span>
+<span class="sd">=============================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">gym.wrappers.monitoring.video_recorder</span> <span class="k">import</span> <span class="n">VideoRecorder</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tf_neuralmpc.policies.model_free_base_policy</span> <span class="k">import</span> <span class="n">ModelFreeBasePolicy</span>
+<span class="kn">from</span> <span class="nn">tf_neuralmpc.policies.random_policy</span> <span class="k">import</span> <span class="n">RandomPolicy</span>
+
+
+<div class="viewcode-block" id="Runner"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner">[docs]</a><span class="k">class</span> <span class="nc">Runner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the runner class which handles the interaction of the different agents with the enviornment,</span>
+<span class="sd">       a runnner takes in a controller and possibly a dynamics model which are used further to iteract with</span>
+<span class="sd">       the environment&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Runner.__init__"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">log_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_of_agents</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the initializer function for the runner class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        env: [mujoco_env.MujocoEnv, SubprocVecEnv]</span>
+<span class="sd">            Defines two environment_utils in a list, the first being a single environment that could possibly be used to</span>
+<span class="sd">            record a rollout in a video and the second is a vectorized environment that could possibly be used for collecting the</span>
+<span class="sd">            rollouts.</span>
+<span class="sd">        log_path:</span>
+<span class="sd">            Defines the log directory to be used to log the results while training and collecting samples.</span>
+<span class="sd">        num_of_agents: Int</span>
+<span class="sd">            The number of agents running in parallel in the environment.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span> <span class="o">=</span> <span class="n">env</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_path</span> <span class="o">=</span> <span class="n">log_path</span>
+        <span class="k">if</span> <span class="n">log_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_file_writer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span> <span class="o">=</span> <span class="n">num_of_agents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">act_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">episode_counter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Runner.sample"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="n">exploration_noise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the sampling function for the runner class which samples one episode with a specified length</span>
+<span class="sd">        using the provided policy.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        horizon: Int</span>
+<span class="sd">            The task horizon/ episode length.</span>
+<span class="sd">        policy: ModelBasedBasePolicy or ModelFreeBasePolicy</span>
+<span class="sd">            The policy to be used in collecting the episodes from the different agents.</span>
+<span class="sd">        exploration_noise: bool</span>
+<span class="sd">            If noise should be added to the actions to help in exploration.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result: dict</span>
+<span class="sd">            returns the episode rollouts results for all the agents in the parallelized environment,</span>
+<span class="sd">            it has the form of {observations, actions, rewards, reward_sum}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">times</span><span class="p">,</span> <span class="n">observations</span><span class="p">,</span> <span class="n">actions</span><span class="p">,</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">reward_sum</span><span class="p">,</span> <span class="n">done</span> <span class="o">=</span> \
+            <span class="p">[],</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">ModelFreeBasePolicy</span><span class="p">):</span>
+            <span class="n">predicted_reward</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">horizon</span><span class="p">):</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">ModelFreeBasePolicy</span><span class="p">):</span>
+                <span class="n">action_to_execute</span><span class="p">,</span> <span class="n">expected_obs</span><span class="p">,</span> <span class="n">expected_reward</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">observations</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">t</span><span class="p">,</span>
+                                                                              <span class="n">exploration_noise</span><span class="p">)</span>
+                <span class="n">predicted_reward</span> <span class="o">+=</span> <span class="n">expected_reward</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">action_to_execute</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">observations</span><span class="p">[</span><span class="n">t</span><span class="p">],</span> <span class="n">t</span><span class="p">)</span>
+                <span class="n">action_to_execute</span> <span class="o">=</span> <span class="n">action_to_execute</span><span class="o">.</span><span class="n">numpy</span><span class="p">()</span>
+            <span class="n">actions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">action_to_execute</span><span class="p">)</span>
+            <span class="n">times</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">)</span>
+            <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">actions</span><span class="p">[</span><span class="n">t</span><span class="p">])</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">RandomPolicy</span><span class="p">):</span>
+                    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+                        <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;rewards/actual_reward&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reward</span><span class="p">),</span> <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">act_counter</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">ModelFreeBasePolicy</span><span class="p">):</span>
+                    <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+                        <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;states/predicted_observations_abs_error&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">expected_obs</span> <span class="o">-</span> <span class="n">obs</span><span class="p">),</span>
+                                                                                             <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)),</span>
+                                          <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">act_counter</span><span class="p">)</span>
+                        <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;rewards/predicted_reward_abs_error&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">expected_reward</span> <span class="o">-</span> <span class="n">reward</span><span class="p">)),</span>
+                                          <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">act_counter</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">act_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">observations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
+            <span class="n">rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
+            <span class="n">reward_sum</span> <span class="o">+=</span> <span class="n">reward</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="o">&gt;=</span> <span class="n">horizon</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">RandomPolicy</span><span class="p">):</span>
+                        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+                            <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;rewards/actual_episode_reward&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">reward_sum</span><span class="p">),</span>
+                                              <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_counter</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">ModelFreeBasePolicy</span><span class="p">):</span>
+                        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+                            <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;rewards/predicted_episode_reward&#39;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">predicted_reward</span><span class="p">),</span>
+                                              <span class="n">step</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_counter</span><span class="p">)</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">episode_counter</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">break</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Average action selection time: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">times</span><span class="p">)))</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Rollout length: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">actions</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;observations&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">observations</span><span class="p">),</span>
+                <span class="s2">&quot;actions&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">actions</span><span class="p">),</span>
+                <span class="s2">&quot;rewards&quot;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rewards</span><span class="p">),</span>
+                <span class="s2">&quot;reward_sum&quot;</span><span class="p">:</span> <span class="n">reward_sum</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Runner.record_rollout"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner.record_rollout">[docs]</a>    <span class="k">def</span> <span class="nf">record_rollout</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">horizon</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="n">record_file_path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the recording function for the runner class which samples one episode with a specified length</span>
+<span class="sd">        using the provided policy and records it in a video.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        horizon: Int</span>
+<span class="sd">            The task horizon/ episode length.</span>
+<span class="sd">        policy: ModelBasedBasePolicy or ModelFreeBasePolicy</span>
+<span class="sd">            The policy to be used in collecting the episodes from the different agents.</span>
+<span class="sd">        record_file_path: String</span>
+<span class="sd">            specified the file path to save the video that will be recorded in.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">recorder</span> <span class="o">=</span> <span class="n">VideoRecorder</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="p">,</span> <span class="n">record_file_path</span> <span class="o">+</span> <span class="s1">&#39;_episode_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">episode_counter</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.mp4&#39;</span><span class="p">)</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">reset</span><span class="p">(),</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">horizon</span><span class="p">):</span>
+            <span class="n">recorder</span><span class="o">.</span><span class="n">capture_frame</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">policy</span><span class="p">,</span> <span class="n">ModelFreeBasePolicy</span><span class="p">):</span>
+                <span class="n">action_to_execute</span><span class="p">,</span> <span class="n">expected_obs</span><span class="p">,</span> <span class="n">expected_reward</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">observations</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span>
+                                                                              <span class="n">exploration_noise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                                              <span class="n">log_results</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">action_to_execute</span> <span class="o">=</span> <span class="n">policy</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">observations</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
+            <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action_to_execute</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">observations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">recorder</span><span class="o">.</span><span class="n">capture_frame</span><span class="p">()</span>
+        <span class="n">recorder</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Runner.perform_rollouts"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner.perform_rollouts">[docs]</a>    <span class="k">def</span> <span class="nf">perform_rollouts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_rollouts</span><span class="p">,</span> <span class="n">task_horizon</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="n">exploration_noise</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the perform_rollouts function for the runner class which samples n episodes with a specified length</span>
+<span class="sd">        using the provided policy.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        number_of_rollouts: Int</span>
+<span class="sd">            Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</span>
+<span class="sd">        task_horizon: Int</span>
+<span class="sd">            The task horizon/ episode length.</span>
+<span class="sd">        policy: ModelBasedBasePolicy or ModelFreeBasePolicy</span>
+<span class="sd">            The policy to be used in collecting the episodes from the different agents.</span>
+<span class="sd">        exploration_noise: bool</span>
+<span class="sd">            If noise should be added to the actions to help in exploration.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        traj_obs: [np.float32]</span>
+<span class="sd">            List with length=number_of_rollouts which holds the observations starting from the reset observations.</span>
+<span class="sd">        traj_acs: [np.float32]</span>
+<span class="sd">            List with length=number_of_rollouts which holds the actions taken by the policy.</span>
+<span class="sd">        traj_rews: [np.float32]</span>
+<span class="sd">            List with length=number_of_rollouts which holds the rewards taken by the policy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Started collecting samples for rollouts&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_rollouts</span><span class="p">):</span>
+            <span class="n">samples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+                    <span class="n">task_horizon</span><span class="p">,</span> <span class="n">policy</span><span class="p">,</span> <span class="n">exploration_noise</span><span class="o">=</span><span class="n">exploration_noise</span><span class="p">))</span>
+            <span class="n">traj_obs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;observations&quot;</span><span class="p">])</span>
+            <span class="n">traj_acs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;actions&quot;</span><span class="p">])</span>
+            <span class="n">traj_rews</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">samples</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="s2">&quot;rewards&quot;</span><span class="p">])</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Finished collecting samples for rollout&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span></div>
+
+<div class="viewcode-block" id="Runner.learn_dynamics_iteratively_w_mpc"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner.learn_dynamics_iteratively_w_mpc">[docs]</a>    <span class="k">def</span> <span class="nf">learn_dynamics_iteratively_w_mpc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_initial_rollouts</span><span class="p">,</span>
+                                         <span class="n">number_of_rollouts_for_refinement</span><span class="p">,</span>
+                                         <span class="n">number_of_refinement_steps</span><span class="p">,</span>
+                                         <span class="n">task_horizon</span><span class="p">,</span>
+                                         <span class="n">initial_policy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">mpc_policy</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">planning_horizon</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">state_reward_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">actions_reward_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">optimizer_name</span><span class="o">=</span><span class="s1">&#39;RandomSearch&#39;</span><span class="p">,</span>
+                                         <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">,</span>
+                                         <span class="n">system_dynamics_handler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">dynamics_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                         <span class="n">exploration_noise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                         <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span>
+                                         <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span>
+                                         <span class="n">normalization</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the learn dynamics function iteratively using mpc policy</span>
+<span class="sd">        for the runner class which samples n rollouts using an initial policy and then</span>
+<span class="sd">        uses these rollouts to learn a dynamics function for the system which is then used to sample further rollouts</span>
+<span class="sd">        to refine the dynamics function.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        dynamics_function: DeterministicDynamicsFunctionBaseClass</span>
+<span class="sd">            Defines the system dynamics function.</span>
+<span class="sd">        number_of_initial_rollouts: Int</span>
+<span class="sd">            Number of initial rollouts/ episodes to perform for each of the agents in the vectorized environment.</span>
+<span class="sd">        number_of_rollouts_for_refinement: Int</span>
+<span class="sd">            Number of refinement rollouts/ episodes to perform for each of the agents in the vectorized environment.</span>
+<span class="sd">        number_of_refinement_steps: Int</span>
+<span class="sd">            Number of refinemnet steps train, collect, train..etc to run for.</span>
+<span class="sd">        task_horizon: Int</span>
+<span class="sd">            The task horizon/ episode length.</span>
+<span class="sd">        initial_policy: ModelBasedBasePolicy or ModelFreeBasePolicy</span>
+<span class="sd">            The policy to be used in collecting the initial episodes from the different agents.</span>
+<span class="sd">        mpc_policy: ModelBasedBasePolicy</span>
+<span class="sd">            The policy to be used in collecting the further episodes from the different agents to refine the model</span>
+<span class="sd">            estimate.</span>
+<span class="sd">        system_dynamics_handler: SystemDynamicsHandler</span>
+<span class="sd">            The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well</span>
+<span class="sd">            as the dynamics function.</span>
+<span class="sd">        exploration_noise: bool</span>
+<span class="sd">            If noise should be added to the actions to help in exploration.</span>
+<span class="sd">        learning_rate: float</span>
+<span class="sd">            Learning rate to be used in training the dynamics function.</span>
+<span class="sd">        epochs: Int</span>
+<span class="sd">            Number of epochs to be used in training the dynamics function everytime train is called.</span>
+<span class="sd">        validation_split: float32</span>
+<span class="sd">            Defines the validation split to be used of the rollouts collected.</span>
+<span class="sd">        batch_size: int</span>
+<span class="sd">            Defines the batch size to be used for training the model.</span>
+<span class="sd">        nn_optimizer: tf.keras.optimizers</span>
+<span class="sd">            Defines the optimizer to use with the neural network.</span>
+<span class="sd">        normalization: bool</span>
+<span class="sd">            Defines if the dynamics function should be trained with normalization or not.</span>
+<span class="sd">        state_reward_function: tf_function</span>
+<span class="sd">            Defines the state reward function with the prototype: tf_func_name(current_state, next_state),</span>
+<span class="sd">            where current_state is BatchXdim_S and next_state is BatchXdim_S.</span>
+<span class="sd">        actions_reward_function: tf_function</span>
+<span class="sd">            Defines the action reward function with the prototype: tf_func_name(current_actions),</span>
+<span class="sd">            where current_actions is BatchXdim_U.</span>
+<span class="sd">        planning_horizon: tf.int32</span>
+<span class="sd">            Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</span>
+<span class="sd">        optimizer: OptimizerBaseClass</span>
+<span class="sd">            Optimizer to be used that optimizes for the best action sequence and returns the first action.</span>
+<span class="sd">        optimizer_name: str</span>
+<span class="sd">            optimizer name between in [&#39;CEM&#39;, &#39;CMA-ES&#39;, &#39;PI2&#39;, &#39;RandomSearch&#39;, &#39;PSO&#39;, &#39;SPSA&#39;].</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        system_dynamics_handler: SystemDynamicsHandler</span>
+<span class="sd">            The system_dynamics_handler holds the trained system dynamics.</span>
+<span class="sd">        mpc_policy: ModelBasedBasePolicy</span>
+<span class="sd">            The policy that was refined to be used as a control policy</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">mpc_policy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">system_dynamics_handler</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dynamics_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;you need to specify either a handler or a dynamics function&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">system_dynamics_handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dynamics_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;you cannot specify both a handler or a dynamics function&quot;</span><span class="p">)</span>
+
+        <span class="n">action_upper_bound</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">action_lower_bound</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">initial_policy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">tf_neuralmpc.policies.random_policy</span> <span class="k">import</span> <span class="n">RandomPolicy</span>
+            <span class="n">initial_policy</span> <span class="o">=</span> <span class="n">RandomPolicy</span><span class="p">(</span><span class="n">number_of_agents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span>
+                                          <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                          <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">)</span>
+        <span class="n">number_of_agents</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">state_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">observation_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">input_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">mpc_policy</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">system_dynamics_handler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">tf_neuralmpc.dynamics_handlers.system_dynamics_handler</span> <span class="k">import</span> <span class="n">SystemDynamicsHandler</span>
+                <span class="n">system_dynamics_handler</span> <span class="o">=</span> <span class="n">SystemDynamicsHandler</span><span class="p">(</span><span class="n">dynamics_function</span><span class="o">=</span><span class="n">dynamics_function</span><span class="p">,</span>
+                                                                <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                                                <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                                                <span class="n">num_of_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                                                <span class="n">log_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="p">,</span>
+                                                                <span class="n">true_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                                <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+            <span class="n">mpc_policy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">make_mpc_policy</span><span class="p">(</span><span class="n">state_reward_function</span><span class="p">,</span>
+                                              <span class="n">actions_reward_function</span><span class="p">,</span>
+                                              <span class="n">planning_horizon</span><span class="p">,</span>
+                                              <span class="n">optimizer_name</span><span class="o">=</span><span class="n">optimizer_name</span><span class="p">,</span>
+                                              <span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span>
+                                              <span class="n">system_dynamics_handler</span><span class="o">=</span><span class="n">system_dynamics_handler</span><span class="p">,</span>
+                                              <span class="n">true_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                              <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+        <span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">perform_rollouts</span><span class="p">(</span><span class="n">number_of_initial_rollouts</span><span class="p">,</span> <span class="n">task_horizon</span><span class="p">,</span> <span class="n">initial_policy</span><span class="p">,</span>
+                                  <span class="n">exploration_noise</span><span class="o">=</span><span class="n">exploration_noise</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">number_of_initial_rollouts</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">mpc_policy</span><span class="o">.</span><span class="n">system_dynamics_handler</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="n">validation_split</span><span class="p">,</span>
+                                                      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+                                                      <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span> <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">nn_optimizer</span><span class="p">)</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Trained initial system model&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_refinement_steps</span><span class="p">):</span>
+            <span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">perform_rollouts</span><span class="p">(</span><span class="n">number_of_rollouts_for_refinement</span><span class="p">,</span> <span class="n">task_horizon</span><span class="p">,</span> <span class="n">mpc_policy</span><span class="p">,</span>
+                                      <span class="n">exploration_noise</span><span class="o">=</span><span class="n">exploration_noise</span><span class="p">)</span>
+            <span class="n">mpc_policy</span><span class="o">.</span><span class="n">system_dynamics_handler</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="n">validation_split</span><span class="p">,</span>
+                                                      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+                                                      <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span> <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">nn_optimizer</span><span class="p">)</span>
+        <span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">perform_rollouts</span><span class="p">(</span><span class="n">number_of_rollouts_for_refinement</span><span class="p">,</span> <span class="n">task_horizon</span><span class="p">,</span> <span class="n">mpc_policy</span><span class="p">,</span>
+                                  <span class="n">exploration_noise</span><span class="o">=</span><span class="n">exploration_noise</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">mpc_policy</span><span class="o">.</span><span class="n">system_dynamics_handler</span><span class="p">,</span> <span class="n">mpc_policy</span></div>
+
+<div class="viewcode-block" id="Runner.make_mpc_policy"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner.make_mpc_policy">[docs]</a>    <span class="k">def</span> <span class="nf">make_mpc_policy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_reward_function</span><span class="p">,</span>
+                        <span class="n">actions_reward_function</span><span class="p">,</span> <span class="n">planning_horizon</span><span class="p">,</span>
+                        <span class="n">optimizer_name</span><span class="o">=</span><span class="s1">&#39;RandomSearch&#39;</span><span class="p">,</span> <span class="n">system_dynamics_handler</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">dynamics_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">true_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                        <span class="n">optimizer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the make mpc policy which returns an mpc policy with the defined cost funcs, optimzer</span>
+<span class="sd">        and the dynamics function.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        dynamics_function: DeterministicDynamicsFunctionBaseClass</span>
+<span class="sd">            Defines the system dynamics function.</span>
+<span class="sd">        system_dynamics_handler: SystemDynamicsHandler</span>
+<span class="sd">            The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well</span>
+<span class="sd">            as the dynamics function.</span>
+<span class="sd">        normalization: bool</span>
+<span class="sd">            Defines if the dynamics function should be trained with normalization or not.</span>
+<span class="sd">        state_reward_function: tf_function</span>
+<span class="sd">            Defines the state reward function with the prototype: tf_func_name(current_state, next_state),</span>
+<span class="sd">            where current_state is BatchXdim_S and next_state is BatchXdim_S.</span>
+<span class="sd">        actions_reward_function: tf_function</span>
+<span class="sd">            Defines the action reward function with the prototype: tf_func_name(current_actions),</span>
+<span class="sd">            where current_actions is BatchXdim_U.</span>
+<span class="sd">        planning_horizon: tf.int32</span>
+<span class="sd">            Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</span>
+<span class="sd">        optimizer: OptimizerBaseClass</span>
+<span class="sd">            Optimizer to be used that optimizes for the best action sequence and returns the first action.</span>
+<span class="sd">        optimizer_name: str</span>
+<span class="sd">            optimizer name between in [&#39;CEM&#39;, &#39;CMA-ES&#39;, &#39;PI2&#39;, &#39;RandomSearch&#39;, &#39;PSO&#39;, &#39;SPSA&#39;].</span>
+<span class="sd">        true_model: bool</span>
+<span class="sd">            boolean defining if its a true model dynamics or not.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        mpc_policy: ModelBasedBasePolicy</span>
+<span class="sd">            The mpc policy that will be used with the system dynamics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">system_dynamics_handler</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dynamics_function</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;you need to specify either a handler or a dynamics function&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">system_dynamics_handler</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">dynamics_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;you cannot specify both a handler or a dynamics function&quot;</span><span class="p">)</span>
+
+        <span class="n">state_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">observation_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">input_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">number_of_agents</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">system_dynamics_handler</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">tf_neuralmpc.dynamics_handlers.system_dynamics_handler</span> <span class="k">import</span> <span class="n">SystemDynamicsHandler</span>
+            <span class="n">number_of_agents</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">system_dynamics_handler</span> <span class="o">=</span> <span class="n">SystemDynamicsHandler</span><span class="p">(</span><span class="n">dynamics_function</span><span class="o">=</span><span class="n">dynamics_function</span><span class="p">,</span>
+                                                            <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                                            <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                                            <span class="n">num_of_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                                            <span class="n">log_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="p">,</span>
+                                                            <span class="n">true_model</span><span class="o">=</span><span class="n">true_model</span><span class="p">,</span>
+                                                            <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">tf_neuralmpc.trajectory_evaluators.deterministic</span> <span class="k">import</span> <span class="n">DeterministicTrajectoryEvaluator</span>
+            <span class="n">planning_horizon</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">planning_horizon</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+            <span class="n">deterministic_trajectory_evaluator</span> <span class="o">=</span> <span class="n">DeterministicTrajectoryEvaluator</span><span class="p">(</span>
+                <span class="n">state_reward_function</span><span class="o">=</span><span class="n">state_reward_function</span><span class="p">,</span>
+                <span class="n">actions_reward_function</span><span class="o">=</span><span class="n">actions_reward_function</span><span class="p">,</span>
+                <span class="n">planning_horizon</span><span class="o">=</span><span class="n">planning_horizon</span><span class="p">,</span>
+                <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                <span class="n">system_dynamics_handler</span><span class="o">=</span><span class="n">system_dynamics_handler</span><span class="p">)</span>
+            <span class="n">action_upper_bound</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">action_lower_bound</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;RandomSearch&#39;</span><span class="p">:</span>
+                <span class="c1"># 6- define the corresponding optimizer</span>
+                <span class="kn">from</span> <span class="nn">tf_neuralmpc.optimizers.random_search</span> <span class="k">import</span> <span class="n">RandomSearchOptimizer</span>
+                <span class="n">population_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">1024</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+                <span class="n">my_optimizer</span> <span class="o">=</span> <span class="n">RandomSearchOptimizer</span><span class="p">(</span><span class="n">planning_horizon</span><span class="o">=</span><span class="n">planning_horizon</span><span class="p">,</span>
+                                                     <span class="n">population_size</span><span class="o">=</span><span class="n">population_size</span><span class="p">,</span>
+                                                     <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                                     <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                                     <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">,</span>
+                                                     <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                                     <span class="n">trajectory_evaluator</span><span class="o">=</span><span class="n">deterministic_trajectory_evaluator</span><span class="p">,</span>
+                                                     <span class="n">num_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;CEM&#39;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">tf_neuralmpc.optimizers.cem</span> <span class="k">import</span> <span class="n">CEMOptimizer</span>
+                <span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">population_size</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="n">num_elites</span> <span class="o">=</span> <span class="mi">50</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.1</span>
+                <span class="n">epsilon</span> <span class="o">=</span> <span class="mf">0.001</span>
+                <span class="n">my_optimizer</span> <span class="o">=</span> <span class="n">CEMOptimizer</span><span class="p">(</span><span class="n">planning_horizon</span><span class="o">=</span><span class="n">planning_horizon</span><span class="p">,</span>
+                                            <span class="n">max_iterations</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                            <span class="n">population_size</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">population_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                            <span class="n">num_elite</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">num_elites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                            <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                            <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                            <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">,</span>
+                                            <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                            <span class="n">epsilon</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                            <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                            <span class="n">num_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                            <span class="n">trajectory_evaluator</span><span class="o">=</span><span class="n">deterministic_trajectory_evaluator</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;CMA-ES&#39;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">tf_neuralmpc.optimizers.cma_es</span> <span class="k">import</span> <span class="n">CMAESOptimizer</span>
+                <span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">population_size</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="n">num_elites</span> <span class="o">=</span> <span class="mi">50</span>
+                <span class="n">alpha_cov</span> <span class="o">=</span> <span class="mf">2.0</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="n">my_optimizer</span> <span class="o">=</span> <span class="n">CMAESOptimizer</span><span class="p">(</span><span class="n">planning_horizon</span><span class="o">=</span><span class="n">planning_horizon</span><span class="p">,</span>
+                                                <span class="n">max_iterations</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                                <span class="n">population_size</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">population_size</span><span class="p">,</span>
+                                                                            <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                                <span class="n">num_elite</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">num_elites</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                                <span class="n">h_sigma</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                                <span class="n">alpha_cov</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">alpha_cov</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                                <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                                <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                                <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">,</span>
+                                                <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                                <span class="n">num_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                                <span class="n">trajectory_evaluator</span><span class="o">=</span><span class="n">deterministic_trajectory_evaluator</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;PI2&#39;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">tf_neuralmpc.optimizers.pi2</span> <span class="k">import</span> <span class="n">PI2Optimizer</span>
+                <span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">population_size</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="n">lamda</span> <span class="o">=</span> <span class="mf">1.0</span>
+                <span class="n">my_optimizer</span> <span class="o">=</span> <span class="n">PI2Optimizer</span><span class="p">(</span><span class="n">planning_horizon</span><span class="o">=</span><span class="n">planning_horizon</span><span class="p">,</span>
+                                              <span class="n">max_iterations</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                              <span class="n">population_size</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">population_size</span><span class="p">,</span>
+                                                                          <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                              <span class="n">lamda</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">lamda</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                              <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                              <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                              <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">,</span>
+                                              <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                              <span class="n">num_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                              <span class="n">trajectory_evaluator</span><span class="o">=</span><span class="n">deterministic_trajectory_evaluator</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;PSO&#39;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">tf_neuralmpc.optimizers.pso</span> <span class="k">import</span> <span class="n">PSOOptimizer</span>
+                <span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">population_size</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="n">c1</span> <span class="o">=</span> <span class="mf">0.3</span>
+                <span class="n">c2</span> <span class="o">=</span> <span class="mf">0.5</span>
+                <span class="n">w</span> <span class="o">=</span> <span class="mf">0.2</span>
+                <span class="n">initial_velocity_fraction</span> <span class="o">=</span> <span class="mf">0.01</span>
+                <span class="n">my_optimizer</span> <span class="o">=</span> <span class="n">PSOOptimizer</span><span class="p">(</span><span class="n">planning_horizon</span><span class="o">=</span><span class="n">planning_horizon</span><span class="p">,</span>
+                                            <span class="n">max_iterations</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                            <span class="n">population_size</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">population_size</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                            <span class="n">c1</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                            <span class="n">c2</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                            <span class="n">w</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                            <span class="n">initial_velocity_fraction</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span>
+                                                  <span class="n">initial_velocity_fraction</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                            <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                            <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                            <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">,</span>
+                                            <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                            <span class="n">num_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                            <span class="n">trajectory_evaluator</span><span class="o">=</span><span class="n">deterministic_trajectory_evaluator</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">optimizer_name</span> <span class="o">==</span> <span class="s1">&#39;SPSA&#39;</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">tf_neuralmpc.optimizers.spsa</span> <span class="k">import</span> <span class="n">SPSAOptimizer</span>
+                <span class="n">max_iterations</span> <span class="o">=</span> <span class="mi">5</span>
+                <span class="n">population_size</span> <span class="o">=</span> <span class="mi">500</span>
+                <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.602</span>
+                <span class="n">gamma</span> <span class="o">=</span> <span class="mf">0.101</span>
+                <span class="n">a_par</span> <span class="o">=</span> <span class="mf">0.01</span>
+                <span class="n">noise_parameter</span> <span class="o">=</span> <span class="mf">0.3</span>
+                <span class="n">my_optimizer</span> <span class="o">=</span> <span class="n">SPSAOptimizer</span><span class="p">(</span><span class="n">planning_horizon</span><span class="o">=</span><span class="n">planning_horizon</span><span class="p">,</span>
+                                               <span class="n">max_iterations</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">max_iterations</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                               <span class="n">population_size</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">population_size</span><span class="p">,</span>
+                                                                           <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                               <span class="n">alpha</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">alpha</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                               <span class="n">gamma</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                               <span class="n">a_par</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">a_par</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                               <span class="n">noise_parameter</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="n">noise_parameter</span><span class="p">,</span>
+                                                                           <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                               <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                               <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                               <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">,</span>
+                                               <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                               <span class="n">num_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                               <span class="n">trajectory_evaluator</span><span class="o">=</span><span class="n">deterministic_trajectory_evaluator</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;this optimizer name is not supported&quot;</span><span class="p">)</span>
+        <span class="kn">from</span> <span class="nn">tf_neuralmpc.policies.mpc_policy</span> <span class="k">import</span> <span class="n">MPCPolicy</span>
+        <span class="n">mpc_policy</span> <span class="o">=</span> <span class="n">MPCPolicy</span><span class="p">(</span><span class="n">system_dynamics_handler</span><span class="o">=</span><span class="n">system_dynamics_handler</span><span class="p">,</span>
+                               <span class="n">optimizer</span><span class="o">=</span><span class="n">my_optimizer</span><span class="p">,</span>
+                               <span class="n">tf_writer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">mpc_policy</span></div>
+
+<div class="viewcode-block" id="Runner.learn_dynamics_from_randomness"><a class="viewcode-back" href="../../../modules/runner/runner.html#tf_neuralmpc.runner.Runner.learn_dynamics_from_randomness">[docs]</a>    <span class="k">def</span> <span class="nf">learn_dynamics_from_randomness</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_of_rollouts</span><span class="p">,</span> <span class="n">task_horizon</span><span class="p">,</span> <span class="n">dynamics_function</span><span class="p">,</span>
+                                       <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+                                       <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                       <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the learn dynamics function for the runner class which samples n rollouts using a random policy and then</span>
+<span class="sd">        uses these rollouts to learn a dynamics function for the system.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        number_of_rollouts: Int</span>
+<span class="sd">            Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</span>
+<span class="sd">        task_horizon: Int</span>
+<span class="sd">            The task horizon/ episode length.</span>
+<span class="sd">        dynamics_function: DeterministicDynamicsFunctionBaseClass</span>
+<span class="sd">            Defines the system dynamics function.</span>
+<span class="sd">        learning_rate: float</span>
+<span class="sd">            Learning rate to be used in training the dynamics function.</span>
+<span class="sd">        epochs: Int</span>
+<span class="sd">            Number of epochs to be used in training the dynamics function everytime train is called.</span>
+<span class="sd">        validation_split: float32</span>
+<span class="sd">            Defines the validation split to be used of the rollouts collected.</span>
+<span class="sd">        batch_size: int</span>
+<span class="sd">            Defines the batch size to be used for training the model.</span>
+<span class="sd">        nn_optimizer: tf.keras.optimizers</span>
+<span class="sd">            Defines the optimizer to use with the neural network.</span>
+<span class="sd">        normalization: bool</span>
+<span class="sd">            Defines if the dynamics function should be trained with normalization or not.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        system_dynamics_handler: SystemDynamicsHandler</span>
+<span class="sd">            The system_dynamics_handler holds the trained system dynamics.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">tf_neuralmpc.policies.random_policy</span> <span class="k">import</span> <span class="n">RandomPolicy</span>
+        <span class="n">action_upper_bound</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">high</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">action_lower_bound</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">policy</span> <span class="o">=</span> <span class="n">RandomPolicy</span><span class="p">(</span><span class="n">number_of_agents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span>
+                              <span class="n">action_lower_bound</span><span class="o">=</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                              <span class="n">action_upper_bound</span><span class="o">=</span><span class="n">action_upper_bound</span><span class="p">)</span>
+
+        <span class="kn">from</span> <span class="nn">tf_neuralmpc.dynamics_handlers.system_dynamics_handler</span> <span class="k">import</span> <span class="n">SystemDynamicsHandler</span>
+        <span class="n">number_of_agents</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">state_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">observation_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">input_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">recording_env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">system_dynamics_handler</span> <span class="o">=</span> <span class="n">SystemDynamicsHandler</span><span class="p">(</span><span class="n">dynamics_function</span><span class="o">=</span><span class="n">dynamics_function</span><span class="p">,</span>
+                                                        <span class="n">dim_O</span><span class="o">=</span><span class="n">state_size</span><span class="p">,</span>
+                                                        <span class="n">dim_U</span><span class="o">=</span><span class="n">input_size</span><span class="p">,</span>
+                                                        <span class="n">num_of_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">,</span>
+                                                        <span class="n">log_dir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">log_path</span><span class="p">,</span>
+                                                        <span class="n">tf_writer</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span><span class="p">,</span>
+                                                        <span class="n">true_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                                                        <span class="n">normalization</span><span class="o">=</span><span class="n">normalization</span><span class="p">)</span>
+        <span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">perform_rollouts</span><span class="p">(</span><span class="n">number_of_rollouts</span><span class="p">,</span> <span class="n">task_horizon</span><span class="p">,</span> <span class="n">policy</span><span class="p">)</span>
+        <span class="n">system_dynamics_handler</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">traj_obs</span><span class="p">,</span> <span class="n">traj_acs</span><span class="p">,</span> <span class="n">traj_rews</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="n">validation_split</span><span class="p">,</span>
+                                      <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span>
+                                      <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span> <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">nn_optimizer</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">system_dynamics_handler</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

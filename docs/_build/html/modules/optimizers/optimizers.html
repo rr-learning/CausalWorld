@@ -1,0 +1,676 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Optimizers &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Policies" href="../policies/policies.html" />
+    <link rel="prev" title="Runners" href="../runner/runner.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../tf_neuralmpc.html">TF-NeuralMPC</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../runner/runner.html">Runners</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Optimizers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#optimizer-base">Optimizer Base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#cross-entropy-method">Cross Entropy Method</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#random-shooting">Random Shooting</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#covariance-matrix-adaptation-evolutionary-strategy">Covariance Matrix Adaptation Evolutionary-Strategy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#particle-swarm-optimizer">Particle Swarm Optimizer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#path-integral-information-theoretic-mpc">Path Integral (Information Theoretic MPC)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#simultaneous-perturbation-stochastic-approximation-optimizer">Simultaneous Perturbation Stochastic Approximation Optimizer</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/policies.html">Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamics_functions/dynamics_functions.html">Dynamics Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamics_handlers/dynamics_handlers.html">Dynamics Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trajectory_evaluators/trajectory_evaluators.html">Trajectory Evaluators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../environment_utils/environment_utils.html">Environment Utils</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tf_neuralmpc.html">TF-NeuralMPC</a> &raquo;</li>
+        
+      <li>Optimizers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/modules/optimizers/optimizers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-tf_neuralmpc.optimizers">
+<span id="optimizers"></span><h1>Optimizers<a class="headerlink" href="#module-tf_neuralmpc.optimizers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="optimizer-base">
+<h2>Optimizer Base<a class="headerlink" href="#optimizer-base" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.optimizers.OptimizerBase">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.optimizers.</code><code class="sig-name descname">OptimizerBase</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/optimizer_base.html#OptimizerBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.OptimizerBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class of the optimizers</p>
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.OptimizerBase.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">current_state</em>, <em class="sig-param">time_step</em>, <em class="sig-param">exploration_noise</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/optimizer_base.html#OptimizerBase.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.OptimizerBase.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the Base Optimizer Class.
+It is used to calculate the optimal solution for action at the current timestep given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>tf.bool</em>) -- Define if the optimal action should have some noise added to it before returning it.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><dl class="simple">
+<dt>resulting_action: tf.float32</dt><dd><p>The optimal solution for the first action to be applied in the current time step.</p>
+</dd>
+<dt>next_state: tf.float32</dt><dd><p>The next state predicted using the dynamics model in the trajectory evaluator.</p>
+</dd>
+<dt>rewards_of_next_state: tf.float32</dt><dd><p>The predicted reward achieved after applying the action given by the optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.OptimizerBase.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">name</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/optimizer_base.html#OptimizerBase.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.OptimizerBase.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the Base Optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>String</em>) -- Defines the name of the block of the optimizer.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.OptimizerBase.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/optimizer_base.html#OptimizerBase.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.OptimizerBase.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method resets the optimizer to its default state at the beginning of the trajectory/episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="cross-entropy-method">
+<h2>Cross Entropy Method<a class="headerlink" href="#cross-entropy-method" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.optimizers.CEMOptimizer">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.optimizers.</code><code class="sig-name descname">CEMOptimizer</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">num_elite</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">epsilon=0.001</em>, <em class="sig-param">alpha=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cem.html#CEMOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CEMOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This Class defines a Cross-Entropy Method optimizer.
+(<a class="reference external" href="http://web.mit.edu/6.454/www/www_fall_2003/gew/CEtutorial.pdf">http://web.mit.edu/6.454/www/www_fall_2003/gew/CEtutorial.pdf</a>)</p>
+<dl class="attribute">
+<dt id="tf_neuralmpc.optimizers.CEMOptimizer.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cem.html#CEMOptimizer.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CEMOptimizer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the Cross-Entropy Method Optimizer.
+It is used to calculate the optimal solution for action at the current timestep given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>tf.bool</em>) -- Define if the optimal action should have some noise added to it before returning it.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><dl class="simple">
+<dt>resulting_action: tf.float32</dt><dd><p>The optimal solution for the first action to be applied in the current time step.</p>
+</dd>
+<dt>next_state: tf.float32</dt><dd><p>The next state predicted using the dynamics model in the trajectory evaluator.</p>
+</dd>
+<dt>rewards_of_next_state: tf.float32</dt><dd><p>The predicted reward achieved after applying the action given by the optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.CEMOptimizer.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">num_elite</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">epsilon=0.001</em>, <em class="sig-param">alpha=0.25</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cem.html#CEMOptimizer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CEMOptimizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the Cross-Entropy Method Optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planning_horizon</strong> (<em>Int</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>max_iterations</strong> (<em>tf.int32</em>) -- Defines the maximimum iterations for the CEM optimizer to refine its guess for the optimal solution.</p></li>
+<li><p><strong>population_size</strong> (<em>tf.int32</em>) -- Defines the population size of the particles evaluated at each iteration.</p></li>
+<li><p><strong>num_elite</strong> (<em>tf.int32</em>) -- Defines the number of elites kept for the next iteration from the population.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input/ action space.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>action_upper_bound</strong> (<em>tf.float32</em>) -- Defines the actions upper bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>action_lower_bound</strong> (<em>tf.float32</em>) -- Defines the actions lower bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>trajectory_evaluator</strong> (<em>EvaluatorBaseClass</em>) -- Defines the trajectory evaluator to be used to evaluate the reward of a sequence of actions.</p></li>
+<li><p><strong>num_agents</strong> (<em>tf.int32</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>epsilon</strong> (<em>tf.float32</em>) -- Defines the epsilon threshold for the difference between iterations solutions so that
+the optimizer returns the solution earlier than max iterations.</p></li>
+<li><p><strong>alpha</strong> (<em>tf.float32</em>) -- Defines the weight of the solution at t-1 in determining the solution at t,
+ex: mean = alpha*old_mean + (1-alpha)*new_mean.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.CEMOptimizer.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cem.html#CEMOptimizer.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CEMOptimizer.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method resets the optimizer to its default state at the beginning of the trajectory/episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="random-shooting">
+<h2>Random Shooting<a class="headerlink" href="#random-shooting" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.optimizers.RandomSearchOptimizer">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.optimizers.</code><code class="sig-name descname">RandomSearchOptimizer</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">num_agents</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/random_search.html#RandomSearchOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.RandomSearchOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is responsible for performing random shooting and choosing the best
+possible predicted trajectory and returning the first action of this trajectory.</p>
+<dl class="attribute">
+<dt id="tf_neuralmpc.optimizers.RandomSearchOptimizer.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/random_search.html#RandomSearchOptimizer.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.RandomSearchOptimizer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the Random Shooting Method Optimizer.
+It is used to calculate the optimal solution for action at the current timestep given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>tf.bool</em>) -- Define if the optimal action should have some noise added to it before returning it.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><dl class="simple">
+<dt>resulting_action: tf.float32</dt><dd><p>The optimal solution for the first action to be applied in the current time step.</p>
+</dd>
+<dt>next_state: tf.float32</dt><dd><p>The next state predicted using the dynamics model in the trajectory evaluator.</p>
+</dd>
+<dt>rewards_of_next_state: tf.float32</dt><dd><p>The predicted reward achieved after applying the action given by the optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.RandomSearchOptimizer.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">num_agents</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/random_search.html#RandomSearchOptimizer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.RandomSearchOptimizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the Cross-Entropy Method Optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planning_horizon</strong> (<em>Int</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>population_size</strong> (<em>tf.int32</em>) -- Defines the population size of the particles evaluated at each iteration.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input/ action space.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>action_upper_bound</strong> (<em>tf.float32</em>) -- Defines the actions upper bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>action_lower_bound</strong> (<em>tf.float32</em>) -- Defines the actions lower bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>trajectory_evaluator</strong> (<em>EvaluatorBaseClass</em>) -- Defines the trajectory evaluator to be used to evaluate the reward of a sequence of actions.</p></li>
+<li><p><strong>num_agents</strong> (<em>tf.int32</em>) -- Defines the number of runner running in parallel</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.RandomSearchOptimizer.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/random_search.html#RandomSearchOptimizer.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.RandomSearchOptimizer.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method resets the optimizer to its default state at the beginning of the trajectory/episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="covariance-matrix-adaptation-evolutionary-strategy">
+<h2>Covariance Matrix Adaptation Evolutionary-Strategy<a class="headerlink" href="#covariance-matrix-adaptation-evolutionary-strategy" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.optimizers.CMAESOptimizer">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.optimizers.</code><code class="sig-name descname">CMAESOptimizer</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">num_elite</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">alpha_cov=&lt;tf.Tensor: id=4</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=2.0&gt;</em>, <em class="sig-param">h_sigma=&lt;tf.Tensor: id=5</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=1.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cma_es.html#CMAESOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CMAESOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class defines a Covariance Matrix Adaptation Evolutionary-Strategy.
+(<a class="reference external" href="https://arxiv.org/pdf/1604.00772.pdf">https://arxiv.org/pdf/1604.00772.pdf</a>) Note: this optimzer is not optimized for more than one agent</p>
+<dl class="attribute">
+<dt id="tf_neuralmpc.optimizers.CMAESOptimizer.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cma_es.html#CMAESOptimizer.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CMAESOptimizer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the Covariance Matrix Adaptation Evolutionary-Strategy Optimizer.
+It is used to calculate the optimal solution for action at the current timestep given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>tf.bool</em>) -- Specifies if the optimal action should have some noise added to it before returning it.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><dl class="simple">
+<dt>resulting_action: tf.float32</dt><dd><p>The optimal solution for the first action to be applied in the current time step.</p>
+</dd>
+<dt>next_state: tf.float32</dt><dd><p>The next state predicted using the dynamics model in the trajectory evaluator.</p>
+</dd>
+<dt>rewards_of_next_state: tf.float32</dt><dd><p>The predicted reward achieved after applying the action given by the optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.CMAESOptimizer.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">num_elite</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">alpha_cov=&lt;tf.Tensor: id=4</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=2.0&gt;</em>, <em class="sig-param">h_sigma=&lt;tf.Tensor: id=5</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=1.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cma_es.html#CMAESOptimizer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CMAESOptimizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the Covariance Matrix Adaptation Evolutionary-Strategy Optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planning_horizon</strong> (<em>Int</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>max_iterations</strong> (<em>tf.int32</em>) -- Defines the maximimum iterations for the CMAES optimizer to refine its guess for the optimal solution.</p></li>
+<li><p><strong>population_size</strong> (<em>tf.int32</em>) -- Defines the population size of the particles evaluated at each iteration.</p></li>
+<li><p><strong>num_elite</strong> (<em>tf.int32</em>) -- Defines the number of elites kept for the next iteration from the population.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input space.</p></li>
+<li><p><strong>action_upper_bound</strong> (<em>tf.float32</em>) -- Defines the actions upper bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>action_lower_bound</strong> (<em>tf.float32</em>) -- Defines the actions lower bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>trajectory_evaluator</strong> (<em>EvaluatorBaseClass</em>) -- Defines the trajectory evaluator to be used to evaluate the reward of a sequence of actions.</p></li>
+<li><p><strong>num_agents</strong> (<em>tf.int32</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>alpha_cov</strong> (<em>tf.float32</em>) -- Defines the alpha covariance to be used.</p></li>
+<li><p><strong>h_sigma</strong> (<em>tf.float32</em>) -- Defines the h sigma to be used.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.CMAESOptimizer.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/cma_es.html#CMAESOptimizer.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.CMAESOptimizer.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method resets the optimizer to its default state at the beginning of the trajectory/episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="particle-swarm-optimizer">
+<h2>Particle Swarm Optimizer<a class="headerlink" href="#particle-swarm-optimizer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.optimizers.PSOOptimizer">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.optimizers.</code><code class="sig-name descname">PSOOptimizer</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">c1=&lt;tf.Tensor: id=7</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.3&gt;</em>, <em class="sig-param">c2=&lt;tf.Tensor: id=8</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.5&gt;</em>, <em class="sig-param">w=&lt;tf.Tensor: id=9</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.2&gt;</em>, <em class="sig-param">initial_velocity_fraction=&lt;tf.Tensor: id=10</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.01&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pso.html#PSOOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PSOOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class defines the particle swarm optimizer.
+(<a class="reference external" href="https://www.cs.tufts.edu/comp/150GA/homeworks/hw3/_reading6%201995%20particle%20swarming.pdf">https://www.cs.tufts.edu/comp/150GA/homeworks/hw3/_reading6%201995%20particle%20swarming.pdf</a>)</p>
+<dl class="attribute">
+<dt id="tf_neuralmpc.optimizers.PSOOptimizer.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pso.html#PSOOptimizer.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PSOOptimizer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the particle swarm optimizer.
+It is used to calculate the optimal solution for action at the current timestep given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>tf.bool</em>) -- Specifies if the optimal action should have some noise added to it before returning it.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><dl class="simple">
+<dt>resulting_action: tf.float32</dt><dd><p>The optimal solution for the first action to be applied in the current time step.</p>
+</dd>
+<dt>next_state: tf.float32</dt><dd><p>The next state predicted using the dynamics model in the trajectory evaluator.</p>
+</dd>
+<dt>rewards_of_next_state: tf.float32</dt><dd><p>The predicted reward achieved after applying the action given by the optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.PSOOptimizer.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">c1=&lt;tf.Tensor: id=7</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.3&gt;</em>, <em class="sig-param">c2=&lt;tf.Tensor: id=8</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.5&gt;</em>, <em class="sig-param">w=&lt;tf.Tensor: id=9</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.2&gt;</em>, <em class="sig-param">initial_velocity_fraction=&lt;tf.Tensor: id=10</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.01&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pso.html#PSOOptimizer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PSOOptimizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the particle swarm optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planning_horizon</strong> (<em>Int</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>max_iterations</strong> (<em>tf.int32</em>) -- Defines the maximimum iterations for the CMAES optimizer to refine its guess for the optimal solution.</p></li>
+<li><p><strong>population_size</strong> (<em>tf.int32</em>) -- Defines the population size of the particles evaluated at each iteration.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input space.</p></li>
+<li><p><strong>action_upper_bound</strong> (<em>tf.float32</em>) -- Defines the actions upper bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>action_lower_bound</strong> (<em>tf.float32</em>) -- Defines the actions lower bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>trajectory_evaluator</strong> (<em>EvaluatorBaseClass</em>) -- Defines the trajectory evaluator to be used to evaluate the reward of a sequence of actions.</p></li>
+<li><p><strong>num_agents</strong> (<em>tf.int32</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>c1</strong> (<em>tf.float32</em>) -- Defines the fraction of the local best known position direction.</p></li>
+<li><p><strong>c2</strong> (<em>tf.float32</em>) -- Defines the fraction of the global best known position direction.</p></li>
+<li><p><strong>w</strong> (<em>tf.float32</em>) -- Defines the fraction of the current velocity to use.</p></li>
+<li><p><strong>initial_velocity_fraction</strong> (<em>tf.float32</em>) -- Defines the initial velocity fraction out of the action space.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.PSOOptimizer.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pso.html#PSOOptimizer.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PSOOptimizer.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method resets the optimizer to its default state at the beginning of the trajectory/episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="path-integral-information-theoretic-mpc">
+<h2>Path Integral (Information Theoretic MPC)<a class="headerlink" href="#path-integral-information-theoretic-mpc" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.optimizers.PI2Optimizer">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.optimizers.</code><code class="sig-name descname">PI2Optimizer</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">lamda=&lt;tf.Tensor: id=6</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=1.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pi2.html#PI2Optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PI2Optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class defines the information theortic MPC based on path intergral methods.
+(<a class="reference external" href="https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7989202">https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7989202</a>)</p>
+<dl class="attribute">
+<dt id="tf_neuralmpc.optimizers.PI2Optimizer.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pi2.html#PI2Optimizer.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PI2Optimizer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the information theortic MPC optimizer.
+It is used to calculate the optimal solution for action at the current timestep given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>tf.bool</em>) -- Specifies if the optimal action should have some noise added to it before returning it.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><dl class="simple">
+<dt>resulting_action: tf.float32</dt><dd><p>The optimal solution for the first action to be applied in the current time step.</p>
+</dd>
+<dt>next_state: tf.float32</dt><dd><p>The next state predicted using the dynamics model in the trajectory evaluator.</p>
+</dd>
+<dt>rewards_of_next_state: tf.float32</dt><dd><p>The predicted reward achieved after applying the action given by the optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.PI2Optimizer.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">lamda=&lt;tf.Tensor: id=6</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=1.0&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pi2.html#PI2Optimizer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PI2Optimizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the information theortic MPC optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planning_horizon</strong> (<em>Int</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>max_iterations</strong> (<em>tf.int32</em>) -- Defines the maximimum iterations for the CMAES optimizer to refine its guess for the optimal solution.</p></li>
+<li><p><strong>population_size</strong> (<em>tf.int32</em>) -- Defines the population size of the particles evaluated at each iteration.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input space.</p></li>
+<li><p><strong>action_upper_bound</strong> (<em>tf.float32</em>) -- Defines the actions upper bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>action_lower_bound</strong> (<em>tf.float32</em>) -- Defines the actions lower bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>trajectory_evaluator</strong> (<em>EvaluatorBaseClass</em>) -- Defines the trajectory evaluator to be used to evaluate the reward of a sequence of actions.</p></li>
+<li><p><strong>num_agents</strong> (<em>tf.int32</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>lamda</strong> (<em>tf.float32</em>) -- Defines the lamda used the energy function.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.PI2Optimizer.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/pi2.html#PI2Optimizer.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.PI2Optimizer.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method resets the optimizer to its default state at the beginning of the trajectory/episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="simultaneous-perturbation-stochastic-approximation-optimizer">
+<h2>Simultaneous Perturbation Stochastic Approximation Optimizer<a class="headerlink" href="#simultaneous-perturbation-stochastic-approximation-optimizer" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.optimizers.SPSAOptimizer">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.optimizers.</code><code class="sig-name descname">SPSAOptimizer</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">alpha=&lt;tf.Tensor: id=0</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.602&gt;</em>, <em class="sig-param">gamma=&lt;tf.Tensor: id=1</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.101&gt;</em>, <em class="sig-param">a_par=&lt;tf.Tensor: id=2</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.01&gt;</em>, <em class="sig-param">noise_parameter=&lt;tf.Tensor: id=3</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.3&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/spsa.html#SPSAOptimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.SPSAOptimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class defines the simultaneous perturbation stochastic approximation optimizer.
+(<a class="reference external" href="https://www.jhuapl.edu/SPSA/PDF-SPSA/Spall_Stochastic_Optimization.PDF">https://www.jhuapl.edu/SPSA/PDF-SPSA/Spall_Stochastic_Optimization.PDF</a>)</p>
+<dl class="attribute">
+<dt id="tf_neuralmpc.optimizers.SPSAOptimizer.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/spsa.html#SPSAOptimizer.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.SPSAOptimizer.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the simultaneous perturbation stochastic approximation optimizer.
+It is used to calculate the optimal solution for action at the current timestep given the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>tf.bool</em>) -- Specifies if the optimal action should have some noise added to it before returning it.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Returns</dt><dd><dl class="simple">
+<dt>resulting_action: tf.float32</dt><dd><p>The optimal solution for the first action to be applied in the current time step.</p>
+</dd>
+<dt>next_state: tf.float32</dt><dd><p>The next state predicted using the dynamics model in the trajectory evaluator.</p>
+</dd>
+<dt>rewards_of_next_state: tf.float32</dt><dd><p>The predicted reward achieved after applying the action given by the optimizer.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.SPSAOptimizer.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">planning_horizon</em>, <em class="sig-param">max_iterations</em>, <em class="sig-param">population_size</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">num_agents</em>, <em class="sig-param">action_upper_bound</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">trajectory_evaluator</em>, <em class="sig-param">alpha=&lt;tf.Tensor: id=0</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.602&gt;</em>, <em class="sig-param">gamma=&lt;tf.Tensor: id=1</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.101&gt;</em>, <em class="sig-param">a_par=&lt;tf.Tensor: id=2</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.01&gt;</em>, <em class="sig-param">noise_parameter=&lt;tf.Tensor: id=3</em>, <em class="sig-param">shape=()</em>, <em class="sig-param">dtype=float32</em>, <em class="sig-param">numpy=0.3&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/spsa.html#SPSAOptimizer.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.SPSAOptimizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the simulataneous perturbation stochastic approximation optimizer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>planning_horizon</strong> (<em>Int</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>max_iterations</strong> (<em>tf.int32</em>) -- Defines the maximimum iterations for the CMAES optimizer to refine its guess for the optimal solution.</p></li>
+<li><p><strong>population_size</strong> (<em>tf.int32</em>) -- Defines the population size of the particles evaluated at each iteration.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input space.</p></li>
+<li><p><strong>action_upper_bound</strong> (<em>tf.float32</em>) -- Defines the actions upper bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>action_lower_bound</strong> (<em>tf.float32</em>) -- Defines the actions lower bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>trajectory_evaluator</strong> (<em>EvaluatorBaseClass</em>) -- Defines the trajectory evaluator to be used to evaluate the reward of a sequence of actions.</p></li>
+<li><p><strong>num_agents</strong> (<em>tf.int32</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>alpha</strong> (<em>tf.float32</em>) -- Defines the alpha used.</p></li>
+<li><p><strong>gamma</strong> (<em>tf.float32</em>) -- Defines the gamma used.</p></li>
+<li><p><strong>a_par</strong> (<em>tf.float32</em>) -- Defines the a_par used.</p></li>
+<li><p><strong>noise_parameter</strong> (<em>tf.float32</em>) -- Defines the noise_parameter used.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.optimizers.SPSAOptimizer.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/optimizers/spsa.html#SPSAOptimizer.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.optimizers.SPSAOptimizer.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This method resets the optimizer to its default state at the beginning of the trajectory/episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../policies/policies.html" class="btn btn-neutral float-right" title="Policies" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../runner/runner.html" class="btn btn-neutral float-left" title="Runners" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

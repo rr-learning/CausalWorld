@@ -1,0 +1,1217 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Welcome to TF_NeuralMPC&#39;s documentation! &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/tf_neuralmpc.html">TF-NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Welcome to TF_NeuralMPC's documentation!</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/old.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="welcome-to-tf-neuralmpc-s-documentation">
+<h1>Welcome to TF_NeuralMPC's documentation!<a class="headerlink" href="#welcome-to-tf-neuralmpc-s-documentation" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="runners">
+<h1>Runners<a class="headerlink" href="#runners" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="runner-class">
+<h2>Runner Class<a class="headerlink" href="#runner-class" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.runner.runner"></span><div class="section" id="tf-neuralmpc-runner-runner-py">
+<h3>TF_NeuralMPC/runner/runner.py<a class="headerlink" href="#tf-neuralmpc-runner-runner-py" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>&#64;author    Ossama Ahmed</p></li>
+<li><p>&#64;email     <a class="reference external" href="mailto:oahmed&#37;&#52;&#48;ethz&#46;ch">oahmed<span>&#64;</span>ethz<span>&#46;</span>ch</a></p></li>
+<li><p>Copyright (C) 2020 Learning and Adaptive Systems Group, ETH Zurich.</p></li>
+<li><p>All rights reserved.</p></li>
+<li><p><a class="reference external" href="https://las.inf.ethz.ch/">https://las.inf.ethz.ch/</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="TF_NeuralMPC.runner.runner.Runner">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.runner.runner.</code><code class="sig-name descname">Runner</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">log_path=None</em>, <em class="sig-param">num_of_agents=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/runner/runner.html#Runner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the runner class which handles the interaction of the different agents with the enviornment,
+a runnner takes in a controller and possibly a dynamics model which are used further to iteract with
+the environment</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.runner.Runner.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">log_path=None</em>, <em class="sig-param">num_of_agents=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/runner/runner.html#Runner.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the runner class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env</strong> (<em>[</em><em>mujoco_env.MujocoEnv</em><em>, </em><em>SubprocVecEnv</em><em>]</em>) -- Defines two environment_utils in a list, the first being a single environment that could possibly be used to
+record a rollout in a video and the second is a vectorized environment that could possibly be used for collecting the
+rollouts.</p></li>
+<li><p><strong>tf_writer</strong> -- Defines a tf writer to be used to log the results while training and collecting samples.</p></li>
+<li><p><strong>num_of_agents</strong> (<em>Int</em>) -- The number of agents running in parallel in the environment.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.runner.runner.Runner.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.runner.Runner.learn_dynamics_from_randomness">
+<code class="sig-name descname">learn_dynamics_from_randomness</code><span class="sig-paren">(</span><em class="sig-param">number_of_rollouts</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">dynamics_function</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">normalization=True</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/runner/runner.html#Runner.learn_dynamics_from_randomness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner.learn_dynamics_from_randomness" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the learn dynamics function for the runner class which samples n rollouts using a policy and then
+uses these rollouts to learn a dynamics function for the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_rollouts</strong> (<em>Int</em>) -- Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="modules/dynamics_handlers/dynamics_handlers.html#TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler" title="TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well
+as the dynamics function.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.runner.Runner.learn_dynamics_iteratively_w_mpc">
+<code class="sig-name descname">learn_dynamics_iteratively_w_mpc</code><span class="sig-paren">(</span><em class="sig-param">number_of_initial_rollouts</em>, <em class="sig-param">number_of_rollouts_for_refinement</em>, <em class="sig-param">number_of_refinement_steps</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">mpc_policy=None</em>, <em class="sig-param">planning_horizon=None</em>, <em class="sig-param">state_reward_function=None</em>, <em class="sig-param">actions_reward_function=None</em>, <em class="sig-param">optimizer=None</em>, <em class="sig-param">optimizer_name='RandomSearch'</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em>, <em class="sig-param">system_dynamics_handler=None</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">exploration_noise=False</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">normalization=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/runner/runner.html#Runner.learn_dynamics_iteratively_w_mpc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner.learn_dynamics_iteratively_w_mpc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the learn dynamics function iteratively using a model based policy
+for the runner class which samples n rollouts using a policy and then
+uses these rollouts to learn a dynamics function for the system which is then used to sample further rollouts
+to refine the dynamics function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_initial_rollouts</strong> (<em>Int</em>) -- Number of initial rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>number_of_rollouts_for_refinement</strong> (<em>Int</em>) -- Number of refinement rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>number_of_refinement_steps</strong> (<em>Int</em>) -- Number of refinemnet steps train, collect, train..etc to run for.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>initial_policy</strong> (<a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the initial episodes from the different agents.</p></li>
+<li><p><strong>refinement_policy</strong> (<a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the further episodes from the different agents to refine the model
+estimate.</p></li>
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="modules/dynamics_handlers/dynamics_handlers.html#TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler" title="TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well
+as the dynamics function.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.runner.Runner.perform_rollouts">
+<code class="sig-name descname">perform_rollouts</code><span class="sig-paren">(</span><em class="sig-param">number_of_rollouts</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/runner/runner.html#Runner.perform_rollouts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner.perform_rollouts" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the perform_rollouts function for the runner class which samples n episodes with a specified length
+using the provided policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_rollouts</strong> (<em>Int</em>) -- Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>traj_obs</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the observations starting from the reset observations.</p></li>
+<li><p><strong>traj_acs</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the actions taken by the policy.</p></li>
+<li><p><strong>traj_rews</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the rewards taken by the policy.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.runner.Runner.record_rollout">
+<code class="sig-name descname">record_rollout</code><span class="sig-paren">(</span><em class="sig-param">horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">record_file_path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/runner/runner.html#Runner.record_rollout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner.record_rollout" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the recording function for the runner class which samples one episode with a specified length
+using the provided policy and records it in a video.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>record_file_path</strong> (<em>String</em>) -- specified the file path to save the video that will be recorded in.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.runner.Runner.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param">horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/runner/runner.html#Runner.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.runner.Runner.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the sampling function for the runner class which samples one episode with a specified length
+using the provided policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="modules/policies/policies.html#TF_NeuralMPC.policies.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>result</strong> -- returns the episode rollouts results for all the agents in the parallelized environment,
+it has the form of {observations, actions, rewards, reward_sum}</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="trajectory-evaluators">
+<h1>Trajectory Evaluators<a class="headerlink" href="#trajectory-evaluators" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="evaluator-base-class">
+<h2>Evaluator Base Class<a class="headerlink" href="#evaluator-base-class" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass"></span><div class="section" id="tf-neuralmpc-trajectory-evaluator-evaluator-baseclass-py">
+<h3>TF_NeuralMPC/trajectory_evaluator/evaluator_baseclass.py<a class="headerlink" href="#tf-neuralmpc-trajectory-evaluator-evaluator-baseclass-py" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>&#64;author    Ossama Ahmed</p></li>
+<li><p>&#64;email     <a class="reference external" href="mailto:oahmed&#37;&#52;&#48;ethz&#46;ch">oahmed<span>&#64;</span>ethz<span>&#46;</span>ch</a></p></li>
+<li><p>Copyright (C) 2020 Learning and Adaptive Systems Group, ETH Zurich.</p></li>
+<li><p>All rights reserved.</p></li>
+<li><p><a class="reference external" href="https://las.inf.ethz.ch/">https://las.inf.ethz.ch/</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.</code><code class="sig-name descname">EvaluatorBaseClass</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/evaluator_baseclass.html#EvaluatorBaseClass"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the base class of the trajectory evaluators</p>
+<dl class="attribute">
+<dt id="TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/evaluator_baseclass.html#EvaluatorBaseClass.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the Evaluator Base Class.
+It is used to calculate the rewards corresponding to each of the action sequences starting
+from the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>action_sequences</strong> (<em>tf.float32</em>) -- Defines the action sequences to be evaluated, (dims = population X num_of_agents X planning_horizon X dim_U)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rewards</strong> -- The rewards corresponding to each action sequence (dims = 1 X population)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/evaluator_baseclass.html#EvaluatorBaseClass.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the Evaluator Base Class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>String</em>) -- Defines the name of the block of the evaluator.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.evaluate_next_reward">
+<code class="sig-name descname">evaluate_next_reward</code><span class="sig-paren">(</span><em class="sig-param">current_state</em>, <em class="sig-param">next_state</em>, <em class="sig-param">current_action</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/evaluator_baseclass.html#EvaluatorBaseClass.evaluate_next_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.evaluate_next_reward" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the function used to predict the next reward using the internal dynamics handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>next_state</strong> (<em>tf.float32</em>) -- Defines the next state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>current_action</strong> (<em>tf.float32</em>) -- Defines the current action to be applied, (dims = num_of_agents X dim_U)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>reward</strong> -- returns the predicted reward using the action, current state and the next one,
+(dims=num_of_agents X 1)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.predict_next_state">
+<code class="sig-name descname">predict_next_state</code><span class="sig-paren">(</span><em class="sig-param">current_state</em>, <em class="sig-param">current_action</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/evaluator_baseclass.html#EvaluatorBaseClass.predict_next_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.evaluator_baseclass.EvaluatorBaseClass.predict_next_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the function used to predict the next state using the internal dynamics handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>current_action</strong> (<em>tf.float32</em>) -- Defines the current action to be applied, (dims = num_of_agents X dim_U)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>next_state</strong> -- Defines the next state of the system, (dims=num_of_agents X dim_S)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="deterministic-evaluator">
+<h2>Deterministic Evaluator<a class="headerlink" href="#deterministic-evaluator" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.trajectory_evaluators.deterministic"></span><div class="section" id="tf-neuralmpc-trajectory-evaluator-deterministic-py">
+<h3>TF_NeuralMPC/trajectory_evaluator/deterministic.py<a class="headerlink" href="#tf-neuralmpc-trajectory-evaluator-deterministic-py" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>&#64;author    Ossama Ahmed</p></li>
+<li><p>&#64;email     <a class="reference external" href="mailto:oahmed&#37;&#52;&#48;ethz&#46;ch">oahmed<span>&#64;</span>ethz<span>&#46;</span>ch</a></p></li>
+<li><p>Copyright (C) 2020 Learning and Adaptive Systems Group, ETH Zurich.</p></li>
+<li><p>All rights reserved.</p></li>
+<li><p><a class="reference external" href="https://las.inf.ethz.ch/">https://las.inf.ethz.ch/</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.trajectory_evaluators.deterministic.</code><code class="sig-name descname">DeterministicTrajectoryEvaluator</code><span class="sig-paren">(</span><em class="sig-param">state_reward_function</em>, <em class="sig-param">actions_reward_function</em>, <em class="sig-param">planning_horizon</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">system_dynamics_handler</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/deterministic.html#DeterministicTrajectoryEvaluator"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the trajectory evaluator class for a deterministic dynamics function</p>
+<dl class="attribute">
+<dt id="TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/deterministic.html#DeterministicTrajectoryEvaluator.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the Deterministic Trajectory Evaluator Class.
+It is used to calculate the rewards corresponding to each of the action sequences starting
+from the current state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>action_sequences</strong> (<em>tf.float32</em>) -- Defines the action sequences to be evaluated, (dims = population X num_of_agents X planning_horizon X dim_U)</p></li>
+<li><p><strong>time_step</strong> (<em>tf.float32</em>) -- Defines the current timestep of the episode.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>rewards</strong> -- The rewards corresponding to each action sequence (dims = 1 X population)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">state_reward_function</em>, <em class="sig-param">actions_reward_function</em>, <em class="sig-param">planning_horizon</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dim_O</em>, <em class="sig-param">system_dynamics_handler</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/deterministic.html#DeterministicTrajectoryEvaluator.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the Deterministic Trajectory Evaluator Class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>state_reward_function</strong> (<em>tf_function</em>) -- Defines the state reward function with the prototype: tf_func_name(current_state, next_state),
+where current_state is BatchXdim_S and next_state is BatchXdim_S.</p></li>
+<li><p><strong>actions_reward_function</strong> (<em>tf_function</em>) -- Defines the action reward function with the prototype: tf_func_name(current_actions),
+where current_actions is BatchXdim_U.</p></li>
+<li><p><strong>planning_horizon</strong> (<em>tf.int32</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input/action space.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>dim_S</strong> (<em>tf.int32</em>) -- Defines the dimensions of the state space.</p></li>
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="modules/dynamics_handlers/dynamics_handlers.html#TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler" title="TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- <dl class="simple">
+<dt>Defines the system dynamics handler class with its own trainer and observations and actions</dt><dd><p>preprocessing functions.</p>
+</dd>
+</dl>
+</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.evaluate_next_reward">
+<code class="sig-name descname">evaluate_next_reward</code><span class="sig-paren">(</span><em class="sig-param">current_state</em>, <em class="sig-param">next_state</em>, <em class="sig-param">current_action</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/deterministic.html#DeterministicTrajectoryEvaluator.evaluate_next_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.evaluate_next_reward" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the function used to predict the next reward using the internal dynamics handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>next_state</strong> (<em>tf.float32</em>) -- Defines the next state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>current_action</strong> (<em>tf.float32</em>) -- Defines the current action to be applied, (dims = num_of_agents X dim_U)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>reward</strong> -- returns the predicted reward using the action, current state and the next one,
+(dims=num_of_agents X 1)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.predict_next_state">
+<code class="sig-name descname">predict_next_state</code><span class="sig-paren">(</span><em class="sig-param">current_state</em>, <em class="sig-param">current_action</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/trajectory_evaluators/deterministic.html#DeterministicTrajectoryEvaluator.predict_next_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.trajectory_evaluators.deterministic.DeterministicTrajectoryEvaluator.predict_next_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the function used to predict the next state using the internal dynamics handler.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- Defines the current state of the system, (dims=num_of_agents X dim_S)</p></li>
+<li><p><strong>current_action</strong> (<em>tf.float32</em>) -- Defines the current action to be applied, (dims = num_of_agents X dim_U)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>next_state</strong> -- Defines the next state of the system, (dims=num_of_agents X dim_S)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="policies">
+<h1>Policies<a class="headerlink" href="#policies" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="model-based-base-policy">
+<h2>Model Based Base Policy<a class="headerlink" href="#model-based-base-policy" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.policies.model_based_base_policy"></span><div class="section" id="tf-neuralmpc-policies-model-based-base-policy-py">
+<h3>TF_NeuralMPC/policies/model_based_base_policy.py<a class="headerlink" href="#tf-neuralmpc-policies-model-based-base-policy-py" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>&#64;author    Ossama Ahmed</p></li>
+<li><p>&#64;email     <a class="reference external" href="mailto:oahmed&#37;&#52;&#48;ethz&#46;ch">oahmed<span>&#64;</span>ethz<span>&#46;</span>ch</a></p></li>
+<li><p>Copyright (C) 2020 Learning and Adaptive Systems Group, ETH Zurich.</p></li>
+<li><p>All rights reserved.</p></li>
+<li><p><a class="reference external" href="https://las.inf.ethz.ch/">https://las.inf.ethz.ch/</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.policies.model_based_base_policy.</code><code class="sig-name descname">ModelBasedBasePolicy</code><span class="sig-paren">(</span><em class="sig-param">system_dynamics</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_based_base_policy.html#ModelBasedBasePolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the model based policy base class for controlling the agent</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">system_dynamics</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_based_base_policy.html#ModelBasedBasePolicy.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>This is the initializer function for the model free policy base class.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>system_dynamics</strong> (<em>SystemDynamics</em>) -- Defines the system dynamics to be used in the policy.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.act">
+<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param">observations</em>, <em class="sig-param">t</em>, <em class="sig-param">exploration_noise=False</em>, <em class="sig-param">log_results=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_based_base_policy.html#ModelBasedBasePolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.act" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the act function for the model based policy base class, which should be called to provide the action
+to be executed at the current time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations</strong> (<em>tf.float32</em>) -- Defines the current observations received from the environment.</p></li>
+<li><p><strong>t</strong> (<em>tf.float32</em>) -- Defines the current timestep.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- Defines if exploration noise should be added to the action to be executed.</p></li>
+<li><p><strong>log_results</strong> (<em>bool</em>) -- Defines if results should be logged to tensorboard or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>action</strong> (<em>tf.float32</em>) -- The action to be executed for each of the runner (dims = runner X dim_U)</p></li>
+<li><p><strong>next_observations</strong> (<em>tf.float32</em>) -- The next observations predicted using the dynamics function learned so far.</p></li>
+<li><p><strong>rewards_of_next_state</strong> (<em>tf.float32</em>) -- The predicted reward if the action was executed using the predicted observations.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_based_base_policy.html#ModelBasedBasePolicy.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the reset function for the model based policy base class, which should be called at the beginning of
+the episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="model-predictive-control-policy">
+<h2>Model Predictive Control Policy<a class="headerlink" href="#model-predictive-control-policy" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.policies.mpc_policy"></span><div class="section" id="tf-neuralmpc-policies-mpc-policy-py">
+<h3>TF_NeuralMPC/policies/mpc_policy.py<a class="headerlink" href="#tf-neuralmpc-policies-mpc-policy-py" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="TF_NeuralMPC.policies.mpc_policy.MPCPolicy">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.policies.mpc_policy.</code><code class="sig-name descname">MPCPolicy</code><span class="sig-paren">(</span><em class="sig-param">system_dynamics_handler</em>, <em class="sig-param">optimizer</em>, <em class="sig-param">tf_writer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/mpc_policy.html#MPCPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.mpc_policy.MPCPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the model predictive control policy for controlling the agent</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.mpc_policy.MPCPolicy.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">system_dynamics_handler</em>, <em class="sig-param">optimizer</em>, <em class="sig-param">tf_writer=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/mpc_policy.html#MPCPolicy.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.mpc_policy.MPCPolicy.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>This is the initializer function for the model predictive control policy.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="modules/dynamics_handlers/dynamics_handlers.html#TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler" title="TF_NeuralMPC.dynamics_handlers.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- Defines the system dynamics handler to be used in the policy for preprocessing the observations and
+postprocessing the state to observations.</p></li>
+<li><p><strong>optimizer</strong> (<em>OptimizerBaseClass</em>) -- Optimizer to be used that optimizes for the best action sequence and returns the first action.</p></li>
+<li><p><strong>tensorflow_writer</strong> (<em>tf.summary</em>) -- Tensorflow writer to be used in logging the data.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.mpc_policy.MPCPolicy.act">
+<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param">observations</em>, <em class="sig-param">t</em>, <em class="sig-param">exploration_noise=False</em>, <em class="sig-param">log_results=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/mpc_policy.html#MPCPolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.mpc_policy.MPCPolicy.act" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the act function for the model predictive control policy, which should be called to provide the action
+to be executed at the current time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations</strong> (<em>tf.float32</em>) -- Defines the current observations received from the environment.</p></li>
+<li><p><strong>t</strong> (<em>tf.float32</em>) -- Defines the current timestep.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- Defines if exploration noise should be added to the action to be executed.</p></li>
+<li><p><strong>log_results</strong> (<em>bool</em>) -- Defines if results should be logged to tensorboard or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>action</strong> (<em>tf.float32</em>) -- The action to be executed for each of the runner (dims = runner X dim_U)</p></li>
+<li><p><strong>next_observations</strong> (<em>tf.float32</em>) -- The next observations predicted using the dynamics function learned so far.</p></li>
+<li><p><strong>rewards_of_next_state</strong> (<em>tf.float32</em>) -- The predicted reward if the action was executed using the predicted observations.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.mpc_policy.MPCPolicy.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/mpc_policy.html#MPCPolicy.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.mpc_policy.MPCPolicy.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the reset function for the model predictive control policy, which should be called at the beginning of
+the episode.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.mpc_policy.MPCPolicy.switch_optimizer">
+<code class="sig-name descname">switch_optimizer</code><span class="sig-paren">(</span><em class="sig-param">optimizer=None</em>, <em class="sig-param">optimizer_name=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/mpc_policy.html#MPCPolicy.switch_optimizer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.mpc_policy.MPCPolicy.switch_optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to switch the optimizer of model predictive control policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>optimizer</strong> (<em>OptimizerBaseClass</em>) -- Optimizer to be used that optimizes for the best action sequence and returns the first action.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="model-free-base-policy">
+<h2>Model Free Base Policy<a class="headerlink" href="#model-free-base-policy" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.policies.model_free_base_policy"></span><div class="section" id="tf-neuralmpc-policies-model-free-base-policy-py">
+<h3>TF_NeuralMPC/policies/model_free_base_policy.py<a class="headerlink" href="#tf-neuralmpc-policies-model-free-base-policy-py" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>&#64;author    Ossama Ahmed</p></li>
+<li><p>&#64;email     <a class="reference external" href="mailto:oahmed&#37;&#52;&#48;ethz&#46;ch">oahmed<span>&#64;</span>ethz<span>&#46;</span>ch</a></p></li>
+<li><p>Copyright (C) 2020 Learning and Adaptive Systems Group, ETH Zurich.</p></li>
+<li><p>All rights reserved.</p></li>
+<li><p><a class="reference external" href="https://las.inf.ethz.ch/">https://las.inf.ethz.ch/</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.policies.model_free_base_policy.</code><code class="sig-name descname">ModelFreeBasePolicy</code><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_free_base_policy.html#ModelFreeBasePolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the model free policy base class for controlling the agent</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_free_base_policy.html#ModelFreeBasePolicy.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the model free policy base class.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.act">
+<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param">observations</em>, <em class="sig-param">t</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_free_base_policy.html#ModelFreeBasePolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.act" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the act function for the model free policy base class, which should be called to provide the action
+to be executed at the current time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations</strong> (<em>tf.float32</em>) -- Defines the current observations received from the environment.</p></li>
+<li><p><strong>t</strong> (<em>tf.float32</em>) -- Defines the current timestep.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- Defines if exploration noise should be added to the action that will be executed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>action</strong> -- The action to be executed for each of the runner (dims = runner X dim_U)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/model_free_base_policy.html#ModelFreeBasePolicy.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the reset function for the model free policy base class, which should be called at the beginning of
+the episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="random-policy">
+<h2>Random Policy<a class="headerlink" href="#random-policy" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.policies.random_policy"></span><div class="section" id="tf-neuralmpc-policies-random-policy-py">
+<h3>TF_NeuralMPC/policies/random_policy.py<a class="headerlink" href="#tf-neuralmpc-policies-random-policy-py" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>&#64;author    Ossama Ahmed</p></li>
+<li><p>&#64;email     <a class="reference external" href="mailto:oahmed&#37;&#52;&#48;ethz&#46;ch">oahmed<span>&#64;</span>ethz<span>&#46;</span>ch</a></p></li>
+<li><p>Copyright (C) 2020 Learning and Adaptive Systems Group, ETH Zurich.</p></li>
+<li><p>All rights reserved.</p></li>
+<li><p><a class="reference external" href="https://las.inf.ethz.ch/">https://las.inf.ethz.ch/</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="TF_NeuralMPC.policies.random_policy.RandomPolicy">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.policies.random_policy.</code><code class="sig-name descname">RandomPolicy</code><span class="sig-paren">(</span><em class="sig-param">number_of_agents</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">action_upper_bound</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/random_policy.html#RandomPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.random_policy.RandomPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the random policy for controlling the agent</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.random_policy.RandomPolicy.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">number_of_agents</em>, <em class="sig-param">action_lower_bound</em>, <em class="sig-param">action_upper_bound</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/random_policy.html#RandomPolicy.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.random_policy.RandomPolicy.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the random policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>num_agents</strong> (<em>tf.int32</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>action_upper_bound</strong> (<em>tf.float32</em>) -- Defines the actions upper bound that could be applied, shape should be 1xdim_U.</p></li>
+<li><p><strong>action_lower_bound</strong> (<em>tf.float32</em>) -- Defines the actions lower bound that could be applied, shape should be 1xdim_U.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.random_policy.RandomPolicy.act">
+<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param">observations</em>, <em class="sig-param">t</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/random_policy.html#RandomPolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.random_policy.RandomPolicy.act" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the act function for the random policy, which should be called to provide the action
+to be executed at the current time step.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations</strong> (<em>tf.float32</em>) -- Defines the current observations received from the environment.</p></li>
+<li><p><strong>t</strong> (<em>tf.float32</em>) -- Defines the current timestep.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>action</strong> -- The action to be executed for each of the runner (dims = runner X dim_U)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.policies.random_policy.RandomPolicy.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/policies/random_policy.html#RandomPolicy.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.policies.random_policy.RandomPolicy.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the reset function for the random policy, which should be called at the beginning of
+the episode.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="optimizers">
+<h1>Optimizers<a class="headerlink" href="#optimizers" title="Permalink to this headline">¶</a></h1>
+</div>
+<div class="section" id="environment-utils">
+<h1>Environment Utils<a class="headerlink" href="#environment-utils" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="subprocess-env">
+<h2>Subprocess Env<a class="headerlink" href="#subprocess-env" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="env-wrapper">
+<h2>Env Wrapper<a class="headerlink" href="#env-wrapper" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+<div class="section" id="dynamics-handlers">
+<h1>Dynamics Handlers<a class="headerlink" href="#dynamics-handlers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>Dynamics Handlers<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.dynamics_handlers.system_dynamics_handler"></span><div class="section" id="tf-neuralmpc-dynamics-handlers-system-dynamics-handler-py">
+<h3>TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.py<a class="headerlink" href="#tf-neuralmpc-dynamics-handlers-system-dynamics-handler-py" title="Permalink to this headline">¶</a></h3>
+<blockquote>
+<div><ul class="simple">
+<li><p>&#64;author    Ossama Ahmed</p></li>
+<li><p>&#64;email     <a class="reference external" href="mailto:oahmed&#37;&#52;&#48;ethz&#46;ch">oahmed<span>&#64;</span>ethz<span>&#46;</span>ch</a></p></li>
+<li><p>Copyright (C) 2020 Learning and Adaptive Systems Group, ETH Zurich.</p></li>
+<li><p>All rights reserved.</p></li>
+<li><p><a class="reference external" href="https://las.inf.ethz.ch/">https://las.inf.ethz.ch/</a></p></li>
+</ul>
+</div></blockquote>
+<dl class="class">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.</code><code class="sig-name descname">SystemDynamicsHandler</code><span class="sig-paren">(</span><em class="sig-param">dim_O</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">num_of_agents=1</em>, <em class="sig-param">log_dir=None</em>, <em class="sig-param">tf_writer=None</em>, <em class="sig-param">saved_model_dir=None</em>, <em class="sig-param">transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">inverse_transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">save_model_frequency=1</em>, <em class="sig-param">load_saved_model=False</em>, <em class="sig-param">true_model=False</em>, <em class="sig-param">normalization=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the system dynamics handler class that is reponsible for training the dynamics functions
+, storing the rollouts as well as prepocessing and postprocessing of the MDP elements</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">dim_O</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">num_of_agents=1</em>, <em class="sig-param">log_dir=None</em>, <em class="sig-param">tf_writer=None</em>, <em class="sig-param">saved_model_dir=None</em>, <em class="sig-param">transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">inverse_transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">save_model_frequency=1</em>, <em class="sig-param">load_saved_model=False</em>, <em class="sig-param">true_model=False</em>, <em class="sig-param">normalization=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the system dynamics handler class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>learning_rate</strong> (<em>float</em>) -- Learning rate to be used in training the dynamics function.</p></li>
+<li><p><strong>epochs</strong> (<em>Int</em>) -- Number of epochs to be used in training the dynamics function everytime train is called.</p></li>
+<li><p><strong>dynamics_function</strong> (<em>DeterministicDynamicsFunctionBaseClass</em>) -- Defines the system dynamics class with its own trainer and dynamics functions.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input/ action space.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>dim_S</strong> (<em>tf.int32</em>) -- Defines the dimensions of the state space.</p></li>
+<li><p><strong>tensorflow_writer</strong> (<em>tf.summary</em>) -- Defines a tensorflow writer to be used for logging</p></li>
+<li><p><strong>log_dir</strong> (<em>string</em>) -- Defines the log directory to save the normalization statistics in.</p></li>
+<li><p><strong>saved_model_dir</strong> (<em>string</em>) -- Defines the saved model directory where the model is saved in, in case of loading the model.</p></li>
+<li><p><strong>num_of_agents</strong> (<em>Int</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>dynamics_trainer_algo</strong> (<em>TrainerBaseClass</em>) -- Defines the dynamics_trainer_algo of the nn dynamics function itself</p></li>
+<li><p><strong>validation_split</strong> (<em>float32</em>) -- Defines the validation split to be used of the rollouts collected.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) -- Defines the batch size to be used for training the model.</p></li>
+<li><p><strong>transform_states_func</strong> (<em>tf_function</em>) -- Defines a tf function to preprocess the states before passsing it to the nn dynamics function.</p></li>
+<li><p><strong>inverse_transform_states_func</strong> (<em>tf_function</em>) -- Defines a tf function to inverse the preprocessing of the states done before passing it to the nn dynamics
+function.</p></li>
+<li><p><strong>transform_actions_func</strong> (<em>tf_function</em>) -- Defines a tf function to preprocess the actions before passsing it to the nn dynamics function.</p></li>
+<li><p><strong>inverse_transform_actions_func</strong> (<em>tf_function</em>) -- Defines a tf function to inverse the preprocessing of the actions done before passing it to the nn dynamics
+function.</p></li>
+<li><p><strong>observations_to_state_func</strong> (<em>tf_function</em>) -- Defines a tf function to transform observations to a state.</p></li>
+<li><p><strong>state_to_observations_func</strong> (<em>tf_function</em>) -- Defines a tf function to transform state to observations.</p></li>
+<li><p><strong>transform_targets_func</strong> (<em>tf_function</em>) -- Defines a tf function to transform the next states as targets (output of the nn dynamics), by default
+this is the deviation function which is (target = next_state - current_state).</p></li>
+<li><p><strong>inverse_transform_targets_func</strong> (<em>tf_function</em>) -- Defines a tf function to inverse transform the targets (output of the nn dynamics), by default
+this is the inverse of the deviation function which is (next_state = target + current_state).</p></li>
+<li><p><strong>feasible_state_func</strong> (<em>tf_function</em>) -- Defines a tf function that takes a state and returns the feasible/acceptable state given the state constraints.</p></li>
+<li><p><strong>feasible_action_func</strong> (<em>tf_function</em>) -- Defines a tf function that takes an action and returns the feasible/acceptable action given
+the actions constraints.</p></li>
+<li><p><strong>save_model_frequency</strong> (<em>Int</em>) -- Defines how often the model should be saved (defined relative to the number of refining iters)</p></li>
+<li><p><strong>load_saved_model</strong> (<em>bool</em>) -- Defines if a model should be loaded or not.</p></li>
+<li><p><strong>true_model</strong> -- Defines if the dynamics function is a non trainable model or not.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.process_input">
+<code class="sig-name descname">process_input</code><span class="sig-paren">(</span><em class="sig-param">states</em>, <em class="sig-param">actions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.process_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.process_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the process_input function, which takes in the states and actions and preprocesses them for the dynamics
+function, (normalization..etc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>states</strong> (<em>tf.float32</em>) -- The current states has a shape of (Batch Xdim_S)</p></li>
+<li><p><strong>actions</strong> (<em>tf.float32</em>) -- The current actions has a shape of (Batch Xdim_U)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>result</strong> -- concatenated states and actions after preprocessing them.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.process_state_output">
+<code class="sig-name descname">process_state_output</code><span class="sig-paren">(</span><em class="sig-param">old_states</em>, <em class="sig-param">normalized_states_deviation</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.process_state_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.process_state_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the process_state_output function, which takes in the previous states predicted target/delta and processes
+them to get the predicted absolute next state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_states</strong> (<em>tf.float32</em>) -- The previous states has a shape of (Batch Xdim_S)</p></li>
+<li><p><strong>normalized_states_deviation</strong> (<em>tf.float32</em>) -- The predicted normalized delta as received from the dynamics function has a shape of (Batch Xdim_U).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>result</strong> -- absolute predicted next state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">observations_trajectories</em>, <em class="sig-param">actions_trajectories</em>, <em class="sig-param">rewards_trajectories</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the train function, which takes in the data of the MDP to train the dynamics model on it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations_trajectories</strong> (<em>[</em><em>np.float32</em><em>]</em>) -- A list of observations of each of the episodes for the n agents.</p></li>
+<li><p><strong>actions_trajectories</strong> (<em>[</em><em>np.float32</em><em>]</em>) -- A list of actions of each of the episodes for the n agents.</p></li>
+<li><p><strong>rewards_trajectories</strong> (<em>[</em><em>np.float32</em><em>]</em>) -- A list of rewards of each of the episodes for the n agents.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.default_inverse_transform_targets">
+<code class="sig-prename descclassname">TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.</code><code class="sig-name descname">default_inverse_transform_targets</code><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.html#default_inverse_transform_targets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.default_inverse_transform_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the default inverse transform targets function used, which reverses the preprocessing of  the targets of
+the dynamics function to obtain the real current_state not the relative one,
+The default one is (current_state = target + current_state).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- The current_state has a shape of (Batch X dim_S)</p></li>
+<li><p><strong>delta</strong> (<em>tf.float32</em>) -- The delta has a shape of (Batch X dim_S) which is equivilant to the target of the network.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.default_transform_targets">
+<code class="sig-prename descclassname">TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.</code><code class="sig-name descname">default_transform_targets</code><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_handlers/system_dynamics_handler.html#default_transform_targets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.default_transform_targets" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the default transform targets function used, which preprocesses the targets of the network before training the
+dynamics function using the inputs and targets. The default one is (target = next_state - current_state).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>current_state</strong> (<em>tf.float32</em>) -- The current_state has a shape of (Batch X dim_S)</p></li>
+<li><p><strong>next_state</strong> (<em>tf.float32</em>) -- The next_state has a shape of (Batch X dim_S)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="dynamics-functions">
+<h1>Dynamics Functions<a class="headerlink" href="#dynamics-functions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="deterministic-dynamics-base-function">
+<h2>Deterministic Dynamics Base Function<a class="headerlink" href="#deterministic-dynamics-base-function" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base"></span><div class="section" id="tf-neuralmpc-dynamics-functions-deterministic-models-deterministic-dynamics-function-base-py">
+<h3>TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_dynamics_function_base.py<a class="headerlink" href="#tf-neuralmpc-dynamics-functions-deterministic-models-deterministic-dynamics-function-base-py" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.</code><code class="sig-name descname">DeterministicDynamicsFunctionBase</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_dynamics_function_base.html#DeterministicDynamicsFunctionBase"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the deterministic dynamics function base class for (s_t, a_t) - &gt; (s_t+1)</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.__call__">
+<code class="sig-name descname">__call__</code><span class="sig-paren">(</span><em class="sig-param">x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_dynamics_function_base.html#DeterministicDynamicsFunctionBase.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the deterministic dynamics function base class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.float32</em>) -- Defines the (s_t, a_t) which is the state and action stacked on top of each other,
+(dims = Batch X (dim_S + dim_U))</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>output</strong> -- Defines the next state (s_t+1) with (dims = Batch X dim_S)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_dynamics_function_base.html#DeterministicDynamicsFunctionBase.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the deterministic dynamics function base class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>String</em>) -- Defines the name of the block of the deterministic dynamics function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.get_loss">
+<code class="sig-name descname">get_loss</code><span class="sig-paren">(</span><em class="sig-param">expected_output</em>, <em class="sig-param">predictions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_dynamics_function_base.html#DeterministicDynamicsFunctionBase.get_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.get_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the training loss function for the deterministic dynamics function base class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_output</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) ground truth with (dims = Batch X dim_S)</p></li>
+<li><p><strong>predictions</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) predicted values with (dims = Batch X dim_S)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>train_loss</strong> -- Defines the training loss as a scalar for the whole batch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.get_validation_loss">
+<code class="sig-name descname">get_validation_loss</code><span class="sig-paren">(</span><em class="sig-param">expected_output</em>, <em class="sig-param">predictions</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_dynamics_function_base.html#DeterministicDynamicsFunctionBase.get_validation_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_dynamics_function_base.DeterministicDynamicsFunctionBase.get_validation_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the validation loss function for the deterministic dynamics function base class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_output</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) ground truth with (dims = Batch X dim_S)</p></li>
+<li><p><strong>predictions</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) predicted values with (dims = Batch X dim_S)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>validation_loss</strong> -- Defines the validation loss as a scalar for the whole batch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+<div class="section" id="deterministic-dynamics-mlp-function">
+<h2>Deterministic Dynamics MLP Function<a class="headerlink" href="#deterministic-dynamics-mlp-function" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><span class="target" id="module-TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp"></span><div class="section" id="tf-neuralmpc-dynamics-functions-deterministic-models-deterministic-mlp-py">
+<h3>TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_mlp.py<a class="headerlink" href="#tf-neuralmpc-dynamics-functions-deterministic-models-deterministic-mlp-py" title="Permalink to this headline">¶</a></h3>
+<dl class="class">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.</code><code class="sig-name descname">DeterministicMLP</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_mlp.html#DeterministicMLP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the deterministic fully connected MLP dynamics function class for (s_t, a_t) - &gt; (s_t+1)</p>
+<dl class="attribute">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.__call__">
+<code class="sig-name descname">__call__</code><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_mlp.html#DeterministicMLP.__call__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the call function for the deterministic fully connected MLP dynamics function class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>tf.float32</em>) -- Defines the (s_t, a_t) which is the state and action stacked on top of each other,
+(dims = Batch X (dim_S + dim_U))</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>output</strong> -- Defines the next state (s_t+1) with (dims = Batch X dim_S)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">name=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_mlp.html#DeterministicMLP.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the deterministic fully connected MLP dynamics function class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>name</strong> (<em>String</em>) -- Defines the name of the block of the deterministic MLP dynamics function.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.add_layer">
+<code class="sig-name descname">add_layer</code><span class="sig-paren">(</span><em class="sig-param">input_dim</em>, <em class="sig-param">output_dim</em>, <em class="sig-param">activation_function=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_mlp.html#DeterministicMLP.add_layer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.add_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the add layer function for the deterministic fully connected MLP dynamics function class, which
+is used to add a new layer at the end of the so far constructed MLP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_dim</strong> (<em>Int</em>) -- Defines the input dimensions of the layer.</p></li>
+<li><p><strong>output_dim</strong> (<em>Int</em>) -- Defines the output dimensions of the layer.</p></li>
+<li><p><strong>activation_function</strong> (<em>tf.nn</em>) -- Defines the activation non-linearity to be used for this layer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.get_loss">
+<code class="sig-name descname">get_loss</code><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_mlp.html#DeterministicMLP.get_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.get_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the training loss function for the deterministic fully connected MLP dynamics function class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_output</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) ground truth with (dims = Batch X dim_S)</p></li>
+<li><p><strong>predictions</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) predicted values with (dims = Batch X dim_S)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>train_loss</strong> -- Defines the training loss as a scalar for the whole batch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.get_validation_loss">
+<code class="sig-name descname">get_validation_loss</code><a class="reference internal" href="_modules/TF_NeuralMPC/dynamics_functions/deterministic_models/deterministic_mlp.html#DeterministicMLP.get_validation_loss"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.dynamics_functions.deterministic_models.deterministic_mlp.DeterministicMLP.get_validation_loss" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the validation loss function for the deterministic fully connected MLP dynamics function class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>expected_output</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) ground truth with (dims = Batch X dim_S)</p></li>
+<li><p><strong>predictions</strong> (<em>tf.float32</em>) -- Defines the next state (s_t+1) predicted values with (dims = Batch X dim_S)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>validation_loss</strong> -- Defines the validation loss as a scalar for the whole batch</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div></blockquote>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
+<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
+</ul>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

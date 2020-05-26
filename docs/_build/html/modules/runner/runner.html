@@ -1,0 +1,420 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Runners &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Optimizers" href="../optimizers/optimizers.html" />
+    <link rel="prev" title="TF-NeuralMPC" href="../tf_neuralmpc.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../tf_neuralmpc.html">TF-NeuralMPC</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Runners</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#runner">Runner</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../optimizers/optimizers.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/policies.html">Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamics_functions/dynamics_functions.html">Dynamics Functions</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamics_handlers/dynamics_handlers.html">Dynamics Handlers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../trajectory_evaluators/trajectory_evaluators.html">Trajectory Evaluators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../environment_utils/environment_utils.html">Environment Utils</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tf_neuralmpc.html">TF-NeuralMPC</a> &raquo;</li>
+        
+      <li>Runners</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/modules/runner/runner.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-tf_neuralmpc.runner">
+<span id="runners"></span><h1>Runners<a class="headerlink" href="#module-tf_neuralmpc.runner" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="runner">
+<h2>Runner<a class="headerlink" href="#runner" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.runner.Runner">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.runner.</code><code class="sig-name descname">Runner</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">log_path=None</em>, <em class="sig-param">num_of_agents=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the runner class which handles the interaction of the different agents with the enviornment,
+a runnner takes in a controller and possibly a dynamics model which are used further to iteract with
+the environment</p>
+<dl class="method">
+<dt id="tf_neuralmpc.runner.Runner.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">log_path=None</em>, <em class="sig-param">num_of_agents=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the runner class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env</strong> (<em>[</em><em>mujoco_env.MujocoEnv</em><em>, </em><em>SubprocVecEnv</em><em>]</em>) -- Defines two environment_utils in a list, the first being a single environment that could possibly be used to
+record a rollout in a video and the second is a vectorized environment that could possibly be used for collecting the
+rollouts.</p></li>
+<li><p><strong>log_path</strong> -- Defines the log directory to be used to log the results while training and collecting samples.</p></li>
+<li><p><strong>num_of_agents</strong> (<em>Int</em>) -- The number of agents running in parallel in the environment.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tf_neuralmpc.runner.Runner.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#tf_neuralmpc.runner.Runner.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.runner.Runner.learn_dynamics_from_randomness">
+<code class="sig-name descname">learn_dynamics_from_randomness</code><span class="sig-paren">(</span><em class="sig-param">number_of_rollouts</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">dynamics_function</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">normalization=True</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner.learn_dynamics_from_randomness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner.learn_dynamics_from_randomness" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the learn dynamics function for the runner class which samples n rollouts using a random policy and then
+uses these rollouts to learn a dynamics function for the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_rollouts</strong> (<em>Int</em>) -- Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>dynamics_function</strong> (<em>DeterministicDynamicsFunctionBaseClass</em>) -- Defines the system dynamics function.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) -- Learning rate to be used in training the dynamics function.</p></li>
+<li><p><strong>epochs</strong> (<em>Int</em>) -- Number of epochs to be used in training the dynamics function everytime train is called.</p></li>
+<li><p><strong>validation_split</strong> (<em>float32</em>) -- Defines the validation split to be used of the rollouts collected.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) -- Defines the batch size to be used for training the model.</p></li>
+<li><p><strong>nn_optimizer</strong> (<em>tf.keras.optimizers</em>) -- Defines the optimizer to use with the neural network.</p></li>
+<li><p><strong>normalization</strong> (<em>bool</em>) -- Defines if the dynamics function should be trained with normalization or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>system_dynamics_handler</strong> -- The system_dynamics_handler holds the trained system dynamics.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler" title="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler">SystemDynamicsHandler</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.runner.Runner.learn_dynamics_iteratively_w_mpc">
+<code class="sig-name descname">learn_dynamics_iteratively_w_mpc</code><span class="sig-paren">(</span><em class="sig-param">number_of_initial_rollouts</em>, <em class="sig-param">number_of_rollouts_for_refinement</em>, <em class="sig-param">number_of_refinement_steps</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">initial_policy=None</em>, <em class="sig-param">mpc_policy=None</em>, <em class="sig-param">planning_horizon=None</em>, <em class="sig-param">state_reward_function=None</em>, <em class="sig-param">actions_reward_function=None</em>, <em class="sig-param">optimizer=None</em>, <em class="sig-param">optimizer_name='RandomSearch'</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em>, <em class="sig-param">system_dynamics_handler=None</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">exploration_noise=False</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">normalization=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner.learn_dynamics_iteratively_w_mpc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner.learn_dynamics_iteratively_w_mpc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the learn dynamics function iteratively using mpc policy
+for the runner class which samples n rollouts using an initial policy and then
+uses these rollouts to learn a dynamics function for the system which is then used to sample further rollouts
+to refine the dynamics function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dynamics_function</strong> (<em>DeterministicDynamicsFunctionBaseClass</em>) -- Defines the system dynamics function.</p></li>
+<li><p><strong>number_of_initial_rollouts</strong> (<em>Int</em>) -- Number of initial rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>number_of_rollouts_for_refinement</strong> (<em>Int</em>) -- Number of refinement rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>number_of_refinement_steps</strong> (<em>Int</em>) -- Number of refinemnet steps train, collect, train..etc to run for.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>initial_policy</strong> (<a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelBasedBasePolicy" title="tf_neuralmpc.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelFreeBasePolicy" title="tf_neuralmpc.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the initial episodes from the different agents.</p></li>
+<li><p><strong>mpc_policy</strong> (<a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelBasedBasePolicy" title="tf_neuralmpc.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a>) -- The policy to be used in collecting the further episodes from the different agents to refine the model
+estimate.</p></li>
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="../dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler" title="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well
+as the dynamics function.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) -- Learning rate to be used in training the dynamics function.</p></li>
+<li><p><strong>epochs</strong> (<em>Int</em>) -- Number of epochs to be used in training the dynamics function everytime train is called.</p></li>
+<li><p><strong>validation_split</strong> (<em>float32</em>) -- Defines the validation split to be used of the rollouts collected.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) -- Defines the batch size to be used for training the model.</p></li>
+<li><p><strong>nn_optimizer</strong> (<em>tf.keras.optimizers</em>) -- Defines the optimizer to use with the neural network.</p></li>
+<li><p><strong>normalization</strong> (<em>bool</em>) -- Defines if the dynamics function should be trained with normalization or not.</p></li>
+<li><p><strong>state_reward_function</strong> (<em>tf_function</em>) -- Defines the state reward function with the prototype: tf_func_name(current_state, next_state),
+where current_state is BatchXdim_S and next_state is BatchXdim_S.</p></li>
+<li><p><strong>actions_reward_function</strong> (<em>tf_function</em>) -- Defines the action reward function with the prototype: tf_func_name(current_actions),
+where current_actions is BatchXdim_U.</p></li>
+<li><p><strong>planning_horizon</strong> (<em>tf.int32</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>optimizer</strong> (<em>OptimizerBaseClass</em>) -- Optimizer to be used that optimizes for the best action sequence and returns the first action.</p></li>
+<li><p><strong>optimizer_name</strong> (<em>str</em>) -- optimizer name between in ['CEM', 'CMA-ES', 'PI2', 'RandomSearch', 'PSO', 'SPSA'].</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>system_dynamics_handler</strong> (<em>SystemDynamicsHandler</em>) -- The system_dynamics_handler holds the trained system dynamics.</p></li>
+<li><p><strong>mpc_policy</strong> (<em>ModelBasedBasePolicy</em>) -- The policy that was refined to be used as a control policy</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.runner.Runner.make_mpc_policy">
+<code class="sig-name descname">make_mpc_policy</code><span class="sig-paren">(</span><em class="sig-param">state_reward_function</em>, <em class="sig-param">actions_reward_function</em>, <em class="sig-param">planning_horizon</em>, <em class="sig-param">optimizer_name='RandomSearch'</em>, <em class="sig-param">system_dynamics_handler=None</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">true_model=True</em>, <em class="sig-param">optimizer=None</em>, <em class="sig-param">normalization=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner.make_mpc_policy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner.make_mpc_policy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the make mpc policy which returns an mpc policy with the defined cost funcs, optimzer
+and the dynamics function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dynamics_function</strong> (<em>DeterministicDynamicsFunctionBaseClass</em>) -- Defines the system dynamics function.</p></li>
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="../dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler" title="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well
+as the dynamics function.</p></li>
+<li><p><strong>normalization</strong> (<em>bool</em>) -- Defines if the dynamics function should be trained with normalization or not.</p></li>
+<li><p><strong>state_reward_function</strong> (<em>tf_function</em>) -- Defines the state reward function with the prototype: tf_func_name(current_state, next_state),
+where current_state is BatchXdim_S and next_state is BatchXdim_S.</p></li>
+<li><p><strong>actions_reward_function</strong> (<em>tf_function</em>) -- Defines the action reward function with the prototype: tf_func_name(current_actions),
+where current_actions is BatchXdim_U.</p></li>
+<li><p><strong>planning_horizon</strong> (<em>tf.int32</em>) -- Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</p></li>
+<li><p><strong>optimizer</strong> (<em>OptimizerBaseClass</em>) -- Optimizer to be used that optimizes for the best action sequence and returns the first action.</p></li>
+<li><p><strong>optimizer_name</strong> (<em>str</em>) -- optimizer name between in ['CEM', 'CMA-ES', 'PI2', 'RandomSearch', 'PSO', 'SPSA'].</p></li>
+<li><p><strong>true_model</strong> (<em>bool</em>) -- boolean defining if its a true model dynamics or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>mpc_policy</strong> -- The mpc policy that will be used with the system dynamics.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelBasedBasePolicy" title="tf_neuralmpc.policies.ModelBasedBasePolicy">ModelBasedBasePolicy</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.runner.Runner.perform_rollouts">
+<code class="sig-name descname">perform_rollouts</code><span class="sig-paren">(</span><em class="sig-param">number_of_rollouts</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner.perform_rollouts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner.perform_rollouts" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the perform_rollouts function for the runner class which samples n episodes with a specified length
+using the provided policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_rollouts</strong> (<em>Int</em>) -- Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelBasedBasePolicy" title="tf_neuralmpc.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelFreeBasePolicy" title="tf_neuralmpc.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>traj_obs</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the observations starting from the reset observations.</p></li>
+<li><p><strong>traj_acs</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the actions taken by the policy.</p></li>
+<li><p><strong>traj_rews</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the rewards taken by the policy.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.runner.Runner.record_rollout">
+<code class="sig-name descname">record_rollout</code><span class="sig-paren">(</span><em class="sig-param">horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">record_file_path</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner.record_rollout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner.record_rollout" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the recording function for the runner class which samples one episode with a specified length
+using the provided policy and records it in a video.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelBasedBasePolicy" title="tf_neuralmpc.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelFreeBasePolicy" title="tf_neuralmpc.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>record_file_path</strong> (<em>String</em>) -- specified the file path to save the video that will be recorded in.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.runner.Runner.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param">horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/runner/runner.html#Runner.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.runner.Runner.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the sampling function for the runner class which samples one episode with a specified length
+using the provided policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelBasedBasePolicy" title="tf_neuralmpc.policies.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../policies/policies.html#tf_neuralmpc.policies.ModelFreeBasePolicy" title="tf_neuralmpc.policies.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>result</strong> -- returns the episode rollouts results for all the agents in the parallelized environment,
+it has the form of {observations, actions, rewards, reward_sum}</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../optimizers/optimizers.html" class="btn btn-neutral float-right" title="Optimizers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../tf_neuralmpc.html" class="btn btn-neutral float-left" title="TF-NeuralMPC" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
