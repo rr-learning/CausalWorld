@@ -4,11 +4,11 @@ channels:
 - anaconda
 - conda-forge
 dependencies:
-- python=3.7.0
+- python=3.7.4
 - cython
 - ipython
 - numpy==1.18.1
-- pinocchio==2.3.1
+- pinocchio==2.2.2
 - pip:
   - pybullet
   - gym

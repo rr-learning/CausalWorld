@@ -110,7 +110,8 @@ def evaluate_model_3():
         return reacher_policy.act(obs)
 
     pipeline = EvaluationPipeline(task_params=task_params, world_params=world_params, policy=policy_fn)
-    scores = pipeline.evaluate_reacher_interventions_curriculum(num_of_episodes=10)
+    scores = pipeline.evaluate_reacher_interventions_curriculum(
+        num_of_episodes=7)
     print(scores)
 
 

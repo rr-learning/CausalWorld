@@ -199,7 +199,6 @@ class BaseTask(object):
         for non_changed_variable in non_changed_variables:
             interventions_dict_copy[non_changed_variable] = \
                 self.initial_state[non_changed_variable]
-        print(interventions_dict_copy)
         for intervention_key, intervention_value in interventions_dict_copy.items():
             # if its a block then choose a property
             if isinstance(intervention_value, dict):

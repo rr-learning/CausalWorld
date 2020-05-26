@@ -46,7 +46,7 @@ class EvaluationPipeline:
                 self.env = World(self.task,
                                  seed=self.seed,
                                  data_recorder=self.data_recorder)
-        self.evaluation_episode_length_in_secs = 2
+        self.evaluation_episode_length_in_secs = 1
         self.time_steps_for_evaluation = int(self.evaluation_episode_length_in_secs / self.env.robot.dt)
         self.metrics_list = []
         self.metrics_list.append(MeanSucessRateMetric())
