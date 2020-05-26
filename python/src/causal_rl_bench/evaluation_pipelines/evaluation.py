@@ -34,19 +34,16 @@ class EvaluationPipeline:
         if self.tracker:
             self.env = World(self.task,
                              **self.tracker.world_params,
-                             enable_visualization=False,
                              seed=self.seed,
                              data_recorder=self.data_recorder)
         else:
             if world_params is not None:
                 self.env = World(self.task,
                                  **world_params,
-                                 enable_visualization=False,
                                  seed=self.seed,
                                  data_recorder=self.data_recorder)
             else:
                 self.env = World(self.task,
-                                 enable_visualization=False,
                                  seed=self.seed,
                                  data_recorder=self.data_recorder)
         self.evaluation_episode_length_in_secs = 2

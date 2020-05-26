@@ -98,6 +98,7 @@ def evaluate_model_3():
     from causal_rl_bench.agents.reacher_policy import ReacherPolicy
     world_params = dict()
     world_params["skip_frame"] = 1
+    world_params["enable_visualization"] = True
     task_params = dict()
     task_params["task_id"] = "reaching"
     # Load the PPO2 policy trained on the cuboid_silhouette task

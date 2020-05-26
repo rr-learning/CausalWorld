@@ -52,21 +52,12 @@ class ReachingTask(BaseTask):
     def _reset_task(self, interventions_dict=None):
         #if there is not interventions dict passed then I
         # just apply the default one
-        interventions_dict_copy = interventions_dict
-        if interventions_dict_copy is not None:
-            non_changed_variables = \
-                set(self.initial_state) - set(interventions_dict_copy)
-            if len(non_changed_variables) > 0:
-                interventions_dict_copy = dict(interventions_dict)
-            for non_changed_variable in non_changed_variables:
-                interventions_dict_copy[non_changed_variable] = \
-                    self.initial_state[non_changed_variable]
-
-            self._apply_interventions(interventions_dict_copy,
-                                      initial_state_latch=True)
+        if interventions_dict is not None:
+            self.apply_interventions(interventions_dict,
+                                     initial_state_latch=True)
         else:
-            self._apply_interventions(self.initial_state,
-                                      initial_state_latch=False)
+            self.apply_interventions(self.initial_state,
+                                     initial_state_latch=False)
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
@@ -136,18 +127,32 @@ class ReachingTask(BaseTask):
                       [0.5, 0.5, 0.5] * 3])
 
     def do_intervention(self, variable_name, variable_value,
-                        sub_variable_name=None):
+                        sub_variable_name=None, training=True):
         #TODO: maybe allow intervention on joint velocities
         #TODO:check for feasibility of intervention here
+        if training and sub_variable_name is None:
+            if (self.training_intervention_spaces[variable_name][0] > variable_value).any() or \
+                    (self.training_intervention_spaces[variable_name][1] < variable_value).any():
+                return False
+        elif training:
+            if (self.training_intervention_spaces[variable_name][sub_variable_name][0] > variable_value).any() or \
+                    (self.training_intervention_spaces[variable_name][sub_variable_name][1] < variable_value).any():
+                return False
         if variable_name == "joint_positions":
             self.robot.set_full_state(np.append(variable_value,
                                                 np.zeros(9)))
         elif variable_name == "goal_positions":
             self.end_effector_positions_goal = variable_value
+            self.stage.set_objects_pose(
+                names=["goal_1", "goal_2", "goal_3"],
+                positions=[self.end_effector_positions_goal[:3],
+                           self.end_effector_positions_goal[3:6],
+                           self.end_effector_positions_goal[6:]],
+                orientations=[None, None, None])
         else:
             raise Exception("This variable is not allowed for "
                             "interventions")
-        return
+        return True
 
     def get_current_student_params(self):
         student_params = dict()

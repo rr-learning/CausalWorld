@@ -13,7 +13,7 @@ class World(gym.Env):
                 'video.frames_per_second': 50}
 
     def __init__(self, task=None, skip_frame=10,
-                 enable_visualization=True, seed=0,
+                 enable_visualization=False, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  normalize_actions=True, normalize_observations=True,
                  max_episode_length=None, data_recorder=None,
@@ -216,18 +216,28 @@ class World(gym.Env):
             return self.task.is_done()
 
     def do_random_intervention(self):
-        self.tracker.add_episode_experience(self.episode_length)
-        # TODO: Set episode length after intervention to zero?
-        self.episode_length = 0
+        # self.tracker.add_episode_experience(self.episode_length)
+        # # TODO: Set episode length after intervention to zero?
+        # self.episode_length = 0
         interventions_dict = self.task.do_random_intervention()
         self.tracker.do_intervention(self.task, interventions_dict)
+        return interventions_dict
 
-    def do_intervention(self, interventions_dict):
-        self.tracker.add_episode_experience(self.episode_length)
-        # TODO: Set episode length after intervention to zero?
-        self.episode_length = 0
-        self.task.do_intervention(interventions_dict)
+    def do_intervention(self, variable_name, variable_value,
+                        sub_variable_name=None):
+        interventions_dict = dict()
+        if sub_variable_name is None:
+            interventions_dict[variable_name] = dict()
+            interventions_dict[variable_name][sub_variable_name] = variable_name
+        else:
+            interventions_dict[variable_name] = variable_name
+        # self.tracker.add_episode_experience(self.episode_length)
+        # # TODO: Set episode length after intervention to zero?
+        # self.episode_length = 0
+        success_signal = self.task.do_intervention(variable_name, variable_value,
+                                                   sub_variable_name)
         self.tracker.do_intervention(self.task, interventions_dict)
+        return success_signal
 
     def get_full_state(self):
         full_state = []

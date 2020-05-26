@@ -164,6 +164,7 @@ class BaseTask(object):
         return self.finished_episode
 
     def do_random_intervention(self, training_space=True):
+        interventions_dict = dict()
         if training_space:
             intervention_space = self.training_intervention_spaces
         else:
@@ -176,21 +177,39 @@ class BaseTask(object):
         if isinstance(variable_space, dict):
             sub_variable_name = np.random.choice(list(variable_space.keys()))
             variable_space = variable_space[sub_variable_name]
+        chosen_intervention = np.random.uniform(variable_space[0],
+                                               variable_space[1])
         self.do_intervention(variable_name,
-                             np.random.uniform(variable_space[0],
-                                               variable_space[1]),
-                             sub_variable_name=sub_variable_name)
-        return
+                             chosen_intervention,
+                             sub_variable_name=sub_variable_name,
+                             training=False)
+        if isinstance(variable_space, dict):
+            interventions_dict[variable_name] = dict()
+            interventions_dict[variable_name][sub_variable_name] = chosen_intervention
+        else:
+            interventions_dict[variable_name] = chosen_intervention
+        return interventions_dict
 
-    def _apply_interventions(self, interventions_dict, initial_state_latch=True):
-        for intervention_key, intervention_value in interventions_dict.items():
+    def apply_interventions(self, interventions_dict, initial_state_latch=True):
+        interventions_dict_copy = interventions_dict
+        non_changed_variables = \
+            set(self.initial_state) - set(interventions_dict_copy)
+        if len(non_changed_variables) > 0:
+            interventions_dict_copy = dict(interventions_dict)
+        for non_changed_variable in non_changed_variables:
+            interventions_dict_copy[non_changed_variable] = \
+                self.initial_state[non_changed_variable]
+        print(interventions_dict_copy)
+        for intervention_key, intervention_value in interventions_dict_copy.items():
             # if its a block then choose a property
             if isinstance(intervention_value, dict):
                 for sub_intervention_key, sub_intervention_value in \
                         intervention_value.items():
+                    #TODO: take care about it later
                     self.do_intervention(intervention_key,
                                          sub_intervention_value,
-                                         sub_variable_name=sub_intervention_key)
+                                         sub_variable_name=sub_intervention_key,
+                                         training=False)
                     if intervention_key in self.initial_state.keys() and \
                             sub_intervention_key in \
                             self.initial_state[intervention_key].keys() and \
@@ -201,7 +220,8 @@ class BaseTask(object):
                 sub_variable_name = None
                 self.do_intervention(intervention_key,
                                      intervention_value,
-                                     sub_variable_name=sub_variable_name)
+                                     sub_variable_name=sub_variable_name,
+                                     training=False)
                 if intervention_key in self.initial_state.keys() and \
                         initial_state_latch:
                     self.initial_state[intervention_key] \
@@ -209,7 +229,7 @@ class BaseTask(object):
         return
 
     def do_intervention(self, variable_name, variable_value,
-                        sub_variable_name=None):
+                        sub_variable_name=None, training=True):
         #TODO: this now only supports two levels of variables
         raise NotImplementedError()
 
