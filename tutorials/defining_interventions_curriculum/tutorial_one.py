@@ -16,7 +16,7 @@ def without_interventions():
     model = PPO2.load(stable_baselines_policy_path)
 
     def policy_fn(obs):
-        return model.predict(obs)[0]
+        return model.predict(obs, deterministic=True)[0]
 
     env = World(task, skip_frame=1,
                 enable_visualization=True)
@@ -34,7 +34,7 @@ def with_interventions():
     model = PPO2.load(stable_baselines_policy_path)
 
     def policy_fn(obs):
-        return model.predict(obs)[0]
+        return model.predict(obs, deterministic=True)[0]
 
     env = World(task, skip_frame=1,
                 enable_visualization=True)

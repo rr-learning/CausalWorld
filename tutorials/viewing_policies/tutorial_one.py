@@ -16,7 +16,7 @@ def example():
 
     # define a method for the policy fn of your trained model
     def policy_fn(obs):
-        return model.predict(obs)[0]
+        return model.predict(obs, deterministic=True)[0]
 
     # Record a video of the policy is done in one line
     # viewer.record_video_of_policy(task=task,
