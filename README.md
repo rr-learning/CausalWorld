@@ -30,7 +30,7 @@ or used in a catkin workspace.
   (causal_rl_bench) python -m pip install .
   ```
 
-2. Make the docs.
+3. Make the docs.
 
   ```bash
   (causal_rl_bench) cd ../counterfactual/docs
