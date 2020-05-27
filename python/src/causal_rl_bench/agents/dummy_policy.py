@@ -1,9 +1,9 @@
-from causal_rl_bench.agents.policy_base import PolicyBase
+from causal_rl_bench.agents.base_policy import BaseActorPolicy
 
 
-class DummyPolicy(PolicyBase):
+class DummyActorPolicy(BaseActorPolicy):
     def __init__(self):
-        super(DummyPolicy, self).__init__()
+        super(DummyActorPolicy, self).__init__()
         self.action = None
         return
 

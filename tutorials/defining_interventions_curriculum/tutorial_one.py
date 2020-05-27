@@ -1,16 +1,18 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.tasks.task import Task
-from causal_rl_bench.agents.reacher_policy import ReacherPolicy
-from causal_rl_bench.wrappers.action_wrappers import MovingAverageActionEnvWrapper
-from causal_rl_bench.wrappers.policy_wrappers import MovingAverageActionPolicyWrapper
-from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculumWrapper
-from causal_rl_bench.intervention_policies.random import StudentRandomInterventionPolicy, \
-    TeacherRandomInterventionPolicy
+from causal_rl_bench.agents.reacher_policy import ReacherActorPolicy
+from causal_rl_bench.wrappers.action_wrappers import \
+    MovingAverageActionEnvWrapper
+from causal_rl_bench.wrappers.policy_wrappers import \
+    MovingAverageActionWrapperActorPolicy
+from causal_rl_bench.curriculum.interventions_curriculum \
+    import InterventionsCurriculumWrapper
+from causal_rl_bench.meta_agents.random import RandomMetaActorPolicy
 
 
 def without_interventions():
     task = Task(task_id='reaching')
-    reacher_policy = ReacherPolicy()
+    reacher_policy = ReacherActorPolicy()
 
     def policy_fn(obs):
         return reacher_policy.act(obs)
@@ -27,7 +29,7 @@ def without_interventions():
 
 def with_interventions():
     task = Task(task_id='reaching')
-    reacher_policy = ReacherPolicy()
+    reacher_policy = ReacherActorPolicy()
     # reacher_policy = MovingAverageActionPolicyWrapper(reacher_policy,
     #                                                   widow_size=250)
 
@@ -40,25 +42,19 @@ def with_interventions():
 
     #till here its the same step, now we need a curriculum wrapper with the intervention agents
     #lets try only a student intervention
-    student_intervention_policy = \
-        StudentRandomInterventionPolicy(
-            task.get_training_intervention_spaces())
-    teacher_intervention_policy = \
-        TeacherRandomInterventionPolicy(
-            task.get_training_intervention_spaces())
-    #the below two steps will not be needed if u have a policy or so
-    teacher_intervention_policy.initialize_sampler(env.robot.
-                                                   sample_end_effector_positions)
-    student_intervention_policy.initialize_sampler(env.robot.
-                                                   sample_joint_positions)
-    #now define the curriculum
+    meta_actor_policy = RandomMetaActorPolicy(
+        task.get_testing_intervention_spaces())
+    meta_actor_policy.add_sampler_func(variable_name='goal_positions',
+                                       sampler_func=env.robot.
+                                       sample_end_effector_positions)
+    meta_actor_policy.add_sampler_func(variable_name='joint_positions',
+                                       sampler_func=env.robot.
+                                       sample_joint_positions)
     env = InterventionsCurriculumWrapper(env=env,
-                                         student_policy=
-                                         student_intervention_policy,
-                                         student_episode_hold=5,
-                                         teacher_policy=
-                                         teacher_intervention_policy,
-                                         teacher_episode_hold=1)
+                                         meta_actor_policy=
+                                         meta_actor_policy,
+                                         meta_episode_hold=4)
+
     for reset_idx in range(40):
         obs = env.reset()
         for time in range(960):

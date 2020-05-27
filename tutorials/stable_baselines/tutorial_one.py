@@ -1,4 +1,5 @@
 import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines import PPO2
@@ -8,7 +9,6 @@ from causal_rl_bench.tasks.task import Task
 import argparse
 import os
 import json
-import numpy as np
 
 
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,

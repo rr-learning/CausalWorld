@@ -5,7 +5,7 @@ from causal_rl_bench.envs.world import World
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
 import tensorflow as tf
-import numpy as np
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import os
 import json
 from stable_baselines.common import set_global_seeds
@@ -95,14 +95,14 @@ def evaluate_model_2():
 
 
 def evaluate_model_3():
-    from causal_rl_bench.agents.reacher_policy import ReacherPolicy
+    from causal_rl_bench.agents.reacher_policy import ReacherActorPolicy
     world_params = dict()
     world_params["skip_frame"] = 1
     world_params["enable_visualization"] = True
     task_params = dict()
     task_params["task_id"] = "reaching"
     # Load the PPO2 policy trained on the cuboid_silhouette task
-    reacher_policy = ReacherPolicy()
+    reacher_policy = ReacherActorPolicy()
     # reacher_policy = MovingAverageActionPolicyWrapper(reacher_policy,
     #                                                   widow_size=250)
 

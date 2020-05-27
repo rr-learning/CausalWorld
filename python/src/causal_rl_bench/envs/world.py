@@ -119,16 +119,6 @@ class World(gym.Env):
 
         return observation, reward, done, info
 
-    def get_current_student_params(self):
-        return self.task.get_current_student_params()
-
-    def get_current_teacher_params(self):
-        return self.task.get_current_teacher_params()
-
-    def get_current_master_params(self):
-        #TODO: this wont be task specific since it can be general
-        raise Exception(" ")
-
     def sample_new_task(self):
         raise Exception(" ")
 
@@ -279,3 +269,7 @@ class World(gym.Env):
         self.proj_matrix = self.pybullet_client.computeProjectionMatrixFOV(
             fov=60, aspect=float(self._render_width) / self._render_height,
             nearVal=0.1, farVal=100.0)
+
+    def get_current_exposed_causal_variables_params(self):
+        return self.task.get_current_exposed_causal_variables_params()
+

@@ -3,8 +3,7 @@ from causal_rl_bench.envs.world import World
 from causal_rl_bench.metrics.mean_sucess_rate_metric import MeanSucessRateMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculumWrapper
-from causal_rl_bench.intervention_policies.random import StudentRandomInterventionPolicy, \
-    TeacherRandomInterventionPolicy
+from causal_rl_bench.meta_agents.random import RandomMetaActorPolicy
 import numpy as np
 
 
@@ -71,23 +70,18 @@ class EvaluationPipeline:
         return metrics
 
     def evaluate_reacher_interventions_curriculum(self, num_of_episodes=100):
-        student_intervention_policy = \
-            StudentRandomInterventionPolicy(
-                self.task.get_testing_intervention_spaces())
-        teacher_intervention_policy = \
-            TeacherRandomInterventionPolicy(
-                self.task.get_testing_intervention_spaces())
-        teacher_intervention_policy.initialize_sampler(self.env.robot.
-                                                       sample_end_effector_positions)
-        student_intervention_policy.initialize_sampler(self.env.robot.
-                                                       sample_joint_positions)
+        meta_actor_policy = RandomMetaActorPolicy(
+            self.task.get_testing_intervention_spaces())
+        meta_actor_policy.add_sampler_func(variable_name='goal_positions',
+                                           sampler_func=self.env.robot.
+                                           sample_end_effector_positions)
+        meta_actor_policy.add_sampler_func(variable_name='joint_positions',
+                                           sampler_func=self.env.robot.
+                                           sample_joint_positions)
         self.env = InterventionsCurriculumWrapper(env=self.env,
-                                                  student_policy=
-                                                  student_intervention_policy,
-                                                  student_episode_hold=2,
-                                                  teacher_policy=
-                                                  teacher_intervention_policy,
-                                                  teacher_episode_hold=4)
+                                                  meta_actor_policy=
+                                                  meta_actor_policy,
+                                                  meta_episode_hold=4)
         for _ in range(num_of_episodes):
             current_episode = self.run_episode()
             self.process_metrics(current_episode)

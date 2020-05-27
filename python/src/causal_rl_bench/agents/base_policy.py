@@ -1,4 +1,4 @@
-class PolicyBase(object):
+class BaseActorPolicy(object):
     """
     This is a policy wrapper template class whose methods needs to
     be implemented to record and view a trained policy using the

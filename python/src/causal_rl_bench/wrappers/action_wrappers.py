@@ -1,5 +1,5 @@
-from causal_rl_bench.wrappers.policy_wrappers import MovingAverageActionPolicyWrapper
-from causal_rl_bench.agents.dummy_policy import DummyPolicy
+from causal_rl_bench.wrappers.policy_wrappers import MovingAverageActionWrapperActorPolicy
+from causal_rl_bench.agents.dummy_policy import DummyActorPolicy
 import gym
 
 
@@ -46,10 +46,10 @@ class DeltaAction(gym.ActionWrapper):
 class MovingAverageActionEnvWrapper(gym.ActionWrapper):
     def __init__(self, env, widow_size=8, initial_value=0):
         super(MovingAverageActionEnvWrapper, self).__init__(env)
-        self.__policy = DummyPolicy()
-        self.__policy = MovingAverageActionPolicyWrapper(self.__policy,
-                                                         widow_size=widow_size,
-                                                         initial_value=initial_value)
+        self.__policy = DummyActorPolicy()
+        self.__policy = MovingAverageActionWrapperActorPolicy(self.__policy,
+                                                              widow_size=widow_size,
+                                                              initial_value=initial_value)
         return
 
     def action(self, action):

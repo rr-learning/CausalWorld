@@ -179,16 +179,12 @@ class ReachingTask(BaseTask):
                             "interventions")
         return True
 
-    def get_current_student_params(self):
-        student_params = dict()
-        student_params['joint_positions'] = \
+    def get_current_exposed_causal_variables_params(self):
+        interventions_params = dict()
+        interventions_params['joint_positions'] = \
             np.array(self.robot.latest_full_state.position)
-        return student_params
-
-    def get_current_teacher_params(self):
-        teacher_params = dict()
-        teacher_params['goal_positions'] = \
+        interventions_params['goal_positions'] = \
             np.array(self.end_effector_positions_goal)
-        return teacher_params
+        return interventions_params
 
 

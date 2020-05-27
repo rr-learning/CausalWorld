@@ -5,6 +5,7 @@ from causal_rl_bench.envs.world import World
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
 import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import numpy as np
 import os
 import json

@@ -1,4 +1,4 @@
-class BaseInterventionPolicy(object):
+class BaseMetaActorPolicy(object):
     def __init__(self):
         return
 

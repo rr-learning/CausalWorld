@@ -1,9 +1,9 @@
-from causal_rl_bench.agents.policy_base import PolicyBase
+from causal_rl_bench.agents.base_policy import BaseActorPolicy
 
 
-class MovingAverageActionPolicyWrapper(PolicyBase):
+class MovingAverageActionWrapperActorPolicy(BaseActorPolicy):
     def __init__(self, policy, widow_size=8, initial_value=0):
-        super(PolicyBase, self).__init__()
+        super(BaseActorPolicy, self).__init__()
         self.__widow_size = widow_size
         self.__buffer = [initial_value / widow_size] * widow_size
         self.__avg = initial_value
