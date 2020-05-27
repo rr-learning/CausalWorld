@@ -12,6 +12,7 @@ class RandomMetaActorPolicy(BaseMetaActorPolicy):
         interventions_dict = dict()
         for variable in variables_dict:
             if isinstance(variables_dict[variable], dict):
+                interventions_dict[variable] = dict()
                 for subvariable_name in variables_dict[variable]:
                     if variable in self.sampler_funcs and \
                             subvariable_name in self.sampler_funcs[variable]:

@@ -52,19 +52,25 @@ class StageObservations(object):
         for rigid_object in self.rigid_objects:
             state_keys = rigid_object.get_state().keys()
             for state_key in state_keys:
-                self.lower_bounds[state_key] = \
-                    rigid_object.lower_bounds[state_key]
-                self.upper_bounds[state_key] = \
-                    rigid_object.upper_bounds[state_key]
-                self.observations_keys.append(state_key)
+                self.lower_bounds[rigid_object.name + '_' + state_key] = \
+                    rigid_object.lower_bounds[rigid_object.name + '_' +
+                                              state_key]
+                self.upper_bounds[rigid_object.name + '_' + state_key] = \
+                    rigid_object.upper_bounds[rigid_object.name + '_' +
+                                              state_key]
+                self.observations_keys.append(rigid_object.name + '_' +
+                                              state_key)
         for visual_object in self.visual_objects:
             state_keys = visual_object.get_state().keys()
             for state_key in state_keys:
-                self.lower_bounds[state_key] = \
-                    visual_object.lower_bounds[state_key]
-                self.upper_bounds[state_key] = \
-                    visual_object.upper_bounds[state_key]
-                self.observations_keys.append(state_key)
+                self.lower_bounds[visual_object.name + '_' + state_key] = \
+                    visual_object.lower_bounds[visual_object.name + '_' +
+                                               state_key]
+                self.upper_bounds[visual_object.name + '_' + state_key] = \
+                    visual_object.upper_bounds[visual_object.name + '_' +
+                                               state_key]
+                self.observations_keys.append(visual_object.name + '_' +
+                                              state_key)
         return
 
     def reset_observation_keys(self):

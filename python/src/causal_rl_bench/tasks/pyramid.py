@@ -37,7 +37,7 @@ class PyramidTask(BaseTask):
                                                         position=np.array([0, 0, 0.0115 + (2*i + 1) / 2 * self.task_params[
                                                             "unit_length"]]),
                                                         orientation=self.pyramid_orientation,
-                                                        colour=np.array([0, 1, 0]),
+                                                        color=np.array([0, 1, 0]),
                                                         alpha=0.5)
         else:
             raise ValueError("randomize_pyramid_pose not supported yet")
@@ -53,7 +53,7 @@ class PyramidTask(BaseTask):
                                                 size=np.array([1, 1, 1]) * self.task_params["unit_length"],
                                                 position=cube_position,
                                                 orientation=cube_orientation,
-                                                colour=self.task_params["cube_color"])
+                                                color=self.task_params["cube_color"])
 
             self.task_stage_observation_keys.append("cube_{}_position".format(i))
             self.task_stage_observation_keys.append("cube_{}_orientation".format(i))

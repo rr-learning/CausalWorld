@@ -16,7 +16,7 @@ class InterventionsCurriculumWrapper(gym.Wrapper):
                 self._elapsed_steps % self.meta_episode_hold == 0:
             current_interventions_dict.update(
                 self.meta_actor_policy.act(
-                    self.env.get_current_exposed_causal_variables_params()))
+                    self.env.get_current_task_parameters()))
         else:
             current_interventions_dict = None
         obs = self.env.reset(interventions_dict=current_interventions_dict)

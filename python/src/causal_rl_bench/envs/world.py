@@ -16,7 +16,7 @@ class World(gym.Env):
                  enable_visualization=False, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  normalize_actions=True, normalize_observations=True,
-                 max_episode_length=None, data_recorder=None,
+                 max_episode_length=None, data_recorder=None, testing=False,
                  enable_goal_image=False, **kwargs):
         """
         Constructor sets up the physical world parameters,
@@ -89,6 +89,10 @@ class World(gym.Env):
         self.data_recorder = data_recorder
         self.tracker = Tracker(task=self.task,
                                world_params=self.get_world_params())
+        if testing:
+            self.training_flag = False
+        else:
+            self.training_flag = True
         self.reset()
         return
 
@@ -153,7 +157,11 @@ class World(gym.Env):
         self.episode_length = 0
         if interventions_dict is not None:
             self.tracker.do_intervention(self.task, interventions_dict)
-        self.task.reset_task(interventions_dict)
+        success_signal, interventions_info = self.task.reset_task(interventions_dict,
+                                                                  is_training=self.training_flag)
+        if success_signal is not None:
+            if not success_signal:
+                self.tracker.add_invalid_intervention(interventions_info)
         # TODO: make sure that stage observations returned are up to date
 
         if self.data_recorder:
@@ -170,22 +178,6 @@ class World(gym.Env):
             return self.robot.get_current_camera_observations()
         else:
             return self.task.filter_structured_observations()
-
-    def get_world_params(self):
-        world_params = dict()
-        # TODO: task name is probably a redundant parameter as this is not bound to the world and could change
-        world_params["task_name"] = self.task.task_name
-        world_params["skip_frame"] = self.robot.get_skip_frame()
-        world_params["action_mode"] = self.robot.get_action_mode()
-        world_params["observation_mode"] = self.robot.get_observation_mode()
-        world_params["normalize_actions"] = \
-            self.robot.robot_actions.is_normalized()
-        world_params["normalize_observations"] = \
-            self.robot.robot_observations.is_normalized()
-        world_params["max_episode_length"] = self.max_episode_length
-        world_params["enable_goal_image"] = self.enable_goal_image
-        world_params["simulation_time"] = self.simulation_time
-        return world_params
 
     def close(self):
         if self.data_recorder:
@@ -205,11 +197,11 @@ class World(gym.Env):
         else:
             return self.task.is_done()
 
-    def do_random_intervention(self):
+    def do_single_random_intervention(self):
         # self.tracker.add_episode_experience(self.episode_length)
         # # TODO: Set episode length after intervention to zero?
         # self.episode_length = 0
-        interventions_dict = self.task.do_random_intervention()
+        interventions_dict = self.task.do_single_random_intervention()
         self.tracker.do_intervention(self.task, interventions_dict)
         return interventions_dict
 
@@ -270,6 +262,20 @@ class World(gym.Env):
             fov=60, aspect=float(self._render_width) / self._render_height,
             nearVal=0.1, farVal=100.0)
 
-    def get_current_exposed_causal_variables_params(self):
-        return self.task.get_current_exposed_causal_variables_params()
+    def get_current_task_parameters(self):
+        return self.task.get_current_task_parameters()
+
+    def get_world_params(self):
+        world_params = dict()
+        world_params["skip_frame"] = self.robot.get_skip_frame()
+        world_params["action_mode"] = self.robot.get_action_mode()
+        world_params["observation_mode"] = self.robot.get_observation_mode()
+        world_params["normalize_actions"] = \
+            self.robot.robot_actions.is_normalized()
+        world_params["normalize_observations"] = \
+            self.robot.robot_observations.is_normalized()
+        world_params["max_episode_length"] = self.max_episode_length
+        world_params["enable_goal_image"] = self.enable_goal_image
+        world_params["simulation_time"] = self.simulation_time
+        return world_params
 

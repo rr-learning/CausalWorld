@@ -98,12 +98,12 @@ class PickingTask(BaseTask):
         self.previous_object_position = block_position
         return reward
 
-    def do_random_intervention(self):
+    def do_single_random_intervention(self):
         interventions_dict = dict()
         new_block_position = self.stage.random_position(height_limits=0.0425)
-        new_colour = np.random.uniform([0], [1], size=[3, ])
+        new_color = np.random.uniform([0], [1], size=[3, ])
         interventions_dict["position"] = new_block_position
-        interventions_dict["colour"] = new_colour
+        interventions_dict["color"] = new_color
         new_size = np.random.uniform([0.065], [0.15], size=[3, ])
         interventions_dict["size"] = new_size
         self.stage.object_intervention("block", interventions_dict)

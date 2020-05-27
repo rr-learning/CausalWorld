@@ -23,7 +23,7 @@ class ArchTask(BaseTask):
                                                 size=np.array([0.04, 0.1, 0.15]),
                                                 position=np.array([-0.05, 0, 0.0115 + 0.075]),
                                                 orientation=self.arch_orientation,
-                                                colour=np.array([0, 1, 0]),
+                                                color=np.array([0, 1, 0]),
                                                 alpha=0.5)
 
         self.stage.add_silhoutte_general_object(name="pillar_2",
@@ -31,7 +31,7 @@ class ArchTask(BaseTask):
                                                 size=np.array([0.04, 0.08, 0.15]),
                                                 position=np.array([0.05, 0, 0.0115 + 0.075]),
                                                 orientation=self.arch_orientation,
-                                                colour=np.array([0, 1, 0]),
+                                                color=np.array([0, 1, 0]),
                                                 alpha=0.5)
 
         self.stage.add_silhoutte_general_object(name="bar",
@@ -39,7 +39,7 @@ class ArchTask(BaseTask):
                                                 size=np.array([0.14, 0.06, 0.04]),
                                                 position=np.array([0, 0, 0.0115 + 0.15 + 0.02]),
                                                 orientation=self.arch_orientation,
-                                                colour=np.array([0, 1, 0]),
+                                                color=np.array([0, 1, 0]),
                                                 alpha=0.5)
 
         self.stage.add_silhoutte_general_object(name="cargo",
@@ -47,7 +47,7 @@ class ArchTask(BaseTask):
                                                 size=np.array([0.04, 0.04, 0.04]),
                                                 position=np.array([0, 0, 0.0115 + 0.15 + 0.04 + 0.02]),
                                                 orientation=self.arch_orientation,
-                                                colour=np.array([0, 1, 0]),
+                                                color=np.array([0, 1, 0]),
                                                 alpha=0.5)
 
         i = 0
@@ -59,7 +59,7 @@ class ArchTask(BaseTask):
                                             size=np.array([0.1, 0.15, 0.04]),
                                             position=cube_position,
                                             orientation=cube_orientation,
-                                            colour=self.task_params["cube_color"])
+                                            color=self.task_params["cube_color"])
 
         self.task_stage_observation_keys.append("cube_{}_position".format(i))
         self.task_stage_observation_keys.append("cube_{}_orientation".format(i))
@@ -73,7 +73,7 @@ class ArchTask(BaseTask):
                                             size=np.array([0.15, 0.08, 0.04]),
                                             position=cube_position,
                                             orientation=cube_orientation,
-                                            colour=self.task_params["cube_color"])
+                                            color=self.task_params["cube_color"])
 
         self.task_stage_observation_keys.append("cube_{}_position".format(i))
         self.task_stage_observation_keys.append("cube_{}_orientation".format(i))
@@ -87,7 +87,7 @@ class ArchTask(BaseTask):
                                             size=np.array([0.14, 0.06, 0.04]),
                                             position=cube_position,
                                             orientation=cube_orientation,
-                                            colour=self.task_params["cube_color"])
+                                            color=self.task_params["cube_color"])
 
         self.task_stage_observation_keys.append("cube_{}_position".format(i))
         self.task_stage_observation_keys.append("cube_{}_orientation".format(i))
@@ -101,7 +101,7 @@ class ArchTask(BaseTask):
                                             size=np.array([0.04, 0.04, 0.04]),
                                             position=cube_position,
                                             orientation=cube_orientation,
-                                            colour=self.task_params["cube_color"])
+                                            color=self.task_params["cube_color"])
 
         self.task_stage_observation_keys.append("cube_{}_position".format(i))
         self.task_stage_observation_keys.append("cube_{}_orientation".format(i))

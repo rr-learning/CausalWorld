@@ -109,9 +109,34 @@ def evaluate_model_3():
     def policy_fn(obs):
         return reacher_policy.act(obs)
 
-    pipeline = EvaluationPipeline(task_params=task_params, world_params=world_params, policy=policy_fn)
+    pipeline = EvaluationPipeline(task_params=task_params,
+                                  world_params=world_params,
+                                  policy=policy_fn)
     scores = pipeline.evaluate_reacher_interventions_curriculum(
-        num_of_episodes=7)
+        num_of_episodes=50)
+    print(scores)
+
+
+def evaluate_model_4():
+    from causal_rl_bench.agents.reacher_policy import ReacherActorPolicy
+    world_params = dict()
+    world_params["skip_frame"] = 1
+    world_params["enable_visualization"] = True
+    task_params = dict()
+    task_params["task_id"] = "reaching"
+    # Load the PPO2 policy trained on the cuboid_silhouette task
+    reacher_policy = ReacherActorPolicy()
+    # reacher_policy = MovingAverageActionPolicyWrapper(reacher_policy,
+    #                                                   widow_size=250)
+
+    def policy_fn(obs):
+        return reacher_policy.act(obs)
+
+    pipeline = EvaluationPipeline(task_params=task_params,
+                                  world_params=world_params,
+                                  policy=policy_fn)
+    scores = pipeline.evaluate_reacher_interventions_curriculum_2(
+        num_of_episodes=50)
     print(scores)
 
 

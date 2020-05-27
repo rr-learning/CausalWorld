@@ -45,7 +45,7 @@ class CuboidSilhouette(BaseTask):
                                                 size=self.task_params["silhouette_size"] * self.task_params["unit_length"],
                                                 position=self.silhouette_position,
                                                 orientation=self.silhouette_orientation,
-                                                colour=np.array([0, 1, 0]),
+                                                color=np.array([0, 1, 0]),
                                                 alpha=0.5)
 
         for i in range(self.num_of_rigid_cubes):
@@ -62,7 +62,7 @@ class CuboidSilhouette(BaseTask):
                                                 size=np.array([1, 1, 1]) * self.task_params["unit_length"],
                                                 position=cube_position,
                                                 orientation=cube_orientation,
-                                                colour=np.array([r, g, b]))
+                                                color=np.array([r, g, b]))
 
             self.task_stage_observation_keys.append("cube_{}_position".format(i))
             self.task_stage_observation_keys.append("cube_{}_orientation".format(i))
@@ -141,7 +141,7 @@ class CuboidSilhouette(BaseTask):
             cuboid_reward -= vertex_distance
         return cuboid_reward
 
-    def do_random_intervention(self):
+    def do_single_random_intervention(self):
         interventions_dict = dict()
         self.task_params["unit_length"] = np.random.uniform(low=0.04, high=0.08)
 
@@ -153,10 +153,10 @@ class CuboidSilhouette(BaseTask):
             cube_orientation = euler_to_quaternion([0, 0,
                                                     np.random.uniform(-np.pi, np.pi)])
 
-            new_colour = np.random.uniform([0], [1], size=[3, ])
+            new_color = np.random.uniform([0], [1], size=[3, ])
             interventions_dict["position"] = cube_position
             interventions_dict["orientation"] = cube_orientation
-            interventions_dict["colour"] = new_colour
+            interventions_dict["color"] = new_color
             interventions_dict["size"] = np.array([1, 1, 1]) * self.task_params["unit_length"]
             self.stage.object_intervention("cube_{}".format(i), interventions_dict)
 
@@ -174,7 +174,7 @@ class CuboidSilhouette(BaseTask):
         interventions_dict_target = dict()
         interventions_dict_target["position"] = self.silhouette_position
         interventions_dict_target["orientation"] = [0, 0, 0, 1]
-        interventions_dict_target["colour"] = np.random.uniform([0], [1], size=[3, ])
+        interventions_dict_target["color"] = np.random.uniform([0], [1], size=[3, ])
         interventions_dict_target["size"] = self.task_params["silhouette_size"] * self.task_params["unit_length"]
         self.stage.object_intervention("cuboid_target", interventions_dict_target)
 
@@ -196,7 +196,7 @@ class CuboidSilhouette(BaseTask):
                                                         np.random.uniform(-np.pi, np.pi)])
                 interventions_dict["position"] = cube_position
                 interventions_dict["orientation"] = cube_orientation
-                interventions_dict["colour"] = np.array([r, g, b])
+                interventions_dict["color"] = np.array([r, g, b])
                 interventions_dict["size"] = np.array([1, 1, 1]) * self.task_params["unit_length"]
                 self.stage.object_intervention("cube_{}".format(i), interventions_dict)
 

@@ -80,7 +80,7 @@ class StackedTowerImproperTask(BaseTask):
             self.stage.add_rigid_general_object(name="block_" + "level_" + str(level_num),
                                                 shape="cube",
                                                 size=block_sizes[level_num],
-                                                colour=np.random.uniform(0, 1, size=[3]),
+                                                color=np.random.uniform(0, 1, size=[3]),
                                                 mass=self.task_params["block_mass"])
             block_position = self.stage.random_position(height_limits=0.0425)
             block_orientation = euler_to_quaternion([0, 0, np.random.uniform(-np.pi, np.pi)])
@@ -150,7 +150,7 @@ class StackedTowerImproperTask(BaseTask):
         # #     self.task_solved = True
         return intersection_area / float(union_area)
 
-    # def do_random_intervention(self):
+    # def do_single_random_intervention(self):
     #     #choose random variable one intervention  only and intervene
     #     variable_name = np.random.choice(list(self.intervention_spaces.keys()))
     #     variable_space = self.intervention_spaces[variable_name]
@@ -170,9 +170,9 @@ class StackedTowerImproperTask(BaseTask):
     #         interventions_dict = dict()
     #         interventions_dict[sub_variable_name] = variable_value
     #         self.stage.object_intervention(variable_name, interventions_dict)
-    #     elif variable_name == 'stack_colour':
+    #     elif variable_name == 'stack_color':
     #         interventions_dict = dict()
-    #         interventions_dict["colour"] = variable_value
+    #         interventions_dict["color"] = variable_value
     #         for visual_object_name in self.stage.visual_objects.keys():
     #             self.stage.object_intervention(visual_object_name, interventions_dict)
     #     elif variable_name == 'stack_levels':
@@ -197,10 +197,10 @@ class StackedTowerImproperTask(BaseTask):
             self.intervention_spaces[name] = dict()
             self.intervention_spaces[name]['position'] = np.array([[-0.15, -0.15, -0.15], [0.15, 0.15, 0.15]])
             self.intervention_spaces[name]['orientation'] = np.array([[0, 0, 0], [np.pi, np.pi, np.pi]])
-            self.intervention_spaces[name]['colour'] = np.array([[0, 0, 0], [1, 1, 1]])
+            self.intervention_spaces[name]['color'] = np.array([[0, 0, 0], [1, 1, 1]])
             self.intervention_spaces[name]['mass'] = np.array([0.02, 0.1])
         self.intervention_spaces['stack_levels'] = np.array([1, 8])
-        self.intervention_spaces['stack_colour'] = np.array([[0, 0, 0], [1, 1, 1]])
+        self.intervention_spaces['stack_color'] = np.array([[0, 0, 0], [1, 1, 1]])
 
     def get_intervention_spaces(self):
         return self.intervention_spaces

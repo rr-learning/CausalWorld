@@ -1,3 +1,7 @@
+"""
+causal_rl_bench/envs/scene/stage.py
+===================================
+"""
 from causal_rl_bench.envs.scene.observations import StageObservations
 from causal_rl_bench.envs.scene.objects import Cuboid, StaticCuboid
 from causal_rl_bench.envs.scene.silhouette import SCuboid, SSphere
@@ -6,6 +10,9 @@ import numpy as np
 
 
 class Stage(object):
+    """This class holds everything in the arena including the tools used
+    for the goal specified, setting object, creating of objects, removing of
+    objects, checking for collisions, all of this is done here"""
     def __init__(self, pybullet_client, observation_mode,
                  normalize_observations=True,
                  goal_image_pybullet_instance=None):
@@ -21,14 +28,19 @@ class Stage(object):
         self.latest_full_state = None
         self.latest_observations = None
         self.goal_image_pybullet_instance = goal_image_pybullet_instance
-        self.floor_inner_bounding_box = np.array([[-0.15, -0.15], [0.15, 0.15]])
         self.floor_height = 0.01
+        self.floor_inner_bounding_box = np.array(
+            [[-0.15, -0.15, self.floor_height], [0.15, 0.15, 0.2]])
         if self.goal_image_pybullet_instance is not None:
             self.goal_image_visual_objects = dict()
             self.goal_image_pybullet_client = \
                 self.goal_image_pybullet_instance._p
             self.goal_image = None
         self.name_keys = []
+        # self.arena_interventions({'floor_color': np.array([1, 0.5, 1])})
+        # self.arena_interventions({'stage_color': np.array([0.3, 0.5, 1])})
+        # self.arena_interventions({'stage_friction': 0.8})
+        # print(self.get_current_variables_values())
         return
 
     def add_rigid_general_object(self, name, shape, **object_params):
@@ -105,16 +117,25 @@ class Stage(object):
         for key in observation_keys:
             self.stage_observations.add_observation(key)
 
-    def get_full_state(self):
-        stage_state = []
+    def get_full_state(self, state_type='list'):
+        if state_type == 'list':
+            stage_state = []
+        elif state_type == 'dict':
+            stage_state = dict()
+        else:
+            raise Exception("type is not supported")
         for name in self.name_keys:
             if name in self.rigid_objects:
                 object = self.rigid_objects[name]
             elif name in self.visual_objects:
                 object = self.visual_objects[name]
-            stage_state.extend(object.get_state(state_type='list'))
-        self.latest_full_state = stage_state
-        return self.latest_full_state
+            else:
+                raise Exception("possible error here")
+            if state_type == 'list':
+                stage_state.extend(object.get_state(state_type='list'))
+            elif state_type == 'dict':
+                stage_state[name] = object.get_state(state_type='dict')
+        return stage_state
 
     def set_full_state(self, new_state):
         #TODO: under the assumption that the new state has the same number of objects
@@ -218,28 +239,88 @@ class Stage(object):
         self.latest_full_state = None
         self.latest_observations = None
 
-
     def get_current_object_keys(self):
         return list(self.rigid_objects.keys()) +  \
                list(self.visual_objects.keys())
 
     def object_intervention(self, key, interventions_dict):
+        success_intervention = True
         if key in self.rigid_objects:
             object = self.rigid_objects[key]
-            object.set_state(interventions_dict)
         elif key in self.visual_objects:
             object = self.visual_objects[key]
-            object.set_state(interventions_dict)
-            if self.goal_image_pybullet_instance is not None:
-                goal_image_object = self.goal_image_visual_objects[key]
-                goal_image_object.set_state(interventions_dict)
         else:
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
-        if self.goal_image_pybullet_instance is not None:
+        # save the old state of the object before intervention
+        old_state = object.get_state(state_type='list')
+        object.set_state(interventions_dict)
+        if not self.check_feasiblity_of_stage():
+            object.set_full_state(old_state)
+            success_intervention = False
+        if key in self.visual_objects and \
+                self.goal_image_pybullet_instance is not None:
+            #TODO: under the impression that an intervention of visuals are always
+            #feasible
+            goal_image_object = self.goal_image_visual_objects[key]
+            goal_image_object.set_state(interventions_dict)
             self.update_goal_image()
         self.pybullet_client.stepSimulation()
-        return
+        return success_intervention
+
+    def get_current_variables_values(self):
+        #TODO: not a complete list yet of what we want to expose
+        variable_params = dict()
+        variable_params["floor_color"] = \
+            self.pybullet_client.getVisualShapeData(self.stage_id)[0][7][:3]
+        variable_params["stage_color"] = \
+            self.pybullet_client.getVisualShapeData(self.stage_id)[0][7][:3]
+        variable_params["stage_friction"] = \
+            self.pybullet_client.getDynamicsInfo(self.stage_id, -1)[1]
+        variable_params["floor_friction"] = \
+            self.pybullet_client.getDynamicsInfo(self.floor_id, -1)[1]
+        variable_params.update(self.get_full_state(state_type='dict'))
+        return variable_params
+
+    def apply_interventions(self, interventions_dict):
+        success_intervention = True
+        for intervention in interventions_dict:
+            if isinstance(interventions_dict[intervention], dict):
+                success_intervention = \
+                    self.object_intervention(intervention,
+                                             interventions_dict[intervention])
+            elif intervention == "floor_color":
+                self.pybullet_client.changeVisualShape(
+                    self.floor_id, -1, rgbaColor=np.append(
+                        interventions_dict[intervention], 1))
+                if self.goal_image_pybullet_instance is not None:
+                    self.goal_image_pybullet_instance.changeVisualShape(
+                        self.floor_id, -1, rgbaColor=np.append(
+                            interventions_dict[intervention], 1))
+            elif intervention == "stage_color":
+                self.pybullet_client.changeVisualShape(
+                    self.stage_id, -1, rgbaColor=np.append(
+                        interventions_dict[intervention], 1))
+                if self.goal_image_pybullet_instance is not None:
+                    self.goal_image_pybullet_instance.changeVisualShape(
+                        self.stage_id, -1, rgbaColor=np.append(
+                            interventions_dict[intervention], 1))
+            elif intervention == "stage_friction":
+                self.pybullet_client.changeDynamics(
+                    bodyUniqueId=self.stage_id,
+                    linkIndex=-1,
+                    lateralFriction=interventions_dict[intervention],
+                )
+            elif intervention == "floor_friction":
+                self.pybullet_client.changeDynamics(
+                    bodyUniqueId=self.floor_id,
+                    linkIndex=-1,
+                    lateralFriction=interventions_dict[intervention],
+                )
+            else:
+                raise Exception("The intervention on stage "
+                                "is not supported yet")
+        return success_intervention
 
     def get_object_full_state(self, key):
         if key in self.rigid_objects:
@@ -329,6 +410,19 @@ class Stage(object):
             raise Exception("goal image is not enabled")
 
     def check_feasiblity_of_stage(self):
+        """
+        This function checks the feasibility of the current state of the stage
+        (i.e checks if any of the bodies in the simulation are in a penetration
+        mode)
+        Parameters
+        ---------
+
+        Returns
+        -------
+            feasibility_flag: bool
+                A boolean indicating whether the stage is in a collision state
+                or not.
+        """
         for contact in self.pybullet_client.getContactPoints():
             if contact[8] < -0.005:
                 return False

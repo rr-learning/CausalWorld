@@ -134,13 +134,13 @@ class PushingTask(BaseTask):
         self.previous_object_orientation = block_orientation
         return reward
 
-    def do_random_intervention(self):
+    def do_single_random_intervention(self):
         # TODO: for now just intervention on a specific object
         interventions_dict = dict()
         new_block_position = self.stage.random_position(height_limits=0.0425)
-        new_colour = np.random.uniform([0], [1], size=[3, ])
+        new_color = np.random.uniform([0], [1], size=[3, ])
         interventions_dict["position"] = new_block_position
-        interventions_dict["colour"] = new_colour
+        interventions_dict["color"] = new_color
         # self.stage.object_intervention("block", interventions_dict)
         interventions_dict = dict()
         goal_block_position = self.stage.random_position(height_limits=0.0425)

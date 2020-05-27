@@ -4,6 +4,7 @@ from causal_rl_bench.metrics.mean_sucess_rate_metric import MeanSucessRateMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculumWrapper
 from causal_rl_bench.meta_agents.random import RandomMetaActorPolicy
+from causal_rl_bench.meta_agents.reacher_evaluator import ReacherMetaActorPolicy
 import numpy as np
 
 
@@ -34,19 +35,23 @@ class EvaluationPipeline:
             self.env = World(self.task,
                              **self.tracker.world_params,
                              seed=self.seed,
-                             data_recorder=self.data_recorder)
+                             data_recorder=self.data_recorder,
+                             testing=True)
         else:
             if world_params is not None:
                 self.env = World(self.task,
                                  **world_params,
                                  seed=self.seed,
-                                 data_recorder=self.data_recorder)
+                                 data_recorder=self.data_recorder,
+                                 testing=True)
             else:
                 self.env = World(self.task,
                                  seed=self.seed,
-                                 data_recorder=self.data_recorder)
+                                 data_recorder=self.data_recorder,
+                                 testing=True)
         self.evaluation_episode_length_in_secs = 1
-        self.time_steps_for_evaluation = int(self.evaluation_episode_length_in_secs / self.env.robot.dt)
+        self.time_steps_for_evaluation = \
+            int(self.evaluation_episode_length_in_secs / self.env.robot.dt)
         self.metrics_list = []
         self.metrics_list.append(MeanSucessRateMetric())
         return
@@ -72,16 +77,16 @@ class EvaluationPipeline:
     def evaluate_reacher_interventions_curriculum(self, num_of_episodes=100):
         meta_actor_policy = RandomMetaActorPolicy(
             self.task.get_testing_intervention_spaces())
-        meta_actor_policy.add_sampler_func(variable_name='goal_positions',
-                                           sampler_func=self.env.robot.
-                                           sample_end_effector_positions)
+        # meta_actor_policy.add_sampler_func(variable_name='goal_positions',
+        #                                    sampler_func=self.env.robot.
+        #                                    sample_end_effector_positions)
         meta_actor_policy.add_sampler_func(variable_name='joint_positions',
                                            sampler_func=self.env.robot.
                                            sample_joint_positions)
         self.env = InterventionsCurriculumWrapper(env=self.env,
                                                   meta_actor_policy=
                                                   meta_actor_policy,
-                                                  meta_episode_hold=4)
+                                                  meta_episode_hold=5)
         for _ in range(num_of_episodes):
             current_episode = self.run_episode()
             self.process_metrics(current_episode)
@@ -91,6 +96,45 @@ class EvaluationPipeline:
         scores['total_interventions'] = self.env.tracker.get_total_interventions()
         scores['total_timesteps'] = self.env.tracker.get_total_time_steps()
         scores['total_resets'] = self.env.tracker.get_total_resets()
+        scores['total_invalid_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_intervention_steps()
+        scores['total_invalid_robot_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_robot_intervention_steps()
+        scores['total_invalid_stage_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_stage_intervention_steps()
+        scores['total_invalid_task_generator_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_task_generator_intervention_steps()
+        scores['total_invalid_out_of_bounds_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_out_of_bounds_intervention_steps()
+        return scores
+
+    def evaluate_reacher_interventions_curriculum_2(self, num_of_episodes=100):
+        meta_actor_policy = ReacherMetaActorPolicy(
+            joint_position_sampler_func=self.env.robot.sample_joint_positions,
+            goal_position_sampler_func=self.env.robot.sample_end_effector_positions)
+        self.env = InterventionsCurriculumWrapper(env=self.env,
+                                                  meta_actor_policy=
+                                                  meta_actor_policy,
+                                                  meta_episode_hold=5)
+        for _ in range(num_of_episodes):
+            current_episode = self.run_episode()
+            self.process_metrics(current_episode)
+        self.env.close()
+        scores = self.get_metric_scores()
+        scores['total_intervention_steps'] = self.env.tracker.get_total_intervention_steps()
+        scores['total_interventions'] = self.env.tracker.get_total_interventions()
+        scores['total_timesteps'] = self.env.tracker.get_total_time_steps()
+        scores['total_resets'] = self.env.tracker.get_total_resets()
+        scores['total_invalid_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_intervention_steps()
+        scores['total_invalid_robot_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_robot_intervention_steps()
+        scores['total_invalid_stage_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_stage_intervention_steps()
+        scores['total_invalid_task_generator_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_task_generator_intervention_steps()
+        scores['total_invalid_out_of_bounds_intervention_steps'] = \
+            self.env.tracker.get_total_invalid_out_of_bounds_intervention_steps()
         return scores
 
     # def evaluate_generalisation(self):

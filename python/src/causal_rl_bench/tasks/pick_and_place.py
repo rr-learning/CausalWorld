@@ -36,7 +36,7 @@ class PickAndPlaceTask(BaseTask):
         self.stage.add_rigid_general_object(name="wall",
                                             shape="static_cube",
                                             size=np.array([0.35, 0.015, 0.065]),
-                                            colour=np.array([0, 0, 0]))
+                                            color=np.array([0, 0, 0]))
         self.stage.add_rigid_general_object(name="block",
                                             shape="cube",
                                             mass=self.task_params[
@@ -164,13 +164,13 @@ class PickAndPlaceTask(BaseTask):
         self.previous_object_orientation = block_orientation
         return reward
 
-    def do_random_intervention(self):
+    def do_single_random_intervention(self):
         # TODO: for now just intervention on a specific object
         interventions_dict = dict()
         new_block_position = self.stage.random_position(height_limits=0.0425)
-        new_colour = np.random.uniform([0], [1], size=[3, ])
+        new_color = np.random.uniform([0], [1], size=[3, ])
         interventions_dict["position"] = new_block_position
-        interventions_dict["colour"] = new_colour
+        interventions_dict["color"] = new_color
         # self.stage.object_intervention("block", interventions_dict)
         interventions_dict = dict()
         goal_block_position = self.stage.random_position(height_limits=0.0425)

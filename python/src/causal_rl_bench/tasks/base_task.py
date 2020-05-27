@@ -25,7 +25,43 @@ class BaseTask(object):
         self.testing_intervention_spaces = None
         self.initial_state = dict()
         self.finished_episode = False
+        self.enforce_intervention_spaces_split = False
         return
+
+    def _handle_contradictory_interventions(self, interventions_dict):
+        # handle the contradictory intervention that changes each other (objects -> silhouettes)
+        # and other way around sometimes
+        return interventions_dict
+
+    def get_task_generator_variables_values(self):
+        return {}
+
+    def _set_up_stage_arena(self):
+        return
+
+    def _set_up_non_default_observations(self):
+        return
+
+    def apply_task_generator_interventions(self, interventions_dict):
+        return True
+
+    def get_info(self):
+        return {}
+
+    def get_reward(self):
+        raise NotImplementedError
+
+    def get_description(self):
+        raise NotImplementedError()
+
+    def _reset_task(self):
+        raise NotImplementedError()
+
+    def _set_training_intervention_spaces(self):
+        raise NotImplementedError()
+
+    def _set_testing_intervention_spaces(self):
+        raise NotImplementedError()
 
     def init_task(self, robot, stage):
         self.robot = robot
@@ -35,18 +71,19 @@ class BaseTask(object):
         self._set_up_non_default_observations()
         self._set_training_intervention_spaces()
         self._set_testing_intervention_spaces()
-        return
-
-    def _set_up_stage_arena(self):
-        return
-
-    def _set_up_non_default_observations(self):
+        # for task_param_varaible in self.initial_state:
+        #     if task_param_varaible not in self.training_intervention_spaces:
+        #         self.training_intervention_spaces[task_param_varaible] = \
+        #             np.array([self.initial_state[task_param_varaible],
+        #                       self.initial_state[task_param_varaible]])
+        #         self.testing_intervention_spaces[task_param_varaible] = \
+        #             np.array([self.initial_state[task_param_varaible],
+        #                       self.initial_state[task_param_varaible]])
         return
 
     def _setup_non_default_robot_observation_key(self, observation_key,
                                                  observation_function,
                                                  lower_bound, upper_bound):
-        # observation function takes in full observations dict and returns a numpy array
         self.robot.add_observation(observation_key, lower_bound=lower_bound,
                                    upper_bound=upper_bound)
         self._non_default_robot_observation_funcs[observation_key] = \
@@ -62,24 +99,25 @@ class BaseTask(object):
             observation_function
         return
 
-    def _compute_sparse_reward(self, achieved_goal, desired_goal, info):
-        self.current_time += self.robot.dt
+    def _compute_sparse_reward(self, achieved_goal,
+                               desired_goal, info,
+                               redundant_calulcation=False):
+        if not redundant_calulcation:
+            self.current_time += self.robot.dt
         if self.task_name == "reaching":
-            current_end_effector_positions = \
-                self.robot.compute_end_effector_positions(
-                    self.robot.latest_full_state.position)
+            current_end_effector_positions = achieved_goal
             current_dist_to_goal = np.abs(desired_goal -
                                           current_end_effector_positions)
             current_dist_to_goal_mean = np.mean(current_dist_to_goal)
-            if current_dist_to_goal_mean < 0.01:
-                self.task_solved = True
-                self.time_steps_elapsed_since_success += 1
-                return 1
-            else:
-                self.task_solved = False
-                #restart again
-                self.time_steps_elapsed_since_success = 0
-                return 0
+            if not redundant_calulcation:
+                if current_dist_to_goal_mean < 0.01:
+                    self.task_solved = True
+                    self.time_steps_elapsed_since_success += 1
+                else:
+                    self.task_solved = False
+                    # restart again
+                    self.time_steps_elapsed_since_success = 0
+            return current_dist_to_goal_mean
         else:
             # intersection areas / union of all visual_objects
             intersection_area = 0
@@ -99,22 +137,69 @@ class BaseTask(object):
             if sparse_reward > 0.9:
                 self.task_solved = True
                 self.time_steps_elapsed_since_success += 1
-                return 1
             else:
                 self.task_solved = False
                 # restart again
                 self.time_steps_elapsed_since_success = 0
-                return 0
+            return sparse_reward
 
-    def reset_task(self, interventions_dict=None):
+    def enforce_intervention_spaces_split(self):
+        self.enforce_intervention_spaces_split = True
+
+    def reset_task(self, interventions_dict=None, is_training=True):
         self.robot.clear()
         self.stage.clear()
         self.task_solved = False
         self.finished_episode = False
         self.time_steps_elapsed_since_success = 0
         self.current_time = 0
-        self._reset_task(interventions_dict)
-        return
+        success_signal = None
+        interventions_info = None
+        if interventions_dict is not None:
+            interventions_dict_copy = interventions_dict
+            non_changed_variables = \
+                set(self.initial_state) - set(interventions_dict_copy)
+            if len(non_changed_variables) > 0:
+                interventions_dict_copy = dict(interventions_dict)
+            for non_changed_variable in non_changed_variables:
+                if isinstance(self.initial_state[non_changed_variable], dict):
+                    for subvariable in self.initial_state[
+                        non_changed_variable]:
+                        interventions_dict_copy[non_changed_variable][
+                            subvariable] = \
+                            self.initial_state[non_changed_variable][
+                                subvariable]
+                else:
+                    interventions_dict_copy[non_changed_variable] = \
+                        self.initial_state[non_changed_variable]
+            success_signal, interventions_info = \
+                self.apply_interventions(interventions_dict_copy,
+                                         is_training=is_training,
+                                         check_bounds=
+                                         self.enforce_intervention_spaces_split)
+            if success_signal:
+                for intervention_variable in self.initial_state:
+                    if intervention_variable in interventions_dict:
+                        if isinstance(self.initial_state[intervention_variable],dict):
+                            for subvariable in self.initial_state[intervention_variable]:
+                                if subvariable in interventions_dict[intervention_variable]:
+                                    self.initial_state[intervention_variable] = \
+                                        interventions_dict_copy[
+                                            intervention_variable]
+                        else:
+                            self.initial_state[intervention_variable] = \
+                                interventions_dict_copy[intervention_variable]
+            else:
+                self.apply_interventions(self.initial_state,
+                                         is_training=is_training,
+                                         check_bounds=False)
+
+        else:
+            self.apply_interventions(self.initial_state,
+                                     is_training=is_training,
+                                     check_bounds=False)
+        self._reset_task()
+        return success_signal, interventions_info
 
     def filter_structured_observations(self):
         robot_observations_dict = self.robot.\
@@ -147,9 +232,6 @@ class BaseTask(object):
 
         return observations_filtered
 
-    def get_info(self):
-        return {}
-
     def get_task_params(self):
         return self.task_params
 
@@ -163,7 +245,7 @@ class BaseTask(object):
             self.finished_episode = True
         return self.finished_episode
 
-    def do_random_intervention(self, training_space=True):
+    def do_single_random_intervention(self, training_space=True):
         interventions_dict = dict()
         if training_space:
             intervention_space = self.training_intervention_spaces
@@ -185,52 +267,11 @@ class BaseTask(object):
                              training=False)
         if isinstance(variable_space, dict):
             interventions_dict[variable_name] = dict()
-            interventions_dict[variable_name][sub_variable_name] = chosen_intervention
+            interventions_dict[variable_name][sub_variable_name] = \
+                chosen_intervention
         else:
             interventions_dict[variable_name] = chosen_intervention
         return interventions_dict
-
-    def apply_interventions(self, interventions_dict, initial_state_latch=True):
-        interventions_dict_copy = interventions_dict
-        non_changed_variables = \
-            set(self.initial_state) - set(interventions_dict_copy)
-        if len(non_changed_variables) > 0:
-            interventions_dict_copy = dict(interventions_dict)
-        for non_changed_variable in non_changed_variables:
-            interventions_dict_copy[non_changed_variable] = \
-                self.initial_state[non_changed_variable]
-        for intervention_key, intervention_value in interventions_dict_copy.items():
-            # if its a block then choose a property
-            if isinstance(intervention_value, dict):
-                for sub_intervention_key, sub_intervention_value in \
-                        intervention_value.items():
-                    #TODO: take care about it later
-                    self.do_intervention(intervention_key,
-                                         sub_intervention_value,
-                                         sub_variable_name=sub_intervention_key,
-                                         training=False)
-                    if intervention_key in self.initial_state.keys() and \
-                            sub_intervention_key in \
-                            self.initial_state[intervention_key].keys() and \
-                            initial_state_latch:
-                        self.initial_state[intervention_key][sub_intervention_key] \
-                            = intervention_value
-            else:
-                sub_variable_name = None
-                self.do_intervention(intervention_key,
-                                     intervention_value,
-                                     sub_variable_name=sub_variable_name,
-                                     training=False)
-                if intervention_key in self.initial_state.keys() and \
-                        initial_state_latch:
-                    self.initial_state[intervention_key] \
-                        = intervention_value
-        return
-
-    def do_intervention(self, variable_name, variable_value,
-                        sub_variable_name=None, training=True):
-        #TODO: this now only supports two levels of variables
-        raise NotImplementedError()
 
     def get_training_intervention_spaces(self):
         return self.training_intervention_spaces
@@ -238,18 +279,119 @@ class BaseTask(object):
     def get_testing_intervention_spaces(self):
         return self.testing_intervention_spaces
 
-    def get_reward(self):
-        raise NotImplementedError
+    def get_current_variables_values(self):
+        variable_params = dict()
+        #get the robots ones
+        variable_params.\
+            update(self.robot.get_current_variables_values())
+        #get the arena
+        variable_params. \
+            update(self.stage.get_current_variables_values())
+        #get the task specific params now
+        variable_params. \
+            update(self.get_task_generator_variables_values())
+        return variable_params
 
-    def get_description(self):
-        raise NotImplementedError()
+    def get_current_task_parameters(self):
+        task_params_dict = dict()
+        current_variables_values = self.get_current_variables_values()
+        #filter them if they are not exposed in in the intervention spaces
+        for variable_name in self.training_intervention_spaces:
+            if isinstance(
+                    self.training_intervention_spaces[variable_name], dict):
+                task_params_dict[variable_name] = dict()
+                for subvariable_name in self.training_intervention_spaces[variable_name]:
+                    task_params_dict[variable_name][subvariable_name] = \
+                        current_variables_values[variable_name][subvariable_name]
+            else:
+                task_params_dict[variable_name] = current_variables_values[variable_name]
+        # you can add task specific ones after that
+        return task_params_dict
 
-    def _reset_task(self, interventions_dict):
-        raise NotImplementedError()
+    def is_intervention_in_bounds(self, interventions_dict,
+                                  is_training=True):
+        if is_training:
+            intervention_space = self.training_intervention_spaces
+        else:
+            intervention_space = self.testing_intervention_spaces
+        for intervention in interventions_dict:
+            if intervention in intervention_space:
+                if not isinstance(interventions_dict[intervention], dict):
+                    if ((intervention_space[intervention][0] >
+                         interventions_dict[intervention]).any() or \
+                         (intervention_space[intervention][1]
+                             < interventions_dict[intervention]).any()):
+                        return False
+                else:
+                    for sub_variable_name in interventions_dict[intervention]:
+                        if sub_variable_name in intervention_space[intervention] and \
+                            ((intervention_space[intervention]
+                            [sub_variable_name][0] >
+                            interventions_dict[intervention][sub_variable_name]).any() or \
+                                (intervention_space[intervention]
+                                 [sub_variable_name][1] <
+                                 interventions_dict[intervention][sub_variable_name]).any()):
+                            return False
+        return True
 
-    def _set_training_intervention_spaces(self):
-        raise NotImplementedError()
+    def divide_intervention_dict(self, interventions_dict):
+        #TODO: for now a heuristic for naming conventions
+        robot_intervention_keys = self.robot.get_current_variables_values().keys()
+        stage_intervention_keys = self.stage.get_current_variables_values().keys()
+        task_generator_intervention_keys = self.get_task_generator_variables_values().keys()
+        robot_interventions_dict = dict()
+        stage_interventions_dict = dict()
+        task_generator_interventions_dict = dict()
+        for intervention in interventions_dict:
+            if intervention in robot_intervention_keys:
+                robot_interventions_dict[intervention] = \
+                    interventions_dict[intervention]
+            elif intervention in stage_intervention_keys:
+                stage_interventions_dict[intervention] = \
+                    interventions_dict[intervention]
+            elif intervention in task_generator_intervention_keys:
+                task_generator_interventions_dict[intervention] = \
+                    interventions_dict[intervention]
+        return robot_interventions_dict, \
+               stage_interventions_dict, \
+               task_generator_interventions_dict
 
-    def _set_testing_intervention_spaces(self):
-        raise NotImplementedError()
+    def apply_interventions(self, interventions_dict,
+                            is_training=True,
+                            check_bounds=False):
+        interventions_info = {'out_bounds': False,
+                              'robot_infeasible': None,
+                              'stage_infeasible': None,
+                              'task_generator_infeasible': None}
+        if check_bounds and not self.is_intervention_in_bounds(
+                interventions_dict, is_training=is_training):
+            interventions_info['out_bounds'] = True
+            return False, interventions_info
+        interventions_dict = \
+            dict(self._handle_contradictory_interventions(interventions_dict))
+        if check_bounds and not self.is_intervention_in_bounds(interventions_dict,
+                                                               is_training=is_training):
+            interventions_info['out_bounds'] = True
+            return False, interventions_info
+        #now divide the interventions
+        robot_interventions_dict, stage_interventions_dict, \
+        task_generator_interventions_dict = \
+            self.divide_intervention_dict(interventions_dict)
+        robot_intervention_success_signal = \
+            self.robot.apply_interventions(robot_interventions_dict)
+        stage_intervention_success_signal = \
+            self.stage.apply_interventions(stage_interventions_dict)
+        task_generator_intervention_success_signal = \
+            self.apply_task_generator_interventions\
+                (task_generator_interventions_dict)
+        interventions_info['robot_infeasible'] = not robot_intervention_success_signal
+        interventions_info['stage_infeasible'] = not stage_intervention_success_signal
+        interventions_info['task_generator_infeasible'] = not task_generator_intervention_success_signal
+        return robot_intervention_success_signal and \
+               stage_intervention_success_signal and \
+               task_generator_intervention_success_signal, interventions_info
+
+
+
+
 
