@@ -5,12 +5,12 @@ import time
 from causal_rl_bench.wrappers.action_wrappers import DeltaAction
 
 
-def get_world(task_id, task_params, world_params, enable_visualization=False):
+def get_world(task_generator_id, task_params, world_params, enable_visualization=False):
     world_params["skip_frame"] = 1
     if task_params is None:
-        task = Task(task_id)
+        task = Task(task_generator_id)
     else:
-        task = Task(task_id, **task_params)
+        task = Task(task_generator_id, **task_params)
     return World(task, **world_params,
                  logging=False,
                  enable_visualization=enable_visualization)

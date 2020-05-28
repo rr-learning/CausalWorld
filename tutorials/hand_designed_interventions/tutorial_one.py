@@ -3,7 +3,7 @@ from causal_rl_bench.tasks.task import Task
 
 
 def example():
-    task = Task(task_id='reaching')
+    task = Task(task_generator_id='reaching')
     env = World(task=task, skip_frame=1, enable_visualization=True, seed=0)
     env.reset()
     for _ in range(500):

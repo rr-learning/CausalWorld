@@ -2,6 +2,7 @@ from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
 from pybullet_fingers.sim_finger import SimFinger
 import numpy as np
+import math
 
 
 class TriFingerRobot(object):
@@ -379,7 +380,6 @@ class TriFingerRobot(object):
 
     def apply_interventions(self, interventions_dict):
         #only will do such an intervention if its a feasible one
-        success_full_interventions = True
         if self.is_initialized():
             old_state = self.get_full_state()
         else:
@@ -397,9 +397,6 @@ class TriFingerRobot(object):
                 "joint_velocities" in interventions_dict:
             self.set_full_state(np.append(new_joint_positions,
                                           new_joint_velcoities))
-        if not self.check_feasibility_of_robot_state():
-            self.set_full_state(old_state)
-            success_full_interventions = False
         for intervention in interventions_dict:
             if intervention == "joint_velocities" or \
                     intervention == "joint_positions":
@@ -436,7 +433,7 @@ class TriFingerRobot(object):
                 raise Exception("The intervention state variable specified is "
                                 "not allowed")
 
-        return success_full_interventions
+        return
 
     def check_feasibility_of_robot_state(self):
         """

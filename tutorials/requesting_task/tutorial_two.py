@@ -3,7 +3,7 @@ from causal_rl_bench.tasks.task import Task
 
 
 def example():
-    task = Task(task_id='cuboid_silhouette')
+    task = Task(task_generator_id='cuboid_silhouette')
     env = World(task=task, skip_frame=10, enable_visualization=True, seed=0,
                 action_mode="joint_positions", observation_mode="cameras",
                 normalize_actions=True, normalize_observations=False,

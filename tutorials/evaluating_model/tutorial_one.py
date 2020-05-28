@@ -27,7 +27,7 @@ def train_policy():
                   "tensorboard_log": log_relative_path}
     os.makedirs(log_relative_path)
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
-    task = Task(task_id='cuboid_silhouette', silhouette_size=np.array([1, 2, 1]))
+    task = Task(task_generator_id='cuboid_silhouette', silhouette_size=np.array([1, 2, 1]))
     env = World(task=task, skip_frame=3,
                 enable_visualization=False,
                 max_episode_length=100)

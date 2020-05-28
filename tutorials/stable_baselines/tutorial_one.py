@@ -15,7 +15,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                  skip_frame, seed_num, ppo_config, total_time_steps, validate_every_timesteps, task_name):
     def _make_env(rank):
         def _init():
-            task = Task(task_id=task_name)
+            task = Task(task_generator_id=task_name)
             env = World(task=task, skip_frame=skip_frame,
                         enable_visualization=False,
                         seed=seed_num + rank, max_episode_length=maximum_episode_length)

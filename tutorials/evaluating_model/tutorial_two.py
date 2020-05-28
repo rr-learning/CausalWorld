@@ -16,7 +16,7 @@ log_relative_path = './trained_policy'
 
 def _make_env(rank):
     def _init():
-        task = Task(task_id="reaching")
+        task = Task(task_generator_id="reaching")
         env = World(task=task, skip_frame=1,
                     enable_visualization=False,
                     seed=rank, max_episode_length=960)
@@ -82,7 +82,7 @@ def evaluate_model_2():
     world_params["skip_frame"] = 1
     world_params["seed"] = 0
     task_params = dict()
-    task_params["task_id"] = "reaching"
+    task_params["task_generator_id"] = "reaching"
     # Load the PPO2 policy trained on the cuboid_silhouette task
     model = PPO2.load(os.path.join(log_relative_path, 'model.zip'))
 
@@ -100,7 +100,7 @@ def evaluate_model_3():
     world_params["skip_frame"] = 1
     world_params["enable_visualization"] = True
     task_params = dict()
-    task_params["task_id"] = "reaching"
+    task_params["task_generator_id"] = "reaching"
     # Load the PPO2 policy trained on the cuboid_silhouette task
     reacher_policy = ReacherActorPolicy()
     # reacher_policy = MovingAverageActionPolicyWrapper(reacher_policy,
@@ -123,7 +123,7 @@ def evaluate_model_4():
     world_params["skip_frame"] = 1
     world_params["enable_visualization"] = True
     task_params = dict()
-    task_params["task_id"] = "reaching"
+    task_params["task_generator_id"] = "reaching"
     # Load the PPO2 policy trained on the cuboid_silhouette task
     reacher_policy = ReacherActorPolicy()
     # reacher_policy = MovingAverageActionPolicyWrapper(reacher_policy,

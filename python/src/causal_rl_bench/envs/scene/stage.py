@@ -244,7 +244,6 @@ class Stage(object):
                list(self.visual_objects.keys())
 
     def object_intervention(self, key, interventions_dict):
-        success_intervention = True
         if key in self.rigid_objects:
             object = self.rigid_objects[key]
         elif key in self.visual_objects:
@@ -255,9 +254,6 @@ class Stage(object):
         # save the old state of the object before intervention
         old_state = object.get_state(state_type='list')
         object.set_state(interventions_dict)
-        if not self.check_feasiblity_of_stage():
-            object.set_full_state(old_state)
-            success_intervention = False
         if key in self.visual_objects and \
                 self.goal_image_pybullet_instance is not None:
             #TODO: under the impression that an intervention of visuals are always
@@ -266,7 +262,7 @@ class Stage(object):
             goal_image_object.set_state(interventions_dict)
             self.update_goal_image()
         self.pybullet_client.stepSimulation()
-        return success_intervention
+        return
 
     def get_current_variables_values(self):
         #TODO: not a complete list yet of what we want to expose
@@ -283,11 +279,9 @@ class Stage(object):
         return variable_params
 
     def apply_interventions(self, interventions_dict):
-        success_intervention = True
         for intervention in interventions_dict:
             if isinstance(interventions_dict[intervention], dict):
-                success_intervention = \
-                    self.object_intervention(intervention,
+                self.object_intervention(intervention,
                                              interventions_dict[intervention])
             elif intervention == "floor_color":
                 self.pybullet_client.changeVisualShape(
@@ -320,7 +314,8 @@ class Stage(object):
             else:
                 raise Exception("The intervention on stage "
                                 "is not supported yet")
-        return success_intervention
+        self.latest_full_state = self.get_full_state()
+        return
 
     def get_object_full_state(self, key):
         if key in self.rigid_objects:
@@ -424,7 +419,7 @@ class Stage(object):
                 or not.
         """
         for contact in self.pybullet_client.getContactPoints():
-            if contact[8] < -0.005:
+            if contact[8] < -0.08:
                 return False
         return True
 

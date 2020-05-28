@@ -17,7 +17,7 @@ def example():
     data_recorder = DataRecorder(output_directory='pushing_episodes', rec_dumb_frequency=11)
 
     # Pass the data recorder to the World
-    task = Task(task_id='pushing')
+    task = Task(task_generator_id='pushing')
     env = World(task=task,
                 enable_visualization=True,
                 data_recorder=data_recorder)

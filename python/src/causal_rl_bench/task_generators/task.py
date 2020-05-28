@@ -11,29 +11,29 @@ from causal_rl_bench.task_generators.pick_and_place import PickAndPlaceTask
 from causal_rl_bench.task_generators.cuboid_silhouette import CuboidSilhouette
 
 
-def Task(task_id="picking", **kwargs):
-    if task_id == "picking":
+def task_generator(task_generator_id="picking", **kwargs):
+    if task_generator_id == "picking":
         task = PickingTask(**kwargs)
-    elif task_id == "pushing":
+    elif task_generator_id == "pushing":
         task = PushingTask(**kwargs)
-    elif task_id == "cuboid_silhouette":
+    elif task_generator_id == "cuboid_silhouette":
         task = CuboidSilhouette(**kwargs)
-    elif task_id == "reaching":
+    elif task_generator_id == "reaching":
         task = ReachingTaskGenerator(**kwargs)
-    elif task_id == "pyramid":
+    elif task_generator_id == "pyramid":
         task = PyramidTask(**kwargs)
-    elif task_id == "arch":
+    elif task_generator_id == "arch":
         task = ArchTask(**kwargs)
-    elif task_id == "example":
+    elif task_generator_id == "example":
         task = ExampleTask(**kwargs)
-    elif task_id == "pick_and_place":
+    elif task_generator_id == "pick_and_place":
         task = PickAndPlaceTask(**kwargs)
-    elif task_id == "stacked_blocks":
+    elif task_generator_id == "stacked_blocks":
         task = StackedBlocksTask(**kwargs)
-    elif task_id == "stacked_tower":
+    elif task_generator_id == "stacked_tower":
         task = StackedTowerTask(**kwargs)
-    elif task_id == "stacked_tower_improper":
+    elif task_generator_id == "stacked_tower_improper":
         task = StackedTowerImproperTask(**kwargs)
     else:
-        raise Exception("No valid task_id")
+        raise Exception("No valid task_generator_id")
     return task

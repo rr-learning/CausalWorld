@@ -3,7 +3,6 @@ import gym
 import pybullet
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
-from causal_rl_bench.task_generators.task import Task
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
 

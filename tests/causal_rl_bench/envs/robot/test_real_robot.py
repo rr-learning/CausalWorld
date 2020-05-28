@@ -24,7 +24,7 @@ def test_pd_gains():
     from causal_rl_bench.tasks.task import Task
     import numpy as np
     np.random.seed(0)
-    task = Task(task_id='reaching')
+    task = Task(task_generator_id='reaching')
     skip_frame = 1 #@250Hz
     threshold = 0.05
     env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
@@ -90,7 +90,7 @@ def test_pd_gains_2():
     from causal_rl_bench.tasks.task import Task
     import numpy as np
     np.random.seed(0)
-    task = Task(task_id='reaching')
+    task = Task(task_generator_id='reaching')
     skip_frame = 1#@240Hz
     threshold = 0.05
     env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,

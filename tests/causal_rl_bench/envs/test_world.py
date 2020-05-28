@@ -4,7 +4,7 @@ import numpy as np
 
 
 def test_determinism():
-    task = Task(task_id="cuboid_silhouette")
+    task = Task(task_generator_id="cuboid_silhouette")
     observations_v1 = []
     observations_v2 = []
     observations_v3 = []
@@ -59,12 +59,12 @@ def test_determinism():
 
 
 def test_parallelism():
-    task = Task(task_id="pushing")
+    task = Task(task_generator_id="pushing")
     env1 = World(task=task,
                  enable_visualization=False,
                  seed=0)
     env1.reset()
-    task2 = Task(task_id="pushing")
+    task2 = Task(task_generator_id="pushing")
     env2 = World(task=task2,
                  enable_visualization=False,
                  seed=0)
@@ -82,7 +82,7 @@ def timing_profile():
     import time
 
     kuka_env = KukaGymEnv(renders=False, isDiscrete=False)#operates at 240 HZ
-    task = Task(task_id="pushing")
+    task = Task(task_generator_id="pushing")
     causal_rl_env = World(task=task,
                           enable_visualization=False,
                           seed=0,

@@ -25,6 +25,12 @@ class ReachingTaskGenerator(BaseTask):
         self.task_stage_observation_keys = ["goal_60_position",
                                             "goal_120_position",
                                             "goal_300_position"]
+        self.default_goal_60 = kwargs.get("default_goal_60",
+                                          np.array([0, 0, 0.15]))
+        self.default_goal_120 = kwargs.get("default_goal_120",
+                                           np.array([0, 0, 0.2]))
+        self.default_goal_300 = kwargs.get("default_goal_300",
+                                           np.array([0, 0, 0.25]))
         self.previous_end_effector_positions = None
         self.previous_joint_velocities = None
 
@@ -32,15 +38,15 @@ class ReachingTaskGenerator(BaseTask):
         self.stage.add_silhoutte_general_object(name="goal_60",
                                                 shape="sphere",
                                                 color=np.array([1, 0, 0]),
-                                                position=np.array([0, 0, 0.15]))
+                                                position=self.default_goal_60)
         self.stage.add_silhoutte_general_object(name="goal_120",
                                                 shape="sphere",
                                                 color=np.array([0, 1, 0]),
-                                                position=np.array([0, 0, 0.2]))
+                                                position=self.default_goal_120)
         self.stage.add_silhoutte_general_object(name="goal_300",
                                                 shape="sphere",
                                                 color=np.array([0, 0, 1]),
-                                                position=np.array([0, 0, 0.25]))
+                                                position=self.default_goal_300)
         return
 
     def get_description(self):

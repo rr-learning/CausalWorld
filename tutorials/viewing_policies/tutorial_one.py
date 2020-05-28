@@ -7,7 +7,7 @@ import causal_rl_bench.viewers.task_viewer as viewer
 def example():
     # This tutorial shows how to view policies of trained agents
 
-    task = Task(task_id='reaching', randomize_joint_positions=True)
+    task = Task(task_generator_id='reaching', randomize_joint_positions=True)
     world_params = dict()
     world_params["skip_frame"] = 1
     world_params["seed"] = 0

@@ -3,7 +3,7 @@ from causal_rl_bench.tasks.task import Task
 
 
 def test_task_sampler():
-    task = Task(task_id='stacked_blocks')
+    task = Task(task_generator_id='stacked_blocks')
     env = World(task=task, enable_visualization=True, seed=0)
     desired_action = env.action_space.sample
     for i in range(40):

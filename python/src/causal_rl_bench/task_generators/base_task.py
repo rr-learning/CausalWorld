@@ -90,8 +90,8 @@ class BaseTask(object):
             desired_goal = np.array([])
             for visual_goal in self.stage.visual_objects:
                 desired_goal = np.append(desired_goal,
-                                         self.stage.visual_objects[visual_goal]
-                                         .get_variable_state('position'))
+                                         self.stage.get_object_state
+                                         (visual_goal, 'position'))
         else:
             desired_goal = np.array([])
             for visual_goal in self.stage.visual_objects:
@@ -109,7 +109,8 @@ class BaseTask(object):
             achieved_goal = np.array([])
             for rigid_object in self.stage.rigid_objects:
                 achieved_goal = np.append(achieved_goal,
-                                          rigid_object.get_bounding_box())
+                                          self.stage.rigid_objects
+                                          [rigid_object].get_bounding_box())
         return achieved_goal
 
     def init_task(self, robot, stage):
@@ -432,6 +433,9 @@ class BaseTask(object):
                               'robot_infeasible': None,
                               'stage_infeasible': None,
                               'task_generator_infeasible': None}
+
+        stage_infeasible = False
+        robot_infeasible = False
         if check_bounds and not self.is_intervention_in_bounds(
                 interventions_dict):
             interventions_info['out_bounds'] = True
@@ -445,19 +449,32 @@ class BaseTask(object):
         robot_interventions_dict, stage_interventions_dict, \
         task_generator_interventions_dict = \
             self.divide_intervention_dict(interventions_dict)
-        robot_intervention_success_signal = \
-            self.robot.apply_interventions(robot_interventions_dict)
-        stage_intervention_success_signal = \
-            self.stage.apply_interventions(stage_interventions_dict)
+        current_stage_state = self.stage.get_full_state()
+        if self.robot.is_initialized():
+            current_robot_state = self.robot.get_full_state()
+        else:
+            current_robot_state = self.robot.get_default_state()
+        self.stage.apply_interventions(stage_interventions_dict)
+        self.robot.apply_interventions(robot_interventions_dict)
+        if not self.stage.check_feasiblity_of_stage():
+            self.stage.set_full_state(current_stage_state)
+            stage_infeasible = True
+        if not self.robot.check_feasibility_of_robot_state():
+            self.robot.set_full_state(current_robot_state)
+            robot_infeasible = True
         task_generator_intervention_success_signal = \
             self.apply_task_generator_interventions\
                 (task_generator_interventions_dict)
-        interventions_info['robot_infeasible'] = not robot_intervention_success_signal
-        interventions_info['stage_infeasible'] = not stage_intervention_success_signal
-        interventions_info['task_generator_infeasible'] = not task_generator_intervention_success_signal
-        return robot_intervention_success_signal and \
-               stage_intervention_success_signal and \
-               task_generator_intervention_success_signal, interventions_info
+        interventions_info['robot_infeasible'] = \
+            robot_infeasible
+        interventions_info['stage_infeasible'] = \
+            stage_infeasible
+        interventions_info['task_generator_infeasible'] = \
+            task_generator_intervention_success_signal
+        return not robot_infeasible and \
+               not stage_infeasible and \
+               task_generator_intervention_success_signal, \
+               interventions_info
 
     def do_intervention(self, interventions_dict, check_bounds=None):
         if check_bounds is None:

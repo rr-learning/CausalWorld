@@ -145,8 +145,7 @@ class Cuboid(RigidObject):
         start = 0
         for i in range(len(self._state_variable_sizes)):
             end = start + self._state_variable_sizes[i]
-            if not np.all(current_state[self.name + "_"
-                                        + self._state_variable_names[i]] ==
+            if not np.all(current_state[self._state_variable_names[i]] ==
                           new_state[start:end]):
                 new_state_dict[self._state_variable_names[i]] = new_state[start:end]
             start = end
@@ -164,7 +163,7 @@ class Cuboid(RigidObject):
         if 'orientation' in state_dict:
             orientation = state_dict['orientation']
         if 'mass' in state_dict:
-            self.mass = state_dict['mass']
+            self.mass = state_dict['mass'][0]
         if 'size' in state_dict:
             self.pybullet_client.removeBody(self.block_id)
             self.shape_id = self.pybullet_client.createCollisionShape(
@@ -176,6 +175,9 @@ class Cuboid(RigidObject):
                 baseOrientation=orientation,
                 baseMass=self.mass
             )
+            self.pybullet_client.changeVisualShape(self.block_id, -1,
+                                                   rgbaColor=
+                                                   np.append(self.color, 1))
             self.size = state_dict['size']
             self._set_area()
         elif 'position' in state_dict or 'orientation' in state_dict:
@@ -183,12 +185,14 @@ class Cuboid(RigidObject):
                 self.block_id, position, orientation
             )
         elif 'mass' in state_dict:
-            self.pybullet_client.changeDynamics(self.block_id, -1, mass=self.mass)
+            self.pybullet_client.changeDynamics(self.block_id, -1,
+                                                mass=self.mass)
 
         if 'color' in  state_dict:
             self.color = state_dict['color']
             self.pybullet_client.changeVisualShape(self.block_id, -1,
-                                                   rgbaColor=np.append(state_dict['color'], 1))
+                                                   rgbaColor=
+                                                   np.append(state_dict['color'], 1))
         if ('linear_velocity' in state_dict) ^ \
                 ('angular_velocity' in state_dict):
             linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(

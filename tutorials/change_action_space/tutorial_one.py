@@ -5,7 +5,7 @@ import numpy as np
 
 
 def apply_delta_action():
-    task = Task(task_id='reaching', randomize_joint_positions=True)
+    task = Task(task_generator_id='reaching', randomize_joint_positions=True)
     env = World(task=task, enable_visualization=True,
                 action_mode="joint_positions",
                 normalize_actions=True,

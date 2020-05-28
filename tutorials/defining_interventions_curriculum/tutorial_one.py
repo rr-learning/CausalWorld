@@ -11,7 +11,7 @@ from causal_rl_bench.meta_agents.random import RandomMetaActorPolicy
 
 
 def without_interventions():
-    task = Task(task_id='reaching')
+    task = Task(task_generator_id='reaching')
     reacher_policy = ReacherActorPolicy()
 
     def policy_fn(obs):
@@ -28,7 +28,7 @@ def without_interventions():
 
 
 def with_interventions():
-    task = Task(task_id='reaching')
+    task = Task(task_generator_id='reaching')
     reacher_policy = ReacherActorPolicy()
     # reacher_policy = MovingAverageActionPolicyWrapper(reacher_policy,
     #                                                   widow_size=250)

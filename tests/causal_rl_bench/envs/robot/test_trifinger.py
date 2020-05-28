@@ -100,7 +100,7 @@ def test_pd_gains():
     from causal_rl_bench.tasks.task import Task
     import numpy as np
     np.random.seed(0)
-    task = Task(task_id='pushing')
+    task = Task(task_generator_id='pushing')
     skip_frame = 1
     env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
                 normalize_actions=False, seed=0)
@@ -149,7 +149,7 @@ def test_inverse_kinemetics():
     np.random.seed(0)
     skip_frame = 1
 
-    task = Task(task_id='reaching')
+    task = Task(task_generator_id='reaching')
     env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
                 normalize_actions=False, seed=0, action_mode="end_effector_positions")
 

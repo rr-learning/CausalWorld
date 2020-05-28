@@ -28,7 +28,7 @@ class EvaluationPipeline:
         self.data_recorder = DataRecorder(output_directory=None)
         if self.tracker:
             task_stats = self.tracker.task_stats_log[0]
-            self.task = Task(task_id=task_stats.task_name,
+            self.task = Task(task_generator_id=task_stats.task_name,
                              **task_stats.task_params,
                              intervention_split=True,
                              training=False)
