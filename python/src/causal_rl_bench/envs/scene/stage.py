@@ -272,7 +272,7 @@ class Stage(object):
         #TODO: not a complete list yet of what we want to expose
         variable_params = dict()
         variable_params["floor_color"] = \
-            self.pybullet_client.getVisualShapeData(self.stage_id)[0][7][:3]
+            self.pybullet_client.getVisualShapeData(self.floor_id)[0][7][:3]
         variable_params["stage_color"] = \
             self.pybullet_client.getVisualShapeData(self.stage_id)[0][7][:3]
         variable_params["stage_friction"] = \

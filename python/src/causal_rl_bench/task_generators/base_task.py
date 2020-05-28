@@ -3,7 +3,9 @@ from causal_rl_bench.utils.state_utils import get_intersection
 
 
 class BaseTask(object):
-    def __init__(self, task_name):
+    def __init__(self, task_name, intervention_split,
+                 training, sparse_reward_weight=1,
+                 dense_reward_weights=np.array([])):
         self.robot = None
         self.stage = None
         self.task_solved = False
@@ -18,14 +20,23 @@ class BaseTask(object):
         self._non_default_stage_observation_funcs = dict()
         self.current_full_observations_dict = dict()
         self.task_params = dict()
+        self.task_params["sparse_reward_weight"] = sparse_reward_weight
+        self.task_params["dense_reward_weights"] = dense_reward_weights
         self.time_steps_elapsed_since_success = 0
         self.time_threshold_in_goal_state_secs = 0.5
         self.current_time_secs = 0
-        self.training_intervention_spaces = None
-        self.testing_intervention_spaces = None
+        self.training_intervention_spaces = dict()
+        self.testing_intervention_spaces = dict()
         self.initial_state = dict()
         self.finished_episode = False
-        self.enforce_intervention_spaces_split = False
+        self.intervention_spaces_split = intervention_split
+        self.training_intervention_mode = training
+        return
+
+    def get_description(self):
+        return
+
+    def _reset_task(self):
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
@@ -48,37 +59,71 @@ class BaseTask(object):
     def get_info(self):
         return {}
 
-    def get_reward(self):
-        raise NotImplementedError
+    def _update_task_state(self, update_task_info):
+        return
 
-    def get_description(self):
-        raise NotImplementedError()
-
-    def _reset_task(self):
-        raise NotImplementedError()
+    def _calculate_dense_rewards(self):
+        return np.array([]), None
 
     def _set_training_intervention_spaces(self):
-        raise NotImplementedError()
+        return
 
     def _set_testing_intervention_spaces(self):
-        raise NotImplementedError()
+        return
+
+    def get_reward(self):
+        desired_goal = self.get_desired_goal()
+        achieved_goal = self.get_achieved_goal()
+        sparse_reward = self._compute_sparse_reward(
+            achieved_goal=achieved_goal,
+            desired_goal=desired_goal,
+            info=self.get_info())
+        dense_rewards, update_task_info = self._calculate_dense_rewards()
+        reward = np.sum(np.array(dense_rewards) *
+                        self.task_params["dense_reward_weights"]) \
+                        + sparse_reward * self.task_params["sparse_reward_weight"]
+        self._update_task_state(update_task_info)
+        return reward
+
+    def get_desired_goal(self):
+        if self.task_name == "reaching":
+            desired_goal = np.array([])
+            for visual_goal in self.stage.visual_objects:
+                desired_goal = np.append(desired_goal,
+                                         self.stage.visual_objects[visual_goal]
+                                         .get_variable_state('position'))
+        else:
+            desired_goal = np.array([])
+            for visual_goal in self.stage.visual_objects:
+                desired_goal = np.append(desired_goal,
+                                         self.stage.visual_objects[visual_goal]
+                                         .get_bounding_box())
+        return desired_goal
+
+    def get_achieved_goal(self):
+        if self.task_name == "reaching":
+            achieved_goal = \
+                self.robot.compute_end_effector_positions(
+                    self.robot.latest_full_state.position)
+        else:
+            achieved_goal = np.array([])
+            for rigid_object in self.stage.rigid_objects:
+                achieved_goal = np.append(achieved_goal,
+                                          rigid_object.get_bounding_box())
+        return achieved_goal
 
     def init_task(self, robot, stage):
         self.robot = robot
         self.stage = stage
+        self.initial_state['joint_positions'] = \
+            self.robot.get_rest_pose()[0]
+        self.initial_state['joint_velocities'] = \
+            np.zeros([9, ])
         self._set_up_stage_arena()
         self.stage.finalize_stage()
         self._set_up_non_default_observations()
         self._set_training_intervention_spaces()
         self._set_testing_intervention_spaces()
-        # for task_param_varaible in self.initial_state:
-        #     if task_param_varaible not in self.training_intervention_spaces:
-        #         self.training_intervention_spaces[task_param_varaible] = \
-        #             np.array([self.initial_state[task_param_varaible],
-        #                       self.initial_state[task_param_varaible]])
-        #         self.testing_intervention_spaces[task_param_varaible] = \
-        #             np.array([self.initial_state[task_param_varaible],
-        #                       self.initial_state[task_param_varaible]])
         return
 
     def _setup_non_default_robot_observation_key(self, observation_key,
@@ -133,7 +178,10 @@ class BaseTask(object):
                         intersection_area += get_intersection(
                             visual_object.get_bounding_box(),
                             rigid_object.get_bounding_box())
-            sparse_reward = intersection_area / float(union_area)
+            if union_area > 0:
+                sparse_reward = intersection_area / float(union_area)
+            else:
+                sparse_reward = 1
             if sparse_reward > 0.9:
                 self.task_solved = True
                 self.time_steps_elapsed_since_success += 1
@@ -143,10 +191,7 @@ class BaseTask(object):
                 self.time_steps_elapsed_since_success = 0
             return sparse_reward
 
-    def enforce_intervention_spaces_split(self):
-        self.enforce_intervention_spaces_split = True
-
-    def reset_task(self, interventions_dict=None, is_training=True):
+    def reset_task(self, interventions_dict=None):
         self.robot.clear()
         self.stage.clear()
         self.task_solved = False
@@ -174,9 +219,8 @@ class BaseTask(object):
                         self.initial_state[non_changed_variable]
             success_signal, interventions_info = \
                 self.apply_interventions(interventions_dict_copy,
-                                         is_training=is_training,
                                          check_bounds=
-                                         self.enforce_intervention_spaces_split)
+                                         self.intervention_spaces_split)
             if success_signal:
                 for intervention_variable in self.initial_state:
                     if intervention_variable in interventions_dict:
@@ -191,12 +235,10 @@ class BaseTask(object):
                                 interventions_dict_copy[intervention_variable]
             else:
                 self.apply_interventions(self.initial_state,
-                                         is_training=is_training,
                                          check_bounds=False)
 
         else:
             self.apply_interventions(self.initial_state,
-                                     is_training=is_training,
                                      check_bounds=False)
         self._reset_task()
         return success_signal, interventions_info
@@ -212,9 +254,21 @@ class BaseTask(object):
         for key in self.task_robot_observation_keys:
             # dont forget to handle non standard observation here
             if key in self._non_default_robot_observation_funcs:
-                observations_filtered =\
-                    np.append(observations_filtered,
-                              self._non_default_robot_observation_funcs[key]())
+                #TODO: there was a bug here with normalization
+                # if self.robot.normalize_observations:
+                if False:
+                    normalized_observations = \
+                        self.robot.\
+                            normalize_observation_for_key(key=key,
+                                                          observation=
+                                                          self._non_default_robot_observation_funcs[key]())
+                    observations_filtered = \
+                        np.append(observations_filtered,
+                                  normalized_observations)
+                else:
+                    observations_filtered =\
+                        np.append(observations_filtered,
+                                  self._non_default_robot_observation_funcs[key]())
             else:
                 observations_filtered = \
                     np.append(observations_filtered,
@@ -222,9 +276,20 @@ class BaseTask(object):
 
         for key in self.task_stage_observation_keys:
             if key in self._non_default_stage_observation_funcs:
-                observations_filtered = \
-                    np.append(observations_filtered,
-                              self._non_default_stage_observation_funcs[key]())
+                # if self.stage.normalize_observations:
+                if False:
+                    normalized_observations = \
+                        self.stage.\
+                            normalize_observation_for_key(key=key,
+                                                          observation=
+                                                          self._non_default_stage_observation_funcs[key]())
+                    observations_filtered = \
+                        np.append(observations_filtered,
+                                  normalized_observations)
+                else:
+                    observations_filtered =\
+                        np.append(observations_filtered,
+                                  self._non_default_robot_observation_funcs[key]())
             else:
                 observations_filtered = \
                     np.append(observations_filtered,
@@ -245,13 +310,15 @@ class BaseTask(object):
             self.finished_episode = True
         return self.finished_episode
 
-    def do_single_random_intervention(self, training_space=True):
+    def do_single_random_intervention(self):
         interventions_dict = dict()
-        if training_space:
+        if self.training_intervention_mode:
             intervention_space = self.training_intervention_spaces
         else:
             intervention_space = self.testing_intervention_spaces
         # choose random variable one intervention  only and intervene
+        if len(intervention_space) == 0:
+            return False, {}, {}
         variable_name = np.random.choice(list(intervention_space))
         variable_space = intervention_space[variable_name]
         sub_variable_name = None
@@ -261,17 +328,17 @@ class BaseTask(object):
             variable_space = variable_space[sub_variable_name]
         chosen_intervention = np.random.uniform(variable_space[0],
                                                variable_space[1])
-        self.do_intervention(variable_name,
-                             chosen_intervention,
-                             sub_variable_name=sub_variable_name,
-                             training=False)
-        if isinstance(variable_space, dict):
+        if sub_variable_name is None:
+            interventions_dict[variable_name] = \
+                chosen_intervention
+        else:
             interventions_dict[variable_name] = dict()
             interventions_dict[variable_name][sub_variable_name] = \
                 chosen_intervention
-        else:
-            interventions_dict[variable_name] = chosen_intervention
-        return interventions_dict
+
+        success_signal, interventions_info = \
+            self.apply_interventions(interventions_dict, check_bounds=False)
+        return success_signal, interventions_info, interventions_dict
 
     def get_training_intervention_spaces(self):
         return self.training_intervention_spaces
@@ -293,24 +360,27 @@ class BaseTask(object):
         return variable_params
 
     def get_current_task_parameters(self):
-        task_params_dict = dict()
+        #this is all the variables that are available and exposed
         current_variables_values = self.get_current_variables_values()
-        #filter them if they are not exposed in in the intervention spaces
-        for variable_name in self.training_intervention_spaces:
-            if isinstance(
-                    self.training_intervention_spaces[variable_name], dict):
-                task_params_dict[variable_name] = dict()
-                for subvariable_name in self.training_intervention_spaces[variable_name]:
-                    task_params_dict[variable_name][subvariable_name] = \
-                        current_variables_values[variable_name][subvariable_name]
-            else:
-                task_params_dict[variable_name] = current_variables_values[variable_name]
+        #filter them only if intervention spaces split is enforced
+        if self.intervention_spaces_split:
+            task_params_dict = dict()
+            for variable_name in self.training_intervention_spaces:
+                if isinstance(
+                        self.training_intervention_spaces[variable_name], dict):
+                    task_params_dict[variable_name] = dict()
+                    for subvariable_name in self.training_intervention_spaces[variable_name]:
+                        task_params_dict[variable_name][subvariable_name] = \
+                            current_variables_values[variable_name][subvariable_name]
+                else:
+                    task_params_dict[variable_name] = current_variables_values[variable_name]
+        else:
+            task_params_dict = dict(current_variables_values)
         # you can add task specific ones after that
         return task_params_dict
 
-    def is_intervention_in_bounds(self, interventions_dict,
-                                  is_training=True):
-        if is_training:
+    def is_intervention_in_bounds(self, interventions_dict):
+        if self.training_intervention_mode:
             intervention_space = self.training_intervention_spaces
         else:
             intervention_space = self.testing_intervention_spaces
@@ -357,20 +427,18 @@ class BaseTask(object):
                task_generator_interventions_dict
 
     def apply_interventions(self, interventions_dict,
-                            is_training=True,
                             check_bounds=False):
         interventions_info = {'out_bounds': False,
                               'robot_infeasible': None,
                               'stage_infeasible': None,
                               'task_generator_infeasible': None}
         if check_bounds and not self.is_intervention_in_bounds(
-                interventions_dict, is_training=is_training):
+                interventions_dict):
             interventions_info['out_bounds'] = True
             return False, interventions_info
         interventions_dict = \
             dict(self._handle_contradictory_interventions(interventions_dict))
-        if check_bounds and not self.is_intervention_in_bounds(interventions_dict,
-                                                               is_training=is_training):
+        if check_bounds and not self.is_intervention_in_bounds(interventions_dict):
             interventions_info['out_bounds'] = True
             return False, interventions_info
         #now divide the interventions
@@ -390,6 +458,14 @@ class BaseTask(object):
         return robot_intervention_success_signal and \
                stage_intervention_success_signal and \
                task_generator_intervention_success_signal, interventions_info
+
+    def do_intervention(self, interventions_dict, check_bounds=None):
+        if check_bounds is None:
+            check_bounds = self.intervention_spaces_split
+        success_signal, interventions_info = \
+            self.apply_interventions(interventions_dict,
+                                     check_bounds=check_bounds)
+        return success_signal, interventions_info
 
 
 

@@ -24,5 +24,17 @@ class BaseMetaActorPolicy(object):
                Dict of variables that the meta actor decided to intervene on
                with the corresponding values.
         """
-        #this should return interventions dict on certain variables
-        raise Exception("not implemented yet")
+        interventions_dict = self._act(variables_dict)
+        self.validate_intervention_dict(variables_dict, interventions_dict)
+        return interventions_dict
+
+    def _act(self, variables_dict):
+        return {}
+
+    def validate_intervention_dict(self, variables_dict, intervention_dict):
+        #TODO: remove redundant interventions here
+        for intervention in intervention_dict:
+            if intervention not in variables_dict:
+                raise Exception("the meta actor "
+                                "performed an invalid intervention "
+                                "on a variable that is not part of its input")

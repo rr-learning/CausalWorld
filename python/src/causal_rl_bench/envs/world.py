@@ -3,7 +3,7 @@ import gym
 import pybullet
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.task_generators.task import Task
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
 
@@ -16,7 +16,7 @@ class World(gym.Env):
                  enable_visualization=False, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  normalize_actions=True, normalize_observations=True,
-                 max_episode_length=None, data_recorder=None, testing=False,
+                 max_episode_length=None, data_recorder=None,
                  enable_goal_image=False, **kwargs):
         """
         Constructor sets up the physical world parameters,
@@ -89,10 +89,6 @@ class World(gym.Env):
         self.data_recorder = data_recorder
         self.tracker = Tracker(task=self.task,
                                world_params=self.get_world_params())
-        if testing:
-            self.training_flag = False
-        else:
-            self.training_flag = True
         self.reset()
         return
 
@@ -157,8 +153,7 @@ class World(gym.Env):
         self.episode_length = 0
         if interventions_dict is not None:
             self.tracker.do_intervention(self.task, interventions_dict)
-        success_signal, interventions_info = self.task.reset_task(interventions_dict,
-                                                                  is_training=self.training_flag)
+        success_signal, interventions_info = self.task.reset_task(interventions_dict)
         if success_signal is not None:
             if not success_signal:
                 self.tracker.add_invalid_intervention(interventions_info)
@@ -198,27 +193,24 @@ class World(gym.Env):
             return self.task.is_done()
 
     def do_single_random_intervention(self):
-        # self.tracker.add_episode_experience(self.episode_length)
-        # # TODO: Set episode length after intervention to zero?
-        # self.episode_length = 0
-        interventions_dict = self.task.do_single_random_intervention()
-        self.tracker.do_intervention(self.task, interventions_dict)
+        success_signal, interventions_info, interventions_dict = \
+            self.task.do_single_random_intervention()
+        if len(interventions_dict) > 0:
+            self.tracker.do_intervention(self.task, interventions_dict)
+            if success_signal is not None:
+                if not success_signal:
+                    self.tracker.add_invalid_intervention(interventions_info)
         return interventions_dict
 
-    def do_intervention(self, variable_name, variable_value,
-                        sub_variable_name=None):
-        interventions_dict = dict()
-        if sub_variable_name is None:
-            interventions_dict[variable_name] = dict()
-            interventions_dict[variable_name][sub_variable_name] = variable_name
-        else:
-            interventions_dict[variable_name] = variable_name
-        # self.tracker.add_episode_experience(self.episode_length)
-        # # TODO: Set episode length after intervention to zero?
-        # self.episode_length = 0
-        success_signal = self.task.do_intervention(variable_name, variable_value,
-                                                   sub_variable_name)
+    def do_intervention(self, interventions_dict,
+                        check_bounds=None):
+        success_signal, interventions_info = \
+            self.task.do_intervention(interventions_dict,
+                                      check_bounds=check_bounds)
         self.tracker.do_intervention(self.task, interventions_dict)
+        if success_signal is not None:
+            if not success_signal:
+                self.tracker.add_invalid_intervention(interventions_info)
         return success_signal
 
     def get_full_state(self):

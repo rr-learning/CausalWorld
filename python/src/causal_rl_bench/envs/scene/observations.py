@@ -132,9 +132,13 @@ class StageObservations(object):
     def get_current_observations(self, helper_keys):
         observations_dict = dict()
         for rigid_object in self.rigid_objects:
-            observations_dict.update(rigid_object.get_state())
+            observations_dict.update({rigid_object.name +'_'+
+                                      k : v for k, v in
+                                      rigid_object.get_state().items()})
         for visual_object in self.visual_objects:
-            observations_dict.update(visual_object.get_state())
+            observations_dict.update({visual_object.name +'_'+
+                                      k : v for k, v in
+                                      visual_object.get_state().items()})
         observation_dict_keys = list(observations_dict.keys())
         for observation in observation_dict_keys:
             if (observation not in self.observations_keys) and (observation not in helper_keys):

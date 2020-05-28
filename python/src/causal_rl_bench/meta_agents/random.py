@@ -8,12 +8,12 @@ class RandomMetaActorPolicy(BaseMetaActorPolicy):
         self.task_intervention_space = task_intervention_space
         self.sampler_funcs = dict()
 
-    def act(self, variables_dict):
+    def _act(self, variables_dict):
         interventions_dict = dict()
-        for variable in variables_dict:
-            if isinstance(variables_dict[variable], dict):
+        for variable in self.task_intervention_space:
+            if isinstance(self.task_intervention_space[variable], dict):
                 interventions_dict[variable] = dict()
-                for subvariable_name in variables_dict[variable]:
+                for subvariable_name in self.task_intervention_space[variable]:
                     if variable in self.sampler_funcs and \
                             subvariable_name in self.sampler_funcs[variable]:
                         interventions_dict[variable][subvariable_name] = \
