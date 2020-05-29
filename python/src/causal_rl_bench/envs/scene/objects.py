@@ -269,13 +269,15 @@ class Cuboid(RigidObject):
         """
         if state_type == 'dict':
             state = dict()
-            position, orientation = self.pybullet_client.getBasePositionAndOrientation(
+            position, orientation = \
+                self.pybullet_client.getBasePositionAndOrientation(
                 self.block_id
             )
             state["type"] = self.type_id
             state["position"] = np.array(position)
             state["orientation"] = np.array(orientation)
-            linear_velocity, angular_velocity = self.pybullet_client.getBaseVelocity(self.block_id)
+            linear_velocity, angular_velocity = \
+                self.pybullet_client.getBaseVelocity(self.block_id)
             state["linear_velocity"] = np.array(linear_velocity)
             state["angular_velocity"] = np.array(angular_velocity)
             state["mass"] = self.mass

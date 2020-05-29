@@ -97,15 +97,15 @@ class World(gym.Env):
         if self.observation_mode == "cameras" and self.enable_goal_image:
             current_images = self.robot.get_current_camera_observations()
             goal_images = self.stage.get_current_goal_image()
-            observation = np.concatenate((current_images, goal_images), axis=0)
+            observation = np.concatenate((current_images, goal_images),
+                                         axis=0)
         elif self.observation_mode == "cameras":
             observation = self.robot.get_current_camera_observations()
         else:
             observation = self.task.filter_structured_observations()
-        reward = self.task.get_reward() * self.dt
-        done = self._is_done()
         info = self.task.get_info()
-
+        reward = self.task.get_reward(info) * self.dt
+        done = self._is_done()
         if self.data_recorder:
             self.data_recorder.append(robot_action=action,
                                       observation=observation,

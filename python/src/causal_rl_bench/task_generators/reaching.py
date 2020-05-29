@@ -1,10 +1,9 @@
 """
 causal_rl_bench.task_generators/reaching.py
-==================================
+===========================================
 """
 from causal_rl_bench.task_generators.base_task import BaseTask
 import numpy as np
-import math
 
 
 class ReachingTaskGenerator(BaseTask):
@@ -54,54 +53,6 @@ class ReachingTaskGenerator(BaseTask):
             "Task where the goal is to reach a " \
             "point for each finger"
 
-    def _set_training_intervention_spaces(self):
-        self.training_intervention_spaces = dict()
-        self.training_intervention_spaces['joint_positions'] = \
-            np.array([[-math.radians(70), -math.radians(70),
-                       -math.radians(160)] * 3,
-                       [math.radians(40), -math.radians(20),
-                        -math.radians(30)] * 3])
-        self.training_intervention_spaces['goal_60'] = dict()
-        self.training_intervention_spaces['goal_120'] = dict()
-        self.training_intervention_spaces['goal_300'] = dict()
-        self.training_intervention_spaces['goal_60']['position'] = \
-            np.array([self.stage.floor_inner_bounding_box[0],
-                      (self.stage.floor_inner_bounding_box[0] +
-                       self.stage.floor_inner_bounding_box[1]) / 2])
-        self.training_intervention_spaces['goal_120']['position'] = \
-            np.array([self.stage.floor_inner_bounding_box[0],
-                      (self.stage.floor_inner_bounding_box[0] +
-                       self.stage.floor_inner_bounding_box[1]) / 2])
-        self.training_intervention_spaces['goal_300']['position'] = \
-            np.array([self.stage.floor_inner_bounding_box[0],
-                      (self.stage.floor_inner_bounding_box[0] +
-                       self.stage.floor_inner_bounding_box[1]) / 2])
-        return
-
-    def _set_testing_intervention_spaces(self):
-        self.testing_intervention_spaces = dict()
-        self.testing_intervention_spaces['joint_positions'] = \
-            np.array([[math.radians(40), -math.radians(20),
-                       -math.radians(30)] * 3,
-                       [math.radians(70), 0,
-                        math.radians(-2)] * 3])
-        self.testing_intervention_spaces['goal_60'] = dict()
-        self.testing_intervention_spaces['goal_120'] = dict()
-        self.testing_intervention_spaces['goal_300'] = dict()
-        self.testing_intervention_spaces['goal_60']['position'] = \
-            np.array([(self.stage.floor_inner_bounding_box[0] +
-                       self.stage.floor_inner_bounding_box[1]) / 2,
-                       self.stage.floor_inner_bounding_box[1]])
-        self.testing_intervention_spaces['goal_120']['position'] = \
-            np.array([(self.stage.floor_inner_bounding_box[0] +
-                       self.stage.floor_inner_bounding_box[1]) / 2,
-                      self.stage.floor_inner_bounding_box[1]])
-        self.testing_intervention_spaces['goal_300']['position'] = \
-            np.array([(self.stage.floor_inner_bounding_box[0] +
-                       self.stage.floor_inner_bounding_box[1]) / 2,
-                      self.stage.floor_inner_bounding_box[1]])
-        return
-
     def _reset_task(self):
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
@@ -110,34 +61,43 @@ class ReachingTaskGenerator(BaseTask):
             self.robot.latest_full_state.velocity)
         return
 
-    def _calculate_dense_rewards(self):
-        end_effector_positions_goal = self.get_desired_goal()
-        current_end_effector_positions = \
-            self.robot.compute_end_effector_positions(
-                self.robot.latest_full_state.position)
+    def _calculate_dense_rewards(self, desired_goal, achieved_goal, info):
+        end_effector_positions_goal = desired_goal
+        current_end_effector_positions = achieved_goal
         previous_dist_to_goal = np.linalg.norm(
             end_effector_positions_goal -
-            self.previous_end_effector_positions)
+            info['previous_end_effector_positions'])
         current_dist_to_goal = np.linalg.norm(end_effector_positions_goal
                                               - current_end_effector_positions)
         rewards = list()
         rewards.append(previous_dist_to_goal - current_dist_to_goal)
         rewards.append(-current_dist_to_goal)
-        rewards.append(-np.linalg.norm(self.robot.latest_full_state.torque))
+        rewards.append(-np.linalg.norm(info['current_torque']))
         rewards.append(-np.linalg.norm(np.abs(
-            self.robot.latest_full_state.velocity -
-            self.previous_joint_velocities), ord=2))
-        update_task_info = {'current_end_effector_positions':
-                                current_end_effector_positions,
-                            'current_velocity': np.copy(
-                                self.robot.latest_full_state.velocity)}
-        return rewards, update_task_info
+            info['current_joint_velocities'] -
+            info['previous_joint_velocities']), ord=2))
+        return rewards
 
-    def _update_task_state(self, update_task_info):
+    def get_info(self):
+        info = dict()
+        info['current_end_effector_positions'] = \
+            self.robot.compute_end_effector_positions(
+                self.robot.latest_full_state.position)
+        info['previous_end_effector_positions'] = \
+            self.previous_end_effector_positions
+        info['current_torque'] = \
+            self.robot.latest_full_state.torque
+        info['current_joint_velocities'] = \
+            self.robot.latest_full_state.velocity
+        info['previous_joint_velocities'] = \
+            self.previous_joint_velocities
+        return info
+
+    def _update_task_state(self, info):
         self.previous_end_effector_positions = \
-            update_task_info['current_end_effector_positions']
+            info['current_end_effector_positions']
         self.previous_joint_velocities = \
-            update_task_info['current_velocity']
+            info['current_joint_velocities']
         return
 
 

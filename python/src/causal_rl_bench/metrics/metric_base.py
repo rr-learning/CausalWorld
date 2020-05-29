@@ -1,6 +1,3 @@
-from causal_rl_bench.loggers.data_recorder import DataRecorder
-
-
 class BaseMetric(object):
     def __init__(self, name):
         self.name = name

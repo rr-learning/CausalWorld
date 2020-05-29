@@ -1,4 +1,5 @@
 import numpy as np
+import math
 from causal_rl_bench.utils.state_utils import get_intersection
 
 
@@ -44,14 +45,14 @@ class BaseTask(object):
         # and other way around sometimes
         return interventions_dict
 
-    def get_task_generator_variables_values(self):
-        return {}
-
     def _set_up_stage_arena(self):
         return
 
     def _set_up_non_default_observations(self):
         return
+
+    def get_task_generator_variables_values(self):
+        return {}
 
     def apply_task_generator_interventions(self, interventions_dict):
         return True
@@ -59,30 +60,87 @@ class BaseTask(object):
     def get_info(self):
         return {}
 
-    def _update_task_state(self, update_task_info):
+    def _update_task_state(self, info):
         return
 
-    def _calculate_dense_rewards(self):
+    def _calculate_dense_rewards(self, desired_goal, achieved_goal, info):
         return np.array([]), None
 
     def _set_training_intervention_spaces(self):
+        #you can override these easily
+        self.training_intervention_spaces = dict()
+        self.training_intervention_spaces['joint_positions'] = \
+            np.array([[-math.radians(70), -math.radians(70),
+                       -math.radians(160)] * 3,
+                      [math.radians(40), -math.radians(20),
+                       -math.radians(30)] * 3])
+        #any goal or object in arena put the position
+        #and orientation modification
+        for rigid_object in self.stage.rigid_objects:
+            self.training_intervention_spaces[rigid_object] = dict()
+            self.training_intervention_spaces[rigid_object]['position'] = \
+                np.array([self.stage.floor_inner_bounding_box[0],
+                          (self.stage.floor_inner_bounding_box[0] +
+                           self.stage.floor_inner_bounding_box[1]) / 2])
+        for visual_object in self.stage.visual_objects:
+            self.training_intervention_spaces[visual_object] = dict()
+            self.training_intervention_spaces[visual_object]['position'] = \
+                np.array([self.stage.floor_inner_bounding_box[0],
+                          (self.stage.floor_inner_bounding_box[0] +
+                           self.stage.floor_inner_bounding_box[1]) / 2])
         return
 
     def _set_testing_intervention_spaces(self):
+        # you can override these easily
+        self.testing_intervention_spaces = dict()
+        self.testing_intervention_spaces['joint_positions'] = \
+            np.array([[math.radians(40), -math.radians(20),
+                       -math.radians(30)] * 3,
+                      [math.radians(70), 0,
+                       math.radians(-2)] * 3])
+        # any goal or object in arena put the position
+        # and orientation modification
+        for rigid_object in self.stage.rigid_objects:
+            self.testing_intervention_spaces[rigid_object] = dict()
+            self.testing_intervention_spaces[rigid_object]['position'] = \
+                np.array([(self.stage.floor_inner_bounding_box[0] +
+                           self.stage.floor_inner_bounding_box[1]) / 2,
+                          self.stage.floor_inner_bounding_box[1]])
+        for visual_object in self.stage.visual_objects:
+            self.testing_intervention_spaces[visual_object] = dict()
+            self.testing_intervention_spaces[visual_object]['position'] = \
+                np.array([(self.stage.floor_inner_bounding_box[0] +
+                           self.stage.floor_inner_bounding_box[1]) / 2,
+                          self.stage.floor_inner_bounding_box[1]])
         return
 
-    def get_reward(self):
+    def get_reward(self, info):
         desired_goal = self.get_desired_goal()
         achieved_goal = self.get_achieved_goal()
         sparse_reward = self._compute_sparse_reward(
             achieved_goal=achieved_goal,
-            desired_goal=desired_goal,
-            info=self.get_info())
-        dense_rewards, update_task_info = self._calculate_dense_rewards()
+            desired_goal=desired_goal)
+        dense_rewards = self._calculate_dense_rewards(achieved_goal=achieved_goal,
+                                                      desired_goal=desired_goal,
+                                                      info=info)
         reward = np.sum(np.array(dense_rewards) *
                         self.task_params["dense_reward_weights"]) \
                         + sparse_reward * self.task_params["sparse_reward_weight"]
-        self._update_task_state(update_task_info)
+        self._update_task_state(info)
+        return reward
+
+    def compute_reward(self, achieved_goal, desired_goal, info):
+        sparse_reward = self._compute_sparse_reward(
+            achieved_goal=achieved_goal,
+            desired_goal=desired_goal,
+            redundant_calulcation=True)
+        dense_rewards, update_task_info = \
+            self._calculate_dense_rewards(achieved_goal=achieved_goal,
+                                          desired_goal=desired_goal,
+                                          info=info)
+        reward = np.sum(np.array(dense_rewards) *
+                        self.task_params["dense_reward_weights"]) \
+                 + sparse_reward * self.task_params["sparse_reward_weight"]
         return reward
 
     def get_desired_goal(self):
@@ -146,8 +204,7 @@ class BaseTask(object):
         return
 
     def _compute_sparse_reward(self, achieved_goal,
-                               desired_goal, info,
-                               redundant_calulcation=False):
+                               desired_goal, redundant_calulcation=False):
         if not redundant_calulcation:
             self.current_time += self.robot.dt
         if self.task_name == "reaching":
@@ -483,7 +540,6 @@ class BaseTask(object):
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)
         return success_signal, interventions_info
-
 
 
 

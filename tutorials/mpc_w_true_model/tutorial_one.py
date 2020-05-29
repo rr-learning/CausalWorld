@@ -21,7 +21,8 @@ randomize_goal_block_pose = True
 
 def _make_env():
     def _init():
-        task = Task(task_generator_id='pushing', randomize_joint_positions=randomize_joint_positions,
+        task = Task(task_generator_id='pushing',
+                    randomize_joint_positions=randomize_joint_positions,
                     randomize_block_pose=randomize_block_pose,
                     randomize_goal_block_pose=randomize_goal_block_pose)
         env = World(task=task, skip_frame=skip_frame,

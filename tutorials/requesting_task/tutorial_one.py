@@ -11,8 +11,9 @@ def example():
         obs = env.reset()
         # print(obs)
         chosen_intervention = env.do_single_random_intervention()
+        print(chosen_intervention)
         # env.do_intervention({'tool_block': {'position':
-        #                                         np.array([0, 0, 0])}})
+        #                                         np.array([0, 0, 0.0425])}})
         for _ in range(200):
             obs, reward, done, info = env.step(env.action_space.sample())
             # print(obs)
