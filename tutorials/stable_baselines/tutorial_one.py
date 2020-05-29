@@ -1,14 +1,18 @@
-import argparse
-import os
-import json
-import tensorflow as tf
-tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-from stable_baselines.common import set_global_seeds
-from stable_baselines.common.vec_env import SubprocVecEnv
+from causal_rl_bench.task_generators.task import task_generator
+from causal_rl_bench.envs.world import World
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
-from causal_rl_bench.envs.world import World
-from causal_rl_bench.task_generators.task import task_generator
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+import os
+import json
+from stable_baselines.common import set_global_seeds
+from stable_baselines.common.vec_env import SubprocVecEnv
+import argparse
+from causal_rl_bench.intervention_agents.training_intervention import \
+    reset_training_intervention_agent
+from causal_rl_bench.wrappers.intervention_wrappers import \
+    ResetInterventionsActorWrapper
 
 
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
@@ -21,6 +25,10 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                         enable_visualization=False,
                         seed=seed_num + rank, max_episode_length=
                         maximum_episode_length)
+            training_intervention_agent = \
+                reset_training_intervention_agent(task_generator_id=task_name)
+            env = ResetInterventionsActorWrapper(env,
+                                                 training_intervention_agent)
             return env
 
         set_global_seeds(seed_num)
@@ -98,6 +106,6 @@ if __name__ == '__main__':
                  seed_num=seed_num,
                  ppo_config=ppo_config,
                  total_time_steps=60000000,
-                 validate_every_timesteps=1000000,
+                 validate_every_timesteps=100,
                  task_name=task_name)
 

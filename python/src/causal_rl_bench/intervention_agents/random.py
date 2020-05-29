@@ -8,8 +8,9 @@ class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
         self.task_intervention_space = None
         self.sampler_funcs = dict()
 
-    def initialize_intervention_space(self, intervention_space):
-        self.task_intervention_space = intervention_space
+    def initialize_actor(self, env):
+        self.task_intervention_space =\
+            env.task.get_testing_intervention_spaces()
         return
 
     def _act(self, variables_dict):

@@ -67,11 +67,11 @@ class EvaluationPipeline(object):
             if isinstance(intervention_actor,
                           RandomInterventionActorPolicy):
                 if self.training:
-                    intervention_actor.initialize_intervention_space(
-                        self.task.get_training_intervention_spaces())
+                    intervention_actor.initialize_actor(
+                        self.env)
                 else:
-                    intervention_actor.initialize_intervention_space(
-                        self.task.get_testing_intervention_spaces())
+                    intervention_actor.initialize_actor(
+                        self.env)
 
         self.metrics_list = []
         self.metrics_list.append(MeanSuccessRateMetric())
