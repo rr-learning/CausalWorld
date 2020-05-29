@@ -18,10 +18,10 @@ class StageObservations(object):
         self.lower_bounds = dict()
         self.upper_bounds = dict()
         self.lower_bounds["goal_image"] = \
-            np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
+            np.zeros(shape=(3, 54, 72, 3), dtype=np.float32)
         self.upper_bounds["goal_image"] = \
             np.full(shape=(3, 54, 72, 3), fill_value=255,
-                    dtype=np.float64)
+                    dtype=np.float32)
 
         self.rigid_objects = rigid_objects
         self.visual_objects = visual_objects
@@ -35,14 +35,14 @@ class StageObservations(object):
 
     def get_observation_spaces(self):
         if self.normalized_observations:
-            return spaces.Box(low=np.full(shape=self.low.shape, fill_value=self.low_norm, dtype=np.float64),
-                              high=np.full(shape=self.low.shape, fill_value=self.high_norm, dtype=np.float64),
-                              dtype=np.float64)
+            return spaces.Box(low=np.full(shape=self.low.shape, fill_value=self.low_norm, dtype=np.float32),
+                              high=np.full(shape=self.low.shape, fill_value=self.high_norm, dtype=np.float32),
+                              dtype=np.float32)
         else:
             if self.observation_mode == "structured":
                 return spaces.Box(low=self.low,
                                   high=self.high,
-                                  dtype=np.float64)
+                                  dtype=np.float32)
             else:
                 return spaces.Box(low=self.low,
                                   high=self.high,

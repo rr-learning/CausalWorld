@@ -1,14 +1,9 @@
-from collections import OrderedDict
-
 import numpy as np
 from gym import spaces
-
-# Important: gym mixes up ordered and unordered keys
-# and the Dict space may return a different order of keys that the actual one
-KEY_ORDER = ['observation', 'achieved_goal', 'desired_goal']
+import gym
 
 
-class HERGoalEnvWrapper(object):
+class HERGoalEnvWrapper(gym.GoalEnv):
     """
     A wrapper that allow to use dict observation space (coming from GoalEnv) with
     the RL algorithms.
@@ -16,7 +11,9 @@ class HERGoalEnvWrapper(object):
     :param env: (gym.GoalEnv)
     """
 
-    def __init__(self, env):
+    def __init__(self, env,
+                 is_goal_distance_dense=False,
+                 sparse_reward_weight=1):
         super(HERGoalEnvWrapper, self).__init__()
         self.env = env
         self.metadata = self.env.metadata
@@ -25,14 +22,20 @@ class HERGoalEnvWrapper(object):
         goal_space_shape = current_goal.shape
         #TODO: get the actual bonds here for proper normalization maybe?
         self.action_space = self.env.action_space
+        self.env.task.time_threshold_in_goal_state_secs = self.env.dt
+        if not is_goal_distance_dense:
+            self.env.scale_reward_by_dt = False
+        self.env.task.calculate_additional_dense_rewards = False
+        self.env.task.set_sparse_reward(sparse_reward_weight)
+        self.env.task.is_goal_distance_dense = is_goal_distance_dense
         self.observation_space = spaces.Dict(dict(desired_goal=spaces.Box(-np.inf,
                                                                           np.inf,
                                                                           shape=goal_space_shape,
-                                                                          dtype='float32'),
+                                                                          dtype=np.float32),
                                                   achieved_goal=spaces.Box(-np.inf,
                                                                           np.inf,
                                                                           shape=goal_space_shape,
-                                                                          dtype='float32'),
+                                                                          dtype=np.float32),
                                                   observation=self.env.observation_space))
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata
@@ -51,10 +54,20 @@ class HERGoalEnvWrapper(object):
         return cls.__name__
 
     def step(self, action):
-        return self.env.step(action)
+        obs_dict = dict()
+        normal_obs, reward, done, info = self.env.step(action)
+        obs_dict['observation'] = normal_obs
+        obs_dict['achieved_goal'] = self.env.task.get_achieved_goal()
+        obs_dict['desired_goal'] = self.env.task.get_desired_goal()
+        return obs_dict, reward, done, info
 
     def reset(self, **kwargs):
-        return self.env.reset(**kwargs)
+        obs_dict = dict()
+        normal_obs = self.env.reset(**kwargs)
+        obs_dict['observation'] = normal_obs
+        obs_dict['achieved_goal'] = self.env.task.get_achieved_goal()
+        obs_dict['desired_goal'] = self.env.task.get_desired_goal()
+        return obs_dict
 
     def render(self, mode='human', **kwargs):
         return self.env.render(mode, **kwargs)
@@ -66,7 +79,9 @@ class HERGoalEnvWrapper(object):
         return self.env.seed(seed)
 
     def compute_reward(self, achieved_goal, desired_goal, info):
-        return self.env.compute_reward(achieved_goal, desired_goal, info)
+        return self.env.task.compute_reward(achieved_goal,
+                                            desired_goal,
+                                            info)
 
     def __str__(self):
         return '<{}{}>'.format(type(self).__name__, self.env)

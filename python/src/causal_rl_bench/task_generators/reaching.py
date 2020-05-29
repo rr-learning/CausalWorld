@@ -13,7 +13,7 @@ class ReachingTaskGenerator(BaseTask):
                                                        False),
                          training=kwargs.get("training", True),
                          sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 0),
+                         kwargs.get("sparse_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([4, 4, 4, 4])))

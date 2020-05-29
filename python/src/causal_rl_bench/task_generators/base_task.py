@@ -8,7 +8,8 @@ class BaseTask(object):
     def __init__(self, task_name, intervention_split,
                  training, sparse_reward_weight=1,
                  dense_reward_weights=np.array([]),
-                 is_goal_distance_dense=True):
+                 is_goal_distance_dense=True,
+                 calculate_additional_dense_rewards=True):
         self.robot = None
         self.stage = None
         self.task_solved = False
@@ -35,6 +36,8 @@ class BaseTask(object):
         self.intervention_spaces_split = intervention_split
         self.training_intervention_mode = training
         self.is_goal_distance_dense = is_goal_distance_dense
+        self.calculate_additional_dense_rewards = \
+            calculate_additional_dense_rewards
         return
 
     def get_description(self):
@@ -176,12 +179,15 @@ class BaseTask(object):
                 goal_distance = 1
             else:
                 goal_distance = -1
-        dense_rewards, update_task_state_dict = self._calculate_dense_rewards(achieved_goal=achieved_goal,
-                                                                              desired_goal=desired_goal)
-        reward = np.sum(np.array(dense_rewards) *
-                        self.task_params["dense_reward_weights"]) \
-                        + goal_distance * self.task_params["sparse_reward_weight"]
-        self._update_task_state(update_task_state_dict)
+        if self.calculate_additional_dense_rewards:
+            dense_rewards, update_task_state_dict = self._calculate_dense_rewards(achieved_goal=achieved_goal,
+                                                                                  desired_goal=desired_goal)
+            reward = np.sum(np.array(dense_rewards) *
+                            self.task_params["dense_reward_weights"]) \
+                            + goal_distance * self.task_params["sparse_reward_weight"]
+            self._update_task_state(update_task_state_dict)
+        else:
+            reward = goal_distance * self.task_params["sparse_reward_weight"]
         return reward
 
     def compute_reward(self, achieved_goal, desired_goal, info):
@@ -343,6 +349,11 @@ class BaseTask(object):
                 (self.robot.dt * self.time_steps_elapsed_since_success):
             self.finished_episode = True
         return self.finished_episode
+
+    def set_sparse_reward(self, sparse_reward_weight):
+        self.task_params["sparse_reward_weight"] = \
+            sparse_reward_weight
+        return
 
     def do_single_random_intervention(self):
         interventions_dict = dict()

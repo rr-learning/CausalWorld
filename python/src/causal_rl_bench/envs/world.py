@@ -89,6 +89,7 @@ class World(gym.Env):
         self.data_recorder = data_recorder
         self.tracker = Tracker(task=self.task,
                                world_params=self.get_world_params())
+        self.scale_reward_by_dt = True
         self.reset()
         return
 
@@ -105,7 +106,9 @@ class World(gym.Env):
         else:
             observation = self.task.filter_structured_observations()
         info = self.task.get_info()
-        reward = self.task.get_reward() * self.dt
+        reward = self.task.get_reward()
+        if self.scale_reward_by_dt:
+            reward *= self.dt
         done = self._is_done()
         if self.data_recorder:
             self.data_recorder.append(robot_action=action,
@@ -187,7 +190,8 @@ class World(gym.Env):
         self.max_episode_length = episode_length
 
     def _is_done(self):
-        if self.enforce_episode_length and self.episode_length > self.max_episode_length:
+        if self.enforce_episode_length and \
+                self.episode_length > self.max_episode_length:
             return True
         else:
             return self.task.is_done()
