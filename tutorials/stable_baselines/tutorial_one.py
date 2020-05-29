@@ -106,6 +106,6 @@ if __name__ == '__main__':
                  seed_num=seed_num,
                  ppo_config=ppo_config,
                  total_time_steps=60000000,
-                 validate_every_timesteps=100,
+                 validate_every_timesteps=1000000,
                  task_name=task_name)
 
