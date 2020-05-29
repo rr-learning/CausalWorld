@@ -130,7 +130,7 @@ class BaseTask(object):
             if self.stage.rigid_objects[rigid_object].is_not_fixed:
                 achieved_goal.append(self.stage.rigid_objects
                                      [rigid_object].get_bounding_box())
-        return achieved_goal
+        return np.array(achieved_goal)
 
     def _goal_distance(self, achieved_goal, desired_goal):
         # intersection areas / union of all visual_objects

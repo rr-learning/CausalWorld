@@ -103,14 +103,14 @@ class ReachingTaskGenerator(BaseTask):
         achieved_goal = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
-        return achieved_goal
+        return np.array(achieved_goal)
 
     def _goal_distance(self, achieved_goal, desired_goal):
         current_end_effector_positions = achieved_goal
         current_dist_to_goal = np.abs(desired_goal -
                                       current_end_effector_positions)
         current_dist_to_goal_mean = np.mean(current_dist_to_goal)
-        return current_dist_to_goal_mean
+        return np.array(current_dist_to_goal_mean)
 
     def _check_preliminary_success(self, goal_distance):
         if goal_distance < 0.01:

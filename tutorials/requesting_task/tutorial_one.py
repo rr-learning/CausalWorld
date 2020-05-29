@@ -2,11 +2,13 @@ from causal_rl_bench.envs.world import World
 from causal_rl_bench.task_generators.task import task_generator
 import numpy as np
 import time
+from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
 
 
 def example():
     task = task_generator(task_generator_id='reaching')
-    env = World(task=task, enable_visualization=True)
+    env = World(task=task, enable_visualization=True, observation_mode="cameras")
+    env = HERGoalEnvWrapper(env)
     for _ in range(200):
         obs = env.reset()
         # print(obs)
