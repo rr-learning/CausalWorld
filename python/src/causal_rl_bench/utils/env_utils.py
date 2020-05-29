@@ -1,6 +1,6 @@
-import math
 import numpy as np
 from gym import spaces
+
 
 def scale(x, space):
     """
@@ -23,4 +23,7 @@ def combine_spaces(space_1, space_2):
     return spaces.Box(low=lower_bound,
                       high=upper_bound,
                       dtype=np.float32)
+
+
+
 

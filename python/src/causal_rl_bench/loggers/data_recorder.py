@@ -60,3 +60,6 @@ class DataRecorder:
 
     def get_current_episode(self):
         return self._curr
+
+    def clear_recorder(self):
+        self.episodes = []

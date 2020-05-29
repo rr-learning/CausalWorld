@@ -1,4 +1,8 @@
 from configparser import ConfigParser
+import os
+from causal_rl_bench.loggers.tracker import Tracker
+from causal_rl_bench.task_generators.task import task_generator
+from causal_rl_bench.envs.world import World
 
 
 def save_config_file(section_names, config_dicts, file_path):
@@ -24,3 +28,14 @@ def read_config_file(file_path):
         for option in config.options(section):
             config_dicts[-1][option] = float(config.get(section, option))
     return section_names, config_dicts
+
+
+def load_world(tracker_relative_path, enable_visualization=False):
+    tracker = Tracker(file_path=os.path.join(tracker_relative_path,
+                                             'tracker'))
+    task_stats = tracker.task_stats_log[0]
+    task = task_generator(task_generator_id=task_stats.task_name,
+                          **task_stats.task_params)
+    env = World(task, **tracker.world_params,
+                enable_visualization=enable_visualization)
+    return env

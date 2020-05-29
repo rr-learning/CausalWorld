@@ -27,16 +27,16 @@ class BaseTask(object):
         self.task_params["sparse_reward_weight"] = sparse_reward_weight
         self.task_params["dense_reward_weights"] = dense_reward_weights
         self.time_steps_elapsed_since_success = 0
-        self.time_threshold_in_goal_state_secs = 0.5
+        self.task_params['time_threshold_in_goal_state_secs'] = 0.5
         self.current_time_secs = 0
         self.training_intervention_spaces = dict()
         self.testing_intervention_spaces = dict()
         self.initial_state = dict()
         self.finished_episode = False
-        self.intervention_spaces_split = intervention_split
-        self.training_intervention_mode = training
-        self.is_goal_distance_dense = is_goal_distance_dense
-        self.calculate_additional_dense_rewards = \
+        self.task_params['intervention_split'] = intervention_split
+        self.task_params['training'] = training
+        self.task_params['is_goal_distance_dense'] = is_goal_distance_dense
+        self.task_params['calculate_additional_dense_rewards'] = \
             calculate_additional_dense_rewards
         return
 
@@ -99,6 +99,10 @@ class BaseTask(object):
                 np.array([self.stage.floor_inner_bounding_box[0],
                           (self.stage.floor_inner_bounding_box[0] +
                            self.stage.floor_inner_bounding_box[1]) / 2])
+        self.training_intervention_spaces['floor_color'] = \
+            np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
+        self.training_intervention_spaces['stage_color'] = \
+            np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         return
 
     def _set_testing_intervention_spaces(self):
@@ -123,6 +127,10 @@ class BaseTask(object):
                 np.array([(self.stage.floor_inner_bounding_box[0] +
                            self.stage.floor_inner_bounding_box[1]) / 2,
                           self.stage.floor_inner_bounding_box[1]])
+        self.testing_intervention_spaces['floor_color'] = \
+            np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
+        self.testing_intervention_spaces['stage_color'] = \
+            np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         return
 
     def get_desired_goal(self):
@@ -179,17 +187,19 @@ class BaseTask(object):
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
         self._update_success(goal_distance)
-        if not self.is_goal_distance_dense:
+        if not self.task_params['is_goal_distance_dense']:
             if self.is_done():
                 goal_distance = 1
             else:
                 goal_distance = -1
-        if self.calculate_additional_dense_rewards:
-            dense_rewards, update_task_state_dict = self._calculate_dense_rewards(achieved_goal=achieved_goal,
-                                                                                  desired_goal=desired_goal)
+        if self.task_params['calculate_additional_dense_rewards']:
+            dense_rewards, update_task_state_dict = \
+                self._calculate_dense_rewards(achieved_goal=achieved_goal,
+                                              desired_goal=desired_goal)
             reward = np.sum(np.array(dense_rewards) *
                             self.task_params["dense_reward_weights"]) \
-                            + goal_distance * self.task_params["sparse_reward_weight"]
+                            + goal_distance * \
+                     self.task_params["sparse_reward_weight"]
             self._update_task_state(update_task_state_dict)
         else:
             reward = goal_distance * self.task_params["sparse_reward_weight"]
@@ -198,7 +208,7 @@ class BaseTask(object):
     def compute_reward(self, achieved_goal, desired_goal, info):
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
-        if not self.is_goal_distance_dense:
+        if not self.task_params['is_goal_distance_dense']:
             #TODO: not exactly right, but its a limitation of HER
             if self._check_preliminary_success(goal_distance):
                 goal_distance = 1
@@ -268,7 +278,7 @@ class BaseTask(object):
             success_signal, interventions_info = \
                 self.apply_interventions(interventions_dict_copy,
                                          check_bounds=
-                                         self.intervention_spaces_split)
+                                         self.task_params['intervention_split'])
             if success_signal:
                 for intervention_variable in self.initial_state:
                     if intervention_variable in interventions_dict:
@@ -350,7 +360,7 @@ class BaseTask(object):
         #the goal position
         if self.finished_episode:
             return True
-        if self.time_threshold_in_goal_state_secs <= \
+        if self.task_params['time_threshold_in_goal_state_secs'] <= \
                 (self.robot.dt * self.time_steps_elapsed_since_success):
             self.finished_episode = True
         return self.finished_episode
@@ -362,7 +372,7 @@ class BaseTask(object):
 
     def do_single_random_intervention(self):
         interventions_dict = dict()
-        if self.training_intervention_mode:
+        if self.task_params['training']:
             intervention_space = self.training_intervention_spaces
         else:
             intervention_space = self.testing_intervention_spaces
@@ -414,13 +424,18 @@ class BaseTask(object):
         #this is all the variables that are available and exposed
         current_variables_values = self.get_current_variables_values()
         #filter them only if intervention spaces split is enforced
-        if self.intervention_spaces_split:
+        if self.task_params['intervention_split']:
+            #choose intervention space
+            if self.task_params['training']:
+                intervention_space = self.training_intervention_spaces
+            else:
+                intervention_space = self.testing_intervention_spaces
             task_params_dict = dict()
-            for variable_name in self.training_intervention_spaces:
+            for variable_name in intervention_space:
                 if isinstance(
-                        self.training_intervention_spaces[variable_name], dict):
+                        intervention_space[variable_name], dict):
                     task_params_dict[variable_name] = dict()
-                    for subvariable_name in self.training_intervention_spaces[variable_name]:
+                    for subvariable_name in intervention_space[variable_name]:
                         task_params_dict[variable_name][subvariable_name] = \
                             current_variables_values[variable_name][subvariable_name]
                 else:
@@ -431,7 +446,7 @@ class BaseTask(object):
         return task_params_dict
 
     def is_intervention_in_bounds(self, interventions_dict):
-        if self.training_intervention_mode:
+        if self.task_params['training']:
             intervention_space = self.training_intervention_spaces
         else:
             intervention_space = self.testing_intervention_spaces
@@ -520,7 +535,7 @@ class BaseTask(object):
         interventions_info['stage_infeasible'] = \
             stage_infeasible
         interventions_info['task_generator_infeasible'] = \
-            task_generator_intervention_success_signal
+            not task_generator_intervention_success_signal
         return not robot_infeasible and \
                not stage_infeasible and \
                task_generator_intervention_success_signal, \
@@ -528,7 +543,7 @@ class BaseTask(object):
 
     def do_intervention(self, interventions_dict, check_bounds=None):
         if check_bounds is None:
-            check_bounds = self.intervention_spaces_split
+            check_bounds = self.task_params['intervention_split']
         success_signal, interventions_info = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)

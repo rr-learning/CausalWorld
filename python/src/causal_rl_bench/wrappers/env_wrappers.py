@@ -4,13 +4,6 @@ import gym
 
 
 class HERGoalEnvWrapper(gym.GoalEnv):
-    """
-    A wrapper that allow to use dict observation space (coming from GoalEnv) with
-    the RL algorithms.
-    It assumes that all the spaces of the dict space are of the same type.
-    :param env: (gym.GoalEnv)
-    """
-
     def __init__(self, env,
                  is_goal_distance_dense=False,
                  sparse_reward_weight=1):
@@ -22,12 +15,13 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         goal_space_shape = current_goal.shape
         #TODO: get the actual bonds here for proper normalization maybe?
         self.action_space = self.env.action_space
-        self.env.task.time_threshold_in_goal_state_secs = self.env.dt
+        self.env.task.task_params['time_threshold_in_goal_state_secs'] = self.env.dt
         if not is_goal_distance_dense:
             self.env.scale_reward_by_dt = False
-        self.env.task.calculate_additional_dense_rewards = False
+        self.env.task.task_params['calculate_additional_dense_rewards'] = False
         self.env.task.set_sparse_reward(sparse_reward_weight)
-        self.env.task.is_goal_distance_dense = is_goal_distance_dense
+        self.env.task.task_params['is_goal_distance_dense'] = \
+            is_goal_distance_dense
         self.observation_space = spaces.Dict(dict(desired_goal=spaces.Box(-np.inf,
                                                                           np.inf,
                                                                           shape=goal_space_shape,

@@ -1,6 +1,7 @@
 import numpy as np
 import gym
 import pybullet
+import os
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.loggers.tracker import Tracker
@@ -124,6 +125,9 @@ class World(gym.Env):
 
     def sample_new_goal(self):
         return self.task.sample_new_goal()
+
+    def add_data_recorder(self, data_recorder):
+        self.data_recorder = data_recorder
 
     # def switch_task(self, task):
     #     self.task = task
@@ -274,4 +278,14 @@ class World(gym.Env):
         world_params["enable_goal_image"] = self.enable_goal_image
         world_params["simulation_time"] = self.simulation_time
         return world_params
+
+    def save_world(self, log_relative_path):
+        if not os.path.exists(log_relative_path):
+            os.makedirs(log_relative_path)
+        tracker_path = os.path.join(log_relative_path, 'tracker')
+        tracker = self.get_tracker()
+        tracker.save(file_path=tracker_path)
+        return
+
+
 

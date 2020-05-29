@@ -4,7 +4,7 @@ causal_rl_bench/meta_agents/base_policy.py
 """
 
 
-class BaseMetaActorPolicy(object):
+class BaseInterventionActorPolicy(object):
     """This class indicates the interface of a meta actor"""
     def __init__(self):
         return

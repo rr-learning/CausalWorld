@@ -1,62 +1,80 @@
+import os
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.metrics.mean_sucess_rate_metric import MeanSuccessRateMetric
+from causal_rl_bench.metrics.mean_sucess_rate_metric import \
+    MeanSuccessRateMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
-from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculumWrapper
-from causal_rl_bench.meta_agents.random import RandomMetaActorPolicy
-from causal_rl_bench.meta_agents.reacher_evaluator import ReacherMetaActorPolicy
-import numpy as np
+from causal_rl_bench.wrappers.intervention_wrappers \
+    import InterventionsCurriculumWrapper
+from causal_rl_bench.loggers.tracker import Tracker
+from causal_rl_bench.intervention_agents.random import \
+    RandomInterventionActorPolicy
 
 
-class EvaluationPipeline:
-    def __init__(self, policy, tracker=None,
-                 world_params=None, task_params=None,
-                 output_path=None, seed=0, num_seeds=50, runs_per_seed=100):
-        # For now we just assume that there were no interventions during training
-        # and all variables are held constant throughout training
-        # Later when interventions are allowed during training, this will get more
-        # complex as it is relevant which variable values have been seen in training
+class EvaluationPipeline(object):
+    def __init__(self, policy, testing_curriculum,
+                 tracker_path=None, world_params=None,
+                 task_params=None, num_seeds=5,
+                 episodes_per_seed=20, intervention_split=True,
+                 training=False, initial_seed=0,
+                 visualize_evaluation=False):
         self.policy_fn = policy
-        self.seed = seed
         self.num_seeds = num_seeds
-        self.tracker = tracker
-        if output_path is None:
-            self.output_path = None
-        else:
-            self.output_path = output_path
-        self.seed = 0
+        self.episodes_per_seed = episodes_per_seed
+        self.initial_seed = initial_seed
+        self.intervention_split = intervention_split
+        self.training = training
+        self.testing_curriculum = testing_curriculum
         self.data_recorder = DataRecorder(output_directory=None)
-        if self.tracker:
+        if tracker_path is not None:
+            self.tracker = Tracker(
+                file_path=os.path.join(tracker_path, 'tracker'))
             task_stats = self.tracker.task_stats_log[0]
+            del task_stats.task_params['intervention_split']
+            del task_stats.task_params['training']
             self.task = task_generator(task_generator_id=task_stats.task_name,
                                        **task_stats.task_params,
-                                       intervention_split=False,
-                                       training=False)
+                                       intervention_split=intervention_split,
+                                       training=training)
         else:
             self.task = task_generator(**task_params,
-                                       intervention_split=False,
-                                       training=False)
-        if self.tracker:
+                                       intervention_split=intervention_split,
+                                       training=training)
+        if tracker_path:
             self.env = World(self.task,
                              **self.tracker.world_params,
-                             seed=self.seed,
-                             data_recorder=self.data_recorder)
+                             seed=self.initial_seed,
+                             data_recorder=self.data_recorder,
+                             enable_visualization=visualize_evaluation)
         else:
             if world_params is not None:
                 self.env = World(self.task,
                                  **world_params,
-                                 seed=self.seed,
-                                 data_recorder=self.data_recorder)
+                                 seed=self.initial_seed,
+                                 data_recorder=self.data_recorder,
+                                 enable_visualization=visualize_evaluation)
             else:
                 self.env = World(self.task,
-                                 seed=self.seed,
-                                 data_recorder=self.data_recorder)
-        self.evaluation_episode_length_in_secs = 1
+                                 seed=self.initial_seed,
+                                 data_recorder=self.data_recorder,
+                                 enable_visualization=visualize_evaluation)
+        evaluation_episode_length_in_secs = 1
         self.time_steps_for_evaluation = \
-            int(self.evaluation_episode_length_in_secs / self.env.robot.dt)
+            int(evaluation_episode_length_in_secs / self.env.robot.dt)
+        self.evaluation_budget = self.time_steps_for_evaluation * \
+                                 episodes_per_seed * num_seeds
+        for intervention_actor in testing_curriculum.intervention_actors:
+            if isinstance(intervention_actor,
+                          RandomInterventionActorPolicy):
+                if self.training:
+                    intervention_actor.initialize_intervention_space(
+                        self.task.get_training_intervention_spaces())
+                else:
+                    intervention_actor.initialize_intervention_space(
+                        self.task.get_testing_intervention_spaces())
+
         self.metrics_list = []
         self.metrics_list.append(MeanSuccessRateMetric())
-        # self.env.enforce_intervention_split(training=False)
         return
 
     def run_episode(self):
@@ -77,28 +95,38 @@ class EvaluationPipeline:
             metrics[metric.name] = metric.get_metric_score()
         return metrics
 
-    def evaluate_reacher_interventions_curriculum(self, num_of_episodes=100):
-        meta_actor_policy = RandomMetaActorPolicy(
-            self.task.get_testing_intervention_spaces())
-        # meta_actor_policy.add_sampler_func(variable_name='goal_positions',
-        #                                    sampler_func=self.env.robot.
-        #                                    sample_end_effector_positions)
-        # meta_actor_policy.add_sampler_func(variable_name='joint_positions',
-        #                                    sampler_func=self.env.robot.
-        #                                    sample_joint_positions)
+    def evaluate_policy(self):
         self.env = InterventionsCurriculumWrapper(env=self.env,
-                                                  meta_actor_policy=
-                                                  meta_actor_policy,
-                                                  meta_episode_hold=1)
-        for _ in range(num_of_episodes):
-            current_episode = self.run_episode()
-            self.process_metrics(current_episode)
+                                                  interventions_curriculum
+                                                  =self.testing_curriculum)
+        for i in range(self.num_seeds):
+            self.env.seed(seed=self.initial_seed + i)
+            for _ in range(self.episodes_per_seed):
+                current_episode = self.run_episode()
+                self.process_metrics(current_episode)
         self.env.close()
         scores = self.get_metric_scores()
-        scores['total_intervention_steps'] = self.env.tracker.get_total_intervention_steps()
-        scores['total_interventions'] = self.env.tracker.get_total_interventions()
-        scores['total_timesteps'] = self.env.tracker.get_total_time_steps()
-        scores['total_resets'] = self.env.tracker.get_total_resets()
+        scores['total_intervention_steps'] = \
+            self.env.tracker.get_total_intervention_steps()
+        scores['total_interventions'] = \
+            self.env.tracker.get_total_interventions()
+        scores['total_timesteps'] = \
+            self.env.tracker.get_total_time_steps()
+        scores['num_of_seeds'] = \
+            self.num_seeds
+        scores['episodes_per_seed'] = \
+            self.episodes_per_seed
+        scores['limited_exposed_intervention_variables'] = \
+            self.intervention_split
+        if self.intervention_split:
+            if self.training:
+                scores['intervention_set_chosen'] = \
+                    "training"
+            else:
+                scores['intervention_set_chosen'] = \
+                    "testing"
+        scores['total_resets'] = \
+            self.env.tracker.get_total_resets()
         scores['total_invalid_intervention_steps'] = \
             self.env.tracker.get_total_invalid_intervention_steps()
         scores['total_invalid_robot_intervention_steps'] = \
@@ -110,75 +138,3 @@ class EvaluationPipeline:
         scores['total_invalid_out_of_bounds_intervention_steps'] = \
             self.env.tracker.get_total_invalid_out_of_bounds_intervention_steps()
         return scores
-
-    def evaluate_reacher_interventions_curriculum_2(self, num_of_episodes=100):
-        meta_actor_policy = ReacherMetaActorPolicy(
-            joint_position_sampler_func=self.env.robot.sample_joint_positions,
-            goal_position_sampler_func=self.env.robot.sample_end_effector_positions)
-        self.env = InterventionsCurriculumWrapper(env=self.env,
-                                                  meta_actor_policy=
-                                                  meta_actor_policy,
-                                                  meta_episode_hold=5)
-        for _ in range(num_of_episodes):
-            current_episode = self.run_episode()
-            self.process_metrics(current_episode)
-        self.env.close()
-        scores = self.get_metric_scores()
-        scores['total_intervention_steps'] = self.env.tracker.get_total_intervention_steps()
-        scores['total_interventions'] = self.env.tracker.get_total_interventions()
-        scores['total_timesteps'] = self.env.tracker.get_total_time_steps()
-        scores['total_resets'] = self.env.tracker.get_total_resets()
-        scores['total_invalid_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_intervention_steps()
-        scores['total_invalid_robot_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_robot_intervention_steps()
-        scores['total_invalid_stage_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_stage_intervention_steps()
-        scores['total_invalid_task_generator_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_task_generator_intervention_steps()
-        scores['total_invalid_out_of_bounds_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_out_of_bounds_intervention_steps()
-        return scores
-
-    # def evaluate_generalisation(self):
-    #     visual_variables = task.get_visual_variables()
-    #     scores = dict()
-    #     score = dict()
-    #     for key in visual_variables.keys():
-    #         scores_var_sweep = dict()
-    #         for value in visual_variables[key]:
-    #             rews = []
-    #             dones = 0
-    #             for episode_seed in range(self.num_seeds):
-    #                 env.do_intervention(**{key: value})
-    #                 env.seed(episode_seed)
-    #                 obs = env.reset()
-    #                 accumulated_reward = 0
-    #                 for _ in range(self.tracker.world_params["max_episode_length"]):
-    #                     obs, rew, done, info = env.step(self.policy_fn(obs))
-    #                     accumulated_reward += rew
-    #                     if done:
-    #                         dones += 1
-    #                         break
-    #                 rews.append(accumulated_reward)
-    #             score["mean_success"] = float(dones / self.num_seeds)
-    #             score["mean_reward"] = np.mean(rews)
-    #             score["std_reward"] = np.std(rews)
-    #             scores_var_sweep[value] = score
-    #         scores[key] = scores_var_sweep
-    #     return scores
-
-    def evaluate_teacher_interventions(self):
-        pass
-
-    def evaluate_master_interventions(self):
-        pass
-
-    def evaluate_runtime_interventions(self):
-        pass
-
-    def evaluate_confounding_robustness(self):
-        pass
-
-    def run_full_evaluation(self):
-        pass

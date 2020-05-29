@@ -1,12 +1,16 @@
-from causal_rl_bench.meta_agents.base_policy import BaseMetaActorPolicy
+from causal_rl_bench.intervention_agents.base_policy import BaseInterventionActorPolicy
 import numpy as np
 
 
-class RandomMetaActorPolicy(BaseMetaActorPolicy):
-    def __init__(self, task_intervention_space):
-        super(RandomMetaActorPolicy, self).__init__()
-        self.task_intervention_space = task_intervention_space
+class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
+    def __init__(self):
+        super(RandomInterventionActorPolicy, self).__init__()
+        self.task_intervention_space = None
         self.sampler_funcs = dict()
+
+    def initialize_intervention_space(self, intervention_space):
+        self.task_intervention_space = intervention_space
+        return
 
     def _act(self, variables_dict):
         interventions_dict = dict()
