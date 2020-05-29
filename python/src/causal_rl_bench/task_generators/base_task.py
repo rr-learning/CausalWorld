@@ -40,6 +40,10 @@ class BaseTask(object):
             calculate_additional_dense_rewards
         return
 
+    def sample_new_goal(self):
+        raise Exception("Sampling new goal is not supported for this "
+                        "task")
+
     def get_description(self):
         return
 
@@ -47,7 +51,8 @@ class BaseTask(object):
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
-        # handle the contradictory intervention that changes each other (objects -> silhouettes)
+        # handle the contradictory intervention
+        # that changes each other (objects -> silhouettes)
         # and other way around sometimes
         return interventions_dict
 

@@ -122,29 +122,29 @@ class World(gym.Env):
 
         return observation, reward, done, info
 
-    def sample_new_task(self):
-        raise Exception(" ")
+    def sample_new_goal(self):
+        return self.task.sample_new_goal()
 
-    def switch_task(self, task):
-        self.task = task
-        self.task.init_task(self.robot, self.stage)
-        if not self.observation_mode == "cameras":
-            self.robot.select_observations(self.task.task_robot_observation_keys)
-            self.stage.select_observations(self.task.task_stage_observation_keys)
-            self.observation_space = \
-                combine_spaces(self.robot.get_observation_spaces(),
-                               self.stage.get_observation_spaces())
-        elif self.observation_mode == "cameras" and self.enable_goal_image:
-            self.stage.select_observations(["goal_image"])
-            self.observation_space = combine_spaces(
-                self.robot.get_observation_spaces(),
-                self.stage.get_observation_spaces())
-        else:
-            self.observation_space = self.robot.get_observation_spaces()
-        self.action_space = self.robot.get_action_spaces()
+    # def switch_task(self, task):
+    #     self.task = task
+    #     self.task.init_task(self.robot, self.stage)
+    #     if not self.observation_mode == "cameras":
+    #         self.robot.select_observations(self.task.task_robot_observation_keys)
+    #         self.stage.select_observations(self.task.task_stage_observation_keys)
+    #         self.observation_space = \
+    #             combine_spaces(self.robot.get_observation_spaces(),
+    #                            self.stage.get_observation_spaces())
+    #     elif self.observation_mode == "cameras" and self.enable_goal_image:
+    #         self.stage.select_observations(["goal_image"])
+    #         self.observation_space = combine_spaces(
+    #             self.robot.get_observation_spaces(),
+    #             self.stage.get_observation_spaces())
+    #     else:
+    #         self.observation_space = self.robot.get_observation_spaces()
+    #     self.action_space = self.robot.get_action_spaces()
 
-    def get_counterfactual_world(self):
-        raise Exception(" ")
+    # def get_counterfactual_world(self):
+    #     raise Exception(" ")
 
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)

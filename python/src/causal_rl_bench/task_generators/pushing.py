@@ -1,6 +1,6 @@
 from causal_rl_bench.task_generators.base_task import BaseTask
 from causal_rl_bench.utils.rotation_utils import quaternion_conjugate, \
-    quaternion_mul
+    quaternion_mul, euler_to_quaternion
 import numpy as np
 
 
@@ -174,3 +174,18 @@ class PushingTask(BaseTask):
                 interventions_dict['goal_block']['size'] = \
                     interventions_dict['tool_block']['size']
         return interventions_dict
+
+    def sample_new_goal(self):
+        #TODO: make sure its feasible goal by
+        # taking care of the size as well
+        lower_bound = self.stage.floor_inner_bounding_box[0]
+        upper_bound = self.stage.floor_inner_bounding_box[1]
+        lower_bound[-1] = 0.0425
+        upper_bound[-1] = 0.0425
+        new_goal = dict()
+        new_goal['goal_block'] = dict()
+        new_goal['goal_block']['position'] \
+            = np.random.uniform(lower_bound, upper_bound)
+        new_goal['goal_block']['orientation'] \
+            = euler_to_quaternion([0, 0, np.random.uniform(0, np.pi)])
+        return new_goal

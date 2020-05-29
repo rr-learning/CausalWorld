@@ -34,7 +34,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
     save_config_file(sac_config, _make_env(0)(),
                      os.path.join(log_relative_path, 'config.json'))
     for i in range(int(total_time_steps / validate_every_timesteps)):
-        model.learn(total_timesteps=100,
+        model.learn(total_timesteps=validate_every_timesteps,
                     tb_log_name="sac",
                     reset_num_timesteps=False)
     model.save(os.path.join(log_relative_path, 'saved_model'))
@@ -85,8 +85,8 @@ if __name__ == '__main__':
     sac_config = {"n_sampled_goal": 4,
                   "goal_selection_strategy": 'future',
                   "learning_rate": 0.001,
-                  "train_freq": total_time_steps_per_update,
-                  "gradient_steps": 50,
+                  "train_freq": 1,
+                  "gradient_steps": 1,
                   "learning_starts": 1000,
                   "tensorboard_log": log_relative_path,
                   "buffer_size": int(1e6),
