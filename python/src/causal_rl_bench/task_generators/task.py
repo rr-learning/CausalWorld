@@ -1,6 +1,6 @@
-from causal_rl_bench.task_generators.pushing import PushingTask
+from causal_rl_bench.task_generators.pushing import PushingTaskGenerator
 from causal_rl_bench.task_generators.example import ExampleTask
-from causal_rl_bench.task_generators.picking import PickingTask
+from causal_rl_bench.task_generators.picking import PickingTaskGenerator
 from causal_rl_bench.task_generators.reaching import ReachingTaskGenerator
 from causal_rl_bench.task_generators.stacked_blocks import StackedBlocksTask
 from causal_rl_bench.task_generators.stacked_tower import StackedTowerTask
@@ -13,9 +13,9 @@ from causal_rl_bench.task_generators.cuboid_silhouette import CuboidSilhouette
 
 def task_generator(task_generator_id="picking", **kwargs):
     if task_generator_id == "picking":
-        task = PickingTask(**kwargs)
+        task = PickingTaskGenerator(**kwargs)
     elif task_generator_id == "pushing":
-        task = PushingTask(**kwargs)
+        task = PushingTaskGenerator(**kwargs)
     elif task_generator_id == "cuboid_silhouette":
         task = CuboidSilhouette(**kwargs)
     elif task_generator_id == "reaching":

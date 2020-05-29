@@ -8,10 +8,10 @@ from causal_rl_bench.wrappers.intervention_wrappers import \
 
 
 def example():
-    task = task_generator(task_generator_id='reaching')
+    task = task_generator(task_generator_id='picking')
     env = World(task=task, enable_visualization=True)
     training_intervention_agent = \
-        reset_training_intervention_agent(task_generator_id='reaching')
+        reset_training_intervention_agent(task_generator_id='picking')
     env = ResetInterventionsActorWrapper(env, training_intervention_agent)
     for _ in range(50):
         obs = env.reset()

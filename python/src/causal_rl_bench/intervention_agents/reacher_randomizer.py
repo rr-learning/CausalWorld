@@ -29,6 +29,8 @@ class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
         return interventions_dict
 
     def get_intervention_actor_params(self):
+        #TODO: We need to think about how to save its params more and load them?
+        #potentially?
         intervention_params = dict()
         intervention_params["intervention_actor_name"] = \
             "reacher_randomizer"

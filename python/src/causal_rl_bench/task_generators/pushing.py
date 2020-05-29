@@ -4,7 +4,7 @@ from causal_rl_bench.utils.rotation_utils import quaternion_conjugate, \
 import numpy as np
 
 
-class PushingTask(BaseTask):
+class PushingTaskGenerator(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(task_name="pushing",
                          intervention_split=kwargs.get("intervention_split",
@@ -34,7 +34,7 @@ class PushingTask(BaseTask):
         self.initial_state["tool_block"]["orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
         self.task_params["goal_block_position"] = \
-            kwargs.get("goal_block_position", np.array([0, 0., 0.0425]))
+            kwargs.get("goal_block_position", np.array([0, 0.15, 0.0425]))
         self.task_params["goal_block_orientation"] = \
             kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_end_effector_positions = None
@@ -64,7 +64,7 @@ class PushingTask(BaseTask):
         return
 
     def _set_training_intervention_spaces(self):
-        super(PushingTask, self)._set_training_intervention_spaces()
+        super(PushingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             self.training_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
@@ -78,7 +78,7 @@ class PushingTask(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
-        super(PushingTask, self)._set_testing_intervention_spaces()
+        super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             self.testing_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
