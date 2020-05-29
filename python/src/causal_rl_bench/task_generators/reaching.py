@@ -53,7 +53,35 @@ class ReachingTaskGenerator(BaseTask):
             "Task where the goal is to reach a " \
             "point for each finger"
 
-    def _reset_task(self):
+    def _calculate_dense_rewards(self, desired_goal, achieved_goal):
+        end_effector_positions_goal = desired_goal
+        current_end_effector_positions = achieved_goal
+        previous_dist_to_goal = np.linalg.norm(
+            end_effector_positions_goal -
+            self.previous_end_effector_positions)
+        current_dist_to_goal = np.linalg.norm(end_effector_positions_goal
+                                              - current_end_effector_positions)
+        rewards = list()
+        rewards.append(previous_dist_to_goal - current_dist_to_goal)
+        rewards.append(-current_dist_to_goal)
+        rewards.append(-np.linalg.norm(self.robot.latest_full_state.torque))
+        rewards.append(-np.linalg.norm(np.abs(
+            self.robot.latest_full_state.velocity -
+            self.previous_joint_velocities), ord=2))
+        update_task_info = {'current_end_effector_positions':
+                                current_end_effector_positions,
+                            'current_velocity': np.copy(
+                                self.robot.latest_full_state.velocity)}
+        return rewards, update_task_info
+
+    def _update_task_state(self, update_task_info):
+        self.previous_end_effector_positions = \
+            update_task_info['current_end_effector_positions']
+        self.previous_joint_velocities = \
+            update_task_info['current_velocity']
+        return
+
+    def _set_task_state(self):
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
@@ -61,44 +89,34 @@ class ReachingTaskGenerator(BaseTask):
             self.robot.latest_full_state.velocity)
         return
 
-    def _calculate_dense_rewards(self, desired_goal, achieved_goal, info):
-        end_effector_positions_goal = desired_goal
-        current_end_effector_positions = achieved_goal
-        previous_dist_to_goal = np.linalg.norm(
-            end_effector_positions_goal -
-            info['previous_end_effector_positions'])
-        current_dist_to_goal = np.linalg.norm(end_effector_positions_goal
-                                              - current_end_effector_positions)
-        rewards = list()
-        rewards.append(previous_dist_to_goal - current_dist_to_goal)
-        rewards.append(-current_dist_to_goal)
-        rewards.append(-np.linalg.norm(info['current_torque']))
-        rewards.append(-np.linalg.norm(np.abs(
-            info['current_joint_velocities'] -
-            info['previous_joint_velocities']), ord=2))
-        return rewards
+    def get_desired_goal(self):
+        desired_goal = np.array([])
+        desired_goal = np.append(desired_goal,
+                                 self.stage.get_object_state('goal_60', 'position'))
+        desired_goal = np.append(desired_goal,
+                                 self.stage.get_object_state('goal_120', 'position'))
+        desired_goal = np.append(desired_goal,
+                                 self.stage.get_object_state('goal_300', 'position'))
+        return desired_goal
 
-    def get_info(self):
-        info = dict()
-        info['current_end_effector_positions'] = \
+    def get_achieved_goal(self):
+        achieved_goal = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
-        info['previous_end_effector_positions'] = \
-            self.previous_end_effector_positions
-        info['current_torque'] = \
-            self.robot.latest_full_state.torque
-        info['current_joint_velocities'] = \
-            self.robot.latest_full_state.velocity
-        info['previous_joint_velocities'] = \
-            self.previous_joint_velocities
-        return info
+        return achieved_goal
 
-    def _update_task_state(self, info):
-        self.previous_end_effector_positions = \
-            info['current_end_effector_positions']
-        self.previous_joint_velocities = \
-            info['current_joint_velocities']
-        return
+    def _goal_distance(self, achieved_goal, desired_goal):
+        current_end_effector_positions = achieved_goal
+        current_dist_to_goal = np.abs(desired_goal -
+                                      current_end_effector_positions)
+        current_dist_to_goal_mean = np.mean(current_dist_to_goal)
+        return current_dist_to_goal_mean
+
+    def _check_preliminary_success(self, goal_distance):
+        if goal_distance < 0.01:
+            return True
+        else:
+            return False
 
 
 

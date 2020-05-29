@@ -1,6 +1,6 @@
-from causal_rl_bench.task_generators.task import Task
+from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.metrics.mean_success_rate_metric import MeanSuccessRateMetric
+from causal_rl_bench.metrics.mean_sucess_rate_metric import MeanSuccessRateMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculumWrapper
 from causal_rl_bench.meta_agents.random import RandomMetaActorPolicy
@@ -28,14 +28,14 @@ class EvaluationPipeline:
         self.data_recorder = DataRecorder(output_directory=None)
         if self.tracker:
             task_stats = self.tracker.task_stats_log[0]
-            self.task = Task(task_generator_id=task_stats.task_name,
-                             **task_stats.task_params,
-                             intervention_split=True,
-                             training=False)
+            self.task = task_generator(task_generator_id=task_stats.task_name,
+                                       **task_stats.task_params,
+                                       intervention_split=False,
+                                       training=False)
         else:
-            self.task = Task(**task_params,
-                             intervention_split=True,
-                             training=False)
+            self.task = task_generator(**task_params,
+                                       intervention_split=False,
+                                       training=False)
         if self.tracker:
             self.env = World(self.task,
                              **self.tracker.world_params,

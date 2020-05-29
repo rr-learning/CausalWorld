@@ -1,6 +1,6 @@
 from causal_rl_bench.evaluation_pipelines.evaluation import EvaluationPipeline
 from causal_rl_bench.loggers.tracker import Tracker
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
@@ -16,7 +16,7 @@ log_relative_path = './trained_policy'
 
 def _make_env(rank):
     def _init():
-        task = Task(task_generator_id="reaching")
+        task = task_generator(task_generator_id="reaching")
         env = World(task=task, skip_frame=1,
                     enable_visualization=False,
                     seed=rank, max_episode_length=960)
@@ -143,4 +143,4 @@ def evaluate_model_4():
 if __name__ == '__main__':
     #first train the policy, skip if u already trained the policy
     # train_policy()
-    evaluate_model_3()
+    evaluate_model_4()

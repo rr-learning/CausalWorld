@@ -5,6 +5,7 @@ from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
+from causal_rl_bench.task_generators.task import task_generator
 
 
 class World(gym.Env):
@@ -59,7 +60,7 @@ class World(gym.Env):
 
         gym.Env.__init__(self)
         if task is None:
-            self.task = Task()
+            self.task = task_generator("reaching")
         else:
             self.task = task
 
@@ -104,7 +105,7 @@ class World(gym.Env):
         else:
             observation = self.task.filter_structured_observations()
         info = self.task.get_info()
-        reward = self.task.get_reward(info) * self.dt
+        reward = self.task.get_reward() * self.dt
         done = self._is_done()
         if self.data_recorder:
             self.data_recorder.append(robot_action=action,

@@ -1,12 +1,14 @@
 import numpy as np
 import math
+from causal_rl_bench.utils.state_utils import get_bounding_box_area
 from causal_rl_bench.utils.state_utils import get_intersection
 
 
 class BaseTask(object):
     def __init__(self, task_name, intervention_split,
                  training, sparse_reward_weight=1,
-                 dense_reward_weights=np.array([])):
+                 dense_reward_weights=np.array([]),
+                 is_goal_distance_dense=True):
         self.robot = None
         self.stage = None
         self.task_solved = False
@@ -32,12 +34,13 @@ class BaseTask(object):
         self.finished_episode = False
         self.intervention_spaces_split = intervention_split
         self.training_intervention_mode = training
+        self.is_goal_distance_dense = is_goal_distance_dense
         return
 
     def get_description(self):
         return
 
-    def _reset_task(self):
+    def _set_task_state(self):
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
@@ -60,10 +63,10 @@ class BaseTask(object):
     def get_info(self):
         return {}
 
-    def _update_task_state(self, info):
+    def _update_task_state(self, update_task_state_dict):
         return
 
-    def _calculate_dense_rewards(self, desired_goal, achieved_goal, info):
+    def _calculate_dense_rewards(self, desired_goal, achieved_goal):
         return np.array([]), None
 
     def _set_training_intervention_spaces(self):
@@ -114,62 +117,84 @@ class BaseTask(object):
                           self.stage.floor_inner_bounding_box[1]])
         return
 
-    def get_reward(self, info):
+    def get_desired_goal(self):
+        desired_goal = []
+        for visual_goal in self.stage.visual_objects:
+            desired_goal.append(self.stage.visual_objects[visual_goal]
+                                .get_bounding_box())
+        return np.array(desired_goal)
+
+    def get_achieved_goal(self):
+        achieved_goal = []
+        for rigid_object in self.stage.rigid_objects:
+            if self.stage.rigid_objects[rigid_object].is_not_fixed:
+                achieved_goal.append(self.stage.rigid_objects
+                                     [rigid_object].get_bounding_box())
+        return achieved_goal
+
+    def _goal_distance(self, achieved_goal, desired_goal):
+        # intersection areas / union of all visual_objects
+        intersection_area = 0
+        #TODO: under the assumption that the visual objects dont intersect
+        #TODO: deal with structured data for silhouettes
+        union_area = 0
+        for desired_subgoal_bb in desired_goal:
+            union_area += get_bounding_box_area(desired_subgoal_bb)
+            for rigid_object_bb in achieved_goal:
+                intersection_area += get_intersection(
+                    desired_subgoal_bb, rigid_object_bb)
+        if union_area > 0:
+            sparse_reward = intersection_area / float(union_area)
+        else:
+            sparse_reward = 1
+        return sparse_reward
+
+    def _update_success(self, goal_distance):
+        preliminary_success = self._check_preliminary_success(goal_distance)
+        if preliminary_success:
+            self.task_solved = True
+            self.time_steps_elapsed_since_success += 1
+        else:
+            self.task_solved = False
+            self.time_steps_elapsed_since_success = 0
+        return
+
+    def _check_preliminary_success(self, goal_distance):
+        if goal_distance > 0.9:
+            return True
+        else:
+            return False
+
+    def get_reward(self):
         desired_goal = self.get_desired_goal()
         achieved_goal = self.get_achieved_goal()
-        sparse_reward = self._compute_sparse_reward(
-            achieved_goal=achieved_goal,
-            desired_goal=desired_goal)
-        dense_rewards = self._calculate_dense_rewards(achieved_goal=achieved_goal,
-                                                      desired_goal=desired_goal,
-                                                      info=info)
+        goal_distance = self._goal_distance(desired_goal=desired_goal,
+                                            achieved_goal=achieved_goal)
+        self._update_success(goal_distance)
+        if not self.is_goal_distance_dense:
+            if self.is_done():
+                goal_distance = 1
+            else:
+                goal_distance = -1
+        dense_rewards, update_task_state_dict = self._calculate_dense_rewards(achieved_goal=achieved_goal,
+                                                                              desired_goal=desired_goal)
         reward = np.sum(np.array(dense_rewards) *
                         self.task_params["dense_reward_weights"]) \
-                        + sparse_reward * self.task_params["sparse_reward_weight"]
-        self._update_task_state(info)
+                        + goal_distance * self.task_params["sparse_reward_weight"]
+        self._update_task_state(update_task_state_dict)
         return reward
 
     def compute_reward(self, achieved_goal, desired_goal, info):
-        sparse_reward = self._compute_sparse_reward(
-            achieved_goal=achieved_goal,
-            desired_goal=desired_goal,
-            redundant_calulcation=True)
-        dense_rewards, update_task_info = \
-            self._calculate_dense_rewards(achieved_goal=achieved_goal,
-                                          desired_goal=desired_goal,
-                                          info=info)
-        reward = np.sum(np.array(dense_rewards) *
-                        self.task_params["dense_reward_weights"]) \
-                 + sparse_reward * self.task_params["sparse_reward_weight"]
+        goal_distance = self._goal_distance(desired_goal=desired_goal,
+                                            achieved_goal=achieved_goal)
+        if not self.is_goal_distance_dense:
+            #TODO: not exactly right, but its a limitation of HER
+            if self._check_preliminary_success(goal_distance):
+                goal_distance = 1
+            else:
+                goal_distance = -1
+        reward = goal_distance * self.task_params["sparse_reward_weight"]
         return reward
-
-    def get_desired_goal(self):
-        if self.task_name == "reaching":
-            desired_goal = np.array([])
-            for visual_goal in self.stage.visual_objects:
-                desired_goal = np.append(desired_goal,
-                                         self.stage.get_object_state
-                                         (visual_goal, 'position'))
-        else:
-            desired_goal = np.array([])
-            for visual_goal in self.stage.visual_objects:
-                desired_goal = np.append(desired_goal,
-                                         self.stage.visual_objects[visual_goal]
-                                         .get_bounding_box())
-        return desired_goal
-
-    def get_achieved_goal(self):
-        if self.task_name == "reaching":
-            achieved_goal = \
-                self.robot.compute_end_effector_positions(
-                    self.robot.latest_full_state.position)
-        else:
-            achieved_goal = np.array([])
-            for rigid_object in self.stage.rigid_objects:
-                achieved_goal = np.append(achieved_goal,
-                                          self.stage.rigid_objects
-                                          [rigid_object].get_bounding_box())
-        return achieved_goal
 
     def init_task(self, robot, stage):
         self.robot = robot
@@ -202,52 +227,6 @@ class BaseTask(object):
         self._non_default_stage_observation_funcs[observation_key] = \
             observation_function
         return
-
-    def _compute_sparse_reward(self, achieved_goal,
-                               desired_goal, redundant_calulcation=False):
-        if not redundant_calulcation:
-            self.current_time += self.robot.dt
-        if self.task_name == "reaching":
-            current_end_effector_positions = achieved_goal
-            current_dist_to_goal = np.abs(desired_goal -
-                                          current_end_effector_positions)
-            current_dist_to_goal_mean = np.mean(current_dist_to_goal)
-            if not redundant_calulcation:
-                if current_dist_to_goal_mean < 0.01:
-                    self.task_solved = True
-                    self.time_steps_elapsed_since_success += 1
-                else:
-                    self.task_solved = False
-                    # restart again
-                    self.time_steps_elapsed_since_success = 0
-            return current_dist_to_goal_mean
-        else:
-            # intersection areas / union of all visual_objects
-            intersection_area = 0
-            #TODO: under the assumption that the visual objects dont intersect
-            #TODO: deal with structured data for silhouettes
-            union_area = 0
-            for visual_object_key in self.stage.visual_objects:
-                visual_object = self.stage.get_object(visual_object_key)
-                union_area += visual_object.get_area()
-                for rigid_object_key in self.stage.rigid_objects:
-                    rigid_object = self.stage.get_object(rigid_object_key)
-                    if rigid_object.is_not_fixed:
-                        intersection_area += get_intersection(
-                            visual_object.get_bounding_box(),
-                            rigid_object.get_bounding_box())
-            if union_area > 0:
-                sparse_reward = intersection_area / float(union_area)
-            else:
-                sparse_reward = 1
-            if sparse_reward > 0.9:
-                self.task_solved = True
-                self.time_steps_elapsed_since_success += 1
-            else:
-                self.task_solved = False
-                # restart again
-                self.time_steps_elapsed_since_success = 0
-            return sparse_reward
 
     def reset_task(self, interventions_dict=None):
         self.robot.clear()
@@ -298,7 +277,7 @@ class BaseTask(object):
         else:
             self.apply_interventions(self.initial_state,
                                      check_bounds=False)
-        self._reset_task()
+        self._set_task_state()
         return success_signal, interventions_info
 
     def filter_structured_observations(self):
@@ -312,9 +291,7 @@ class BaseTask(object):
         for key in self.task_robot_observation_keys:
             # dont forget to handle non standard observation here
             if key in self._non_default_robot_observation_funcs:
-                #TODO: there was a bug here with normalization
-                # if self.robot.normalize_observations:
-                if False:
+                if self.robot.normalize_observations:
                     normalized_observations = \
                         self.robot.\
                             normalize_observation_for_key(key=key,
@@ -334,8 +311,7 @@ class BaseTask(object):
 
         for key in self.task_stage_observation_keys:
             if key in self._non_default_stage_observation_funcs:
-                # if self.stage.normalize_observations:
-                if False:
+                if self.stage.normalize_observations:
                     normalized_observations = \
                         self.stage.\
                             normalize_observation_for_key(key=key,
@@ -396,6 +372,7 @@ class BaseTask(object):
 
         success_signal, interventions_info = \
             self.apply_interventions(interventions_dict, check_bounds=False)
+        self._set_task_state()
         return success_signal, interventions_info, interventions_dict
 
     def get_training_intervention_spaces(self):
@@ -539,6 +516,7 @@ class BaseTask(object):
         success_signal, interventions_info = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)
+        self._set_task_state()
         return success_signal, interventions_info
 
 
