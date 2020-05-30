@@ -11,7 +11,7 @@ from causal_rl_bench.wrappers.intervention_wrappers import \
 
 
 def example():
-    # This tutorial shows how to view policies of trained agents
+    # This tutorial shows how to view a pretrained reacher policy
 
     task = task_generator(task_generator_id='reaching')
     world_params = dict()

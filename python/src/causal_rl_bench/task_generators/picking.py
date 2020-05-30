@@ -14,7 +14,7 @@ class PickingTaskGenerator(BaseTask):
                          kwargs.get("sparse_reward_weight", 0),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
-                                    np.array([1000, 500, 3000, 1])))
+                                    np.array([1, 0.5, 3, 0.001])))
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -138,13 +138,10 @@ class PickingTaskGenerator(BaseTask):
                                                     'position')
         target_height = goal_position[-1]
         joint_velocities = self.robot.latest_full_state.velocity
-        # reward term one
         previous_block_to_goal = abs(self.previous_object_position[2] -
                                      target_height)
         current_block_to_goal = abs(block_position[2] - target_height)
         rewards.append(previous_block_to_goal - current_block_to_goal)
-
-        # reward term two
         previous_block_to_center = np.sqrt(
             (self.previous_object_position[0] ** 2 +
              self.previous_object_position[1] ** 2))
@@ -155,8 +152,6 @@ class PickingTaskGenerator(BaseTask):
         end_effector_positions = self.robot.compute_end_effector_positions(
             self.robot.latest_full_state.position)
         end_effector_positions = end_effector_positions.reshape(-1, 3)
-
-        # calculate first reward term
         current_distance_from_block = np.linalg.norm(end_effector_positions -
                                                      block_position)
         previous_distance_from_block = np.linalg.norm(

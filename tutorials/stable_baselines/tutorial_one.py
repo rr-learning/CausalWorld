@@ -17,7 +17,7 @@ from causal_rl_bench.wrappers.intervention_wrappers import \
 
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                  skip_frame, seed_num, ppo_config, total_time_steps,
-                 validate_every_timesteps, task_name):
+                 validate_every_timesteps, task_name, fixed_position):
     def _make_env(rank):
         def _init():
             task = task_generator(task_generator_id=task_name)
@@ -25,10 +25,11 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                         enable_visualization=False,
                         seed=seed_num + rank, max_episode_length=
                         maximum_episode_length)
-            training_intervention_agent = \
-                reset_training_intervention_agent(task_generator_id=task_name)
-            env = ResetInterventionsActorWrapper(env,
-                                                 training_intervention_agent)
+            if not fixed_position:
+                training_intervention_agent = \
+                    reset_training_intervention_agent(task_generator_id=task_name)
+                env = ResetInterventionsActorWrapper(env,
+                                                     training_intervention_agent)
             return env
 
         set_global_seeds(seed_num)
@@ -76,6 +77,8 @@ if __name__ == '__main__':
                     default=30, help="number of parallel environments")
     ap.add_argument("--task_name", required=False,
                     default="reaching", help="the task nam for training")
+    ap.add_argument("--fixed_position", required=False,
+                    default=True, help="define the reset intervention wrapper")
     ap.add_argument("--log_relative_path", required=True,
                     help="log folder")
     args = vars(ap.parse_args())
@@ -86,6 +89,7 @@ if __name__ == '__main__':
     skip_frame = int(args['skip_frame'])
     seed_num = int(args['seed_num'])
     task_name = str(args['task_name'])
+    fixed_position = bool(args['fixed_position'])
     assert (((float(total_time_steps_per_update) /
              num_of_envs)/5).is_integer())
     ppo_config = {"gamma": 0.9988,
@@ -107,5 +111,6 @@ if __name__ == '__main__':
                  ppo_config=ppo_config,
                  total_time_steps=60000000,
                  validate_every_timesteps=1000000,
-                 task_name=task_name)
+                 task_name=task_name,
+                 fixed_position=fixed_position)
 

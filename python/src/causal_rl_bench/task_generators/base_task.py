@@ -24,6 +24,7 @@ class BaseTask(object):
         self._non_default_stage_observation_funcs = dict()
         self.current_full_observations_dict = dict()
         self.task_params = dict()
+        self.task_params["task_name"] = self.task_name
         self.task_params["sparse_reward_weight"] = sparse_reward_weight
         self.task_params["dense_reward_weights"] = dense_reward_weights
         self.time_steps_elapsed_since_success = 0

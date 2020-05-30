@@ -15,6 +15,7 @@ def example():
     env = ResetInterventionsActorWrapper(env, training_intervention_agent)
     for _ in range(50):
         obs = env.reset()
+        print(env.observation_space)
         # print(obs)
         # chosen_intervention = env.do_single_random_intervention()
         # print(chosen_intervention)

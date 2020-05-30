@@ -13,7 +13,7 @@ from causal_rl_bench.wrappers.intervention_wrappers import \
 def example():
     # This tutorial shows how to view policies of trained agents
 
-    task = task_generator(task_generator_id='reaching')
+    task = task_generator(task_generator_id='picking')
     world_params = dict()
     world_params["skip_frame"] = 1
     world_params["seed"] = 0
@@ -24,19 +24,19 @@ def example():
     def policy_fn(obs):
         return model.predict(obs, deterministic=True)[0]
 
-    # Record a video of the policy is done in one line
-    viewer.record_video_of_policy(task=task,
-                                  world_params=world_params,
-                                  policy_fn=policy_fn,
-                                  file_name="pushing_video",
-                                  number_of_resets=10,
-                                  max_time_steps=10*100,
-                                  env_wrappers=np.array(
-                                      [ResetInterventionsActorWrapper]),
-                                  env_wrappers_args=
-                                  np.array([{'intervention_actor':
-                                             reset_training_intervention_agent
-                                             (task_generator_id='reaching')}]))
+    # # Record a video of the policy is done in one line
+    # viewer.record_video_of_policy(task=task,
+    #                               world_params=world_params,
+    #                               policy_fn=policy_fn,
+    #                               file_name="pushing_video",
+    #                               number_of_resets=10,
+    #                               max_time_steps=10*100,
+    #                               env_wrappers=np.array(
+    #                                   [ResetInterventionsActorWrapper]),
+    #                               env_wrappers_args=
+    #                               np.array([{'intervention_actor':
+    #                                          reset_training_intervention_agent
+    #                                          (task_generator_id='reaching')}]))
 
     # Similarly for interactive visualization in the GUI
     viewer.view_policy(task=task,
@@ -48,7 +48,7 @@ def example():
                        env_wrappers_args=
                        np.array([{'intervention_actor':
                                  reset_training_intervention_agent
-                                 (task_generator_id='reaching')}]))
+                                 (task_generator_id='picking')}]))
 
 
 if __name__ == '__main__':
