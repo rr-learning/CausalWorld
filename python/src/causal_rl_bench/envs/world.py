@@ -91,7 +91,7 @@ class World(gym.Env):
         self.tracker = Tracker(task=self.task,
                                world_params=self.get_world_params())
         #TODO: I removed scaling by dt for now to test picking training curve
-        self.scale_reward_by_dt = True
+        self.scale_reward_by_dt = False
         self.reset()
         return
 

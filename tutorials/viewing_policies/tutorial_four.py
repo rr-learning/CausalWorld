@@ -15,7 +15,7 @@ def example():
 
     task = task_generator(task_generator_id='picking')
     world_params = dict()
-    world_params["skip_frame"] = 1
+    world_params["skip_frame"] = 3
     world_params["seed"] = 0
     stable_baselines_policy_path = "./saved_model.zip"
     model = PPO2.load(stable_baselines_policy_path)
@@ -42,13 +42,13 @@ def example():
     viewer.view_policy(task=task,
                        world_params=world_params,
                        policy_fn=policy_fn,
-                       max_time_steps=40*960,
-                       number_of_resets=40,
-                       env_wrappers=np.array([ResetInterventionsActorWrapper]),
-                       env_wrappers_args=
-                       np.array([{'intervention_actor':
-                                 reset_training_intervention_agent
-                                 (task_generator_id='picking')}]))
+                       max_time_steps=40*500,
+                       number_of_resets=40)
+                       # env_wrappers=np.array([ResetInterventionsActorWrapper]),
+                       # env_wrappers_args=
+                       # np.array([{'intervention_actor':
+                       #           reset_training_intervention_agent
+                       #           (task_generator_id='picking')}]))
 
 
 if __name__ == '__main__':

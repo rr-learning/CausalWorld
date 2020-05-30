@@ -137,7 +137,10 @@ class PickingTaskGenerator(BaseTask):
         goal_position = self.stage.get_object_state('goal_block',
                                                     'position')
         target_height = goal_position[-1]
-        joint_velocities = self.robot.latest_full_state.velocity
+        #TODO: we need to revert this
+        # joint_velocities = self.robot.latest_full_state.velocity
+        joint_velocities = self.robot.get_current_observations([])[
+            "joint_velocities"]
         previous_block_to_goal = abs(self.previous_object_position[2] -
                                      target_height)
         current_block_to_goal = abs(block_position[2] - target_height)
@@ -173,6 +176,7 @@ class PickingTaskGenerator(BaseTask):
             update_task_info['current_end_effector_positions']
         self.previous_object_position = \
             update_task_info['current_tool_block_position']
+        # TODO: we need to revert this
         self.previous_joint_velocities = \
             update_task_info['current_velocity']
         return
@@ -185,8 +189,11 @@ class PickingTaskGenerator(BaseTask):
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
             self.stage.get_object_state('tool_block', 'position')
+        # TODO: we need to revert this
+        # self.previous_joint_velocities = \
+        #     self.robot.latest_full_state.velocity
         self.previous_joint_velocities = \
-            self.robot.latest_full_state.velocity
+            self.robot.get_current_observations([])["joint_velocities"]
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
