@@ -1,4 +1,5 @@
-from causal_rl_bench.intervention_agents.base_policy import BaseInterventionActorPolicy
+from causal_rl_bench.intervention_agents.base_policy import \
+    BaseInterventionActorPolicy
 import numpy as np
 
 

@@ -9,8 +9,8 @@ import json
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
 import argparse
-from causal_rl_bench.intervention_agents.training_intervention import \
-    reset_training_intervention_agent
+from causal_rl_bench.intervention_agents.training_interventions import \
+    get_reset_training_intervention_agent
 from causal_rl_bench.wrappers.intervention_wrappers import \
     ResetInterventionsActorWrapper
 
@@ -27,7 +27,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                         maximum_episode_length)
             if not fixed_position:
                 training_intervention_agent = \
-                    reset_training_intervention_agent(task_generator_id=task_name)
+                    get_reset_training_intervention_agent(task_generator_id=task_name)
                 env = ResetInterventionsActorWrapper(env,
                                                      training_intervention_agent)
             return env

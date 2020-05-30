@@ -15,14 +15,22 @@ class PickingTaskGenerator(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([1, 0.5, 3, 0.001])))
+        # self.task_robot_observation_keys = ["joint_positions",
+        #                                     "joint_velocities",
+        #                                     "action_joint_positions",
+        #                                     "end_effector_positions"]
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
-                                            "end_effector_positions"]
-        self.task_stage_observation_keys = ["tool_block_position",
-                                            "tool_block_orientation",
-                                            "goal_block_position",
-                                            "goal_block_orientation"]
+                                            "end_effector_positions",
+                                            "goal_height"]
+        self.task_stage_observation_keys = ["tool_block_position"]
+        self.task_params["goal_height"] = 0.15
+
+        # self.task_stage_observation_keys = ["tool_block_position",
+        #                                     "tool_block_orientation",
+        #                                     "goal_block_position",
+        #                                     "goal_block_orientation"]
         self.task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.02)
         self.task_params["joint_positions"] = \
@@ -43,6 +51,16 @@ class PickingTaskGenerator(BaseTask):
     def get_description(self):
         return "Task where the goal is to pick a " \
                "cube towards a goal height"
+
+    def _set_up_non_default_observations(self):
+        self._setup_non_default_robot_observation_key(
+            observation_key="goal_height",
+            observation_function=self._set_goal_height,
+            lower_bound=[0.04], upper_bound=[0.3])
+        return
+
+    def _set_goal_height(self):
+        return self.task_params["goal_height"]
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="tool_block",
@@ -134,9 +152,10 @@ class PickingTaskGenerator(BaseTask):
         rewards = list()
         block_position = self.stage.get_object_state('tool_block',
                                                      'position')
-        goal_position = self.stage.get_object_state('goal_block',
-                                                    'position')
-        target_height = goal_position[-1]
+        # goal_position = self.stage.get_object_state('goal_block',
+        #                                             'position')
+        # target_height = goal_position[-1]
+        target_height = self.task_params["goal_height"]
         #TODO: we need to revert this
         # joint_velocities = self.robot.latest_full_state.velocity
         joint_velocities = self.robot.get_current_observations([])[

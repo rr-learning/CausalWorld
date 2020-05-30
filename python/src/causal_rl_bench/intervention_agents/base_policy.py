@@ -31,6 +31,9 @@ class BaseInterventionActorPolicy(object):
     def _act(self, variables_dict):
         return {}
 
+    def initialize_actor(self, env):
+        return
+
     def validate_intervention_dict(self, variables_dict, intervention_dict):
         #TODO: remove redundant interventions here
         for intervention in intervention_dict:

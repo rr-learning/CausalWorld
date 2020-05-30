@@ -1,8 +1,8 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
-from causal_rl_bench.intervention_agents.training_intervention import \
-    reset_training_intervention_agent
+from causal_rl_bench.intervention_agents.training_interventions import \
+    get_reset_training_intervention_agent
 from causal_rl_bench.wrappers.intervention_wrappers import \
     ResetInterventionsActorWrapper
 
@@ -10,9 +10,9 @@ from causal_rl_bench.wrappers.intervention_wrappers import \
 def example():
     task = task_generator(task_generator_id='picking')
     env = World(task=task, enable_visualization=True)
-    training_intervention_agent = \
-        reset_training_intervention_agent(task_generator_id='picking')
-    env = ResetInterventionsActorWrapper(env, training_intervention_agent)
+    # training_intervention_agent = \
+    #     get_reset_training_intervention_agent(task_generator_id='picking')
+    # env = ResetInterventionsActorWrapper(env, training_intervention_agent)
     for _ in range(50):
         obs = env.reset()
         print(env.observation_space)

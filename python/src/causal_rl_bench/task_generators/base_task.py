@@ -473,9 +473,12 @@ class BaseTask(object):
 
     def divide_intervention_dict(self, interventions_dict):
         #TODO: for now a heuristic for naming conventions
-        robot_intervention_keys = self.robot.get_current_variables_values().keys()
-        stage_intervention_keys = self.stage.get_current_variables_values().keys()
-        task_generator_intervention_keys = self.get_task_generator_variables_values().keys()
+        robot_intervention_keys = \
+            self.robot.get_current_variables_values().keys()
+        stage_intervention_keys = \
+            self.stage.get_current_variables_values().keys()
+        task_generator_intervention_keys = \
+            self.get_task_generator_variables_values().keys()
         robot_interventions_dict = dict()
         stage_interventions_dict = dict()
         task_generator_interventions_dict = dict()
@@ -508,7 +511,8 @@ class BaseTask(object):
             return False, interventions_info
         interventions_dict = \
             dict(self._handle_contradictory_interventions(interventions_dict))
-        if check_bounds and not self.is_intervention_in_bounds(interventions_dict):
+        if check_bounds and not self.is_intervention_in_bounds(
+                interventions_dict):
             interventions_info['out_bounds'] = True
             return False, interventions_info
         #now divide the interventions

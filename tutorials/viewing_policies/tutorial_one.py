@@ -4,8 +4,8 @@ import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import numpy as np
 import causal_rl_bench.viewers.task_viewer as viewer
-from causal_rl_bench.intervention_agents.training_intervention import \
-    reset_training_intervention_agent
+from causal_rl_bench.intervention_agents.training_interventions import \
+    get_reset_training_intervention_agent
 from causal_rl_bench.wrappers.intervention_wrappers import \
     ResetInterventionsActorWrapper
 
@@ -32,7 +32,7 @@ def example():
                        env_wrappers=np.array([ResetInterventionsActorWrapper]),
                        env_wrappers_args=
                        np.array([{'intervention_actor':
-                                 reset_training_intervention_agent
+                                 get_reset_training_intervention_agent
                                  (task_generator_id='reaching')}]))
 
 
