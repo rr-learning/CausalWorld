@@ -8,7 +8,7 @@ from causal_rl_bench.task_generators.pyramid import PyramidTask
 from causal_rl_bench.task_generators.arch import ArchTask
 from causal_rl_bench.task_generators.pick_and_place import \
     PickAndPlaceTaskGenerator
-from causal_rl_bench.task_generators.cuboid_silhouette import CuboidSilhouette
+from causal_rl_bench.task_generators.cuboid_silhouette_old import CuboidSilhouette
 
 
 def task_generator(task_generator_id="picking", **kwargs):
