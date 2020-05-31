@@ -63,10 +63,21 @@ class BaseTask(object):
         return {}
 
     def apply_task_generator_interventions(self, interventions_dict):
-        return True
+        return True, False
 
     def get_info(self):
-        return {}
+        info = dict()
+        info['possible_solution_intervention'] = dict()
+        for rigid_object in self.stage.rigid_objects:
+            #check if there is an equivilant visual object corresponding
+            possible_corresponding_goal = rigid_object.replace('tool', 'goal')
+            if possible_corresponding_goal in self.stage.visual_objects:
+                info['possible_solution_intervention'][rigid_object] = dict()
+                info['possible_solution_intervention'][rigid_object]['position'] = \
+                    self.stage.get_object_state(possible_corresponding_goal, 'position')
+                info['possible_solution_intervention'][rigid_object]['orientation'] = \
+                    self.stage.get_object_state(possible_corresponding_goal, 'orientation')
+        return info
 
     def _update_task_state(self, update_task_state_dict):
         return
@@ -90,12 +101,16 @@ class BaseTask(object):
                 np.array([self.stage.floor_inner_bounding_box[0],
                           (self.stage.floor_inner_bounding_box[0] +
                            self.stage.floor_inner_bounding_box[1]) / 2])
+            self.training_intervention_spaces[rigid_object]['size'] = \
+                np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
         for visual_object in self.stage.visual_objects:
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
                 np.array([self.stage.floor_inner_bounding_box[0],
                           (self.stage.floor_inner_bounding_box[0] +
                            self.stage.floor_inner_bounding_box[1]) / 2])
+            self.training_intervention_spaces[visual_object]['size'] = \
+                np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
         self.training_intervention_spaces['floor_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self.training_intervention_spaces['stage_color'] = \
@@ -135,12 +150,16 @@ class BaseTask(object):
                 np.array([(self.stage.floor_inner_bounding_box[0] +
                            self.stage.floor_inner_bounding_box[1]) / 2,
                           self.stage.floor_inner_bounding_box[1]])
+            self.testing_intervention_spaces[rigid_object]['size'] = \
+                np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
         for visual_object in self.stage.visual_objects:
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
                 np.array([(self.stage.floor_inner_bounding_box[0] +
                            self.stage.floor_inner_bounding_box[1]) / 2,
                           self.stage.floor_inner_bounding_box[1]])
+            self.testing_intervention_spaces[visual_object]['size'] = \
+                np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
         self.testing_intervention_spaces['floor_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self.testing_intervention_spaces['stage_color'] = \
@@ -273,6 +292,7 @@ class BaseTask(object):
         self.current_time = 0
         success_signal = None
         interventions_info = None
+        reset_observation_space_signal = False
         if interventions_dict is not None:
             interventions_dict_copy = interventions_dict
             non_changed_variables = \
@@ -290,7 +310,7 @@ class BaseTask(object):
                 else:
                     interventions_dict_copy[non_changed_variable] = \
                         self.initial_state[non_changed_variable]
-            success_signal, interventions_info = \
+            success_signal, interventions_info, reset_observation_space_signal = \
                 self.apply_interventions(interventions_dict_copy,
                                          check_bounds=
                                          self.task_params['intervention_split'])
@@ -314,7 +334,7 @@ class BaseTask(object):
             self.apply_interventions(self.initial_state,
                                      check_bounds=False)
         self._set_task_state()
-        return success_signal, interventions_info
+        return success_signal, interventions_info, reset_observation_space_signal
 
     def filter_structured_observations(self):
         robot_observations_dict = self.robot.\
@@ -411,10 +431,10 @@ class BaseTask(object):
             interventions_dict[variable_name][sub_variable_name] = \
                 chosen_intervention
 
-        success_signal, interventions_info = \
+        success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict, check_bounds=False)
         self._set_task_state()
-        return success_signal, interventions_info, interventions_dict
+        return success_signal, interventions_info, interventions_dict, reset_observation_space_signal
 
     def get_training_intervention_spaces(self):
         return self.training_intervention_spaces
@@ -540,7 +560,7 @@ class BaseTask(object):
             current_robot_state = self.robot.get_default_state()
         self.stage.apply_interventions(stage_interventions_dict)
         self.robot.apply_interventions(robot_interventions_dict)
-        task_generator_intervention_success_signal = \
+        task_generator_intervention_success_signal, reset_observation_space_signal = \
             self.apply_task_generator_interventions \
                 (task_generator_interventions_dict)
         if not self.stage.check_feasiblity_of_stage():
@@ -558,16 +578,16 @@ class BaseTask(object):
         return not robot_infeasible and \
                not stage_infeasible and \
                task_generator_intervention_success_signal, \
-               interventions_info
+               interventions_info, reset_observation_space_signal
 
     def do_intervention(self, interventions_dict, check_bounds=None):
         if check_bounds is None:
             check_bounds = self.task_params['intervention_split']
-        success_signal, interventions_info = \
+        success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)
         self._set_task_state()
-        return success_signal, interventions_info
+        return success_signal, interventions_info, reset_observation_space_signal
 
 
 

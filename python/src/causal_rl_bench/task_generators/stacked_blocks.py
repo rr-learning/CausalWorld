@@ -2,8 +2,6 @@ from causal_rl_bench.task_generators.base_task import BaseTask
 from causal_rl_bench.utils.rotation_utils import euler_to_quaternion
 import numpy as np
 import copy
-from itertools import compress
-from causal_rl_bench.utils.state_utils import get_intersection
 
 
 class StackedBlocksGeneratorTask(BaseTask):
@@ -35,30 +33,31 @@ class StackedBlocksGeneratorTask(BaseTask):
         self.task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self.task_params["blocks_min_size"] = \
-            kwargs.get("blocks_min_size", np.array([0.035, 0.035, 0.035]))
+            kwargs.get("blocks_min_size", 0.035)
         self.task_params["num_of_levels"] = \
             kwargs.get("num_of_levels", 8)
         self.task_params["max_level_width"] = \
-            kwargs.get("max_level_width", 0.035)
-        self.previous_end_effector_positions = None
-        self.previous_object_position = None
-        self.previous_object_orientation = None
+            kwargs.get("max_level_width", 0.12)
+        self.current_stack_levels = self.task_params["num_of_levels"]
+        self.current_blocks_mass = self.task_params["tool_block_mass"]
+        self.current_blocks_min_size = self.task_params["blocks_min_size"]
+        self.current_max_level_width = self.task_params["max_level_width"]
 
     def get_description(self):
         return "Task where the goal is to stack arbitrary shapes of cuboids"
 
     def _set_up_stage_arena(self):
         number_of_blocks_per_level = int(self.task_params["max_level_width"] \
-                                     / self.task_params["blocks_min_size"][0])
+                                     / self.task_params["blocks_min_size"])
         default_start_position = -(number_of_blocks_per_level *
-                                  self.task_params["blocks_min_size"][0])/2
-        default_start_position += self.task_params["blocks_min_size"][0]/2
-        curr_height = 0.01 - self.task_params["blocks_min_size"][-1]/2
+                                  self.task_params["blocks_min_size"])/2
+        default_start_position += self.task_params["blocks_min_size"]/2
+        curr_height = 0.01 - self.task_params["blocks_min_size"]/2
         change_per_level = 0.005
         rigid_block_side = 0.1
         for level in range(self.task_params["num_of_levels"]):
             change_per_level *= -1
-            curr_height += self.task_params["blocks_min_size"][-1]
+            curr_height += self.task_params["blocks_min_size"]
             start_position = default_start_position + change_per_level
             rigid_block_side *= -1
             for i in range(number_of_blocks_per_level):
@@ -69,8 +68,14 @@ class StackedBlocksGeneratorTask(BaseTask):
                                                         position=[start_position,
                                                                   0, curr_height],
                                                         orientation=[0, 0, 0, 1],
-                                                        size=self.task_params
-                                                        ["blocks_min_size"])
+                                                        size=np.repeat(self.task_params
+                                                        ["blocks_min_size"], 3))
+                self.task_stage_observation_keys.append("goal_"+"level_"+
+                                                         str(level)+"_num_"+
+                                                         str(i)+'_position')
+                self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                        str(level) + "_num_" +
+                                                        str(i) + '_orientation')
                 self.stage.add_rigid_general_object(name="tool_" + "level_" +
                                                           str(level) + "_num_" +
                                                           str(i),
@@ -79,26 +84,122 @@ class StackedBlocksGeneratorTask(BaseTask):
                                                               rigid_block_side,
                                                               curr_height],
                                                     orientation=[0, 0, 0, 1],
-                                                    size=self.task_params
-                                                    ["blocks_min_size"])
-                start_position += self.task_params["blocks_min_size"][0]
+                                                    size=np.repeat(self.task_params
+                                                        ["blocks_min_size"], 3),
+                                                    mass=self.task_params
+                                                    ["tool_block_mass"])
+                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(level) + "_num_" +
+                                                        str(i) + '_position')
+                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(level) + "_num_" +
+                                                        str(i) + '_orientation')
+                start_position += self.task_params["blocks_min_size"]
         if self.task_params["joint_positions"] is not None:
             self.initial_state['joint_positions'] = \
                 self.task_params["joint_positions"]
         return
 
-    # def generate_new_goal(self):
-    #
-    #     self._create_new_challenge()
-    #     # self.reset_task()
-    #     return
+    def sample_new_goal(self, training=True):
+        intervention_dict = dict()
+        if training:
+            intervention_space = self.training_intervention_spaces
+        else:
+            intervention_space = self.testing_intervention_spaces
+        intervention_dict['stack_levels'] = np.\
+            random.uniform(intervention_space['stack_levels'][0],
+                           intervention_space['stack_levels'][1])
+        intervention_dict['blocks_mass'] = np. \
+            random.uniform(intervention_space['blocks_mass'][0],
+                           intervention_space['blocks_mass'][1])
+        intervention_dict['blocks_min_size'] = np. \
+            random.uniform(intervention_space['blocks_min_size'][0],
+                           intervention_space['blocks_min_size'][1])
+        intervention_dict['max_level_width'] = np. \
+            random.uniform(intervention_space['max_level_width'][0],
+                           intervention_space['max_level_width'][1])
+        return intervention_dict
 
-    def _create_new_challenge(self):
+    def get_task_generator_variables_values(self):
+        return {'stack_levels': self.current_stack_levels,
+                'blocks_mass': self.current_blocks_mass,
+                'blocks_min_size': self.current_blocks_min_size,
+                'max_level_width': self.current_max_level_width}
+
+    def apply_task_generator_interventions(self, interventions_dict):
+        #TODO: support level removal intervention
+        if len(interventions_dict) == 0:
+            return True, False
+        reset_observation_space = True
+        if "max_level_width" in interventions_dict:
+            self.current_max_level_width = interventions_dict["max_level_width"]
+        if "blocks_min_size" in interventions_dict:
+            self.current_blocks_min_size = interventions_dict["blocks_min_size"]
+        if "stack_levels" in interventions_dict:
+            self.current_stack_levels = interventions_dict["stack_levels"]
+        if "blocks_mass" in interventions_dict:
+            self.current_blocks_mass = interventions_dict["blocks_mass"]
+        if "max_level_width" in interventions_dict or "blocks_min_size" in interventions_dict or \
+                "stack_levels" in interventions_dict:
+            self._create_new_challenge(num_of_levels=int(self.current_stack_levels),
+                                       blocks_min_size=self.current_blocks_min_size,
+                                       blocks_mass=self.current_blocks_mass,
+                                       max_level_width=self.current_max_level_width)
+        elif "blocks_mass" in interventions_dict:
+            new_interventions_dict = dict()
+            for rigid_object in self.stage.rigid_objects:
+                new_interventions_dict[rigid_object] = dict()
+                new_interventions_dict[rigid_object]['mass'] = \
+                    self.current_blocks_mass
+
+        else:
+            raise Exception("this task generator variable "
+                            "is not yet defined")
+        return True, reset_observation_space
+
+    def _set_training_intervention_spaces(self):
+        #for now remove all possible interventions on the goal in general
+        #intevrntions on size of objects might become tricky to handle
+        #contradicting interventions here?
+        super(StackedBlocksGeneratorTask, self)._set_training_intervention_spaces()
+        for visual_object in self.stage.visual_objects:
+            del self.training_intervention_spaces[visual_object]
+        for rigid_object in self.stage.rigid_objects:
+            del self.training_intervention_spaces[rigid_object]['size']
+        self.training_intervention_spaces['stack_levels'] = \
+            np.array([1, 5])
+        self.training_intervention_spaces['blocks_mass'] = \
+            np.array([0.02, 0.06])
+        self.training_intervention_spaces['blocks_min_size'] = \
+            np.array([0.035, 0.065])
+        self.training_intervention_spaces['max_level_width'] = \
+            np.array([0.035, 0.12])
+        return
+
+    def _set_testing_intervention_spaces(self):
+        super(StackedBlocksGeneratorTask, self)._set_testing_intervention_spaces()
+        for visual_object in self.stage.visual_objects:
+            del self.testing_intervention_spaces[visual_object]
+        for rigid_object in self.stage.rigid_objects:
+            del self.testing_intervention_spaces[rigid_object]['size']
+        self.testing_intervention_spaces['stack_levels'] = \
+            np.array([6, 8])
+        self.testing_intervention_spaces['blocks_mass'] = \
+            np.array([0.06, 0.08])
+        self.testing_intervention_spaces['blocks_min_size'] = \
+            np.array([0.065, 0.075])
+        self.testing_intervention_spaces['max_level_width'] = \
+            np.array([0.12, 0.15])
+        return
+
+    def _create_new_challenge(self, num_of_levels, blocks_min_size,
+                              blocks_mass, max_level_width):
         self.stage.remove_everything()
-        self.current_stack_levels = self.task_params["num_of_levels"]
+        self.task_stage_observation_keys = []
         block_sizes, positions, chosen_y = self._generate_random_target(
-            num_of_levels=self.task_params["num_of_levels"],
-            min_size=self.task_params["blocks_min_size"])
+            num_of_levels=num_of_levels,
+            min_size=blocks_min_size,
+            max_level_width=max_level_width)
         for level_num in range(len(block_sizes)):
             for i in range(len(block_sizes[level_num])):
                 self.stage.add_rigid_general_object(
@@ -107,7 +208,7 @@ class StackedBlocksGeneratorTask(BaseTask):
                     shape="cube",
                     size=block_sizes[level_num][i],
                     color=np.random.uniform(0, 1, size=[3]),
-                    mass=self.task_params["tool_block_mass"])
+                    mass=blocks_mass)
                 block_position = self.stage.random_position(
                     height_limits=0.0425)
                 block_orientation = euler_to_quaternion(
@@ -132,9 +233,21 @@ class StackedBlocksGeneratorTask(BaseTask):
                     trial_index += 1
                 silhouette_position = [positions[level_num][i], chosen_y,
                                        (level_num+1) *
-                                       self.task_params["blocks_min_size"][-1]
-                                       + (-self.task_params["blocks_min_size"]
-                                          [-1]/2+0.01)]
+                                       blocks_min_size
+                                       + (-blocks_min_size
+                                          /2+0.01)]
+                self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                        str(level_num) + "_num_" +
+                                                        str(i) + '_position')
+                self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                        str(level_num) + "_num_" +
+                                                        str(i) + '_orientation')
+                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(level_num) + "_num_" +
+                                                        str(i) + '_position')
+                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(level_num) + "_num_" +
+                                                        str(i) + '_orientation')
                 self.stage.add_silhoutte_general_object(name="goal_" +
                                                              "level_" +
                                                              str(level_num)+
@@ -144,11 +257,14 @@ class StackedBlocksGeneratorTask(BaseTask):
                                                         np.array(silhouette_position),
                                                         size=
                                                         np.array(block_sizes[level_num][i]))
+        self.current_stack_levels = num_of_levels
+        self.current_blocks_mass = blocks_mass
+        self.current_blocks_min_size = blocks_min_size
+        self.current_max_level_width = max_level_width
         return
 
     def _generate_random_block(self, allowed_boundaries,
-                               start_z, min_size=np.array([0.035, 0.035,
-                                                           0.035]),
+                               start_z, min_size=0.035,
                                max_level_width=0.12):
         """
         This function will return a random position and size of a block
@@ -159,17 +275,17 @@ class StackedBlocksGeneratorTask(BaseTask):
         :return:
         """
         allowed_boundaries[0][0] = max(self.stage.floor_inner_bounding_box[0][0]
-                                       + min_size[0],
+                                       + min_size,
                                        allowed_boundaries[0][0])
         allowed_boundaries[1][0] = min(self.stage.floor_inner_bounding_box[1][0]
-                                       - min_size[0],
+                                       - min_size,
                                        allowed_boundaries[1][0])
 
         allowed_boundaries[0][1] = max(self.stage.floor_inner_bounding_box[0][1]
-                                       + min_size[1],
+                                       + min_size,
                                        allowed_boundaries[0][1])
         allowed_boundaries[1][1] = min(self.stage.floor_inner_bounding_box[1][1]
-                                       - min_size[1],
+                                       - min_size,
                                        allowed_boundaries[1][1])
         position_x_y = np.random.uniform(allowed_boundaries[0][:2],
                                          allowed_boundaries[1][:2])
@@ -179,13 +295,14 @@ class StackedBlocksGeneratorTask(BaseTask):
             position_x_y[0] - self.stage.floor_inner_bounding_box[0][0]) * 2
         allowed_max_width = min(allowed_max_width, max_level_width)
         size = np.random.uniform(min_size,
-                                 [allowed_max_width, min_size[1], min_size[2]])
+                                 [allowed_max_width, min_size, min_size])
         position_z = start_z + size[-1]/2
         position = np.array([position_x_y[0], position_x_y[1], position_z])
         return size, position
 
     def _generate_random_target(self, num_of_levels=4,
-                                min_size=np.array([0.035, 0.035, 0.035])):
+                                min_size=0.035,
+                                max_level_width=0.12):
         """
         This function generated a sampled target, should be modified to new
         sample goal
@@ -203,7 +320,7 @@ class StackedBlocksGeneratorTask(BaseTask):
         size, position = self._generate_random_block(
             allowed_boundaries=current_boundaries, start_z=start_z,
             min_size=min_size,
-            max_level_width=self.task_params["max_level_width"])
+            max_level_width=max_level_width)
         level_blocks.append([[size[0], position[0]]])
         for level_index in range(1, num_of_levels):
             start_z = start_z + size[-1]
@@ -216,18 +333,18 @@ class StackedBlocksGeneratorTask(BaseTask):
             size, position = self._generate_random_block(
                 allowed_boundaries=current_boundaries,
                 start_z=start_z, min_size=min_size,
-                max_level_width=self.task_params["max_level_width"])
+                max_level_width=max_level_width)
             level_blocks.append([[size[0], position[0]]])
         chosen_y = position[1]
         new_level_blocks = \
             self._generate_blocks_to_use(level_blocks,
-                                         min_size=min_size[0])
+                                         min_size=min_size)
         new_level_blocks = \
             self._generate_blocks_to_use(new_level_blocks,
-                                         min_size=min_size[0])
+                                         min_size=min_size)
         new_level_blocks = \
             self._generate_blocks_to_use(new_level_blocks,
-                                         min_size=min_size[0])
+                                         min_size=min_size)
         #now return the actual block sizes that needs to be created
         block_sizes, positions = self._get_block_sizes(new_level_blocks,
                                                        min_size)
@@ -292,9 +409,8 @@ class StackedBlocksGeneratorTask(BaseTask):
             positions.append([])
             current_level_blocks = level_blocks[i]
             for block in current_level_blocks:
-                block_sizes[-1].append([block[0], min_size[1], min_size[2]])
+                block_sizes[-1].append([block[0], min_size, min_size])
                 positions[-1].append(block[1])
         return block_sizes, positions
 
-    def sample_new_goal(self, training=True):
-        return self._create_new_challenge()
+

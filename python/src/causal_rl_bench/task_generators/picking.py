@@ -188,8 +188,8 @@ class PickingTaskGenerator(BaseTask):
         else:
             intervention_space = self.testing_intervention_spaces
         intervention_dict['goal_height'] = np.\
-            random.uniform(intervention_space['goal_block']['position'][0],
-                           intervention_space['goal_block']['position'][1])[-1]
+            random.uniform(intervention_space['goal_height'][0],
+                           intervention_space['goal_height'][1])
         return intervention_dict
 
     def get_task_generator_variables_values(self):
@@ -197,6 +197,7 @@ class PickingTaskGenerator(BaseTask):
                                                            'position')[-1]}
 
     def apply_task_generator_interventions(self, interventions_dict):
+        reset_observation_space = False
         new_interventions_dict = dict()
         for intervention_variable in interventions_dict:
             if intervention_variable == "goal_height":
@@ -213,7 +214,7 @@ class PickingTaskGenerator(BaseTask):
                 raise Exception("this task generator variable "
                                 "is not yet defined")
         if len(new_interventions_dict) == 0:
-            return True
+            return True, reset_observation_space
         else:
             self.stage.apply_interventions(new_interventions_dict)
-        return True
+        return True, reset_observation_space

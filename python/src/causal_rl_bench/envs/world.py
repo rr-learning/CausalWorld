@@ -66,19 +66,7 @@ class World(gym.Env):
             self.task = task
 
         self.task.init_task(self.robot, self.stage)
-        if not self.observation_mode == "cameras":
-            self.robot.select_observations(self.task.task_robot_observation_keys)
-            self.stage.select_observations(self.task.task_stage_observation_keys)
-            self.observation_space = \
-                combine_spaces(self.robot.get_observation_spaces(),
-                               self.stage.get_observation_spaces())
-        elif self.observation_mode == "cameras" and self.enable_goal_image:
-            self.stage.select_observations(["goal_image"])
-            self.observation_space = combine_spaces(
-                self.robot.get_observation_spaces(),
-                self.stage.get_observation_spaces())
-        else:
-            self.observation_space = self.robot.get_observation_spaces()
+        self.reset_observations_space()
         self.action_space = self.robot.get_action_spaces()
         self.skip_frame = skip_frame
         self.dt = self.simulation_time * self.skip_frame
@@ -92,6 +80,22 @@ class World(gym.Env):
                                world_params=self.get_world_params())
         self.scale_reward_by_dt = True
         self.reset()
+        return
+
+    def reset_observations_space(self):
+        if not self.observation_mode == "cameras":
+            self.robot.select_observations(self.task.task_robot_observation_keys)
+            self.stage.select_observations(self.task.task_stage_observation_keys)
+            self.observation_space = \
+                combine_spaces(self.robot.get_observation_spaces(),
+                               self.stage.get_observation_spaces())
+        elif self.observation_mode == "cameras" and self.enable_goal_image:
+            self.stage.select_observations(["goal_image"])
+            self.observation_space = combine_spaces(
+                self.robot.get_observation_spaces(),
+                self.stage.get_observation_spaces())
+        else:
+            self.observation_space = self.robot.get_observation_spaces()
         return
 
     def step(self, action):
@@ -160,7 +164,10 @@ class World(gym.Env):
         self.episode_length = 0
         if interventions_dict is not None:
             self.tracker.do_intervention(self.task, interventions_dict)
-        success_signal, interventions_info = self.task.reset_task(interventions_dict)
+        success_signal, interventions_info, reset_observation_space_signal = \
+            self.task.reset_task(interventions_dict)
+        if reset_observation_space_signal:
+            self.reset_observations_space()
         if success_signal is not None:
             if not success_signal:
                 self.tracker.add_invalid_intervention(interventions_info)
@@ -201,8 +208,10 @@ class World(gym.Env):
             return self.task.is_done()
 
     def do_single_random_intervention(self):
-        success_signal, interventions_info, interventions_dict = \
+        success_signal, interventions_info, interventions_dict, reset_observation_space_signal = \
             self.task.do_single_random_intervention()
+        if reset_observation_space_signal:
+            self.reset_observations_space()
         if len(interventions_dict) > 0:
             self.tracker.do_intervention(self.task, interventions_dict)
             if success_signal is not None:
@@ -212,10 +221,12 @@ class World(gym.Env):
 
     def do_intervention(self, interventions_dict,
                         check_bounds=None):
-        success_signal, interventions_info = \
+        success_signal, interventions_info, reset_observation_space_signal = \
             self.task.do_intervention(interventions_dict,
                                       check_bounds=check_bounds)
         self.tracker.do_intervention(self.task, interventions_dict)
+        if reset_observation_space_signal:
+            self.reset_observations_space()
         if success_signal is not None:
             if not success_signal:
                 self.tracker.add_invalid_intervention(interventions_info)
