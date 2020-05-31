@@ -39,7 +39,7 @@ class StackedBlocksGeneratorTask(BaseTask):
         self.task_params["num_of_levels"] = \
             kwargs.get("num_of_levels", 8)
         self.task_params["max_level_width"] = \
-            kwargs.get("max_level_width", 0.12)
+            kwargs.get("max_level_width", 0.035)
         self.previous_end_effector_positions = None
         self.previous_object_position = None
         self.previous_object_orientation = None
@@ -135,7 +135,6 @@ class StackedBlocksGeneratorTask(BaseTask):
                                        self.task_params["blocks_min_size"][-1]
                                        + (-self.task_params["blocks_min_size"]
                                           [-1]/2+0.01)]
-                print(silhouette_position)
                 self.stage.add_silhoutte_general_object(name="goal_" +
                                                              "level_" +
                                                              str(level_num)+
@@ -188,7 +187,8 @@ class StackedBlocksGeneratorTask(BaseTask):
     def _generate_random_target(self, num_of_levels=4,
                                 min_size=np.array([0.035, 0.035, 0.035])):
         """
-        This function generated a sampled target, should be modified to new sample goal
+        This function generated a sampled target, should be modified to new
+        sample goal
         :param levels_num:
         :param min_size:
         :return:
@@ -202,7 +202,8 @@ class StackedBlocksGeneratorTask(BaseTask):
         level_index = 0
         size, position = self._generate_random_block(
             allowed_boundaries=current_boundaries, start_z=start_z,
-            min_size=min_size)
+            min_size=min_size,
+            max_level_width=self.task_params["max_level_width"])
         level_blocks.append([[size[0], position[0]]])
         for level_index in range(1, num_of_levels):
             start_z = start_z + size[-1]
@@ -214,7 +215,8 @@ class StackedBlocksGeneratorTask(BaseTask):
                                              new_allowed_boundaries[1])]
             size, position = self._generate_random_block(
                 allowed_boundaries=current_boundaries,
-                start_z=start_z, min_size=min_size)
+                start_z=start_z, min_size=min_size,
+                max_level_width=self.task_params["max_level_width"])
             level_blocks.append([[size[0], position[0]]])
         chosen_y = position[1]
         new_level_blocks = \
