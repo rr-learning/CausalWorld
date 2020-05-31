@@ -128,6 +128,19 @@ class StackedBlocksGeneratorTask(BaseTask):
 
     def apply_task_generator_interventions(self, interventions_dict):
         #TODO: support level removal intervention
+        # elif variable_name == 'stack_levels':
+        #     #remove levels now
+        #     if self.current_stack_levels > variable_value:
+        #         for i in range(variable_value, self.current_stack_levels):
+        #             self.stage.remove_general_object("target_"+"level_" + str(i))
+        #             select_rigid_objects_to_remove = [key.startswith("block_" + "level_" + str(i))
+        #                                               for key in self.stage.rigid_objects]
+        #             rigid_objects_to_remove = list(compress(list(self.stage.rigid_objects.keys()),
+        #                                                     select_rigid_objects_to_remove))
+        #             for rigid_object_to_remove in rigid_objects_to_remove:
+        #                 self.stage.remove_general_object(rigid_object_to_remove)
+        #         self.current_stack_levels = variable_value
+        #         self._set_intervention_spaces()
         if len(interventions_dict) == 0:
             return True, False
         reset_observation_space = True
@@ -155,6 +168,8 @@ class StackedBlocksGeneratorTask(BaseTask):
         else:
             raise Exception("this task generator variable "
                             "is not yet defined")
+        self._set_testing_intervention_spaces()
+        self._set_training_intervention_spaces()
         return True, reset_observation_space
 
     def _set_training_intervention_spaces(self):
