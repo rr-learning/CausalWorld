@@ -41,10 +41,6 @@ class BaseTask(object):
             calculate_additional_dense_rewards
         return
 
-    def sample_new_goal(self):
-        raise Exception("Sampling new goal is not supported for this "
-                        "task")
-
     def get_description(self):
         return
 
@@ -105,6 +101,23 @@ class BaseTask(object):
         self.training_intervention_spaces['stage_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         return
+
+    def sample_new_goal(self, training=True):
+        #TODO: for now we just vary position as a new goal
+        #Need to generalize this
+        intervention_dict = dict()
+        if training:
+            intervention_space = self.training_intervention_spaces
+        else:
+            intervention_space = self.testing_intervention_spaces
+        for visual_object in self.stage.visual_objects:
+            if visual_object in intervention_space and \
+                    'position' in intervention_space[visual_object]:
+                intervention_dict[visual_object] = dict()
+                intervention_dict[visual_object]['position'] = \
+                    np.random.uniform(intervention_space[visual_object]['position'][0],
+                                      intervention_space[visual_object]['position'][1])
+        return intervention_dict
 
     def _set_testing_intervention_spaces(self):
         # you can override these easily
@@ -227,6 +240,7 @@ class BaseTask(object):
             np.zeros([9, ])
         self._set_up_stage_arena()
         self.stage.finalize_stage()
+        self.task_params.update(self.initial_state)
         self._set_up_non_default_observations()
         self._set_training_intervention_spaces()
         self._set_testing_intervention_spaces()
@@ -526,15 +540,15 @@ class BaseTask(object):
             current_robot_state = self.robot.get_default_state()
         self.stage.apply_interventions(stage_interventions_dict)
         self.robot.apply_interventions(robot_interventions_dict)
+        task_generator_intervention_success_signal = \
+            self.apply_task_generator_interventions \
+                (task_generator_interventions_dict)
         if not self.stage.check_feasiblity_of_stage():
             self.stage.set_full_state(current_stage_state)
             stage_infeasible = True
         if not self.robot.check_feasibility_of_robot_state():
             self.robot.set_full_state(current_robot_state)
             robot_infeasible = True
-        task_generator_intervention_success_signal = \
-            self.apply_task_generator_interventions\
-                (task_generator_interventions_dict)
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \

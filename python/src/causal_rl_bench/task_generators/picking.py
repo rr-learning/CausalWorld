@@ -1,5 +1,4 @@
 from causal_rl_bench.task_generators.base_task import BaseTask
-from causal_rl_bench.utils.rotation_utils import euler_to_quaternion
 import numpy as np
 
 
@@ -15,22 +14,17 @@ class PickingTaskGenerator(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([1, 0.5, 3, 0.001])))
-        # self.task_robot_observation_keys = ["joint_positions",
-        #                                     "joint_velocities",
-        #                                     "action_joint_positions",
-        #                                     "end_effector_positions"]
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
-                                            "end_effector_positions",
-                                            "goal_height"]
-        self.task_stage_observation_keys = ["tool_block_position"]
-        self.task_params["goal_height"] = 0.15
-
-        # self.task_stage_observation_keys = ["tool_block_position",
-        #                                     "tool_block_orientation",
-        #                                     "goal_block_position",
-        #                                     "goal_block_orientation"]
+                                            "end_effector_positions"]
+        self.task_stage_observation_keys = ["tool_block_position",
+                                            "tool_block_orientation",
+                                            "goal_block_position",
+                                            "goal_block_orientation"]
+        # TODO: check for nans when bounds are the same in normalization
+        self.task_params["goal_height"] = \
+            kwargs.get("goal_height", 0.15)
         self.task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.02)
         self.task_params["joint_positions"] = \
@@ -40,10 +34,6 @@ class PickingTaskGenerator(BaseTask):
             kwargs.get("tool_block_position", np.array([0, 0, 0.0425]))
         self.initial_state["tool_block"]["orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
-        self.task_params["goal_block_position"] = \
-            kwargs.get("goal_block_position", np.array([0, 0., 0.15]))
-        self.task_params["goal_block_orientation"] = \
-            kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_object_position = None
         self.previous_end_effector_positions = None
         self.previous_joint_velocities = None
@@ -51,16 +41,6 @@ class PickingTaskGenerator(BaseTask):
     def get_description(self):
         return "Task where the goal is to pick a " \
                "cube towards a goal height"
-
-    def _set_up_non_default_observations(self):
-        self._setup_non_default_robot_observation_key(
-            observation_key="goal_height",
-            observation_function=self._set_goal_height,
-            lower_bound=[0.04], upper_bound=[0.3])
-        return
-
-    def _set_goal_height(self):
-        return self.task_params["goal_height"]
 
     def _set_up_stage_arena(self):
         self.stage.add_rigid_general_object(name="tool_block",
@@ -71,13 +51,19 @@ class PickingTaskGenerator(BaseTask):
                                             ["tool_block"]["position"],
                                             orientation=self.initial_state
                                             ["tool_block"]["orientation"])
+        goal_block_position = np.array(
+            self.initial_state["tool_block"]["position"])
+        goal_block_position[-1] = self.task_params["goal_height"]
         self.stage.add_silhoutte_general_object(name="goal_block",
                                                 shape="cube",
-                                                position=self.task_params[
-                                                    "goal_block_position"],
+                                                position=goal_block_position,
                                                 orientation=
-                                                self.task_params[
-                                                    "goal_block_orientation"])
+                                                self.initial_state[
+                                                    "tool_block"][
+                                                    "orientation"])
+        if self.task_params["joint_positions"] is not None:
+            self.initial_state['joint_positions'] = \
+                self.task_params["joint_positions"]
         return
 
     def _set_training_intervention_spaces(self):
@@ -89,14 +75,6 @@ class PickingTaskGenerator(BaseTask):
             self.training_intervention_spaces[rigid_object]['position'][1][
                 -1] \
                 = 0.0425
-            self.training_intervention_spaces[rigid_object]['position'][0][0] \
-                += 0.04
-            self.training_intervention_spaces[rigid_object]['position'][0][1] \
-                += 0.04
-            self.training_intervention_spaces[rigid_object]['position'][1][0] \
-                -= 0.04
-            self.training_intervention_spaces[rigid_object]['position'][1][1] \
-                -= 0.04
         for visual_object in self.stage.visual_objects:
             self.training_intervention_spaces[visual_object]['position'][
                 0][-1] \
@@ -104,14 +82,8 @@ class PickingTaskGenerator(BaseTask):
             self.training_intervention_spaces[visual_object]['position'][
                 1][-1] \
                 = 0.20
-            self.training_intervention_spaces[visual_object]['position'][0][0] \
-                += 0.04
-            self.training_intervention_spaces[visual_object]['position'][0][1] \
-                += 0.04
-            self.training_intervention_spaces[visual_object]['position'][1][0] \
-                -= 0.04
-            self.training_intervention_spaces[visual_object]['position'][1][1] \
-                -= 0.04
+        self.training_intervention_spaces['goal_height'] = \
+            np.array([0.08, 0.20])
         return
 
     def _set_testing_intervention_spaces(self):
@@ -123,14 +95,6 @@ class PickingTaskGenerator(BaseTask):
             self.testing_intervention_spaces[rigid_object]['position'][1][
                 -1] \
                 = 0.0425
-            self.testing_intervention_spaces[rigid_object]['position'][0][0] \
-                += 0.04
-            self.testing_intervention_spaces[rigid_object]['position'][0][1] \
-                += 0.04
-            self.testing_intervention_spaces[rigid_object]['position'][1][0] \
-                -= 0.04
-            self.testing_intervention_spaces[rigid_object]['position'][1][1] \
-                -= 0.04
         for visual_object in self.stage.visual_objects:
             self.testing_intervention_spaces[visual_object]['position'][0][
                 -1] \
@@ -138,28 +102,17 @@ class PickingTaskGenerator(BaseTask):
             self.testing_intervention_spaces[visual_object]['position'][1][
                 -1] \
                 = 0.25
-            self.testing_intervention_spaces[visual_object]['position'][0][0] \
-                += 0.04
-            self.testing_intervention_spaces[visual_object]['position'][0][1] \
-                += 0.04
-            self.testing_intervention_spaces[visual_object]['position'][1][0] \
-                -= 0.04
-            self.testing_intervention_spaces[visual_object]['position'][1][1] \
-                -= 0.04
+        self.testing_intervention_spaces['goal_height'] = \
+            np.array([0.20, 0.25])
         return
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
         rewards = list()
         block_position = self.stage.get_object_state('tool_block',
                                                      'position')
-        # goal_position = self.stage.get_object_state('goal_block',
-        #                                             'position')
-        # target_height = goal_position[-1]
-        target_height = self.task_params["goal_height"]
-        #TODO: we need to revert this
-        # joint_velocities = self.robot.latest_full_state.velocity
-        joint_velocities = self.robot.get_current_observations([])[
-            "joint_velocities"]
+        target_height = self.stage.get_object_state('goal_block',
+                                                     'position')[-1]
+        joint_velocities = self.robot.latest_full_state.velocity
         previous_block_to_goal = abs(self.previous_object_position[2] -
                                      target_height)
         current_block_to_goal = abs(block_position[2] - target_height)
@@ -195,7 +148,6 @@ class PickingTaskGenerator(BaseTask):
             update_task_info['current_end_effector_positions']
         self.previous_object_position = \
             update_task_info['current_tool_block_position']
-        # TODO: we need to revert this
         self.previous_joint_velocities = \
             update_task_info['current_velocity']
         return
@@ -208,11 +160,8 @@ class PickingTaskGenerator(BaseTask):
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
             self.stage.get_object_state('tool_block', 'position')
-        # TODO: we need to revert this
-        # self.previous_joint_velocities = \
-        #     self.robot.latest_full_state.velocity
         self.previous_joint_velocities = \
-            self.robot.get_current_observations([])["joint_velocities"]
+            self.robot.latest_full_state.velocity
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
@@ -231,19 +180,40 @@ class PickingTaskGenerator(BaseTask):
                     interventions_dict['tool_block']['size']
         return interventions_dict
 
-    def sample_new_goal(self):
+    def sample_new_goal(self, training=True):
         # TODO: make sure its feasible goal by
-        # taking care of the size as well
-        lower_bound = self.stage.floor_inner_bounding_box[0]
-        upper_bound = self.stage.floor_inner_bounding_box[1]
-        lower_bound[-1] = 0.07
-        upper_bound[-1] = 0.22
-        new_goal = dict()
-        new_goal['goal_block'] = dict()
-        new_goal['goal_block']['position'] \
-            = np.random.uniform(lower_bound, upper_bound)
-        new_goal['goal_block']['orientation'] \
-            = euler_to_quaternion([0, 0, 0])
-        return new_goal
+        intervention_dict = dict()
+        if training:
+            intervention_space = self.training_intervention_spaces
+        else:
+            intervention_space = self.testing_intervention_spaces
+        intervention_dict['goal_height'] = np.\
+            random.uniform(intervention_space['goal_block']['position'][0],
+                           intervention_space['goal_block']['position'][1])[-1]
+        return intervention_dict
 
+    def get_task_generator_variables_values(self):
+        return {'goal_height': self.stage.get_object_state('goal_block',
+                                                           'position')[-1]}
 
+    def apply_task_generator_interventions(self, interventions_dict):
+        new_interventions_dict = dict()
+        for intervention_variable in interventions_dict:
+            if intervention_variable == "goal_height":
+                new_interventions_dict['goal_block'] = dict()
+                new_interventions_dict['goal_block']['position'] = \
+                    self.stage.get_object_state\
+                    ('tool_block', 'position')
+                new_interventions_dict['goal_block']['orientation'] = \
+                    self.stage.get_object_state\
+                    ('tool_block', 'orientation')
+                new_interventions_dict['goal_block']['position'][-1] = \
+                    interventions_dict["goal_height"]
+            else:
+                raise Exception("this task generator variable "
+                                "is not yet defined")
+        if len(new_interventions_dict) == 0:
+            return True
+        else:
+            self.stage.apply_interventions(new_interventions_dict)
+        return True

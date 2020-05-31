@@ -118,21 +118,3 @@ class ReachingTaskGenerator(BaseTask):
             return True
         else:
             return False
-
-    def sample_new_goal(self):
-        #TODO: make sure its feasible goal by
-        # taking care of the size as well
-        goals = np.random.uniform(self.stage.floor_inner_bounding_box[0],
-                                  self.stage.floor_inner_bounding_box[1],
-                                  size=[3, 3])
-        new_goal = dict()
-        new_goal['goal_60'] = dict()
-        new_goal['goal_60']['position'] \
-            = goals[0]
-        new_goal['goal_120'] = dict()
-        new_goal['goal_120']['position'] \
-            = goals[1]
-        new_goal['goal_300'] = dict()
-        new_goal['goal_300']['position'] \
-            = goals[2]
-        return new_goal
