@@ -434,7 +434,6 @@ class BaseTask(object):
             interventions_dict[variable_name] = dict()
             interventions_dict[variable_name][sub_variable_name] = \
                 chosen_intervention
-
         success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict, check_bounds=False)
         # self._set_task_state()

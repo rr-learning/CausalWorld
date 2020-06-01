@@ -20,6 +20,7 @@ def example():
 
         # print(new_goal)
         # chosen_intervention = env.do_single_random_intervention()
+        env.do_intervention({'number_of_obstacles': 5})
         # print(chosen_intervention)
         # print("intervened")
         for i in range(100):

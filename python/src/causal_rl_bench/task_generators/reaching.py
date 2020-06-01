@@ -35,6 +35,7 @@ class ReachingTaskGenerator(BaseTask):
             kwargs.get("joint_positions", None)
         self.previous_end_effector_positions = None
         self.previous_joint_velocities = None
+        self.current_number_of_obstacles = 0
 
     def _set_up_stage_arena(self):
         self.stage.add_silhoutte_general_object(name="goal_60",
@@ -49,6 +50,7 @@ class ReachingTaskGenerator(BaseTask):
                                                 shape="sphere",
                                                 color=np.array([0, 0, 1]),
                                                 position=self.task_params['default_goal_300'])
+        self.current_number_of_obstacles = 0
         if self.task_params["joint_positions"] is not None:
             self.initial_state['joint_positions'] = \
                 self.task_params["joint_positions"]
@@ -169,6 +171,8 @@ class ReachingTaskGenerator(BaseTask):
         self.training_intervention_spaces['goal_300']['position'] = \
             np.array([lower_bound,
                       upper_bound])
+        self.training_intervention_spaces['number_of_obstacles'] = \
+            np.array([1, 5])
 
         return
 
@@ -213,4 +217,41 @@ class ReachingTaskGenerator(BaseTask):
         self.testing_intervention_spaces['goal_300']['position'] = \
             np.array([lower_bound,
                       upper_bound])
+        #TODO:dicuss this!
+        self.testing_intervention_spaces['number_of_obstacles'] = \
+            np.array([1, 5])
         return
+
+    def get_task_generator_variables_values(self):
+        task_generator_variables = dict()
+        task_generator_variables['number_of_obstacles'] = \
+            self.current_number_of_obstacles
+        return task_generator_variables
+
+    def apply_task_generator_interventions(self, interventions_dict):
+        # TODO: support level removal intervention
+        print(interventions_dict)
+        if len(interventions_dict) == 0:
+            return True, False
+        reset_observation_space = False
+        if "number_of_obstacles" in interventions_dict:
+            #if its more than what I have
+            #TODO: maybe check feasibility of stage?
+            if int(interventions_dict["number_of_obstacles"]) > self.current_number_of_obstacles:
+                for i in range(self.current_number_of_obstacles, int(interventions_dict["number_of_obstacles"])):
+                    self.stage.add_rigid_general_object(name="obstacle_"+str(i),
+                                                        shape="static_cube",
+                                                        size=
+                                                        np.array([0.01, 0.01, 0.01]),
+                                                        color=np.array([0, 0, 0]),
+                                                        position=np.random.uniform(self.stage.floor_inner_bounding_box[0],
+                                                                                   self.stage.floor_inner_bounding_box[1]))
+                    self.current_number_of_obstacles += 1
+            #TODO: if its less than what I have
+        else:
+            raise Exception("this task generator variable "
+                            "is not yet defined")
+        self._set_testing_intervention_spaces()
+        self._set_training_intervention_spaces()
+        self.stage.finalize_stage()
+        return True, reset_observation_space

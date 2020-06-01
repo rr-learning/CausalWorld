@@ -42,6 +42,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         self.current_blocks_mass = self.task_params["tool_block_mass"]
         self.current_blocks_min_size = self.task_params["blocks_min_size"]
         self.current_max_level_width = self.task_params["max_level_width"]
+        self.current_number_of_obstacles = 0
 
     def get_description(self):
         return "Task where the goal is to stack arbitrary shapes of cuboids"
@@ -125,7 +126,8 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         return {'stack_levels': self.current_stack_levels,
                 'blocks_mass': self.current_blocks_mass,
                 'blocks_min_size': self.current_blocks_min_size,
-                'max_level_width': self.current_max_level_width}
+                'max_level_width': self.current_max_level_width,
+                'number_of_obstacles': self.current_number_of_obstacles}
 
     def apply_task_generator_interventions(self, interventions_dict):
         #TODO: support level removal intervention
@@ -144,6 +146,21 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         #         self._set_intervention_spaces()
         if len(interventions_dict) == 0:
             return True, False
+        if "number_of_obstacles" in interventions_dict:
+            #if its more than what I have
+            #TODO: maybe check feasibility of stage?
+            if int(interventions_dict["number_of_obstacles"]) > self.current_number_of_obstacles:
+                for i in range(self.current_number_of_obstacles, int(interventions_dict["number_of_obstacles"])):
+                    self.stage.add_rigid_general_object(name="obstacle_"+str(i),
+                                                        shape="static_cube",
+                                                        size=
+                                                        np.array([0.01, 0.01, 0.01]),
+                                                        color=np.array([0, 0, 0]),
+                                                        position=np.random.uniform(self.stage.floor_inner_bounding_box[0],
+                                                                                   self.stage.floor_inner_bounding_box[1]))
+                    self.current_number_of_obstacles += 1
+            if len(interventions_dict) == 1:
+                return True, False
         reset_observation_space = True
         if "max_level_width" in interventions_dict:
             self.current_max_level_width = interventions_dict["max_level_width"]
@@ -192,6 +209,8 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
             np.array([0.035, 0.065])
         self.training_intervention_spaces['max_level_width'] = \
             np.array([0.035, 0.12])
+        self.training_intervention_spaces['number_of_obstacles'] = \
+            np.array([1, 5])
         return
 
     def _set_testing_intervention_spaces(self):
@@ -208,11 +227,14 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
             np.array([0.065, 0.075])
         self.testing_intervention_spaces['max_level_width'] = \
             np.array([0.12, 0.15])
+        self.testing_intervention_spaces['number_of_obstacles'] = \
+            np.array([1, 5])
         return
 
     def _create_new_challenge(self, num_of_levels, blocks_min_size,
                               blocks_mass, max_level_width):
         self.stage.remove_everything()
+        self.current_number_of_obstacles = 0
         self.task_stage_observation_keys = []
         block_sizes, positions, chosen_y = self._generate_random_target(
             num_of_levels=num_of_levels,
