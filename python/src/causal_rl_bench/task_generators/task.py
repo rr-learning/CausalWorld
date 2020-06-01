@@ -3,6 +3,7 @@ from causal_rl_bench.task_generators.picking import PickingTaskGenerator
 from causal_rl_bench.task_generators.reaching import ReachingTaskGenerator
 from causal_rl_bench.task_generators.stacked_blocks import StackedBlocksGeneratorTask
 from causal_rl_bench.task_generators.towers import TowersGeneratorTask
+from causal_rl_bench.task_generators.general import GeneralGeneratorTask
 from causal_rl_bench.task_generators.pick_and_place import \
     PickAndPlaceTaskGenerator
 
@@ -20,6 +21,8 @@ def task_generator(task_generator_id="picking", **kwargs):
         task = StackedBlocksGeneratorTask(**kwargs)
     elif task_generator_id == "towers":
         task = TowersGeneratorTask(**kwargs)
+    elif task_generator_id == "general":
+        task = GeneralGeneratorTask(**kwargs)
     else:
         raise Exception("No valid task_generator_id")
     return task

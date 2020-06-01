@@ -8,7 +8,7 @@ from causal_rl_bench.wrappers.intervention_wrappers import \
 from causal_rl_bench.intervention_agents.trial import TrialInterventionActorPolicy
 
 def example():
-    task = task_generator(task_generator_id='towers')
+    task = task_generator(task_generator_id='general')
     env = World(task=task, enable_visualization=True, normalize_actions=False)
     # actor = TrialInterventionActorPolicy()
     # env = ActionsInterventionsActorWrapper(env, actor)

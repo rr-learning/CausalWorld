@@ -339,6 +339,12 @@ class TriFingerRobot(object):
             #TODO:add heuristics if the points are in the reachabe sets or not.
         return tip_positions
 
+    def forward_simulation(self, time=1):
+        n_steps = int(time / self.simulation_time)
+        for _ in range(n_steps):
+            self.get_pybullet_client().stepSimulation()
+        return
+
     def select_observations(self, observation_keys):
         self.robot_observations.reset_observation_keys()
         for key in observation_keys:
