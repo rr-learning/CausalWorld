@@ -46,7 +46,8 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                             shape="static_cube",
                                             size=
                                             np.array([0.35, 0.015, 0.065]),
-                                            color=np.array([0, 0, 0]))
+                                            color=np.array([0, 0, 0]),
+                                            position=[0, 0, 0.0425])
         self.stage.add_rigid_general_object(name="tool_block",
                                             shape="cube",
                                             mass=self.task_params[
@@ -107,8 +108,6 @@ class PickAndPlaceTaskGenerator(BaseTask):
         self.previous_object_orientation = \
             self.stage.get_object_state('tool_block', 'orientation')
         return
-
-
 
     def get_description(self):
         return "Task where the goal is to pick a " \

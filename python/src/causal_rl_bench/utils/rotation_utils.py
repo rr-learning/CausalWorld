@@ -7,6 +7,11 @@ def euler_to_quaternion(euler_angles):
     return r.as_quat()
 
 
+def quaternion_to_euler(quat_angles):
+    r = R.from_quat(quat_angles)
+    return r.as_rotvec()
+
+
 def quaternion_conjugate(quaternion):
     inv_q = -quaternion
     inv_q[:, 3] *= -1

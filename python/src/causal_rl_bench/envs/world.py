@@ -79,6 +79,7 @@ class World(gym.Env):
         self.tracker = Tracker(task=self.task,
                                world_params=self.get_world_params())
         self.scale_reward_by_dt = True
+        self.disabled_actions = False
         self.reset()
         return
 
@@ -100,7 +101,8 @@ class World(gym.Env):
 
     def step(self, action):
         self.episode_length += 1
-        self.robot.apply_action(action)
+        if not self.disabled_actions:
+            self.robot.apply_action(action)
         if self.observation_mode == "cameras" and self.enable_goal_image:
             current_images = self.robot.get_current_camera_observations()
             goal_images = self.stage.get_current_goal_image()
@@ -129,6 +131,9 @@ class World(gym.Env):
 
     def sample_new_goal(self):
         return self.task.sample_new_goal()
+
+    def disable_actions(self):
+        self.disabled_actions = True
 
     def add_data_recorder(self, data_recorder):
         self.data_recorder = data_recorder

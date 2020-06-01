@@ -44,6 +44,7 @@ class TowersGeneratorTask(BaseTask):
     def get_description(self):
         return "Task where the goal is to stack arbitrary number of towers side by side"
 
+    #TODO: add obstacles interventions? up to a 10 obstacles?
     def _set_up_stage_arena(self):
         block_size = self.current_number_of_blocks_in_tower / self.task_params["tower_dims"]
         curr_height = 0.01 - block_size/2

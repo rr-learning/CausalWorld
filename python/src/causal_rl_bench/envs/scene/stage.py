@@ -30,17 +30,13 @@ class Stage(object):
         self.goal_image_pybullet_instance = goal_image_pybullet_instance
         self.floor_height = 0.01
         self.floor_inner_bounding_box = np.array(
-            [[-0.15, -0.15, self.floor_height], [0.15, 0.15, 0.2]])
+            [[-0.15, -0.15, self.floor_height], [0.15, 0.15, 0.3]])
         if self.goal_image_pybullet_instance is not None:
             self.goal_image_visual_objects = dict()
             self.goal_image_pybullet_client = \
                 self.goal_image_pybullet_instance._p
             self.goal_image = None
         self.name_keys = []
-        # self.arena_interventions({'floor_color': np.array([1, 0.5, 1])})
-        # self.arena_interventions({'stage_color': np.array([0.3, 0.5, 1])})
-        # self.arena_interventions({'stage_friction': 0.8})
-        # print(self.get_current_variables_values())
         return
 
     def add_rigid_general_object(self, name, shape, **object_params):
@@ -190,13 +186,15 @@ class Stage(object):
     def random_position(self, height_limits=(0.05, 0.15),
                         angle_limits=(-2 * math.pi, 2 * math.pi),
                         radius_limits=(0.0, 0.15),
-                        allowed_section=np.array([[-0.5, -0.5, 0], [0.5, 0.5, 0.5]])):
+                        allowed_section=np.array([[-0.5, -0.5, 0],
+                                                  [0.5, 0.5, 0.5]])):
 
         satisfying_constraints = False
         while not satisfying_constraints:
             angle = np.random.uniform(*angle_limits)
             # for uniform sampling with respect to the disc area use scaling
-            radial_distance = np.sqrt(np.random.uniform(radius_limits[0]**2, radius_limits[1]**2))
+            radial_distance = np.sqrt(np.random.uniform(radius_limits[0]**2,
+                                                        radius_limits[1]**2))
 
             if isinstance(height_limits, (int, float)):
                 height_z = height_limits

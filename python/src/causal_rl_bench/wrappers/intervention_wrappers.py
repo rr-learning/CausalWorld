@@ -48,3 +48,25 @@ class ResetInterventionsActorWrapper(gym.Wrapper):
         default_world_params.update(
             self.intervention_actor.get_intervention_actor_params())
         return default_world_params
+
+
+class ActionsInterventionsActorWrapper(gym.Wrapper):
+    def __init__(self, env, intervention_actor):
+        super(ActionsInterventionsActorWrapper, self).__init__(env)
+        self.env = env
+        self.intervention_actor = intervention_actor
+        self.intervention_actor.initialize_actor(self.env)
+        self.env.disable_actions()
+
+    def step(self, action):
+        intervention_dict = self.intervention_actor.act(
+            self.env.get_current_task_parameters())
+        self.env.do_intervention(intervention_dict)
+        return self.env.step(self.env.action_space.low)
+
+    def get_world_params(self):
+        #TODO: propagate this to other wrappers
+        default_world_params = self.env.get_world_params()
+        default_world_params.update(
+            self.intervention_actor.get_intervention_actor_params())
+        return default_world_params
