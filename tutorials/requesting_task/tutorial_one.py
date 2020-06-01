@@ -8,7 +8,7 @@ from causal_rl_bench.wrappers.intervention_wrappers import \
 from causal_rl_bench.intervention_agents.trial import TrialInterventionActorPolicy
 
 def example():
-    task = task_generator(task_generator_id='general')
+    task = task_generator(task_generator_id='creative_stacked_blocks')
     env = World(task=task, enable_visualization=True, normalize_actions=False)
     # actor = TrialInterventionActorPolicy()
     # env = ActionsInterventionsActorWrapper(env, actor)
@@ -22,8 +22,8 @@ def example():
         # chosen_intervention = env.do_single_random_intervention()
         # print(chosen_intervention)
         # print("intervened")
-        for i in range(300):
-            obs, reward, done, info = env.step(env.action_space.low)
+        for i in range(100):
+            obs, reward, done, info = env.step(env.action_space.sample())
             # print(obs[-11:-7])
             # print(reward)
             # if i == 0:
