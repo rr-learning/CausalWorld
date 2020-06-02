@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Welcome to Causal RL Bench&#39;s documentation! &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  <title>Welcome to Causal RL Bench&#39;s documentation! &mdash; causal_rl_bench 1.0.0 documentation</title>
   
 
   
@@ -48,7 +48,7 @@
           
 
           
-            <a href="#" class="icon icon-home"> tf_neuralmpc
+            <a href="#" class="icon icon-home"> causal_rl_bench
           
 
           
@@ -96,7 +96,7 @@
       <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">tf_neuralmpc</a>
+          <a href="#">causal_rl_bench</a>
         
       </nav>
 
@@ -165,29 +165,15 @@ amount of common shared structure. The skills to learn range from simple to
 extremely challenging although the compositional nature of the environments
 should allow to reuse previously learned more primitive skills along a
 naturally emerging curriculum of tasks.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">number_of_agents</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="n">single_env</span><span class="p">,</span> <span class="n">parallel_env</span> <span class="o">=</span> <span class="n">EnvironmentWrapper</span><span class="o">.</span><span class="n">make_standard_gym_env</span><span class="p">(</span><span class="s2">&quot;Pendulum-v0&quot;</span><span class="p">,</span> <span class="n">random_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                                                                 <span class="n">num_of_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">)</span>
-<span class="n">my_runner</span> <span class="o">=</span> <span class="n">Runner</span><span class="p">(</span><span class="n">env</span><span class="o">=</span><span class="p">[</span><span class="n">single_env</span><span class="p">,</span> <span class="n">parallel_env</span><span class="p">],</span>
-                <span class="n">log_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                <span class="n">num_of_agents</span><span class="o">=</span><span class="n">number_of_agents</span><span class="p">)</span>
-<span class="n">mpc_controller</span> <span class="o">=</span> <span class="n">my_runner</span><span class="o">.</span><span class="n">make_mpc_policy</span><span class="p">(</span><span class="n">dynamics_function</span><span class="o">=</span><span class="n">PendulumTrueModel</span><span class="p">(),</span>
-                                        <span class="n">state_reward_function</span><span class="o">=</span><span class="n">pendulum_state_reward_function</span><span class="p">,</span>
-                                        <span class="n">actions_reward_function</span><span class="o">=</span><span class="n">pendulum_actions_reward_function</span><span class="p">,</span>
-                                        <span class="n">planning_horizon</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
-                                        <span class="n">optimizer_name</span><span class="o">=</span><span class="s1">&#39;PI2&#39;</span><span class="p">,</span>
-                                        <span class="n">true_model</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span> <span class="kn">from</span> <span class="nn">causal_rl_bench.envs.world</span> <span class="kn">import</span> <span class="n">World</span>
+ <span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.task</span> <span class="kn">import</span> <span class="n">task_generator</span>
 
-<span class="n">current_obs</span> <span class="o">=</span> <span class="n">single_env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
-<span class="n">current_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">current_obs</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                   <span class="p">(</span><span class="n">number_of_agents</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-<span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">):</span>
- <span class="n">action_to_execute</span><span class="p">,</span> <span class="n">expected_obs</span><span class="p">,</span> <span class="n">expected_reward</span> <span class="o">=</span> <span class="n">mpc_controller</span><span class="o">.</span><span class="n">act</span><span class="p">(</span><span class="n">current_obs</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span>
- <span class="n">current_obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">single_env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action_to_execute</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
- <span class="n">current_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">current_obs</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                       <span class="p">(</span><span class="n">number_of_agents</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
- <span class="n">single_env</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
-
+ <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s1">&#39;stacked_blocks&#39;</span><span class="p">)</span>
+ <span class="n">env</span> <span class="o">=</span> <span class="n">World</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">)</span>
+ <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+ <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+     <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
+ <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
 <span class="n">modules</span><span class="o">/</span><span class="n">causal_rl_bench</span><span class="o">.</span><span class="n">rst</span>
@@ -213,7 +199,7 @@ naturally emerging curriculum of tasks.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+        &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
 
     </p>
   </div>

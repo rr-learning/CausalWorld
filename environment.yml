@@ -7,6 +7,7 @@ dependencies:
 - pinocchio==2.2.2
 - tensorflow==1.14.0
 - sphinx
+- jupyter
 - pip:
   - pybullet
   - gym
@@ -18,3 +19,4 @@ dependencies:
   - catkin_pkg
   - sphinx_rtd_theme
   - stable-baselines==2.10.0
+  - sphinx_rtd_theme
