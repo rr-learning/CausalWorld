@@ -9,6 +9,18 @@ class BaseInterventionActorPolicy(object):
     def __init__(self):
         return
 
+    def initialize(self, env):
+        """
+        This functions allows the intervention agent to query things from the env, such
+        as intervention spaces or to have access to sampling funcs for goals..etc
+        Parameters
+        ---------
+            env: Env
+        Returns
+        -------
+        """
+        return
+
     def act(self, variables_dict):
         """
         This functions enables the meta actor to decide on specific
@@ -25,19 +37,16 @@ class BaseInterventionActorPolicy(object):
                with the corresponding values.
         """
         interventions_dict = self._act(variables_dict)
-        self.validate_intervention_dict(variables_dict, interventions_dict)
+        self.__validate_intervention_dict(variables_dict, interventions_dict)
         return interventions_dict
 
     def _act(self, variables_dict):
         return {}
 
-    def initialize_actor(self, env):
-        return
-
-    def validate_intervention_dict(self, variables_dict, intervention_dict):
-        #TODO: remove redundant interventions here
+    def __validate_intervention_dict(self, variables_dict, intervention_dict):
         for intervention in intervention_dict:
             if intervention not in variables_dict:
                 raise Exception("the meta actor "
                                 "performed an invalid intervention "
                                 "on a variable that is not part of its input")
+

@@ -41,6 +41,12 @@ class BaseTask(object):
             calculate_additional_dense_rewards
         return
 
+    def is_in_training_mode(self):
+        if self.task_params['intervention_split'] and self.task_params['training']:
+            return True
+        else:
+            return False
+
     def get_description(self):
         return
 

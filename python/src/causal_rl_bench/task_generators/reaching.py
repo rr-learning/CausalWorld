@@ -230,7 +230,6 @@ class ReachingTaskGenerator(BaseTask):
 
     def apply_task_generator_interventions(self, interventions_dict):
         # TODO: support level removal intervention
-        print(interventions_dict)
         if len(interventions_dict) == 0:
             return True, False
         reset_observation_space = False

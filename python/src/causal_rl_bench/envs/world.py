@@ -303,5 +303,7 @@ class World(gym.Env):
         tracker.save(file_path=tracker_path)
         return
 
+    def is_in_training_mode(self):
+        return self.task.is_in_training_mode()
 
 

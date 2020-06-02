@@ -5,25 +5,19 @@ from causal_rl_bench.metrics.mean_sucess_rate_metric import \
     MeanSuccessRateMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.wrappers.intervention_wrappers \
-    import InterventionsCurriculumWrapper
+    import CurriculumWrapper
 from causal_rl_bench.loggers.tracker import Tracker
-from causal_rl_bench.intervention_agents.random import \
-    RandomInterventionActorPolicy
 
 
 class EvaluationPipeline(object):
-    def __init__(self, policy, testing_curriculum,
+    def __init__(self, testing_curriculum,
                  tracker_path=None, world_params=None,
-                 task_params=None, num_seeds=5,
-                 episodes_per_seed=20, intervention_split=True,
-                 training=False, initial_seed=0,
-                 visualize_evaluation=False):
-        self.policy_fn = policy
-        self.num_seeds = num_seeds
-        self.episodes_per_seed = episodes_per_seed
-        self.initial_seed = initial_seed
+                 task_params=None, intervention_split=True,
+                 training=False, visualize_evaluation=False,
+                 initial_seed=0):
         self.intervention_split = intervention_split
         self.training = training
+        self.initial_seed = initial_seed
         self.testing_curriculum = testing_curriculum
         self.data_recorder = DataRecorder(output_directory=None)
         if tracker_path is not None:
@@ -37,10 +31,16 @@ class EvaluationPipeline(object):
                                        intervention_split=intervention_split,
                                        training=training)
         else:
+            if 'intervention_split' in task_params or 'training' in task_params:
+                del task_params['intervention_split']
+                del task_params['training']
             self.task = task_generator(**task_params,
                                        intervention_split=intervention_split,
                                        training=training)
         if tracker_path:
+            if world_params is not None:
+                if 'seed' in self.tracker.world_params:
+                    del self.tracker.world_params['seed']
             self.env = World(self.task,
                              **self.tracker.world_params,
                              seed=self.initial_seed,
@@ -48,6 +48,8 @@ class EvaluationPipeline(object):
                              enable_visualization=visualize_evaluation)
         else:
             if world_params is not None:
+                if 'seed' in world_params:
+                    del world_params['seed']
                 self.env = World(self.task,
                                  **world_params,
                                  seed=self.initial_seed,
@@ -61,26 +63,18 @@ class EvaluationPipeline(object):
         evaluation_episode_length_in_secs = 1
         self.time_steps_for_evaluation = \
             int(evaluation_episode_length_in_secs / self.env.robot.dt)
-        self.evaluation_budget = self.time_steps_for_evaluation * \
-                                 episodes_per_seed * num_seeds
-        for intervention_actor in testing_curriculum.intervention_actors:
-            if isinstance(intervention_actor,
-                          RandomInterventionActorPolicy):
-                if self.training:
-                    intervention_actor.initialize_actor(
-                        self.env)
-                else:
-                    intervention_actor.initialize_actor(
-                        self.env)
+        #wrap now the environment
+        self.env = CurriculumWrapper(self.env,
+                                     interventions_curriculum=self.testing_curriculum)
 
         self.metrics_list = []
         self.metrics_list.append(MeanSuccessRateMetric())
         return
 
-    def run_episode(self):
+    def run_episode(self, policy_fn):
         obs = self.env.reset()
         for _ in range(self.time_steps_for_evaluation):
-            desired_action = self.policy_fn(obs)
+            desired_action = policy_fn(obs)
             obs, rew, done, info = self.env.step(desired_action)
         return self.data_recorder.get_current_episode()
 
@@ -95,15 +89,17 @@ class EvaluationPipeline(object):
             metrics[metric.name] = metric.get_metric_score()
         return metrics
 
-    def evaluate_policy(self):
-        self.env = InterventionsCurriculumWrapper(env=self.env,
-                                                  interventions_curriculum
-                                                  =self.testing_curriculum)
-        for i in range(self.num_seeds):
+    def evaluate_policy(self, policy, num_seeds=5,
+                        episodes_per_seed=5):
+        evaluation_budget = self.time_steps_for_evaluation * \
+                            episodes_per_seed * num_seeds
+        for i in range(num_seeds):
             self.env.seed(seed=self.initial_seed + i)
-            for _ in range(self.episodes_per_seed):
-                current_episode = self.run_episode()
+            self.testing_curriculum.reset()
+            for _ in range(episodes_per_seed):
+                current_episode = self.run_episode(policy)
                 self.process_metrics(current_episode)
+                self.data_recorder.clear_recorder()
         self.env.close()
         scores = self.get_metric_scores()
         scores['total_intervention_steps'] = \
@@ -113,9 +109,9 @@ class EvaluationPipeline(object):
         scores['total_timesteps'] = \
             self.env.tracker.get_total_time_steps()
         scores['num_of_seeds'] = \
-            self.num_seeds
+            num_seeds
         scores['episodes_per_seed'] = \
-            self.episodes_per_seed
+            episodes_per_seed
         scores['limited_exposed_intervention_variables'] = \
             self.intervention_split
         if self.intervention_split:
