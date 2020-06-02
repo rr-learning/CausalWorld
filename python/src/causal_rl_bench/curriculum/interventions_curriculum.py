@@ -1,4 +1,4 @@
 class InterventionsCurriculum(object):
-    def __init__(self, intervention_actors, episode_holds):
+    def __init__(self, intervention_actors, episodes_hold, timesteps_hold):
         self.intervention_actors = intervention_actors
-        self.episode_holds = episode_holds
+        self.episode_holds = episodes_hold

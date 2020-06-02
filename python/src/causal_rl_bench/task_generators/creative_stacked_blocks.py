@@ -150,7 +150,8 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
             #if its more than what I have
             #TODO: maybe check feasibility of stage?
             if int(interventions_dict["number_of_obstacles"]) > self.current_number_of_obstacles:
-                for i in range(self.current_number_of_obstacles, int(interventions_dict["number_of_obstacles"])):
+                for i in range(self.current_number_of_obstacles,
+                               int(interventions_dict["number_of_obstacles"])):
                     self.stage.add_rigid_general_object(name="obstacle_"+str(i),
                                                         shape="static_cube",
                                                         size=

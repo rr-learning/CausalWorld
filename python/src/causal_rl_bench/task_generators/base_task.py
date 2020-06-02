@@ -354,9 +354,8 @@ class BaseTask(object):
                 if self.robot.normalize_observations:
                     normalized_observations = \
                         self.robot.\
-                            normalize_observation_for_key(key=key,
-                                                          observation=
-                                                          self._non_default_robot_observation_funcs[key]())
+                            normalize_observation_for_key\
+                            (key=key, observation= self._non_default_robot_observation_funcs[key]())
                     observations_filtered = \
                         np.append(observations_filtered,
                                   normalized_observations)
@@ -373,10 +372,9 @@ class BaseTask(object):
             if key in self._non_default_stage_observation_funcs:
                 if self.stage.normalize_observations:
                     normalized_observations = \
-                        self.stage.\
-                            normalize_observation_for_key(key=key,
-                                                          observation=
-                                                          self._non_default_stage_observation_funcs[key]())
+                        self.stage.normalize_observation_for_key\
+                            (key=key,
+                             observation=self._non_default_stage_observation_funcs[key]())
                     observations_filtered = \
                         np.append(observations_filtered,
                                   normalized_observations)
@@ -437,7 +435,8 @@ class BaseTask(object):
         success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict, check_bounds=False)
         # self._set_task_state()
-        return success_signal, interventions_info, interventions_dict, reset_observation_space_signal
+        return success_signal, interventions_info, interventions_dict, \
+               reset_observation_space_signal
 
     def get_training_intervention_spaces(self):
         return self.training_intervention_spaces
@@ -590,8 +589,5 @@ class BaseTask(object):
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)
         # self._set_task_state()
-        return success_signal, interventions_info, reset_observation_space_signal
-
-
-
-
+        return success_signal, interventions_info, \
+               reset_observation_space_signal
