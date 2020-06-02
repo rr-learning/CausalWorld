@@ -6,7 +6,7 @@ causal_rl_bench/meta_agents/base_policy.py
 
 class BaseInterventionActorPolicy(object):
     """This class indicates the interface of a meta actor"""
-    def __init__(self):
+    def __init__(self, **kwargs):
         return
 
     def initialize(self, env):
@@ -49,4 +49,7 @@ class BaseInterventionActorPolicy(object):
                 raise Exception("the meta actor "
                                 "performed an invalid intervention "
                                 "on a variable that is not part of its input")
+
+    def get_params(self):
+        raise Exception("get params is not implemented")
 

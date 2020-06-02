@@ -88,7 +88,7 @@ class GeneralGeneratorTask(BaseTask):
             np.array([0.045, 0.06])
         return
 
-    def sample_new_goal(self, training=True):
+    def sample_new_goal(self, training=True, level=None):
         intervention_dict = dict()
         if training:
             intervention_space = self.training_intervention_spaces

@@ -3,6 +3,10 @@ import os
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
+from causal_rl_bench.wrappers import ObjectSelectorWrapper, DeltaAction, MovingAverageActionEnvWrapper, \
+    HERGoalEnvWrapper, CurriculumWrapper
+from causal_rl_bench.utils.intervention_agent_utils import initialize_intervention_agents
+from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculum
 
 
 def save_config_file(section_names, config_dicts, file_path):
@@ -38,4 +42,24 @@ def load_world(tracker_relative_path, enable_visualization=False):
                           **task_stats.task_params)
     env = World(task, **tracker.world_params,
                 enable_visualization=enable_visualization)
+    for wrapper in tracker.world_params['wrappers']:
+        if wrapper == 'object_selector':
+            env = ObjectSelectorWrapper(env, **tracker.world_params['wrappers'][wrapper])
+        elif wrapper == 'delta_action':
+            env = DeltaAction(env, **tracker.world_params['wrappers'][wrapper])
+        elif wrapper == 'moving_average_action':
+            env = MovingAverageActionEnvWrapper(env, **tracker.world_params['wrappers'][wrapper])
+        elif wrapper == 'her_environment':
+            env = HERGoalEnvWrapper(env, **tracker.world_params['wrappers'][wrapper])
+        elif wrapper == 'curriculum_environment':
+            #first initialize actors
+            intervention_actors = \
+                initialize_intervention_agents(tracker.world_params['wrappers'][wrapper]['agent_params'])
+            #initialize intervention curriculum
+            curriculum = InterventionsCurriculum(intervention_actors= intervention_actors,
+                                                 episodes_hold=tracker.world_params['wrappers'][wrapper]['episodes_hold'],
+                                                 timesteps_hold=tracker.world_params['wrappers'][wrapper]['timesteps_hold'])
+            env = CurriculumWrapper(env, curriculum)
+        else:
+            raise Exception("wrapper is not known to be loaded")
     return env

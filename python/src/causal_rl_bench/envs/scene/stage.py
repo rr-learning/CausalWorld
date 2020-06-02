@@ -417,7 +417,7 @@ class Stage(object):
                 or not.
         """
         for contact in self.pybullet_client.getContactPoints():
-            if contact[8] < -0.08:
+            if contact[8] < -0.002:
                 return False
         return True
 

@@ -4,7 +4,7 @@ from causal_rl_bench.envs.world import World
 from causal_rl_bench.metrics.mean_sucess_rate_metric import \
     MeanSuccessRateMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
-from causal_rl_bench.wrappers.intervention_wrappers \
+from causal_rl_bench.wrappers.curriculum_wrappers \
     import CurriculumWrapper
 from causal_rl_bench.loggers.tracker import Tracker
 

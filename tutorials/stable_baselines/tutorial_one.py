@@ -9,15 +9,11 @@ import json
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
 import argparse
-from causal_rl_bench.intervention_agents.training_interventions import \
-    get_reset_training_intervention_agent
-from causal_rl_bench.wrappers.intervention_wrappers import \
-    ResetInterventionsActorWrapper
 
 
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                  skip_frame, seed_num, ppo_config, total_time_steps,
-                 validate_every_timesteps, task_name, fixed_position):
+                 validate_every_timesteps, task_name):
     def _make_env(rank):
         def _init():
             task = task_generator(task_generator_id=task_name)
@@ -25,11 +21,6 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                         enable_visualization=False,
                         seed=seed_num + rank, max_episode_length=
                         maximum_episode_length)
-            if not fixed_position:
-                training_intervention_agent = \
-                    get_reset_training_intervention_agent(task_generator_id=task_name)
-                env = ResetInterventionsActorWrapper(env,
-                                                     training_intervention_agent)
             return env
 
         set_global_seeds(seed_num)
@@ -111,6 +102,5 @@ if __name__ == '__main__':
                  ppo_config=ppo_config,
                  total_time_steps=60000000,
                  validate_every_timesteps=1000000,
-                 task_name=task_name,
-                 fixed_position=fixed_position)
+                 task_name=task_name)
 

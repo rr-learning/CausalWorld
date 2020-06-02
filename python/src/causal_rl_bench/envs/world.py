@@ -76,6 +76,7 @@ class World(gym.Env):
         self._setup_viewing_camera()
 
         self.data_recorder = data_recorder
+        self.wrappers_dict = dict()
         self.tracker = Tracker(task=self.task,
                                world_params=self.get_world_params())
         self.scale_reward_by_dt = True
@@ -129,35 +130,14 @@ class World(gym.Env):
 
         return observation, reward, done, info
 
-    def sample_new_goal(self):
-        return self.task.sample_new_goal()
+    def sample_new_goal(self, training=True, level=None):
+        return self.task.sample_new_goal(training, level)
 
     def disable_actions(self):
         self.disabled_actions = True
 
     def add_data_recorder(self, data_recorder):
         self.data_recorder = data_recorder
-
-    # def switch_task(self, task):
-    #     self.task = task
-    #     self.task.init_task(self.robot, self.stage)
-    #     if not self.observation_mode == "cameras":
-    #         self.robot.select_observations(self.task.task_robot_observation_keys)
-    #         self.stage.select_observations(self.task.task_stage_observation_keys)
-    #         self.observation_space = \
-    #             combine_spaces(self.robot.get_observation_spaces(),
-    #                            self.stage.get_observation_spaces())
-    #     elif self.observation_mode == "cameras" and self.enable_goal_image:
-    #         self.stage.select_observations(["goal_image"])
-    #         self.observation_space = combine_spaces(
-    #             self.robot.get_observation_spaces(),
-    #             self.stage.get_observation_spaces())
-    #     else:
-    #         self.observation_space = self.robot.get_observation_spaces()
-    #     self.action_space = self.robot.get_action_spaces()
-
-    # def get_counterfactual_world(self):
-    #     raise Exception(" ")
 
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)
@@ -293,7 +273,12 @@ class World(gym.Env):
         world_params["max_episode_length"] = self.max_episode_length
         world_params["enable_goal_image"] = self.enable_goal_image
         world_params["simulation_time"] = self.simulation_time
+        world_params["wrappers"] = self.wrappers_dict
         return world_params
+
+    def add_wrapper_info(self, wrapper_dict):
+        self.wrappers_dict.update(wrapper_dict)
+        return
 
     def save_world(self, log_relative_path):
         if not os.path.exists(log_relative_path):

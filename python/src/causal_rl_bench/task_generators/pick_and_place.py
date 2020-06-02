@@ -42,7 +42,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
         self.previous_joint_velocities = None
 
     def _set_up_stage_arena(self):
-        self.stage.add_rigid_general_object(name="wall",
+        self.stage.add_rigid_general_object(name="obstacle",
                                             shape="static_cube",
                                             size=
                                             np.array([0.35, 0.015, 0.065]),
@@ -195,7 +195,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                               allowed_section=np.array([[-0.5, 0.065, 0],
                                                                         [0.5, 0.5, 0.5]]))
 
-    def sample_new_goal(self, training=True):
+    def sample_new_goal(self, training=True, level=None):
         #TODO: discuss this with fred
         rigid_block_side = np.random.randint(0, 2)
         goal_block_side = not rigid_block_side

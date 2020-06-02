@@ -60,24 +60,21 @@ def evaluate_model():
 
     def policy_fn(obs):
         return model.predict(obs)[0]
-    #define intervention actors here
-    intervention_actors = [RandomInterventionActorPolicy()]
-    episode_holds = [5]
-    curriculum = InterventionsCurriculum(intervention_actors=
-                                         intervention_actors,
-                                         episode_holds=episode_holds)
-    pipeline = EvaluationPipeline(policy=policy_fn,
-                                  testing_curriculum=curriculum,
-                                  tracker_path=log_relative_path,
-                                  num_seeds=5, episodes_per_seed=20,
-                                  intervention_split=False,
-                                  training=False, initial_seed=0,
-                                  visualize_evaluation=True)
-    scores = pipeline.evaluate_policy()
+
+    curr_curriculum = InterventionsCurriculum(intervention_actors=[RandomInterventionActorPolicy()],
+                                              episodes_hold=[3],
+                                              timesteps_hold=[None])
+    evaluator = EvaluationPipeline(testing_curriculum=curr_curriculum,
+                                   tracker_path=log_relative_path,
+                                   intervention_split=False,
+                                   visualize_evaluation=True,
+                                   initial_seed=0)
+
+    scores = evaluator.evaluate_policy(policy_fn)
     print(scores)
 
 
 if __name__ == '__main__':
     #first train the policy, skip if u already trained the policy
-    # train_policy()
+    train_policy()
     evaluate_model()

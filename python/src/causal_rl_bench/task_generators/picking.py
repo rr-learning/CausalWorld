@@ -180,7 +180,7 @@ class PickingTaskGenerator(BaseTask):
                     interventions_dict['tool_block']['size']
         return interventions_dict
 
-    def sample_new_goal(self, training=True):
+    def sample_new_goal(self, training=True, level=None):
         # TODO: make sure its feasible goal by
         intervention_dict = dict()
         if training:

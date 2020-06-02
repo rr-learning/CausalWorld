@@ -7,6 +7,7 @@ class DeltaAction(gym.ActionWrapper):
     def __init__(self, env):
         super(DeltaAction, self).__init__(env)
         #TODO: discuss the action space of a delta action
+        self.env.add_wrapper_info({'delta_action': dict()})
 
     def action(self, action):
         #Take care of normalization here too
@@ -42,6 +43,9 @@ class DeltaAction(gym.ActionWrapper):
                     observation=offset, key=self.env.action_mode)
         return action - offset
 
+    def reset(self, interventions_dict=None):
+        return self.env.reset(interventions_dict)
+
 
 class MovingAverageActionEnvWrapper(gym.ActionWrapper):
     def __init__(self, env, widow_size=8, initial_value=0):
@@ -50,6 +54,8 @@ class MovingAverageActionEnvWrapper(gym.ActionWrapper):
         self.__policy = MovingAverageActionWrapperActorPolicy(self.__policy,
                                                               widow_size=widow_size,
                                                               initial_value=initial_value)
+        self.env.add_wrapper_info({'moving_average_action': {'widow_size': widow_size,
+                                                             'initial_value': initial_value}})
         return
 
     def action(self, action):
@@ -58,3 +64,6 @@ class MovingAverageActionEnvWrapper(gym.ActionWrapper):
 
     def reverse_action(self, action):
         raise Exception("not implemented yet")
+
+    def reset(self, interventions_dict=None):
+        return self.env.reset(interventions_dict)

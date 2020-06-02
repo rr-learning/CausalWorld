@@ -3,9 +3,9 @@ from causal_rl_bench.intervention_agents.base_policy import \
 import numpy as np
 
 
-class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
+class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, **kwargs):
-        super(RandomInterventionActorPolicy, self).__init__()
+        super(VisualInterventionActorPolicy, self).__init__()
         self.task_intervention_space = None
 
     def initialize(self, env):
@@ -21,19 +21,18 @@ class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
         interventions_dict = dict()
         for variable in self.task_intervention_space:
             if isinstance(self.task_intervention_space[variable], dict):
-                interventions_dict[variable] = dict()
-                for subvariable_name in self.task_intervention_space[variable]:
-                    interventions_dict[variable][subvariable_name] =\
-                        np.random.uniform(
-                        self.task_intervention_space
-                        [variable][subvariable_name][0],
-                        self.task_intervention_space
-                        [variable][subvariable_name][1])
-            else:
+                if 'color' in self.task_intervention_space[variable]:
+                    interventions_dict[variable] = dict()
+                    interventions_dict[variable]['color'] = np.random.uniform(
+                                                            self.task_intervention_space
+                                                            [variable]['color'][0],
+                                                            self.task_intervention_space
+                                                            [variable]['color'][1])
+            elif 'color' in variable:
                 interventions_dict[variable] = np.random.uniform(
                     self.task_intervention_space[variable][0],
                     self.task_intervention_space[variable][1])
         return interventions_dict
 
     def get_params(self):
-        return {'random_agent': dict()}
+        return {'visual_agent': dict()}

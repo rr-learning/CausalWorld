@@ -1,7 +1,7 @@
 class InterventionsCurriculum(object):
-    def __init__(self, intervention_actors, episodes_hold, timesteps_hold):
+    def __init__(self, intervention_actors, episodes_hold, timesteps_hold, **kwargs):
         self.intervention_actors = intervention_actors
-        self.episode_holds = episodes_hold
+        self.episodes_hold = episodes_hold
         self.timesteps_hold = timesteps_hold
         self._elapsed_episodes = 0
         self._elapsed_timesteps = 0
@@ -16,8 +16,8 @@ class InterventionsCurriculum(object):
         self._elapsed_timesteps = 0
         current_interventions_dict = dict()
         for i in range(len(self.intervention_actors)):
-            if self.episode_holds[i] is not None and \
-                    self._elapsed_episodes % self.episode_holds[i] == 0:
+            if self.episodes_hold[i] is not None and \
+                    self._elapsed_episodes % self.episodes_hold[i] == 0:
                 current_intervention_actor = self.intervention_actors[i]
                 current_interventions_dict.update(
                     current_intervention_actor.act(current_task_params))
@@ -42,3 +42,12 @@ class InterventionsCurriculum(object):
         for intervention_actor in self.intervention_actors:
             intervention_actor.initialize(env)
         return
+
+    def get_params(self):
+        params = dict()
+        params['agent_params'] = dict()
+        for actor in self.intervention_actors:
+            params['agent_params'].update(actor.get_params())
+        params['episodes_hold'] = self.episodes_hold
+        params['timesteps_hold'] = self.timesteps_hold
+        return params

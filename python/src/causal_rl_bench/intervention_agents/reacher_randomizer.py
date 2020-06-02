@@ -3,12 +3,12 @@ from causal_rl_bench.intervention_agents.base_policy import \
 
 
 class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(ReacherInterventionActorPolicy, self).__init__()
         self.joint_position_sampler_func = None
         self.goal_position_sampler_func = None
 
-    def initialize_actor(self, env):
+    def initialize(self, env):
         self.joint_position_sampler_func = \
             env.robot.sample_joint_positions
         self.goal_position_sampler_func = \
@@ -28,10 +28,6 @@ class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
         interventions_dict['goal_300']['position'] = new_goal[6:]
         return interventions_dict
 
-    def get_intervention_actor_params(self):
-        #TODO: We need to think about how to save its params more and load them?
-        #potentially?
-        intervention_params = dict()
-        intervention_params["intervention_actor_name"] = \
-            "reacher_randomizer"
-        return intervention_params
+    def get_params(self):
+        return {'reacher_agent': dict()}
+

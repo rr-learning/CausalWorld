@@ -3,7 +3,7 @@ from causal_rl_bench.intervention_agents.base_policy import \
 
 
 class GoalInterventionActorPolicy(BaseInterventionActorPolicy):
-    def __init__(self):
+    def __init__(self, **kwargs):
         super(GoalInterventionActorPolicy, self).__init__()
         self.goal_sampler_function = None
 
@@ -13,3 +13,6 @@ class GoalInterventionActorPolicy(BaseInterventionActorPolicy):
 
     def _act(self, variables_dict):
         return self.goal_sampler_function()
+
+    def get_params(self):
+        return {'goal_agent': dict()}

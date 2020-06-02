@@ -1,11 +1,11 @@
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.wrappers.action_wrappers import DeltaAction
 import numpy as np
 
 
 def apply_delta_action():
-    task = Task(task_generator_id='reaching', randomize_joint_positions=True)
+    task = task_generator(task_generator_id='reaching')
     env = World(task=task, enable_visualization=True,
                 action_mode="joint_positions",
                 normalize_actions=True,

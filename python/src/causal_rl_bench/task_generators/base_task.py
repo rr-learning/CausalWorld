@@ -91,6 +91,23 @@ class BaseTask(object):
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
         return np.array([]), None
 
+    def sample_new_goal(self, training=True, level=None):
+        #TODO: for now we just vary position as a new goal
+        #Need to generalize this
+        intervention_dict = dict()
+        if training:
+            intervention_space = self.training_intervention_spaces
+        else:
+            intervention_space = self.testing_intervention_spaces
+        for visual_object in self.stage.visual_objects:
+            if visual_object in intervention_space and \
+                    'position' in intervention_space[visual_object]:
+                intervention_dict[visual_object] = dict()
+                intervention_dict[visual_object]['position'] = \
+                    np.random.uniform(intervention_space[visual_object]['position'][0],
+                                      intervention_space[visual_object]['position'][1])
+        return intervention_dict
+
     def _set_training_intervention_spaces(self):
         #you can override these easily
         self.training_intervention_spaces = dict()
@@ -110,6 +127,8 @@ class BaseTask(object):
                           self.stage.floor_inner_bounding_box[0]])
             self.training_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+            self.training_intervention_spaces[rigid_object]['color'] = \
+                np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         for visual_object in self.stage.visual_objects:
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
@@ -119,28 +138,21 @@ class BaseTask(object):
                           self.stage.floor_inner_bounding_box[0]])
             self.training_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+            self.training_intervention_spaces[visual_object]['color'] = \
+                np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self.training_intervention_spaces['floor_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self.training_intervention_spaces['stage_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
+        self.training_intervention_spaces['floor_friction'] = \
+            np.array([0.3, 0.8])
+        for link in self.robot.link_ids:
+            self.training_intervention_spaces[link] = dict()
+            self.training_intervention_spaces[link]['color'] = \
+                np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
+            self.training_intervention_spaces[link]['mass'] = \
+                np.array([0.2, 0.6])
         return
-
-    def sample_new_goal(self, training=True):
-        #TODO: for now we just vary position as a new goal
-        #Need to generalize this
-        intervention_dict = dict()
-        if training:
-            intervention_space = self.training_intervention_spaces
-        else:
-            intervention_space = self.testing_intervention_spaces
-        for visual_object in self.stage.visual_objects:
-            if visual_object in intervention_space and \
-                    'position' in intervention_space[visual_object]:
-                intervention_dict[visual_object] = dict()
-                intervention_dict[visual_object]['position'] = \
-                    np.random.uniform(intervention_space[visual_object]['position'][0],
-                                      intervention_space[visual_object]['position'][1])
-        return intervention_dict
 
     def _set_testing_intervention_spaces(self):
         # you can override these easily
@@ -161,6 +173,8 @@ class BaseTask(object):
                           self.stage.floor_inner_bounding_box[1]])
             self.testing_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+            self.testing_intervention_spaces[rigid_object]['color'] = \
+                np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         for visual_object in self.stage.visual_objects:
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
@@ -170,10 +184,20 @@ class BaseTask(object):
                           self.stage.floor_inner_bounding_box[1]])
             self.testing_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+            self.testing_intervention_spaces[visual_object]['color'] = \
+                np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self.testing_intervention_spaces['floor_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self.testing_intervention_spaces['stage_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
+        self.testing_intervention_spaces['floor_friction'] = \
+            np.array([0.6, 0.8])
+        for link in self.robot.link_ids:
+            self.testing_intervention_spaces[link] = dict()
+            self.testing_intervention_spaces[link]['color'] = \
+                np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
+            self.testing_intervention_spaces[link]['mass'] = \
+                np.array([0.6, 0.8])
         return
 
     def get_desired_goal(self):
@@ -305,21 +329,17 @@ class BaseTask(object):
         reset_observation_space_signal = False
         if interventions_dict is not None:
             interventions_dict_copy = interventions_dict
-            non_changed_variables = \
-                set(self.initial_state) - set(interventions_dict_copy)
-            if len(non_changed_variables) > 0:
-                interventions_dict_copy = dict(interventions_dict)
-            for non_changed_variable in non_changed_variables:
-                if isinstance(self.initial_state[non_changed_variable], dict):
-                    for subvariable in self.initial_state[
-                        non_changed_variable]:
-                        interventions_dict_copy[non_changed_variable][
-                            subvariable] = \
-                            self.initial_state[non_changed_variable][
-                                subvariable]
+            #go through initial state vars and see if they are in the dict or not
+            for variable in self.initial_state:
+                if variable not in interventions_dict_copy:
+                    interventions_dict_copy[variable] = self.initial_state[variable]
                 else:
-                    interventions_dict_copy[non_changed_variable] = \
-                        self.initial_state[non_changed_variable]
+                    #now it might exist but its subvariables might not
+                    if isinstance(self.initial_state[variable], dict):
+                        for subvariable in self.initial_state[variable]:
+                            if subvariable not in interventions_dict_copy[variable]:
+                                interventions_dict_copy[variable][subvariable] = \
+                                    self.initial_state[variable][subvariable]
             success_signal, interventions_info, reset_observation_space_signal = \
                 self.apply_interventions(interventions_dict_copy,
                                          check_bounds=

@@ -33,6 +33,8 @@ class HERGoalEnvWrapper(gym.GoalEnv):
                                                   observation=self.env.observation_space))
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata
+        self.env.add_wrapper_info({'her_environment': {'is_goal_distance_dense': is_goal_distance_dense,
+                                                        'sparse_reward_weight': sparse_reward_weight}})
 
     def __getattr__(self, name):
         if name.startswith('_'):

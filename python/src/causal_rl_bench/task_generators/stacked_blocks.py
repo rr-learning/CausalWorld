@@ -100,7 +100,7 @@ class StackedBlocksGeneratorTask(BaseTask):
                 self.task_params["joint_positions"]
         return
 
-    def sample_new_goal(self, training=True):
+    def sample_new_goal(self, training=True, level=None):
         intervention_dict = dict()
         if training:
             intervention_space = self.training_intervention_spaces

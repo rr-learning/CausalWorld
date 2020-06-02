@@ -1,9 +1,9 @@
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.task_generators.task import task_generator
 
 
 def example():
-    task = Task(task_generator_id='cuboid_silhouette')
+    task = task_generator(task_generator_id='stacked_blocks')
     env = World(task=task, skip_frame=10, enable_visualization=True, seed=0,
                 action_mode="joint_positions", observation_mode="cameras",
                 normalize_actions=True, normalize_observations=False,
