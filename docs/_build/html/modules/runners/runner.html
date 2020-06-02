@@ -1,0 +1,334 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Runners &mdash; TF_NeuralMPC 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> TF_NeuralMPC
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tf_neuralmpc.html">TF_NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TF_NeuralMPC</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+      <li>Runners</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/modules/runners/runner.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-TF_NeuralMPC.runner">
+<span id="runners"></span><h1>Runners<a class="headerlink" href="#module-TF_NeuralMPC.runner" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="runner">
+<h2>Runner<a class="headerlink" href="#runner" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="TF_NeuralMPC.runner.Runner">
+<em class="property">class </em><code class="sig-prename descclassname">TF_NeuralMPC.runner.</code><code class="sig-name descname">Runner</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">log_path=None</em>, <em class="sig-param">num_of_agents=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/TF_NeuralMPC/runner/runner.html#Runner"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.Runner" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the runner class which handles the interaction of the different agents with the enviornment,
+a runnner takes in a controller and possibly a dynamics model which are used further to iteract with
+the environment</p>
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.Runner.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">env</em>, <em class="sig-param">log_path=None</em>, <em class="sig-param">num_of_agents=1</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/TF_NeuralMPC/runner/runner.html#Runner.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.Runner.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the runner class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>env</strong> (<em>[</em><em>mujoco_env.MujocoEnv</em><em>, </em><em>SubprocVecEnv</em><em>]</em>) -- Defines two environment_utils in a list, the first being a single environment that could possibly be used to
+record a rollout in a video and the second is a vectorized environment that could possibly be used for collecting the
+rollouts.</p></li>
+<li><p><strong>tf_writer</strong> -- Defines a tf writer to be used to log the results while training and collecting samples.</p></li>
+<li><p><strong>num_of_agents</strong> (<em>Int</em>) -- The number of agents running in parallel in the environment.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="TF_NeuralMPC.runner.Runner.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#TF_NeuralMPC.runner.Runner.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.Runner.learn_dynamics_from_randomness">
+<code class="sig-name descname">learn_dynamics_from_randomness</code><span class="sig-paren">(</span><em class="sig-param">number_of_rollouts</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">dynamics_function</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">normalization=True</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/TF_NeuralMPC/runner/runner.html#Runner.learn_dynamics_from_randomness"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.Runner.learn_dynamics_from_randomness" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the learn dynamics function for the runner class which samples n rollouts using a policy and then
+uses these rollouts to learn a dynamics function for the system.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_rollouts</strong> (<em>Int</em>) -- Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler" title="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well
+as the dynamics function.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.Runner.learn_dynamics_iteratively_w_mpc">
+<code class="sig-name descname">learn_dynamics_iteratively_w_mpc</code><span class="sig-paren">(</span><em class="sig-param">number_of_initial_rollouts</em>, <em class="sig-param">number_of_rollouts_for_refinement</em>, <em class="sig-param">number_of_refinement_steps</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">mpc_policy=None</em>, <em class="sig-param">planning_horizon=None</em>, <em class="sig-param">state_reward_function=None</em>, <em class="sig-param">actions_reward_function=None</em>, <em class="sig-param">optimizer=None</em>, <em class="sig-param">optimizer_name='RandomSearch'</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em>, <em class="sig-param">system_dynamics_handler=None</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">exploration_noise=False</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">normalization=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/TF_NeuralMPC/runner/runner.html#Runner.learn_dynamics_iteratively_w_mpc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.Runner.learn_dynamics_iteratively_w_mpc" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the learn dynamics function iteratively using a model based policy
+for the runner class which samples n rollouts using a policy and then
+uses these rollouts to learn a dynamics function for the system which is then used to sample further rollouts
+to refine the dynamics function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_initial_rollouts</strong> (<em>Int</em>) -- Number of initial rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>number_of_rollouts_for_refinement</strong> (<em>Int</em>) -- Number of refinement rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>number_of_refinement_steps</strong> (<em>Int</em>) -- Number of refinemnet steps train, collect, train..etc to run for.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>initial_policy</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the initial episodes from the different agents.</p></li>
+<li><p><strong>refinement_policy</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the further episodes from the different agents to refine the model
+estimate.</p></li>
+<li><p><strong>system_dynamics_handler</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler" title="TF_NeuralMPC.dynamics_handlers.system_dynamics_handler.SystemDynamicsHandler"><em>SystemDynamicsHandler</em></a>) -- The system_dynamics_handler is a handler of the state, actions and targets processing funcs as well
+as the dynamics function.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.Runner.perform_rollouts">
+<code class="sig-name descname">perform_rollouts</code><span class="sig-paren">(</span><em class="sig-param">number_of_rollouts</em>, <em class="sig-param">task_horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/TF_NeuralMPC/runner/runner.html#Runner.perform_rollouts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.Runner.perform_rollouts" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the perform_rollouts function for the runner class which samples n episodes with a specified length
+using the provided policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_of_rollouts</strong> (<em>Int</em>) -- Number of rollouts/ episodes to perform for each of the agents in the vectorized environment.</p></li>
+<li><p><strong>task_horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p><strong>traj_obs</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the observations starting from the reset observations.</p></li>
+<li><p><strong>traj_acs</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the actions taken by the policy.</p></li>
+<li><p><strong>traj_rews</strong> (<em>[np.float32]</em>) -- List with length=number_of_rollouts which holds the rewards taken by the policy.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.Runner.record_rollout">
+<code class="sig-name descname">record_rollout</code><span class="sig-paren">(</span><em class="sig-param">horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">record_file_path</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/TF_NeuralMPC/runner/runner.html#Runner.record_rollout"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.Runner.record_rollout" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the recording function for the runner class which samples one episode with a specified length
+using the provided policy and records it in a video.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>record_file_path</strong> (<em>String</em>) -- specified the file path to save the video that will be recorded in.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="TF_NeuralMPC.runner.Runner.sample">
+<code class="sig-name descname">sample</code><span class="sig-paren">(</span><em class="sig-param">horizon</em>, <em class="sig-param">policy</em>, <em class="sig-param">exploration_noise=False</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/TF_NeuralMPC/runner/runner.html#Runner.sample"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#TF_NeuralMPC.runner.Runner.sample" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the sampling function for the runner class which samples one episode with a specified length
+using the provided policy.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>horizon</strong> (<em>Int</em>) -- The task horizon/ episode length.</p></li>
+<li><p><strong>policy</strong> (<a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy" title="TF_NeuralMPC.policies.model_based_base_policy.ModelBasedBasePolicy"><em>ModelBasedBasePolicy</em></a><em> or </em><a class="reference internal" href="../../old.html#TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy" title="TF_NeuralMPC.policies.model_free_base_policy.ModelFreeBasePolicy"><em>ModelFreeBasePolicy</em></a>) -- The policy to be used in collecting the episodes from the different agents.</p></li>
+<li><p><strong>exploration_noise</strong> (<em>bool</em>) -- If noise should be added to the actions to help in exploration.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>result</strong> -- returns the episode rollouts results for all the agents in the parallelized environment,
+it has the form of {observations, actions, rewards, reward_sum}</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

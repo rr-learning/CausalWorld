@@ -1,0 +1,333 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tf_neuralmpc.trajectory_evaluators.deterministic &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/tf_neuralmpc.html">TF-NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tf_neuralmpc.trajectory_evaluators.deterministic</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tf_neuralmpc.trajectory_evaluators.deterministic</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">tf_neuralmpc/trajectory_evaluator/deterministic.py</span>
+<span class="sd">===================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tf_neuralmpc.trajectory_evaluators.evaluator_base</span> <span class="k">import</span> <span class="n">EvaluatorBase</span>
+
+
+<div class="viewcode-block" id="DeterministicTrajectoryEvaluator"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.DeterministicTrajectoryEvaluator">[docs]</a><span class="k">class</span> <span class="nc">DeterministicTrajectoryEvaluator</span><span class="p">(</span><span class="n">EvaluatorBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the trajectory evaluator class for a deterministic dynamics function&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="DeterministicTrajectoryEvaluator.__init__"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.DeterministicTrajectoryEvaluator.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_reward_function</span><span class="p">,</span> <span class="n">actions_reward_function</span><span class="p">,</span> <span class="n">planning_horizon</span><span class="p">,</span>
+                 <span class="n">dim_U</span><span class="p">,</span> <span class="n">dim_O</span><span class="p">,</span> <span class="n">system_dynamics_handler</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the initializer function for the Deterministic Trajectory Evaluator Class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        state_reward_function: tf_function</span>
+<span class="sd">            Defines the state reward function with the prototype: tf_func_name(current_state, next_state),</span>
+<span class="sd">            where current_state is BatchXdim_S and next_state is BatchXdim_S.</span>
+<span class="sd">        actions_reward_function: tf_function</span>
+<span class="sd">            Defines the action reward function with the prototype: tf_func_name(current_actions),</span>
+<span class="sd">            where current_actions is BatchXdim_U.</span>
+<span class="sd">        planning_horizon: tf.int32</span>
+<span class="sd">            Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</span>
+<span class="sd">        dim_U: tf.int32</span>
+<span class="sd">            Defines the dimensions of the input/action space.</span>
+<span class="sd">        dim_O: tf.int32</span>
+<span class="sd">            Defines the dimensions of the observations space.</span>
+<span class="sd">        system_dynamics_handler: SystemDynamicsHandler</span>
+<span class="sd">            Defines the system dynamics handler class with its own trainer and observations and actions</span>
+<span class="sd">             preprocessing functions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DeterministicTrajectoryEvaluator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">state_reward_function</span> <span class="o">=</span> <span class="n">state_reward_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">actions_reward_function</span> <span class="o">=</span> <span class="n">actions_reward_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span> <span class="o">=</span> <span class="n">planning_horizon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">system_dynamics_handler</span> <span class="o">=</span> <span class="n">system_dynamics_handler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span> <span class="o">=</span> <span class="n">dim_U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span> <span class="o">=</span> <span class="n">dim_O</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_S</span> <span class="o">=</span> <span class="n">dim_O</span></div>
+
+<div class="viewcode-block" id="DeterministicTrajectoryEvaluator.__call__"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.DeterministicTrajectoryEvaluator.__call__">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_states</span><span class="p">,</span> <span class="n">action_sequences</span><span class="p">,</span> <span class="n">time_step</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This is the call function for the Deterministic Trajectory Evaluator Class.</span>
+<span class="sd">          It is used to calculate the rewards corresponding to each of the action sequences starting</span>
+<span class="sd">          from the current state.</span>
+
+<span class="sd">          Parameters</span>
+<span class="sd">          ---------</span>
+<span class="sd">          current_state: tf.float32</span>
+<span class="sd">              Defines the current state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          action_sequences: tf.float32</span>
+<span class="sd">             Defines the action sequences to be evaluated, (dims = population X num_of_agents X planning_horizon X dim_U)</span>
+<span class="sd">          time_step: tf.float32</span>
+<span class="sd">              Defines the current timestep of the episode.</span>
+
+
+<span class="sd">          Returns</span>
+<span class="sd">          -------</span>
+<span class="sd">          rewards: tf.float32</span>
+<span class="sd">              The rewards corresponding to each action sequence (dims = 1 X population)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="n">init_t</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">)</span>
+        <span class="n">nopt</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">action_sequences</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">n_agents</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">action_sequences</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">init_rewards</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nopt</span><span class="o">*</span><span class="n">n_agents</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+        <span class="n">action_sequences</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">action_sequences</span><span class="p">,</span>
+                                      <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">,</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span><span class="p">])</span>
+        <span class="n">action_sequences</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">action_sequences</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">])</span>
+        <span class="n">init_states</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">current_states</span><span class="p">,</span> <span class="p">[</span><span class="n">nopt</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">continue_prediction</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">total_reward</span><span class="p">,</span> <span class="n">current_state</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">less</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">iterate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">total_reward</span><span class="p">,</span> <span class="n">current_state</span><span class="p">):</span>
+            <span class="n">current_actions</span> <span class="o">=</span> <span class="n">action_sequences</span><span class="p">[</span><span class="n">t</span><span class="p">]</span>
+            <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_next_state</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">current_actions</span><span class="p">)</span>
+            <span class="n">delta_reward</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_reward_function</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">next_state</span><span class="p">)</span> <span class="o">+</span> \
+                           <span class="bp">self</span><span class="o">.</span><span class="n">actions_reward_function</span><span class="p">(</span><span class="n">current_actions</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">t</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="n">total_reward</span> <span class="o">+</span> <span class="n">delta_reward</span><span class="p">,</span> <span class="n">next_state</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">while_loop</span><span class="p">(</span>
+            <span class="n">cond</span><span class="o">=</span><span class="n">continue_prediction</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">iterate</span><span class="p">,</span> <span class="n">loop_vars</span><span class="o">=</span><span class="p">[</span><span class="n">init_t</span><span class="p">,</span> <span class="n">init_rewards</span><span class="p">,</span>
+                                                               <span class="n">init_states</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="c1">#return rewards for each agent</span>
+        <span class="n">rewards</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rewards</span><span class="p">,</span> <span class="p">[</span><span class="n">nopt</span><span class="p">,</span> <span class="n">n_agents</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">is_nan</span><span class="p">(</span><span class="n">rewards</span><span class="p">),</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="o">-</span><span class="mf">1e6</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="o">*</span>
+                        <span class="n">tf</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">rewards</span><span class="p">),</span> <span class="n">rewards</span><span class="p">)</span></div>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_predict_next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_state</span><span class="p">,</span> <span class="n">current_actions</span><span class="p">):</span>
+        <span class="c1"># make sure its a feasible action</span>
+        <span class="n">current_actions</span> <span class="o">=</span> <span class="n">current_actions</span>
+        <span class="n">sys_model_inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_dynamics_handler</span><span class="o">.</span><span class="n">process_input</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">current_actions</span><span class="p">)</span>
+        <span class="n">next_state_prediction_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_dynamics_handler</span><span class="o">.</span><span class="n">dynamics_function</span><span class="p">(</span><span class="n">sys_model_inputs</span><span class="p">,</span>
+                                                                                     <span class="n">train</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">))</span>
+        <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">system_dynamics_handler</span><span class="o">.</span><span class="n">process_state_output</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">next_state_prediction_delta</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">next_state</span>
+
+<div class="viewcode-block" id="DeterministicTrajectoryEvaluator.predict_next_state"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.DeterministicTrajectoryEvaluator.predict_next_state">[docs]</a>    <span class="k">def</span> <span class="nf">predict_next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_state</span><span class="p">,</span> <span class="n">current_action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This is the function used to predict the next state using the internal dynamics handler.</span>
+
+<span class="sd">          Parameters</span>
+<span class="sd">          ---------</span>
+<span class="sd">          current_state: tf.float32</span>
+<span class="sd">              Defines the current state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          current_action: tf.float32</span>
+<span class="sd">             Defines the current action to be applied, (dims = num_of_agents X dim_U)</span>
+
+
+<span class="sd">          Returns</span>
+<span class="sd">          -------</span>
+<span class="sd">          next_state: tf.float32</span>
+<span class="sd">              Defines the next state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_next_state</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">current_action</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DeterministicTrajectoryEvaluator.evaluate_next_reward"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.DeterministicTrajectoryEvaluator.evaluate_next_reward">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_next_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_state</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">current_action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This is the function used to predict the next reward using the internal dynamics handler.</span>
+
+<span class="sd">          Parameters</span>
+<span class="sd">          ---------</span>
+<span class="sd">          current_state: tf.float32</span>
+<span class="sd">              Defines the current state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          next_state: tf.float32</span>
+<span class="sd">              Defines the next state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          current_action: tf.float32</span>
+<span class="sd">             Defines the current action to be applied, (dims = num_of_agents X dim_U)</span>
+
+
+<span class="sd">          Returns</span>
+<span class="sd">          -------</span>
+<span class="sd">          reward: tf.float32</span>
+<span class="sd">              returns the predicted reward using the action, current state and the next one,</span>
+<span class="sd">              (dims=num_of_agents X 1)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">state_reward_function</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">next_state</span><span class="p">)</span> <span class="o">+</span> \
+               <span class="bp">self</span><span class="o">.</span><span class="n">actions_reward_function</span><span class="p">(</span><span class="n">current_action</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

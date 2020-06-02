@@ -5,7 +5,7 @@ from causal_rl_bench.baselines.model_based.optimizers.cem import \
     CrossEntropyMethod
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 import numpy as np
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.task_generators.task import task_generator
 
 seed = 0
 skip_frame = 35
@@ -21,9 +21,10 @@ randomize_goal_block_pose = True
 
 def _make_env():
     def _init():
-        task = Task(task_id='pushing', randomize_joint_positions=randomize_joint_positions,
-                    randomize_block_pose=randomize_block_pose,
-                    randomize_goal_block_pose=randomize_goal_block_pose)
+        task = task_generator(task_generator_id='pushing',
+                              randomize_joint_positions=randomize_joint_positions,
+                              randomize_block_pose=randomize_block_pose,
+                              randomize_goal_block_pose=randomize_goal_block_pose)
         env = World(task=task, skip_frame=skip_frame,
                     enable_visualization=False,
                     seed=seed)
@@ -33,9 +34,9 @@ def _make_env():
 
 
 def run_mpc():
-    task = Task(task_id='pushing', randomize_joint_positions=randomize_joint_positions,
-                randomize_block_pose=randomize_block_pose,
-                randomize_goal_block_pose=randomize_goal_block_pose)
+    task = task_generator(task_generator_id='pushing', randomize_joint_positions=randomize_joint_positions,
+                          randomize_block_pose=randomize_block_pose,
+                          randomize_goal_block_pose=randomize_goal_block_pose)
     env = World(task=task, skip_frame=1, enable_visualization=False,
                 seed=seed)
     true_model = TrueModel(_make_env, parallel_agents=parallel_agents)

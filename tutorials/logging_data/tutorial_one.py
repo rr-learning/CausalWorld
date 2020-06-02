@@ -1,5 +1,5 @@
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.task_generators.task import task_generator
 
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.loggers.data_loader import DataLoader
@@ -17,7 +17,7 @@ def example():
     data_recorder = DataRecorder(output_directory='pushing_episodes', rec_dumb_frequency=11)
 
     # Pass the data recorder to the World
-    task = Task(task_id='pushing')
+    task = task_generator(task_generator_id='pushing')
     env = World(task=task,
                 enable_visualization=True,
                 data_recorder=data_recorder)
@@ -34,7 +34,7 @@ def example():
     episode = data.get_episode(14)
 
     # Initialize a new environment according a specific episode and replay it
-    task = Task(episode.task_name, **episode.task_params)
+    task = task_generator(episode.task_name, **episode.task_params)
     env = World(task,
                 **episode.world_params,
                 logging=False,

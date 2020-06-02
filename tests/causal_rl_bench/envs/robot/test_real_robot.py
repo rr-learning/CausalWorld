@@ -24,7 +24,7 @@ def test_pd_gains():
     from causal_rl_bench.tasks.task import Task
     import numpy as np
     np.random.seed(0)
-    task = Task(task_id='reaching')
+    task = Task(task_generator_id='reaching')
     skip_frame = 1 #@250Hz
     threshold = 0.05
     env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
@@ -84,4 +84,60 @@ def test_pd_gains():
     env.close()
 
 
-test_pd_gains()
+def test_pd_gains_2():
+    # control the robot using pd controller
+    from causal_rl_bench.envs.world import World
+    from causal_rl_bench.tasks.task import Task
+    import numpy as np
+    np.random.seed(0)
+    task = Task(task_generator_id='reaching')
+    skip_frame = 1#@240Hz
+    threshold = 0.05
+    env = World(task=task, enable_visualization=True, skip_frame=skip_frame, normalize_observations=False,
+                normalize_actions=False, seed=0)
+    robot = robot_fingers.Robot(robot_interfaces.trifinger,
+                                robot_fingers.create_trifinger_backend,
+                                "trifinger.yml")
+    robot.initialize()
+    frontend = robot.frontend
+    zero_hold_real_robot = 4
+    zero_hold_simulator = 1
+    obs = env.reset()
+    #stay at the idle place for the zero hold
+    desired_action = env.action_space.low
+    # simulated_positions = perform_step_simulated_robot(env, desired_action_sim, zero_hold_simulator)
+    # real_positions = perform_step_real_robot(frontend, desired_action, zero_hold_real_robot)
+    # if (np.abs(real_positions - simulated_positions) > threshold).any():
+    #     raise AssertionError("staying at idle position failed")
+    #
+    # desired_action = env.action_space.low
+    # simulated_positions = perform_step_simulated_robot(env, desired_action, zero_hold_simulator)
+    # real_positions = perform_step_real_robot(frontend, desired_action, zero_hold_real_robot)
+    # if (np.abs(real_positions - simulated_positions) > threshold).any():
+    #     raise AssertionError("going to lower bound failed")
+    for i in range(250):
+        simulated_positions = perform_step_simulated_robot(env, desired_action, zero_hold_simulator)
+        real_positions = perform_step_real_robot(frontend, desired_action, zero_hold_real_robot)
+    #go to low space in both envs
+    for _ in range(5000):
+        simulated_positions = perform_step_simulated_robot(env, simulated_positions, zero_hold_simulator)
+        real_positions = perform_step_real_robot(frontend, real_positions, zero_hold_real_robot)
+            # desired_action = np.zeros([9,])
+            # current_obs = np.around(obs[:9], decimals=2)
+            # print("what I wanted to reach", current_obs + desired_action)
+            # obs, reward, done, info = env.step(desired_action)
+            # print("what I actually reached", np.around(obs[:9], decimals=2))
+            # print("diff is", current_obs + desired_action - np.around(obs[:9], decimals=2))
+            #     # desired_action = obs[:9]
+
+        # for j in range(100):
+        #     desired_action = default_desired_action
+        #     desired_action[i * 3:(i + 1) * 3] = env.robot.sample_joint_positions()[i * 3:(i + 1) * 3]
+        #     simulated_positions = perform_step_simulated_robot(env, desired_action, zero_hold_simulator)
+        #     real_positions = perform_step_real_robot(frontend, desired_action, zero_hold_real_robot)
+        #     if (np.abs(real_positions - simulated_positions) > threshold).any():
+        #         raise AssertionError("random position failed comparison")
+
+
+# test_pd_gains()
+test_pd_gains_2()

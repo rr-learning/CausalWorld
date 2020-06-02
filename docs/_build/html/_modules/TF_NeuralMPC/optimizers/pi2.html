@@ -1,0 +1,351 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tf_neuralmpc.optimizers.pi2 &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/tf_neuralmpc.html">TF-NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tf_neuralmpc.optimizers.pi2</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tf_neuralmpc.optimizers.pi2</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">tf_neuralmpc/optimizers/pi2.py</span>
+<span class="sd">==============================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow_probability</span> <span class="k">as</span> <span class="nn">tfp</span>
+<span class="kn">from</span> <span class="nn">tf_neuralmpc.optimizers.optimizer_base</span> <span class="k">import</span> <span class="n">OptimizerBase</span>
+<span class="n">tfd</span> <span class="o">=</span> <span class="n">tfp</span><span class="o">.</span><span class="n">distributions</span>
+
+
+<div class="viewcode-block" id="PI2Optimizer"><a class="viewcode-back" href="../../../modules/optimizers/optimizers.html#tf_neuralmpc.optimizers.PI2Optimizer">[docs]</a><span class="k">class</span> <span class="nc">PI2Optimizer</span><span class="p">(</span><span class="n">OptimizerBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class defines the information theortic MPC based on path intergral methods.</span>
+<span class="sd">        (https://ieeexplore.ieee.org/stamp/stamp.jsp?tp=&amp;arnumber=7989202)&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="PI2Optimizer.__init__"><a class="viewcode-back" href="../../../modules/optimizers/optimizers.html#tf_neuralmpc.optimizers.PI2Optimizer.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">planning_horizon</span><span class="p">,</span> <span class="n">max_iterations</span><span class="p">,</span> <span class="n">population_size</span><span class="p">,</span> <span class="n">dim_U</span><span class="p">,</span> <span class="n">dim_O</span><span class="p">,</span>
+                 <span class="n">action_upper_bound</span><span class="p">,</span> <span class="n">action_lower_bound</span><span class="p">,</span> <span class="n">trajectory_evaluator</span><span class="p">,</span> <span class="n">num_agents</span><span class="p">,</span>
+                 <span class="n">lamda</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the initializer function for the information theortic MPC optimizer.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        planning_horizon: Int</span>
+<span class="sd">            Defines the planning horizon for the optimizer (how many steps to lookahead and optimize for).</span>
+<span class="sd">        max_iterations: tf.int32</span>
+<span class="sd">            Defines the maximimum iterations for the CMAES optimizer to refine its guess for the optimal solution.</span>
+<span class="sd">        population_size: tf.int32</span>
+<span class="sd">            Defines the population size of the particles evaluated at each iteration.</span>
+<span class="sd">        dim_O: tf.int32</span>
+<span class="sd">            Defines the dimensions of the observations space.</span>
+<span class="sd">        dim_U: tf.int32</span>
+<span class="sd">            Defines the dimensions of the input space.</span>
+<span class="sd">        action_upper_bound: tf.float32</span>
+<span class="sd">            Defines the actions upper bound that could be applied, shape should be 1xdim_U.</span>
+<span class="sd">        action_lower_bound: tf.float32</span>
+<span class="sd">            Defines the actions lower bound that could be applied, shape should be 1xdim_U.</span>
+<span class="sd">        trajectory_evaluator: EvaluatorBaseClass</span>
+<span class="sd">            Defines the trajectory evaluator to be used to evaluate the reward of a sequence of actions.</span>
+<span class="sd">        num_agents: tf.int32</span>
+<span class="sd">            Defines the number of runner running in parallel</span>
+<span class="sd">        lamda: tf.float32</span>
+<span class="sd">            Defines the lamda used the energy function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PI2Optimizer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span> <span class="o">=</span> <span class="n">planning_horizon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span> <span class="o">=</span> <span class="n">dim_U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span> <span class="o">=</span> <span class="n">dim_O</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_S</span> <span class="o">=</span> <span class="n">dim_O</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span> <span class="o">=</span> <span class="n">num_agents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_evaluator</span> <span class="o">=</span> <span class="n">trajectory_evaluator</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution_dim</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution_size</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_prod</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solution_dim</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span> <span class="o">=</span> <span class="n">max_iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">population_size</span> <span class="o">=</span> <span class="n">population_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span> <span class="o">=</span> <span class="n">action_upper_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span> <span class="o">=</span> <span class="n">action_lower_bound</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound_horizon</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                                                  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound_horizon</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                                                  <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">previous_solution_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                                           <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">previous_solution_values</span> <span class="o">=</span> <span class="n">previous_solution_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_solution</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">previous_solution_values</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                                      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_solution</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">previous_solution_values</span><span class="p">)</span>
+        <span class="n">solution_variance_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">16</span><span class="p">,</span>
+                                           <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">solution_variance_values</span> <span class="o">=</span> <span class="n">solution_variance_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution_variance</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">Variable</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">solution_variance_values</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span>
+                                                      <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solution_variance</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">solution_variance_values</span><span class="p">)</span>
+        <span class="c1">#TODO: to be pushed to a config file</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lamda</span> <span class="o">=</span> <span class="n">lamda</span>
+        <span class="c1"># exploration</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exploration_variance</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">16</span><span class="p">)</span> <span class="o">*</span> <span class="mf">0.05</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">exploration_mean</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="PI2Optimizer.__call__"><a class="viewcode-back" href="../../../modules/optimizers/optimizers.html#tf_neuralmpc.optimizers.PI2Optimizer.__call__">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_state</span><span class="p">,</span> <span class="n">time_step</span><span class="p">,</span> <span class="n">exploration_noise</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This is the call function for the information theortic MPC optimizer.</span>
+<span class="sd">          It is used to calculate the optimal solution for action at the current timestep given the current state.</span>
+
+<span class="sd">          Parameters</span>
+<span class="sd">          ---------</span>
+<span class="sd">          current_state: tf.float32</span>
+<span class="sd">              Defines the current state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          time_step: tf.float32</span>
+<span class="sd">              Defines the current timestep of the episode.</span>
+<span class="sd">          exploration_noise: tf.bool</span>
+<span class="sd">              Specifies if the optimal action should have some noise added to it before returning it.</span>
+
+
+<span class="sd">          Returns</span>
+<span class="sd">           -------</span>
+<span class="sd">           resulting_action: tf.float32</span>
+<span class="sd">               The optimal solution for the first action to be applied in the current time step.</span>
+<span class="sd">           next_state: tf.float32</span>
+<span class="sd">               The next state predicted using the dynamics model in the trajectory evaluator.</span>
+<span class="sd">           rewards_of_next_state: tf.float32</span>
+<span class="sd">               The predicted reward achieved after applying the action given by the optimizer.</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="k">def</span> <span class="nf">continue_condition</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mean</span><span class="p">):</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">less</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_iterations</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">def</span> <span class="nf">iterate</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">mean</span><span class="p">):</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">truncated_normal</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">population_size</span><span class="p">,</span>
+                                                  <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">solution_dim</span><span class="p">],</span>
+                                                 <span class="n">mean</span><span class="p">,</span>
+                                                 <span class="n">tf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">solution_variance</span><span class="p">),</span>
+                                                 <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">samples_feasible</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound_horizon</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound_horizon</span><span class="p">)</span>
+            <span class="n">penalty</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">samples</span> <span class="o">-</span> <span class="n">samples_feasible</span><span class="p">,</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">population_size</span><span class="p">,</span>
+                                                                      <span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span>
+                                                                      <span class="o">-</span><span class="mi">1</span><span class="p">]),</span>
+                              <span class="n">axis</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">samples_feasible</span>
+
+            <span class="n">rewards</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_evaluator</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">samples</span><span class="p">,</span> <span class="n">time_step</span><span class="p">)</span> <span class="o">-</span> <span class="n">penalty</span>
+            <span class="n">costs</span> <span class="o">=</span> <span class="o">-</span><span class="n">rewards</span>
+            <span class="n">costs</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">costs</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+            <span class="n">beta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_min</span><span class="p">(</span><span class="n">costs</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">prob</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">lamda</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">costs</span> <span class="o">-</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)))</span>
+            <span class="n">eta</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="c1">#compute weights now</span>
+            <span class="n">omega</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">eta</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">prob</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+            <span class="n">new_mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">reduce_sum</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">multiply</span><span class="p">(</span><span class="n">samples</span><span class="p">,</span> <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="o">-</span><span class="mi">1</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">t</span> <span class="o">+</span> <span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span> <span class="n">new_mean</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">new_mean</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">while_loop</span><span class="p">(</span><span class="n">cond</span><span class="o">=</span><span class="n">continue_condition</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="n">iterate</span><span class="p">,</span> <span class="n">loop_vars</span><span class="o">=</span><span class="p">[</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">int32</span><span class="p">),</span>
+                                                                                      <span class="bp">self</span><span class="o">.</span><span class="n">previous_solution</span><span class="p">])</span>
+        <span class="c1">#assign it to the previous solution for the next uinit</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_solution</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">new_mean</span><span class="p">[:,</span> <span class="mi">1</span><span class="p">:],</span>
+                                                 <span class="n">tf</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">new_mean</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">)],</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">resulting_action</span> <span class="o">=</span> <span class="n">new_mean</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">exploration_noise</span><span class="p">:</span>
+            <span class="n">noise</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">truncated_normal</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span><span class="p">],</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">exploration_mean</span><span class="p">,</span>
+                                               <span class="n">tf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exploration_variance</span><span class="p">),</span>
+                                               <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>
+            <span class="n">resulting_action</span> <span class="o">=</span> <span class="n">resulting_action</span> <span class="o">+</span> <span class="n">noise</span>
+            <span class="n">resulting_action</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">clip_by_value</span><span class="p">(</span><span class="n">resulting_action</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span><span class="p">,</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span><span class="p">)</span>
+        <span class="n">next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_evaluator</span><span class="o">.</span><span class="n">predict_next_state</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">resulting_action</span><span class="p">)</span>
+        <span class="n">rewards_of_next_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trajectory_evaluator</span><span class="o">.</span><span class="n">evaluate_next_reward</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span>
+                                                                               <span class="n">next_state</span><span class="p">,</span>
+                                                                               <span class="n">resulting_action</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">resulting_action</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">rewards_of_next_state</span></div>
+
+<div class="viewcode-block" id="PI2Optimizer.reset"><a class="viewcode-back" href="../../../modules/optimizers/optimizers.html#tf_neuralmpc.optimizers.PI2Optimizer.reset">[docs]</a>    <span class="k">def</span> <span class="nf">reset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This method resets the optimizer to its default state at the beginning of the trajectory/episode.</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="n">previous_solution_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">tile</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">action_lower_bound</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">action_upper_bound</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                                           <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="n">previous_solution_values</span> <span class="o">=</span> <span class="n">previous_solution_values</span><span class="o">.</span><span class="n">reshape</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">num_agents</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">planning_horizon</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_solution</span><span class="o">.</span><span class="n">assign</span><span class="p">(</span><span class="n">previous_solution_values</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

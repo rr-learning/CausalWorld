@@ -2,6 +2,7 @@ from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
 from pybullet_fingers.sim_finger import SimFinger
 import numpy as np
+import math
 
 
 class TriFingerRobot(object):
@@ -41,92 +42,32 @@ class TriFingerRobot(object):
             self.last_applied_joint_positions = None
         self.latest_full_state = None
         self.state_size = 18
-
-    def is_self_colliding(self):
-        for contact in self.tri_finger._p.getContactPoints():
-            if contact[1] == self.tri_finger.finger_id and \
-                    contact[2] == self.tri_finger.finger_id:
-                return True
-        return False
-
-    def is_colliding_with_stage(self):
-        for contact in self.tri_finger._p.getContactPoints():
-            if (contact[1] == self.tri_finger.finger_id and contact[2] == self.tri_finger.stage_id) or \
-                    (contact[2] == self.tri_finger.finger_id and contact[1] == self.tri_finger.stage_id):
-                return True
-        return False
-
-    def is_in_contact_with_block(self, block):
-        for contact in self.tri_finger._p.getContactPoints():
-            if (contact[1] == self.tri_finger.finger_id and contact[2] == block.block_id) or \
-                    (contact[2] == self.tri_finger.finger_id and contact[1] == block.block_id):
-                return True
-        return False
-
-    def get_normal_interaction_force_with_block(self, block, finger_tip_number):
-        # TODO: doesnt account for several contacts per body
-        if finger_tip_number == 0:
-            idx = 4
-        elif finger_tip_number == 1:
-            idx = 9
-        elif finger_tip_number == 2:
-            idx = 14
-        else:
-            raise Exception("finger tip number doesnt exist")
-
-        for contact in self.tri_finger._p.getContactPoints():
-            if (contact[1] == self.tri_finger.finger_id and contact[2] == block.block_id) or \
-                    (contact[2] == self.tri_finger.finger_id and contact[1] == block.block_id):
-                return contact[9]*np.array(contact[7])
-            for contact in self.tri_finger._p.getContactPoints():
-                if (contact[1] == self.tri_finger.finger_id and contact[2] == block.block_id
-                    and contact[3] == idx) or  (contact[2] == self.tri_finger.finger_id and contact[1] == block.block_id
-                     and contact[4] == idx):
-                    return contact[9] * np.array(contact[7])
-        return None
-
-    def get_tip_contact_states(self):
-        #TODO: only support open and closed states (should support slipping too)
-        contact_tips = [0, 0, 0] #all are open
-        for contact in self.tri_finger._p.getContactPoints():
-            if contact[1] == self.tri_finger.finger_id:
-                if contact[3] == 4:
-                    contact_tips[0] = 1
-                elif contact[3] == 9:
-                    contact_tips[1] = 1
-                elif contact[3] == 14:
-                    contact_tips[2] = 1
-            elif contact[2] == self.tri_finger.finger_id:
-                if contact[4] == 4:
-                    contact_tips[0] = 1
-                elif contact[4] == 9:
-                    contact_tips[1] = 1
-                elif contact[4] == 14:
-                    contact_tips[2] = 1
-        return contact_tips
-
-    def compute_end_effector_positions(self, joint_positions):
-        tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
-            joint_positions
-        )
-        end_effector_position = np.concatenate(tip_positions)
-        return end_effector_position
-
-    def _compute_end_effector_positions(self, robot_state):
-        tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
-            robot_state.position
-        )
-        end_effector_position = np.concatenate(tip_positions)
-        return end_effector_position
-
-    def _process_action_joint_positions(self, robot_state):
-        #This returns the absolute joint positions command sent in position control mode (end effector and joint positions)
-        #this observation shouldnt be used in torque control
-        last_joints_action_applied = self.get_last_applied_joint_positions() #always denormalized by default
-        if self.normalize_observations:
-            last_joints_action_applied = self.normalize_observation_for_key(
-                observation=last_joints_action_applied, key='action_joint_positions')
-        return last_joints_action_applied
+        #TODO: move this to pybullet_fingers repo maybe?
+        self.link_ids = {'robot_finger_60_link_0': 1,
+                         'robot_finger_60_link_1': 2,
+                         'robot_finger_60_link_2': 3,
+                         'robot_finger_60_link_3': 4,
+                         'robot_finger_120_link_0': 6,
+                         'robot_finger_120_link_1': 7,
+                         'robot_finger_120_link_2': 8,
+                         'robot_finger_120_link_3': 9,
+                         'robot_finger_300_link_0': 11,
+                         'robot_finger_300_link_1': 12,
+                         'robot_finger_300_link_2': 13,
+                         'robot_finger_300_link_3': 14}
+        self.visual_shape_ids_ids = {'robot_finger_60_link_0': 0,
+                                     'robot_finger_60_link_1': 1,
+                                     'robot_finger_60_link_2': 2,
+                                     'robot_finger_60_link_3': 3,
+                                     'robot_finger_120_link_0': 4,
+                                     'robot_finger_120_link_1': 5,
+                                     'robot_finger_120_link_2': 6,
+                                     'robot_finger_120_link_3': 7,
+                                     'robot_finger_300_link_0': 8,
+                                     'robot_finger_300_link_1': 9,
+                                     'robot_finger_300_link_2': 10,
+                                     'robot_finger_300_link_3': 11}
+        return
 
     def set_action_mode(self, action_mode):
         self.action_mode = action_mode
@@ -139,7 +80,8 @@ class TriFingerRobot(object):
     def set_observation_mode(self, observation_mode):
         self.observation_mode = observation_mode
         self.robot_observations = \
-            TriFingerObservations(observation_mode, self.normalize_observations)
+            TriFingerObservations(observation_mode,
+                                  self.normalize_observations)
 
     def get_observation_mode(self):
         return self.observation_mode
@@ -149,6 +91,42 @@ class TriFingerRobot(object):
 
     def get_skip_frame(self):
         return self.skip_frame
+
+    def get_full_state(self):
+        return np.append(self.latest_full_state.position,
+                         self.latest_full_state.velocity)
+
+    def set_full_state(self, state):
+        self.latest_full_state = self.tri_finger.\
+            reset_finger(state[:9], state[9:])
+        # here the previous actions will all be zeros to avoid dealing with different action modes for now
+        self.last_action = np.zeros(9, )
+        self.last_clipped_action = np.zeros(9, )
+        if self.action_mode != "joint_torques":
+            self.last_applied_joint_positions = list(state[:9])
+        return
+
+    def get_last_action(self):
+        return self.last_action
+
+    def get_last_clipped_action(self):
+        return self.last_clipped_action
+
+    def get_last_applied_joint_positions(self):
+        return self.last_applied_joint_positions
+
+    def get_observation_spaces(self):
+        return self.robot_observations.get_observation_spaces()
+
+    def get_action_spaces(self):
+        return self.robot_actions.get_action_space()
+
+    def get_state_size(self):
+        return self.state_size
+
+    #TODO: refactor in the pybullet_fingers repo
+    def get_pybullet_client(self):
+        return self.tri_finger._p
 
     def apply_action(self, action):
         self.control_index += 1
@@ -185,19 +163,89 @@ class TriFingerRobot(object):
         self.last_clipped_action = clipped_action
         return
 
-    def get_full_state(self):
-        return np.append(self.latest_full_state.position,
-                         self.latest_full_state.velocity)
+    def get_joint_positions_from_tip_positions(self, tip_positions,
+                                               default_pose=None):
+        if default_pose is None:
+            positions = self.tri_finger.pybullet_inverse_kinematics(
+                tip_positions, list(self.get_rest_pose()[0]))
+        else:
+            positions = self.tri_finger.pybullet_inverse_kinematics(
+                tip_positions, default_pose)
+        return positions
 
-    def set_full_state(self, state):
-        self.latest_full_state = self.tri_finger.\
-            reset_finger(state[:9], state[9:])
-        # here the previous actions will all be zeros to avoid dealing with different action modes for now
-        self.last_action = np.zeros(9, )
-        self.last_clipped_action = np.zeros(9, )
-        if self.action_mode != "joint_torques":
-            self.last_applied_joint_positions = list(state[:9])
-        return
+    def get_current_camera_observations(self):
+        return self.robot_observations.get_current_camera_observations(
+            self.latest_full_state)
+
+    def get_goal_image_instance_pybullet(self):
+        if self.enable_goal_image:
+            return self.goal_image_instance
+        else:
+            raise Exception("goal image is not enabled")
+
+    def get_rest_pose(self):
+        deg45 = np.pi / 4
+        positions = [0, -deg45, -deg45]
+        joint_positions = positions * 3
+        end_effector_positions = [0.05142966, 0.03035857, 0.32112874,
+                                  0.00057646, -0.05971867, 0.32112874,
+                                  -0.05200612, 0.02936011, 0.32112874]
+        return joint_positions, end_effector_positions
+
+    def get_default_state(self):
+        return np.append(self.get_rest_pose()[0],
+                         np.zeros(9))
+
+    def get_current_variables_values(self):
+        # TODO: not a complete list yet of what we want to expose
+        variable_params = dict()
+        if self.is_initialized():
+            state = self.get_full_state()
+        else:
+            state = self.get_default_state()
+        variable_params['joint_positions'] = state[:9]
+        variable_params['joint_velocities'] = state[9:]
+        for robot_finger_link in self.link_ids:
+            variable_params[robot_finger_link] = dict()
+            variable_params[robot_finger_link]['color'] = \
+                self.get_pybullet_client(). \
+                    getVisualShapeData(self.tri_finger.finger_id) \
+                    [self.visual_shape_ids_ids[robot_finger_link]][7][:3]
+            variable_params[robot_finger_link]['mass'] = \
+                self.get_pybullet_client(). \
+                    getDynamicsInfo(self.tri_finger.finger_id,
+                                    self.link_ids[robot_finger_link])[0]
+        return variable_params
+
+    def get_current_observations(self, helper_keys):
+        return self.robot_observations.get_current_observations(
+            self.latest_full_state, helper_keys)
+
+    def compute_end_effector_positions(self, joint_positions):
+        tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
+            joint_positions
+        )
+        end_effector_position = np.concatenate(tip_positions)
+        return end_effector_position
+
+    def _compute_end_effector_positions(self, robot_state):
+        tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
+            robot_state.position
+        )
+        end_effector_position = np.concatenate(tip_positions)
+        return end_effector_position
+
+    def _process_action_joint_positions(self, robot_state):
+        #This returns the absolute joint positions command sent in position control mode
+        # (end effector and joint positions)
+        #this observation shouldnt be used in torque control
+        last_joints_action_applied = self.get_last_applied_joint_positions()
+        #always denormalized by default
+        if self.normalize_observations:
+            last_joints_action_applied = self.normalize_observation_for_key(
+                observation=last_joints_action_applied,
+                key='action_joint_positions')
+        return last_joints_action_applied
 
     def clear(self):
         self.last_action = None
@@ -227,18 +275,6 @@ class TriFingerRobot(object):
         if self.action_mode != "joint_torques":
             self.last_applied_joint_positions = list(joint_positions)
         return
-
-    def get_last_action(self):
-        return self.last_action
-
-    def get_last_clipped_action(self):
-        return self.last_clipped_action
-
-    def get_last_applied_joint_positions(self):
-        return self.last_applied_joint_positions
-    
-    def get_observation_spaces(self):
-        return self.robot_observations.get_observation_spaces()
 
     def sample_joint_positions(self, sampling_strategy="separated"):
         if sampling_strategy == "uniform":
@@ -286,31 +322,28 @@ class TriFingerRobot(object):
             raise Exception("not yet implemented")
         return positions
 
-    def sample_end_effector_positions(self, sampling_strategy="middle_stage"):
+    def sample_end_effector_positions(self, sampling_strategy="from_joints"):
         if sampling_strategy == "middle_stage":
             tip_positions = np.random.uniform(
                 [0.1, 0.1, 0.15, 0.1, -0.15, 0.15, -0.15, -0.15, 0.15],
                 [0.15, 0.15, 0.15, 0.15, -0.1, 0.15, -0.1, -0.1, 0.15])
             # TODO:add heuristics if the points are in the reachabe sets or not.
             #red is 300, green is 60, blue is 180
+        elif sampling_strategy == "from_joints":
+            joints_goal = self.sample_joint_positions()
+            tip_positions = self.\
+                compute_end_effector_positions(joints_goal)
         else:
             raise Exception("not yet implemented")
             #perform inverse kinemetics
             #TODO:add heuristics if the points are in the reachabe sets or not.
         return tip_positions
 
-    def get_joint_positions_from_tip_positions(self, tip_positions,
-                                               default_pose=None):
-        if default_pose is None:
-            positions = self.tri_finger.pybullet_inverse_kinematics(
-                tip_positions, list(self.get_rest_pose()[0]))
-        else:
-            positions = self.tri_finger.pybullet_inverse_kinematics(
-                tip_positions, default_pose)
-        return positions
-
-    def get_action_spaces(self):
-        return self.robot_actions.get_action_space()
+    def forward_simulation(self, time=1):
+        n_steps = int(time / self.simulation_time)
+        for _ in range(n_steps):
+            self.get_pybullet_client().stepSimulation()
+        return
 
     def select_observations(self, observation_keys):
         self.robot_observations.reset_observation_keys()
@@ -336,23 +369,12 @@ class TriFingerRobot(object):
         if self.enable_goal_image:
             self.goal_image_instance.disconnect_from_simulation()
 
-    def get_state_size(self):
-        return self.state_size
-
-    #TODO: refactor in the pybullet_fingers repo
-    def get_pybullet_client(self):
-        return self.tri_finger._p
-
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):
         self.robot_observations.add_observation(observation_key,
                                                 lower_bound,
                                                 upper_bound,
                                                 observation_fn)
-
-    def get_current_observations(self, helper_keys):
-        return self.robot_observations.get_current_observations(
-            self.latest_full_state, helper_keys)
 
     def normalize_observation_for_key(self, observation, key):
         return self.robot_observations.normalize_observation_for_key(
@@ -362,21 +384,158 @@ class TriFingerRobot(object):
         return self.robot_observations.denormalize_observation_for_key(
             observation, key)
 
-    def get_current_camera_observations(self):
-        return self.robot_observations.get_current_camera_observations(
-            self.latest_full_state)
-
-    def get_goal_image_instance_pybullet(self):
-        if self.enable_goal_image:
-            return self.goal_image_instance
+    def apply_interventions(self, interventions_dict):
+        #only will do such an intervention if its a feasible one
+        if self.is_initialized():
+            old_state = self.get_full_state()
         else:
-            raise Exception("goal image is not enabled")
+            old_state = self.get_default_state()
+        if "joint_positions" in interventions_dict:
+            new_joint_positions = interventions_dict["joint_positions"]
+        else:
+            new_joint_positions = old_state[:9]
+        if "joint_velocities" in interventions_dict:
+            new_joint_velcoities = interventions_dict["joint_velocities"]
+        else:
+            new_joint_velcoities = old_state[9:]
 
-    def get_rest_pose(self):
-        deg45 = np.pi / 4
-        positions = [0, -deg45, -deg45]
-        joint_positions = positions * 3
-        end_effector_positions = [0.05142966, 0.03035857, 0.32112874,
-                                  0.00057646, -0.05971867,  0.32112874,
-                                  -0.05200612,  0.02936011,  0.32112874]
-        return joint_positions, end_effector_positions
+        if "joint_positions" in interventions_dict or \
+                "joint_velocities" in interventions_dict:
+            self.set_full_state(np.append(new_joint_positions,
+                                          new_joint_velcoities))
+        for intervention in interventions_dict:
+            if intervention == "joint_velocities" or \
+                    intervention == "joint_positions":
+                continue
+            if "robot_finger" in intervention:
+                for sub_intervention_variable in \
+                        interventions_dict[intervention]:
+                    if sub_intervention_variable == 'color':
+                        self.get_pybullet_client().changeVisualShape(
+                            self.tri_finger.finger_id,
+                            self.link_ids[intervention],
+                            rgbaColor=np.append(
+                                interventions_dict[intervention]
+                                [sub_intervention_variable], 1))
+                        if self.enable_goal_image:
+                            self.goal_image_instance._p.changeVisualShape(
+                                self.tri_finger.finger_id,
+                                self.link_ids[intervention],
+                                rgbaColor=np.append(
+                                    interventions_dict[intervention]
+                                    [sub_intervention_variable], 1))
+                    elif sub_intervention_variable == 'mass':
+                        self.get_pybullet_client().changeDynamics\
+                            (self.tri_finger.finger_id,
+                             self.link_ids[intervention], mass=
+                             interventions_dict[intervention]
+                             [sub_intervention_variable])
+                    else:
+                        raise Exception(
+                            "The intervention state variable specified is "
+                            "not allowed")
+
+            else:
+                raise Exception("The intervention state variable specified is "
+                                "not allowed")
+
+        return
+
+    def check_feasibility_of_robot_state(self):
+        """
+        This function checks the feasibility of the current state of the robot
+        (i.e checks if its in penetration with anything now
+        Parameters
+        ---------
+
+        Returns
+        -------
+            feasibility_flag: bool
+                A boolean indicating whether the stage is in a collision state
+                or not.
+        """
+        for contact in self.tri_finger._p.getContactPoints():
+            if (contact[1] == self.tri_finger.finger_id or
+                contact[2] == self.tri_finger.finger_id) and \
+                    contact[8] < -0.005:
+                return False
+        return True
+
+    def is_initialized(self):
+        if self.latest_full_state is None:
+            return False
+        else:
+            return True
+
+    def is_self_colliding(self):
+        for contact in self.tri_finger._p.getContactPoints():
+            if contact[1] == self.tri_finger.finger_id and \
+                    contact[2] == self.tri_finger.finger_id:
+                return True
+        return False
+
+    def is_colliding_with_stage(self):
+        for contact in self.tri_finger._p.getContactPoints():
+            if (contact[1] == self.tri_finger.finger_id and contact[2]
+                == self.tri_finger.stage_id) or \
+                    (contact[2] == self.tri_finger.finger_id and contact[1]
+                     == self.tri_finger.stage_id):
+                return True
+        return False
+
+    def is_in_contact_with_block(self, block):
+        for contact in self.tri_finger._p.getContactPoints():
+            if (contact[1] == self.tri_finger.finger_id and
+                contact[2] == block.block_id) or \
+                    (contact[2] == self.tri_finger.finger_id and
+                     contact[1] == block.block_id):
+                return True
+        return False
+
+    def get_normal_interaction_force_with_block(self, block,
+                                                finger_tip_number):
+        # TODO: doesnt account for several contacts per body
+        if finger_tip_number == 60:
+            idx = self.link_ids['robot_finger_60_link_3']
+        elif finger_tip_number == 120:
+            idx = self.link_ids['robot_finger_120_link_3']
+        elif finger_tip_number == 300:
+            idx = self.link_ids['robot_finger_300_link_3']
+        else:
+            raise Exception("finger tip number doesnt exist")
+
+        for contact in self.tri_finger._p.getContactPoints():
+            if (contact[1] == self.tri_finger.finger_id and
+                contact[2] == block.block_id) or \
+                    (contact[2] == self.tri_finger.finger_id
+                     and contact[1] == block.block_id):
+                return contact[9]*np.array(contact[7])
+            for contact in self.tri_finger._p.getContactPoints():
+                if (contact[1] == self.tri_finger.finger_id
+                    and contact[2] == block.block_id
+                    and contact[3] == idx) or  \
+                        (contact[2] == self.tri_finger.finger_id
+                         and contact[1] == block.block_id
+                     and contact[4] == idx):
+                    return contact[9] * np.array(contact[7])
+        return None
+
+    def get_tip_contact_states(self):
+        #TODO: only support open and closed states (should support slipping too)
+        contact_tips = [0, 0, 0] #all are open
+        for contact in self.tri_finger._p.getContactPoints():
+            if contact[1] == self.tri_finger.finger_id:
+                if contact[3] == self.link_ids['robot_finger_60_link_3']:
+                    contact_tips[0] = 1
+                elif contact[3] == self.link_ids['robot_finger_120_link_3']:
+                    contact_tips[1] = 1
+                elif contact[3] == self.link_ids['robot_finger_300_link_3']:
+                    contact_tips[2] = 1
+            elif contact[2] == self.tri_finger.finger_id:
+                if contact[4] == self.link_ids['robot_finger_60_link_3']:
+                    contact_tips[0] = 1
+                elif contact[4] == self.link_ids['robot_finger_180_link_3']:
+                    contact_tips[1] = 1
+                elif contact[4] == self.link_ids['robot_finger_300_link_3']:
+                    contact_tips[2] = 1
+        return contact_tips

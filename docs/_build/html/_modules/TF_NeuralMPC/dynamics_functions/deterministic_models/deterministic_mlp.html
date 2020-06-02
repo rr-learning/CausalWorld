@@ -1,0 +1,304 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tf_neuralmpc.dynamics_functions.deterministic_models.deterministic_mlp &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/tf_neuralmpc.html">TF-NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tf_neuralmpc.dynamics_functions.deterministic_models.deterministic_mlp</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tf_neuralmpc.dynamics_functions.deterministic_models.deterministic_mlp</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">tf_neuralmpc/dynamics_functions/deterministic_models/deterministic_mlp.py</span>
+<span class="sd">=========================================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">from</span> <span class="nn">tf_neuralmpc.dynamics_functions.deterministic_models.deterministic_dynamics_function_base</span> \
+    <span class="kn">import</span> <span class="nn">DeterministicDynamicsFunctionBase</span>
+
+
+<div class="viewcode-block" id="DeterministicMLP"><a class="viewcode-back" href="../../../../modules/dynamics_functions/dynamics_functions.html#tf_neuralmpc.dynamics_functions.DeterministicMLP">[docs]</a><span class="k">class</span> <span class="nc">DeterministicMLP</span><span class="p">(</span><span class="n">DeterministicDynamicsFunctionBase</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the deterministic fully connected MLP dynamics function class for (s_t, a_t) - &gt; (s_t+1)&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="DeterministicMLP.__init__"><a class="viewcode-back" href="../../../../modules/dynamics_functions/dynamics_functions.html#tf_neuralmpc.dynamics_functions.DeterministicMLP.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the initializer function for the deterministic fully connected MLP dynamics function class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        name: String</span>
+<span class="sd">            Defines the name of the block of the deterministic MLP dynamics function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DeterministicMLP</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">finalized</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decays</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optvars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nonoptvars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">losses</span><span class="o">.</span><span class="n">MeanSquaredError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DeterministicMLP.add_layer"><a class="viewcode-back" href="../../../../modules/dynamics_functions/dynamics_functions.html#tf_neuralmpc.dynamics_functions.DeterministicMLP.add_layer">[docs]</a>    <span class="k">def</span> <span class="nf">add_layer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_dim</span><span class="p">,</span> <span class="n">output_dim</span><span class="p">,</span> <span class="n">activation_function</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the add layer function for the deterministic fully connected MLP dynamics function class, which</span>
+<span class="sd">        is used to add a new layer at the end of the so far constructed MLP.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        input_dim: Int</span>
+<span class="sd">            Defines the input dimensions of the layer.</span>
+<span class="sd">        output_dim: Int</span>
+<span class="sd">            Defines the output dimensions of the layer.</span>
+<span class="sd">        activation_function: tf.nn</span>
+<span class="sd">            Defines the activation non-linearity to be used for this layer.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">Dense</span><span class="p">(</span><span class="n">output_dim</span><span class="p">,</span> <span class="n">input_shape</span><span class="o">=</span><span class="p">(</span><span class="n">input_dim</span><span class="p">,),</span> <span class="n">activation</span><span class="o">=</span><span class="n">activation_function</span><span class="p">,</span>
+                                                 <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;float32&#39;</span><span class="p">))</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="DeterministicMLP.__call__"><a class="viewcode-back" href="../../../../modules/dynamics_functions/dynamics_functions.html#tf_neuralmpc.dynamics_functions.DeterministicMLP.__call__">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">train</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the call function for the deterministic fully connected MLP dynamics function class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        x: tf.float32</span>
+<span class="sd">            Defines the (s_t, a_t) which is the state and action stacked on top of each other,</span>
+<span class="sd">            (dims = Batch X (dim_S + dim_U))</span>
+
+<span class="sd">        train: tf.bool</span>
+<span class="sd">            Defines whether the network should run in train mode or not.</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output: tf.float32</span>
+<span class="sd">            Defines the next state (s_t+1) with (dims = Batch X dim_S)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">layers</span><span class="o">.</span><span class="n">layers</span><span class="p">:</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">x</span></div>
+
+<div class="viewcode-block" id="DeterministicMLP.get_loss"><a class="viewcode-back" href="../../../../modules/dynamics_functions/dynamics_functions.html#tf_neuralmpc.dynamics_functions.DeterministicMLP.get_loss">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">get_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expected_output</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the training loss function for the deterministic fully connected MLP dynamics function class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        expected_output: tf.float32</span>
+<span class="sd">            Defines the next state (s_t+1) ground truth with (dims = Batch X dim_S)</span>
+<span class="sd">        predictions: tf.float32</span>
+<span class="sd">            Defines the next state (s_t+1) predicted values with (dims = Batch X dim_S)</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        train_loss: tf.float32</span>
+<span class="sd">            Defines the training loss as a scalar for the whole batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">expected_output</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DeterministicMLP.get_validation_loss"><a class="viewcode-back" href="../../../../modules/dynamics_functions/dynamics_functions.html#tf_neuralmpc.dynamics_functions.DeterministicMLP.get_validation_loss">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">get_validation_loss</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expected_output</span><span class="p">,</span> <span class="n">predictions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the validation loss function for the deterministic fully connected MLP dynamics function class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        expected_output: tf.float32</span>
+<span class="sd">            Defines the next state (s_t+1) ground truth with (dims = Batch X dim_S)</span>
+<span class="sd">        predictions: tf.float32</span>
+<span class="sd">            Defines the next state (s_t+1) predicted values with (dims = Batch X dim_S)</span>
+
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        validation_loss: tf.float32</span>
+<span class="sd">            Defines the validation loss as a scalar for the whole batch</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_fn</span><span class="p">(</span><span class="n">expected_output</span><span class="p">,</span> <span class="n">predictions</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

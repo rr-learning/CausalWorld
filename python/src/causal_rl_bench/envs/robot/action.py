@@ -44,11 +44,11 @@ class TriFingerAction(object):
         if self.normalize_actions:
             return spaces.Box(low=-np.ones(len(self.low)),
                               high=np.ones(len(self.high)),
-                              dtype=np.float64)
+                              dtype=np.float32)
         else:
             return spaces.Box(low=self.low,
                               high=self.high,
-                              dtype=np.float64)
+                              dtype=np.float32)
 
     def is_normalized(self):
         return self.normalize_actions

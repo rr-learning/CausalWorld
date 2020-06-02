@@ -1,11 +1,12 @@
 import numpy as np
 import gym
 import pybullet
+import os
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
 from causal_rl_bench.envs.scene.stage import Stage
-from causal_rl_bench.tasks.task import Task
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
+from causal_rl_bench.task_generators.task import task_generator
 
 
 class World(gym.Env):
@@ -13,7 +14,7 @@ class World(gym.Env):
                 'video.frames_per_second': 50}
 
     def __init__(self, task=None, skip_frame=10,
-                 enable_visualization=True, seed=0,
+                 enable_visualization=False, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  normalize_actions=True, normalize_observations=True,
                  max_episode_length=None, data_recorder=None,
@@ -60,24 +61,12 @@ class World(gym.Env):
 
         gym.Env.__init__(self)
         if task is None:
-            self.task = Task()
+            self.task = task_generator("reaching")
         else:
             self.task = task
 
         self.task.init_task(self.robot, self.stage)
-        if not self.observation_mode == "cameras":
-            self.robot.select_observations(self.task.task_robot_observation_keys)
-            self.stage.select_observations(self.task.task_stage_observation_keys)
-            self.observation_space = \
-                combine_spaces(self.robot.get_observation_spaces(),
-                               self.stage.get_observation_spaces())
-        elif self.observation_mode == "cameras" and self.enable_goal_image:
-            self.stage.select_observations(["goal_image"])
-            self.observation_space = combine_spaces(
-                self.robot.get_observation_spaces(),
-                self.stage.get_observation_spaces())
-        else:
-            self.observation_space = self.robot.get_observation_spaces()
+        self.reset_observations_space()
         self.action_space = self.robot.get_action_spaces()
         self.skip_frame = skip_frame
         self.dt = self.simulation_time * self.skip_frame
@@ -87,42 +76,15 @@ class World(gym.Env):
         self._setup_viewing_camera()
 
         self.data_recorder = data_recorder
-        self.tracker = Tracker(task=self.task, world_params=self.get_world_params())
-
+        self.wrappers_dict = dict()
+        self.tracker = Tracker(task=self.task,
+                               world_params=self.get_world_params())
+        self.scale_reward_by_dt = True
+        self.disabled_actions = False
         self.reset()
         return
 
-    def step(self, action):
-        self.episode_length += 1
-        self.robot.apply_action(action)
-        if self.observation_mode == "cameras" and self.enable_goal_image:
-            current_images = self.robot.get_current_camera_observations()
-            goal_images = self.stage.get_current_goal_image()
-            observation = np.concatenate((current_images, goal_images), axis=0)
-        elif self.observation_mode == "cameras":
-            observation = self.robot.get_current_camera_observations()
-        else:
-            observation = self.task.filter_structured_observations()
-        reward = self.task.get_reward() * self.dt
-        done = self._is_done()
-        info = self.task.get_info()
-
-        if self.data_recorder:
-            self.data_recorder.append(robot_action=action,
-                                      observation=observation,
-                                      reward=reward,
-                                      timestamp=self.episode_length *
-                                                self.skip_frame *
-                                                self.simulation_time)
-
-        return observation, reward, done, info
-
-    def sample_new_task(self):
-        raise Exception(" ")
-
-    def switch_task(self, task):
-        self.task = task
-        self.task.init_task(self.robot, self.stage)
+    def reset_observations_space(self):
         if not self.observation_mode == "cameras":
             self.robot.select_observations(self.task.task_robot_observation_keys)
             self.stage.select_observations(self.task.task_stage_observation_keys)
@@ -136,20 +98,64 @@ class World(gym.Env):
                 self.stage.get_observation_spaces())
         else:
             self.observation_space = self.robot.get_observation_spaces()
-        self.action_space = self.robot.get_action_spaces()
+        return
 
-    def get_counterfactual_world(self):
-        raise Exception(" ")
+    def step(self, action):
+        self.episode_length += 1
+        if not self.disabled_actions:
+            self.robot.apply_action(action)
+        if self.observation_mode == "cameras" and self.enable_goal_image:
+            current_images = self.robot.get_current_camera_observations()
+            goal_images = self.stage.get_current_goal_image()
+            observation = np.concatenate((current_images, goal_images),
+                                         axis=0)
+        elif self.observation_mode == "cameras":
+            observation = self.robot.get_current_camera_observations()
+        else:
+            observation = self.task.filter_structured_observations()
+        info = self.task.get_info()
+        reward = self.task.get_reward()
+        if self.scale_reward_by_dt:
+            reward *= self.dt
+        done = self._is_done()
+        if self.data_recorder:
+            self.data_recorder.append(robot_action=action,
+                                      observation=observation,
+                                      reward=reward,
+                                      done=done,
+                                      info=info,
+                                      timestamp=self.episode_length *
+                                                self.skip_frame *
+                                                self.simulation_time)
+
+        return observation, reward, done, info
+
+    def sample_new_goal(self, training=True, level=None):
+        return self.task.sample_new_goal(training, level)
+
+    def disable_actions(self):
+        self.disabled_actions = True
+
+    def add_data_recorder(self, data_recorder):
+        self.data_recorder = data_recorder
 
     def seed(self, seed=None):
         self.np_random, seed = gym.utils.seeding.np_random(seed)
         np.random.seed(seed)
         return [seed]
 
-    def reset(self):
+    def reset(self, interventions_dict=None):
         self.tracker.add_episode_experience(self.episode_length)
         self.episode_length = 0
-        self.task.reset_task()
+        if interventions_dict is not None:
+            self.tracker.do_intervention(self.task, interventions_dict)
+        success_signal, interventions_info, reset_observation_space_signal = \
+            self.task.reset_task(interventions_dict)
+        if reset_observation_space_signal:
+            self.reset_observations_space()
+        if success_signal is not None:
+            if not success_signal:
+                self.tracker.add_invalid_intervention(interventions_info)
         # TODO: make sure that stage observations returned are up to date
 
         if self.data_recorder:
@@ -167,22 +173,6 @@ class World(gym.Env):
         else:
             return self.task.filter_structured_observations()
 
-    def get_world_params(self):
-        world_params = dict()
-        # TODO: task name is probably a redundant parameter as this is not bound to the world and could change
-        world_params["task_name"] = self.task.task_name
-        world_params["skip_frame"] = self.robot.get_skip_frame()
-        world_params["action_mode"] = self.robot.get_action_mode()
-        world_params["observation_mode"] = self.robot.get_observation_mode()
-        world_params["normalize_actions"] = \
-            self.robot.robot_actions.is_normalized()
-        world_params["normalize_observations"] = \
-            self.robot.robot_observations.is_normalized()
-        world_params["max_episode_length"] = self.max_episode_length
-        world_params["enable_goal_image"] = self.enable_goal_image
-        world_params["simulation_time"] = self.simulation_time
-        return world_params
-
     def close(self):
         if self.data_recorder:
             self.data_recorder.save()
@@ -196,24 +186,36 @@ class World(gym.Env):
         self.max_episode_length = episode_length
 
     def _is_done(self):
-        if self.enforce_episode_length and self.episode_length > self.max_episode_length:
+        if self.enforce_episode_length and \
+                self.episode_length > self.max_episode_length:
             return True
         else:
             return self.task.is_done()
 
-    def do_random_intervention(self):
-        self.tracker.add_episode_experience(self.episode_length)
-        # TODO: Set episode length after intervention to zero?
-        self.episode_length = 0
-        self.task.do_random_intervention()
-        self.tracker.do_intervention(self.task)
+    def do_single_random_intervention(self):
+        success_signal, interventions_info, interventions_dict, reset_observation_space_signal = \
+            self.task.do_single_random_intervention()
+        if reset_observation_space_signal:
+            self.reset_observations_space()
+        if len(interventions_dict) > 0:
+            self.tracker.do_intervention(self.task, interventions_dict)
+            if success_signal is not None:
+                if not success_signal:
+                    self.tracker.add_invalid_intervention(interventions_info)
+        return interventions_dict
 
-    def do_intervention(self, **kwargs):
-        self.tracker.add_episode_experience(self.episode_length)
-        # TODO: Set episode length after intervention to zero?
-        self.episode_length = 0
-        self.task.do_intervention(**kwargs)
-        self.tracker.do_intervention(self.task)
+    def do_intervention(self, interventions_dict,
+                        check_bounds=None):
+        success_signal, interventions_info, reset_observation_space_signal = \
+            self.task.do_intervention(interventions_dict,
+                                      check_bounds=check_bounds)
+        self.tracker.do_intervention(self.task, interventions_dict)
+        if reset_observation_space_signal:
+            self.reset_observations_space()
+        if success_signal is not None:
+            if not success_signal:
+                self.tracker.add_invalid_intervention(interventions_info)
+        return success_signal
 
     def get_full_state(self):
         full_state = []
@@ -255,3 +257,38 @@ class World(gym.Env):
         self.proj_matrix = self.pybullet_client.computeProjectionMatrixFOV(
             fov=60, aspect=float(self._render_width) / self._render_height,
             nearVal=0.1, farVal=100.0)
+
+    def get_current_task_parameters(self):
+        return self.task.get_current_task_parameters()
+
+    def get_world_params(self):
+        world_params = dict()
+        world_params["skip_frame"] = self.robot.get_skip_frame()
+        world_params["action_mode"] = self.robot.get_action_mode()
+        world_params["observation_mode"] = self.robot.get_observation_mode()
+        world_params["normalize_actions"] = \
+            self.robot.robot_actions.is_normalized()
+        world_params["normalize_observations"] = \
+            self.robot.robot_observations.is_normalized()
+        world_params["max_episode_length"] = self.max_episode_length
+        world_params["enable_goal_image"] = self.enable_goal_image
+        world_params["simulation_time"] = self.simulation_time
+        world_params["wrappers"] = self.wrappers_dict
+        return world_params
+
+    def add_wrapper_info(self, wrapper_dict):
+        self.wrappers_dict.update(wrapper_dict)
+        return
+
+    def save_world(self, log_relative_path):
+        if not os.path.exists(log_relative_path):
+            os.makedirs(log_relative_path)
+        tracker_path = os.path.join(log_relative_path, 'tracker')
+        tracker = self.get_tracker()
+        tracker.save(file_path=tracker_path)
+        return
+
+    def is_in_training_mode(self):
+        return self.task.is_in_training_mode()
+
+

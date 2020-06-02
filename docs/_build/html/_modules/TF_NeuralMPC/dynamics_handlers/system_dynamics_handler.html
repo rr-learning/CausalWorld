@@ -1,0 +1,533 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tf_neuralmpc.dynamics_handlers.system_dynamics_handler &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/tf_neuralmpc.html">TF-NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tf_neuralmpc.dynamics_handlers.system_dynamics_handler</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tf_neuralmpc.dynamics_handlers.system_dynamics_handler</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">tf_neuralmpc/dynamics_handlers/system_dynamics_handler.py</span>
+<span class="sd">==========================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+
+
+<span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+<span class="k">def</span> <span class="nf">default_transform_targets</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">next_state</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the default transform targets function used, which preprocesses the targets of the network before training the</span>
+<span class="sd">    dynamics function using the inputs and targets. The default one is (target = next_state - current_state).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ---------</span>
+<span class="sd">    current_state: tf.float32</span>
+<span class="sd">        The current_state has a shape of (Batch X dim_S)</span>
+<span class="sd">    next_state: tf.float32</span>
+<span class="sd">        The next_state has a shape of (Batch X dim_S)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">next_state</span> <span class="o">-</span> <span class="n">current_state</span>
+
+
+<span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+<span class="k">def</span> <span class="nf">default_inverse_transform_targets</span><span class="p">(</span><span class="n">current_state</span><span class="p">,</span> <span class="n">delta</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is the default inverse transform targets function used, which reverses the preprocessing of  the targets of</span>
+<span class="sd">    the dynamics function to obtain the real current_state not the relative one,</span>
+<span class="sd">    The default one is (current_state = target + current_state).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ---------</span>
+<span class="sd">    current_state: tf.float32</span>
+<span class="sd">        The current_state has a shape of (Batch X dim_S)</span>
+<span class="sd">    delta: tf.float32</span>
+<span class="sd">        The delta has a shape of (Batch X dim_S) which is equivilant to the target of the network.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">delta</span> <span class="o">+</span> <span class="n">current_state</span>
+
+
+<div class="viewcode-block" id="SystemDynamicsHandler"><a class="viewcode-back" href="../../../modules/dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler">[docs]</a><span class="k">class</span> <span class="nc">SystemDynamicsHandler</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the system dynamics handler class that is reponsible for training the dynamics functions</span>
+<span class="sd">    , storing the rollouts as well as prepocessing and postprocessing of the MDP elements&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SystemDynamicsHandler.__init__"><a class="viewcode-back" href="../../../modules/dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dim_O</span><span class="p">,</span> <span class="n">dim_U</span><span class="p">,</span> <span class="n">dynamics_function</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">num_of_agents</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">log_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">tf_writer</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">saved_model_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">transform_targets_func</span><span class="o">=</span><span class="n">default_transform_targets</span><span class="p">,</span>
+                 <span class="n">inverse_transform_targets_func</span><span class="o">=</span><span class="n">default_inverse_transform_targets</span><span class="p">,</span>
+                 <span class="n">save_model_frequency</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">load_saved_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">true_model</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">normalization</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the initializer function for the system dynamics handler class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dynamics_function: DeterministicDynamicsFunctionBaseClass</span>
+<span class="sd">            Defines the system dynamics function.</span>
+<span class="sd">        dim_U: tf.int32</span>
+<span class="sd">            Defines the dimensions of the input/ action space.</span>
+<span class="sd">        dim_O: tf.int32</span>
+<span class="sd">            Defines the dimensions of the observations space.</span>
+<span class="sd">        tf_writer: tf.summary</span>
+<span class="sd">            Defines a tensorflow writer to be used for logging</span>
+<span class="sd">        log_dir: string</span>
+<span class="sd">            Defines the log directory to save the normalization statistics in.</span>
+<span class="sd">        saved_model_dir: string</span>
+<span class="sd">            Defines the saved model directory where the model is saved in, in case of loading the model.</span>
+<span class="sd">        num_of_agents: Int</span>
+<span class="sd">            Defines the number of runner running in parallel</span>
+<span class="sd">        dynamics_function: DeterministicDynamicsFunctionBase</span>
+<span class="sd">            Defines the dynamics_function of the nn dynamics function itself</span>
+<span class="sd">        transform_targets_func: tf_function</span>
+<span class="sd">            Defines a tf function to transform the next states as targets (output of the nn dynamics), by default</span>
+<span class="sd">            this is the deviation function which is (target = next_state - current_state).</span>
+<span class="sd">        inverse_transform_targets_func: tf_function</span>
+<span class="sd">            Defines a tf function to inverse transform the targets (output of the nn dynamics), by default</span>
+<span class="sd">            this is the inverse of the deviation function which is (next_state = target + current_state).</span>
+<span class="sd">        save_model_frequency: Int</span>
+<span class="sd">            Defines how often the model should be saved (defined relative to the number of refining iters)</span>
+<span class="sd">        load_saved_model: bool</span>
+<span class="sd">            Defines if a model should be loaded or not.</span>
+<span class="sd">        true_model: bool</span>
+<span class="sd">            Defines if the dynamics function is a non trainable model or not.</span>
+<span class="sd">        normalization: bool</span>
+<span class="sd">            Defines if the dynamics function should be trained with normalization or not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span> <span class="o">=</span> <span class="n">num_of_agents</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">is_true_model</span> <span class="o">=</span> <span class="n">true_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span> <span class="o">=</span> <span class="n">dim_O</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span> <span class="o">=</span> <span class="n">dim_U</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span> <span class="o">=</span> <span class="n">dynamics_function</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_model_frequency</span> <span class="o">=</span> <span class="n">save_model_frequency</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">=</span> <span class="n">log_dir</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tf_writer</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">create_file_writer</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span> <span class="o">=</span> <span class="n">tf_writer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">load_saved_model</span> <span class="o">=</span> <span class="n">load_saved_model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="o">=</span> <span class="n">saved_model_dir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span> <span class="o">=</span> <span class="n">normalization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">transform_targets</span> <span class="o">=</span> <span class="n">transform_targets_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transform_targets</span> <span class="o">=</span> <span class="n">inverse_transform_targets_func</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_validation_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_training_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_validation_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_iter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refining_model_iter</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">first_time</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_saved_model</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading the saved model now....&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;you need to provide a saved model dir&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span><span class="p">)</span>
+            <span class="c1">#load the stats and set first time to false</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">first_time</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mean_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="o">+</span> <span class="s1">&#39;/mean_states.npy&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">std_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="o">+</span> <span class="s1">&#39;/std_states.npy&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mean_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="o">+</span> <span class="s1">&#39;/mean_actions.npy&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">std_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="o">+</span> <span class="s1">&#39;/std_actions.npy&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">mean_targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="o">+</span> <span class="s1">&#39;/mean_targets.npy&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">std_targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">saved_model_dir</span> <span class="o">+</span> <span class="s1">&#39;/std_targets.npy&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SystemDynamicsHandler.process_input"><a class="viewcode-back" href="../../../modules/dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.process_input">[docs]</a>    <span class="k">def</span> <span class="nf">process_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the process_input function, which takes in the states and actions and preprocesses them for the dynamics</span>
+<span class="sd">        function, (normalization..etc)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        states: tf.float32</span>
+<span class="sd">            The current states has a shape of (Batch Xdim_S)</span>
+<span class="sd">        actions: tf.float32</span>
+<span class="sd">            The current actions has a shape of (Batch Xdim_U)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result: tf.float32</span>
+<span class="sd">            concatenated states and actions after preprocessing them.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_true_model</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">states</span><span class="p">,</span> <span class="n">actions</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_input</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">actions</span><span class="p">)</span></div>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_process_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">states</span><span class="p">,</span> <span class="n">actions</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">:</span>
+            <span class="n">new_states</span> <span class="o">=</span> <span class="p">(</span><span class="n">states</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_states</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_states</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+            <span class="n">new_actions</span> <span class="o">=</span> <span class="p">(</span><span class="n">actions</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_actions</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_actions</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">new_states</span><span class="p">,</span> <span class="n">new_actions</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">tf</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">states</span><span class="p">,</span> <span class="n">actions</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+
+<div class="viewcode-block" id="SystemDynamicsHandler.process_state_output"><a class="viewcode-back" href="../../../modules/dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.process_state_output">[docs]</a>    <span class="k">def</span> <span class="nf">process_state_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_states</span><span class="p">,</span> <span class="n">normalized_states_deviation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the process_state_output function, which takes in the previous states predicted target/delta and processes</span>
+<span class="sd">        them to get the predicted absolute next state.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        old_states: tf.float32</span>
+<span class="sd">            The previous states has a shape of (Batch Xdim_S)</span>
+<span class="sd">        normalized_states_deviation: tf.float32</span>
+<span class="sd">            The predicted normalized delta as received from the dynamics function has a shape of (Batch Xdim_U).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        result: tf.float32</span>
+<span class="sd">            absolute predicted next state.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_true_model</span><span class="p">:</span>
+            <span class="n">new_states_transformed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transform_targets</span><span class="p">(</span><span class="n">old_states</span><span class="p">,</span> <span class="n">normalized_states_deviation</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">new_states_transformed</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_state_output</span><span class="p">(</span><span class="n">old_states</span><span class="p">,</span> <span class="n">normalized_states_deviation</span><span class="p">)</span></div>
+
+    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">_process_state_output</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old_states</span><span class="p">,</span> <span class="n">normalized_states_deviation</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">:</span>
+            <span class="n">new_states_deviation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_targets</span> <span class="o">+</span> <span class="p">(</span><span class="n">normalized_states_deviation</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_targets</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_states_deviation</span> <span class="o">=</span> <span class="n">normalized_states_deviation</span>
+        <span class="n">new_states</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_transform_targets</span><span class="p">(</span><span class="n">old_states</span><span class="p">,</span> <span class="n">new_states_deviation</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_states</span>
+
+<div class="viewcode-block" id="SystemDynamicsHandler.train"><a class="viewcode-back" href="../../../modules/dynamics_handlers/dynamics_handlers.html#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.train">[docs]</a>    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations_trajectories</span><span class="p">,</span> <span class="n">actions_trajectories</span><span class="p">,</span>
+              <span class="n">rewards_trajectories</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span>
+              <span class="n">batch_size</span><span class="o">=</span><span class="mi">128</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+              <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the train function, which takes in the data of the MDP to train the dynamics model on it.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        observations_trajectories: [np.float32]</span>
+<span class="sd">            A list of observations of each of the episodes for the n agents.</span>
+<span class="sd">        actions_trajectories: [np.float32]</span>
+<span class="sd">            A list of actions of each of the episodes for the n agents.</span>
+<span class="sd">        rewards_trajectories: [np.float32]</span>
+<span class="sd">            A list of rewards of each of the episodes for the n agents.</span>
+<span class="sd">        learning_rate: float</span>
+<span class="sd">            Learning rate to be used in training the dynamics function.</span>
+<span class="sd">        epochs: Int</span>
+<span class="sd">            Number of epochs to be used in training the dynamics function everytime train is called.</span>
+<span class="sd">        validation_split: float32</span>
+<span class="sd">            Defines the validation split to be used of the rollouts collected.</span>
+<span class="sd">        batch_size: int</span>
+<span class="sd">            Defines the batch size to be used for training the model.</span>
+<span class="sd">        nn_optimizer: tf.keras.optimizers</span>
+<span class="sd">            Defines the optimizer to use with the neural network.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_append_to_training_dataset</span><span class="p">(</span><span class="n">observations_trajectories</span><span class="p">,</span> <span class="n">actions_trajectories</span><span class="p">,</span>
+                                         <span class="n">rewards_trajectories</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="n">validation_split</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">first_time</span><span class="p">:</span> <span class="c1">#TODO: for some reason this is needed</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalization</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_compute_normalization</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_time</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">first_time</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">model_training_in</span><span class="p">,</span> <span class="n">model_training_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_training_out</span><span class="p">)</span>
+        <span class="n">train_dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">((</span><span class="n">model_training_in</span><span class="p">,</span>
+                                                            <span class="n">model_training_out</span><span class="p">))</span><span class="o">.</span>\
+            <span class="n">shuffle</span><span class="p">(</span><span class="n">model_training_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model_validation_in</span><span class="p">,</span> <span class="n">model_validation_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_data</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_validation_in</span><span class="p">,</span>
+                                                                         <span class="bp">self</span><span class="o">.</span><span class="n">model_validation_out</span><span class="p">)</span>
+        <span class="n">validation_dataset</span> <span class="o">=</span> <span class="n">tf</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="o">.</span><span class="n">from_tensor_slices</span><span class="p">((</span><span class="n">model_validation_in</span><span class="p">,</span>
+                                                                 <span class="n">model_validation_out</span><span class="p">))</span><span class="o">.</span>\
+            <span class="n">batch</span><span class="p">(</span><span class="n">batch_size</span><span class="p">,</span> <span class="n">drop_remainder</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Started the system training&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_training_algorithm</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">validation_dataset</span><span class="p">,</span>
+                                 <span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="n">epochs</span><span class="p">,</span>
+                                 <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">nn_optimizer</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">training_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1">#TODO: just commented for now because of a bug in TF 2.0.0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">training_iter</span><span class="o">%</span><span class="bp">self</span><span class="o">.</span><span class="n">save_model_frequency</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Saving the model now....&quot;</span><span class="p">)</span>
+            <span class="n">call</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span><span class="o">.</span><span class="fm">__call__</span><span class="o">.</span><span class="n">get_concrete_function</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">TensorSpec</span><span class="p">([</span><span class="kc">None</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">],</span>
+                                                                                    <span class="n">tf</span><span class="o">.</span><span class="n">float32</span><span class="p">),</span>
+                                                                         <span class="n">tf</span><span class="o">.</span><span class="n">TensorSpec</span><span class="p">([],</span>
+                                                                                       <span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">)</span>
+                                                                         <span class="p">)</span>
+            <span class="n">tf</span><span class="o">.</span><span class="n">saved_model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s1">&#39;/saved_model/&#39;</span><span class="p">,</span> <span class="n">signatures</span><span class="o">=</span><span class="n">call</span><span class="p">)</span>
+            <span class="c1">#save the means and std devs</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s2">&quot;/saved_model/mean_states&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_states</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s2">&quot;/saved_model/std_states&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_states</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s2">&quot;/saved_model/mean_actions&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_actions</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s2">&quot;/saved_model/std_actions&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_actions</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s2">&quot;/saved_model/mean_targets&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_targets</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">log_dir</span> <span class="o">+</span> <span class="s2">&quot;/saved_model/std_targets&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">std_targets</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+    <span class="k">def</span> <span class="nf">_training_algorithm</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">train_dataset</span><span class="p">,</span> <span class="n">validation_dataset</span><span class="p">,</span>
+                            <span class="n">learning_rate</span><span class="o">=</span><span class="mf">1e-3</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span>
+                            <span class="n">nn_optimizer</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">keras</span><span class="o">.</span><span class="n">optimizers</span><span class="o">.</span><span class="n">Adam</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the train_model function for the dynamics trainer base class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        train_dataset: tf.data.Dataset</span>
+<span class="sd">            training dataset that is composed of (input, expected_output) after processing.</span>
+<span class="sd">        validation_dataset: tf.data.Dataset</span>
+<span class="sd">            validation dataset that is composed of (input, expected_output) after processing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">optimizer</span> <span class="o">=</span> <span class="n">nn_optimizer</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="n">learning_rate</span><span class="p">)</span>
+        <span class="n">training_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+        <span class="n">validation_loss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">epochs</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">epochs</span><span class="p">):</span>  <span class="c1"># run through epochs</span>
+            <span class="n">average_loss</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">number_of_batches</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">train_dataset</span><span class="p">:</span>
+                <span class="n">number_of_batches</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">with</span> <span class="n">tf</span><span class="o">.</span><span class="n">GradientTape</span><span class="p">()</span> <span class="k">as</span> <span class="n">tape</span><span class="p">:</span>
+                    <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">))</span>
+                    <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span><span class="o">.</span><span class="n">get_loss</span><span class="p">(</span><span class="n">expected_output</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">predictions</span><span class="o">=</span><span class="n">prediction</span><span class="p">)</span>
+                    <span class="n">average_loss</span> <span class="o">+=</span> <span class="n">loss</span>
+                <span class="n">trainable_variables</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">watched_variables</span><span class="p">()</span>
+                <span class="n">gradients</span> <span class="o">=</span> <span class="n">tape</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">loss</span><span class="p">,</span> <span class="n">trainable_variables</span><span class="p">)</span>
+                <span class="n">optimizer</span><span class="o">.</span><span class="n">apply_gradients</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">gradients</span><span class="p">,</span> <span class="n">trainable_variables</span><span class="p">))</span>
+
+            <span class="n">training_loss</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">average_loss</span> <span class="o">/</span> <span class="n">number_of_batches</span>
+            <span class="n">average_loss</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">number_of_batches</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">validation_dataset</span><span class="p">:</span>
+                <span class="n">number_of_batches</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">train</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">constant</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">bool</span><span class="p">))</span>
+                <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dynamics_function</span><span class="o">.</span><span class="n">get_validation_loss</span><span class="p">(</span><span class="n">expected_output</span><span class="o">=</span><span class="n">y</span><span class="p">,</span> <span class="n">predictions</span><span class="o">=</span><span class="n">prediction</span><span class="p">)</span>
+                <span class="n">average_loss</span> <span class="o">+=</span> <span class="n">loss</span>
+            <span class="n">validation_loss</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">average_loss</span> <span class="o">/</span> <span class="n">number_of_batches</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">tf_writer</span><span class="o">.</span><span class="n">as_default</span><span class="p">():</span>
+                    <span class="n">tf</span><span class="o">.</span><span class="n">summary</span><span class="o">.</span><span class="n">scalar</span><span class="p">(</span><span class="s1">&#39;system_model_val/loss&#39;</span><span class="p">,</span> <span class="n">validation_loss</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                                      <span class="n">step</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">refining_model_iter</span> <span class="o">*</span> <span class="n">epochs</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">refining_model_iter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_append_to_training_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observations_trajectories</span><span class="p">,</span> <span class="n">actions_trajectories</span><span class="p">,</span>
+                                    <span class="n">rewards_trajectories</span><span class="p">,</span> <span class="n">validation_split</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>
+        <span class="n">new_data_in</span><span class="p">,</span> <span class="n">new_data_targs</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">obs</span><span class="p">,</span> <span class="n">acs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">observations_trajectories</span><span class="p">,</span> <span class="n">actions_trajectories</span><span class="p">):</span>
+            <span class="c1">#switch number of runner with traj length</span>
+            <span class="k">for</span> <span class="n">agent</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">num_of_agents</span><span class="p">):</span>
+                <span class="n">states</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">agent</span><span class="p">]</span>
+                <span class="n">actions</span> <span class="o">=</span> <span class="n">acs</span><span class="p">[:,</span> <span class="n">agent</span><span class="p">]</span>
+                <span class="n">new_data_in</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">states</span><span class="p">,</span> <span class="n">actions</span><span class="p">],</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">next_states</span> <span class="o">=</span> <span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">:,</span> <span class="n">agent</span><span class="p">]</span>
+                <span class="n">new_data_targs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">transform_targets</span><span class="p">(</span><span class="n">states</span><span class="p">,</span> <span class="n">next_states</span><span class="p">)</span><span class="o">.</span><span class="n">numpy</span><span class="p">())</span>
+        <span class="c1">#now split data into val and train</span>
+        <span class="n">new_data_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_data_in</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_U</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">)</span>
+        <span class="n">new_data_targs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">new_data_targs</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">)</span>
+        <span class="n">training_indicies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">],</span>
+                                             <span class="n">size</span><span class="o">=</span><span class="n">new_data_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="n">validation_split</span><span class="p">,</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">validation_split</span><span class="p">])</span>
+        <span class="n">new_train_in</span> <span class="o">=</span> <span class="n">new_data_in</span><span class="p">[</span><span class="n">training_indicies</span><span class="p">]</span>
+        <span class="n">new_train_targs</span> <span class="o">=</span> <span class="n">new_data_targs</span><span class="p">[</span><span class="n">training_indicies</span><span class="p">]</span>
+        <span class="n">new_validation_in</span> <span class="o">=</span> <span class="n">new_data_in</span><span class="p">[</span><span class="o">~</span><span class="n">training_indicies</span><span class="p">]</span>
+        <span class="n">new_validation_targs</span> <span class="o">=</span> <span class="n">new_data_targs</span><span class="p">[</span><span class="o">~</span><span class="n">training_indicies</span><span class="p">]</span>
+        <span class="n">N_train</span> <span class="o">=</span> <span class="n">new_train_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">N_val</span> <span class="o">=</span> <span class="n">new_validation_in</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span><span class="p">,</span> <span class="n">new_train_in</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_training_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_out</span><span class="p">,</span> <span class="n">new_train_targs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_validation_in</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">model_validation_in</span><span class="p">,</span> <span class="n">new_validation_in</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model_validation_out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">model_validation_out</span><span class="p">,</span> <span class="n">new_validation_targs</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_normalize_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_in</span><span class="p">,</span> <span class="n">data_out</span><span class="p">):</span>
+        <span class="n">states_normalized</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_in</span><span class="p">[:,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_states</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_states</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+        <span class="n">actions_normalized</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_in</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">:]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_actions</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_actions</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+        <span class="n">targets_normalized</span> <span class="o">=</span> <span class="p">(</span><span class="n">data_out</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean_targets</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">std_targets</span> <span class="o">+</span> <span class="mf">1e-7</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">states_normalized</span><span class="p">,</span> <span class="n">actions_normalized</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span> <span class="n">targets_normalized</span>
+
+    <span class="k">def</span> <span class="nf">_compute_normalization</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span><span class="p">[:,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_states</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span><span class="p">[:,</span> <span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_actions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_in</span><span class="p">[:,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dim_O</span><span class="p">:],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mean_targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_out</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">std_targets</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model_training_out</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

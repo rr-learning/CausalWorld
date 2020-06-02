@@ -1,4 +1,4 @@
-from causal_rl_bench.tasks.task import Task
+from causal_rl_bench.task_generators.task import task_generator
 import causal_rl_bench.viewers.task_viewer as viewer
 from causal_rl_bench.loggers.data_loader import DataLoader
 
@@ -6,7 +6,7 @@ from causal_rl_bench.loggers.data_loader import DataLoader
 def example():
     # This tutorial shows how to view a random policy on the pyramid task
 
-    task = Task(task_id='pyramid')
+    task = task_generator(task_generator_id='pyramid')
     world_params = dict()
     world_params["skip_frame"] = 3
     world_params["seed"] = 200

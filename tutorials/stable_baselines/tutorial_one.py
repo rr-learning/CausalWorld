@@ -1,23 +1,26 @@
-import tensorflow as tf
-from stable_baselines.common import set_global_seeds
-from stable_baselines.common.vec_env import SubprocVecEnv
+from causal_rl_bench.task_generators.task import task_generator
+from causal_rl_bench.envs.world import World
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
-from causal_rl_bench.envs.world import World
-from causal_rl_bench.tasks.task import Task
-import argparse
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import os
 import json
+from stable_baselines.common import set_global_seeds
+from stable_baselines.common.vec_env import SubprocVecEnv
+import argparse
 
 
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
-                 skip_frame, seed_num, ppo_config, total_time_steps, validate_every_timesteps, task_name):
+                 skip_frame, seed_num, ppo_config, total_time_steps,
+                 validate_every_timesteps, task_name):
     def _make_env(rank):
         def _init():
-            task = Task(task_id=task_name)
+            task = task_generator(task_generator_id=task_name)
             env = World(task=task, skip_frame=skip_frame,
                         enable_visualization=False,
-                        seed=seed_num + rank, max_episode_length=maximum_episode_length)
+                        seed=seed_num + rank, max_episode_length=
+                        maximum_episode_length)
             return env
 
         set_global_seeds(seed_num)
@@ -25,9 +28,11 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
     os.makedirs(log_relative_path)
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
     env = SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
-    model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
+    model = PPO2(MlpPolicy, env, _init_setup_model=True,
+                 policy_kwargs=policy_kwargs,
                  verbose=1, **ppo_config)
-    save_config_file(ppo_config, _make_env(0)(), os.path.join(log_relative_path, 'config.json'))
+    save_config_file(ppo_config, _make_env(0)(),
+                     os.path.join(log_relative_path, 'config.json'))
     for i in range(int(total_time_steps / validate_every_timesteps)):
         model.learn(total_timesteps=validate_every_timesteps,
                     tb_log_name="ppo2",
@@ -38,6 +43,9 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
 
 def save_config_file(ppo_config, env, file_path):
     task_config = env.task.get_task_params()
+    for task_param in task_config:
+        if not isinstance(task_config[task_param], str):
+            task_config[task_param] = str(task_config[task_param])
     env_config = env.get_world_params()
     env.close()
     configs_to_save = [task_config, env_config, ppo_config]
@@ -59,7 +67,9 @@ if __name__ == '__main__':
     ap.add_argument("--num_of_envs", required=False,
                     default=30, help="number of parallel environments")
     ap.add_argument("--task_name", required=False,
-                    default="pushing", help="the task nam for training")
+                    default="reaching", help="the task nam for training")
+    ap.add_argument("--fixed_position", required=False,
+                    default=True, help="define the reset intervention wrapper")
     ap.add_argument("--log_relative_path", required=True,
                     help="log folder")
     args = vars(ap.parse_args())
@@ -70,6 +80,7 @@ if __name__ == '__main__':
     skip_frame = int(args['skip_frame'])
     seed_num = int(args['seed_num'])
     task_name = str(args['task_name'])
+    fixed_position = bool(args['fixed_position'])
     assert (((float(total_time_steps_per_update) /
              num_of_envs)/5).is_integer())
     ppo_config = {"gamma": 0.9988,

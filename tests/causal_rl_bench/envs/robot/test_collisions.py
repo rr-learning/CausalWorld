@@ -8,7 +8,7 @@ import unittest
 
 class CrossReferenceWPybulletFingers(unittest.TestCase):
     def setUp(self):
-        task = Task(task_id='picking', randomize_joint_positions=False,
+        task = Task(task_generator_id='picking', randomize_joint_positions=False,
                     randomize_block_pose=False, block_mass=0.02,
                     goal_height=0.0425)
         self.causal_rl_env = World(task=task,

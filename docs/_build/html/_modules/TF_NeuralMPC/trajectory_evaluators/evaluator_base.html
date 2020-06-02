@@ -1,0 +1,273 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>tf_neuralmpc.trajectory_evaluators.evaluator_base &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/tf_neuralmpc.html">TF-NeuralMPC</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>tf_neuralmpc.trajectory_evaluators.evaluator_base</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for tf_neuralmpc.trajectory_evaluators.evaluator_base</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">tf_neuralmpc/trajectory_evaluator/evaluator_base.py</span>
+<span class="sd">===================================================</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+
+
+<div class="viewcode-block" id="EvaluatorBase"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.EvaluatorBase">[docs]</a><span class="k">class</span> <span class="nc">EvaluatorBase</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the base class of the trajectory evaluators&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="EvaluatorBase.__init__"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.EvaluatorBase.__init__">[docs]</a>    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This is the initializer function for the Evaluator Base Class.</span>
+
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+<span class="sd">        name: String</span>
+<span class="sd">            Defines the name of the block of the evaluator.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EvaluatorBase</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EvaluatorBase.__call__"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.EvaluatorBase.__call__">[docs]</a>    <span class="nd">@tf</span><span class="o">.</span><span class="n">function</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_states</span><span class="p">,</span> <span class="n">action_sequences</span><span class="p">,</span> <span class="n">time_step</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This is the call function for the Evaluator Base Class.</span>
+<span class="sd">          It is used to calculate the rewards corresponding to each of the action sequences starting</span>
+<span class="sd">          from the current state.</span>
+
+<span class="sd">          Parameters</span>
+<span class="sd">          ---------</span>
+<span class="sd">          current_state: tf.float32</span>
+<span class="sd">              Defines the current state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          action_sequences: tf.float32</span>
+<span class="sd">             Defines the action sequences to be evaluated, (dims = population X num_of_agents X planning_horizon X dim_U)</span>
+<span class="sd">          time_step: tf.float32</span>
+<span class="sd">              Defines the current timestep of the episode.</span>
+
+
+<span class="sd">          Returns</span>
+<span class="sd">          -------</span>
+<span class="sd">          rewards: tf.float32</span>
+<span class="sd">              The rewards corresponding to each action sequence (dims = 1 X population)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;__call__ function is not implemented yet&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EvaluatorBase.predict_next_state"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.EvaluatorBase.predict_next_state">[docs]</a>    <span class="k">def</span> <span class="nf">predict_next_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_state</span><span class="p">,</span> <span class="n">current_action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This is the function used to predict the next state using the internal dynamics handler.</span>
+
+<span class="sd">          Parameters</span>
+<span class="sd">          ---------</span>
+<span class="sd">          current_state: tf.float32</span>
+<span class="sd">              Defines the current state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          current_action: tf.float32</span>
+<span class="sd">             Defines the current action to be applied, (dims = num_of_agents X dim_U)</span>
+
+
+<span class="sd">          Returns</span>
+<span class="sd">          -------</span>
+<span class="sd">          next_state: tf.float32</span>
+<span class="sd">              Defines the next state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;predict_next_state function is not implemented yet&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="EvaluatorBase.evaluate_next_reward"><a class="viewcode-back" href="../../../modules/trajectory_evaluators/trajectory_evaluators.html#tf_neuralmpc.trajectory_evaluators.EvaluatorBase.evaluate_next_reward">[docs]</a>    <span class="k">def</span> <span class="nf">evaluate_next_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">current_state</span><span class="p">,</span> <span class="n">next_state</span><span class="p">,</span> <span class="n">current_action</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">          This is the function used to predict the next reward using the internal dynamics handler.</span>
+
+<span class="sd">          Parameters</span>
+<span class="sd">          ---------</span>
+<span class="sd">          current_state: tf.float32</span>
+<span class="sd">              Defines the current state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          next_state: tf.float32</span>
+<span class="sd">              Defines the next state of the system, (dims=num_of_agents X dim_S)</span>
+<span class="sd">          current_action: tf.float32</span>
+<span class="sd">             Defines the current action to be applied, (dims = num_of_agents X dim_U)</span>
+
+
+<span class="sd">          Returns</span>
+<span class="sd">          -------</span>
+<span class="sd">          reward: tf.float32</span>
+<span class="sd">              returns the predicted reward using the action, current state and the next one,</span>
+<span class="sd">              (dims=num_of_agents X 1)</span>
+<span class="sd">          &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;evaluate_next_reward function is not implemented yet&quot;</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

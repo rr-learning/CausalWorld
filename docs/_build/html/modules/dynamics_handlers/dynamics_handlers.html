@@ -1,0 +1,323 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Dynamics Handlers &mdash; tf_neuralmpc 1.0.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Trajectory Evaluators" href="../trajectory_evaluators/trajectory_evaluators.html" />
+    <link rel="prev" title="Dynamics Functions" href="../dynamics_functions/dynamics_functions.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> tf_neuralmpc
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../tf_neuralmpc.html">TF-NeuralMPC</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../runner/runner.html">Runners</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../optimizers/optimizers.html">Optimizers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../policies/policies.html">Policies</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../dynamics_functions/dynamics_functions.html">Dynamics Functions</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Dynamics Handlers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Dynamics Handlers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../trajectory_evaluators/trajectory_evaluators.html">Trajectory Evaluators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../environment_utils/environment_utils.html">Environment Utils</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">tf_neuralmpc</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../tf_neuralmpc.html">TF-NeuralMPC</a> &raquo;</li>
+        
+      <li>Dynamics Handlers</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/modules/dynamics_handlers/dynamics_handlers.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-tf_neuralmpc.dynamics_handlers">
+<span id="dynamics-handlers"></span><h1>Dynamics Handlers<a class="headerlink" href="#module-tf_neuralmpc.dynamics_handlers" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="id1">
+<h2>Dynamics Handlers<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler">
+<em class="property">class </em><code class="sig-prename descclassname">tf_neuralmpc.dynamics_handlers.</code><code class="sig-name descname">SystemDynamicsHandler</code><span class="sig-paren">(</span><em class="sig-param">dim_O</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">num_of_agents=1</em>, <em class="sig-param">log_dir=None</em>, <em class="sig-param">tf_writer=None</em>, <em class="sig-param">saved_model_dir=None</em>, <em class="sig-param">transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">inverse_transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">save_model_frequency=1</em>, <em class="sig-param">load_saved_model=False</em>, <em class="sig-param">true_model=False</em>, <em class="sig-param">normalization=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the system dynamics handler class that is reponsible for training the dynamics functions
+, storing the rollouts as well as prepocessing and postprocessing of the MDP elements</p>
+<dl class="method">
+<dt id="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.__init__">
+<code class="sig-name descname">__init__</code><span class="sig-paren">(</span><em class="sig-param">dim_O</em>, <em class="sig-param">dim_U</em>, <em class="sig-param">dynamics_function=None</em>, <em class="sig-param">num_of_agents=1</em>, <em class="sig-param">log_dir=None</em>, <em class="sig-param">tf_writer=None</em>, <em class="sig-param">saved_model_dir=None</em>, <em class="sig-param">transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">inverse_transform_targets_func=&lt;tensorflow.python.eager.def_function.Function object&gt;</em>, <em class="sig-param">save_model_frequency=1</em>, <em class="sig-param">load_saved_model=False</em>, <em class="sig-param">true_model=False</em>, <em class="sig-param">normalization=True</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.__init__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the initializer function for the system dynamics handler class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dynamics_function</strong> (<a class="reference internal" href="../dynamics_functions/dynamics_functions.html#tf_neuralmpc.dynamics_functions.DeterministicDynamicsFunctionBase" title="tf_neuralmpc.dynamics_functions.DeterministicDynamicsFunctionBase"><em>DeterministicDynamicsFunctionBase</em></a>) -- Defines the system dynamics function.</p></li>
+<li><p><strong>dim_U</strong> (<em>tf.int32</em>) -- Defines the dimensions of the input/ action space.</p></li>
+<li><p><strong>dim_O</strong> (<em>tf.int32</em>) -- Defines the dimensions of the observations space.</p></li>
+<li><p><strong>tf_writer</strong> (<em>tf.summary</em>) -- Defines a tensorflow writer to be used for logging</p></li>
+<li><p><strong>log_dir</strong> (<em>string</em>) -- Defines the log directory to save the normalization statistics in.</p></li>
+<li><p><strong>saved_model_dir</strong> (<em>string</em>) -- Defines the saved model directory where the model is saved in, in case of loading the model.</p></li>
+<li><p><strong>num_of_agents</strong> (<em>Int</em>) -- Defines the number of runner running in parallel</p></li>
+<li><p><strong>dynamics_function</strong> -- Defines the dynamics_function of the nn dynamics function itself</p></li>
+<li><p><strong>transform_targets_func</strong> (<em>tf_function</em>) -- Defines a tf function to transform the next states as targets (output of the nn dynamics), by default
+this is the deviation function which is (target = next_state - current_state).</p></li>
+<li><p><strong>inverse_transform_targets_func</strong> (<em>tf_function</em>) -- Defines a tf function to inverse transform the targets (output of the nn dynamics), by default
+this is the inverse of the deviation function which is (next_state = target + current_state).</p></li>
+<li><p><strong>save_model_frequency</strong> (<em>Int</em>) -- Defines how often the model should be saved (defined relative to the number of refining iters)</p></li>
+<li><p><strong>load_saved_model</strong> (<em>bool</em>) -- Defines if a model should be loaded or not.</p></li>
+<li><p><strong>true_model</strong> (<em>bool</em>) -- Defines if the dynamics function is a non trainable model or not.</p></li>
+<li><p><strong>normalization</strong> (<em>bool</em>) -- Defines if the dynamics function should be trained with normalization or not.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.__weakref__">
+<code class="sig-name descname">__weakref__</code><a class="headerlink" href="#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.__weakref__" title="Permalink to this definition">¶</a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.process_input">
+<code class="sig-name descname">process_input</code><span class="sig-paren">(</span><em class="sig-param">states</em>, <em class="sig-param">actions</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.process_input"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.process_input" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the process_input function, which takes in the states and actions and preprocesses them for the dynamics
+function, (normalization..etc)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>states</strong> (<em>tf.float32</em>) -- The current states has a shape of (Batch Xdim_S)</p></li>
+<li><p><strong>actions</strong> (<em>tf.float32</em>) -- The current actions has a shape of (Batch Xdim_U)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>result</strong> -- concatenated states and actions after preprocessing them.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.process_state_output">
+<code class="sig-name descname">process_state_output</code><span class="sig-paren">(</span><em class="sig-param">old_states</em>, <em class="sig-param">normalized_states_deviation</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.process_state_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.process_state_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the process_state_output function, which takes in the previous states predicted target/delta and processes
+them to get the predicted absolute next state.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>old_states</strong> (<em>tf.float32</em>) -- The previous states has a shape of (Batch Xdim_S)</p></li>
+<li><p><strong>normalized_states_deviation</strong> (<em>tf.float32</em>) -- The predicted normalized delta as received from the dynamics function has a shape of (Batch Xdim_U).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>result</strong> -- absolute predicted next state.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>tf.float32</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.train">
+<code class="sig-name descname">train</code><span class="sig-paren">(</span><em class="sig-param">observations_trajectories</em>, <em class="sig-param">actions_trajectories</em>, <em class="sig-param">rewards_trajectories</em>, <em class="sig-param">validation_split=0.2</em>, <em class="sig-param">batch_size=128</em>, <em class="sig-param">learning_rate=0.001</em>, <em class="sig-param">epochs=30</em>, <em class="sig-param">nn_optimizer=&lt;class 'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;</em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/tf_neuralmpc/dynamics_handlers/system_dynamics_handler.html#SystemDynamicsHandler.train"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tf_neuralmpc.dynamics_handlers.SystemDynamicsHandler.train" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is the train function, which takes in the data of the MDP to train the dynamics model on it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>observations_trajectories</strong> (<em>[</em><em>np.float32</em><em>]</em>) -- A list of observations of each of the episodes for the n agents.</p></li>
+<li><p><strong>actions_trajectories</strong> (<em>[</em><em>np.float32</em><em>]</em>) -- A list of actions of each of the episodes for the n agents.</p></li>
+<li><p><strong>rewards_trajectories</strong> (<em>[</em><em>np.float32</em><em>]</em>) -- A list of rewards of each of the episodes for the n agents.</p></li>
+<li><p><strong>learning_rate</strong> (<em>float</em>) -- Learning rate to be used in training the dynamics function.</p></li>
+<li><p><strong>epochs</strong> (<em>Int</em>) -- Number of epochs to be used in training the dynamics function everytime train is called.</p></li>
+<li><p><strong>validation_split</strong> (<em>float32</em>) -- Defines the validation split to be used of the rollouts collected.</p></li>
+<li><p><strong>batch_size</strong> (<em>int</em>) -- Defines the batch size to be used for training the model.</p></li>
+<li><p><strong>nn_optimizer</strong> (<em>tf.keras.optimizers</em>) -- Defines the optimizer to use with the neural network.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../trajectory_evaluators/trajectory_evaluators.html" class="btn btn-neutral float-right" title="Trajectory Evaluators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../dynamics_functions/dynamics_functions.html" class="btn btn-neutral float-left" title="Dynamics Functions" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Ossama Ahmed and Jonas Ruthfuss
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
