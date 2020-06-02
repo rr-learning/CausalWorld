@@ -69,6 +69,7 @@ class PushingTaskGenerator(BaseTask):
     def _set_training_intervention_spaces(self):
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
+            #TODO: make it a function of size
             self.training_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
             self.training_intervention_spaces[rigid_object]['position'][1][-1] \

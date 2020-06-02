@@ -544,13 +544,13 @@ class BaseTask(object):
         if check_bounds and not self.is_intervention_in_bounds(
                 interventions_dict):
             interventions_info['out_bounds'] = True
-            return False, interventions_info
+            return False, interventions_info, False
         interventions_dict = \
             dict(self._handle_contradictory_interventions(interventions_dict))
         if check_bounds and not self.is_intervention_in_bounds(
                 interventions_dict):
             interventions_info['out_bounds'] = True
-            return False, interventions_info
+            return False, interventions_info, False
         #now divide the interventions
         robot_interventions_dict, stage_interventions_dict, \
         task_generator_interventions_dict = \
