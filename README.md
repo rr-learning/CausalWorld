@@ -35,7 +35,5 @@ or used in a catkin workspace.
   ```bash
   (causal_rl_bench) cd ../counterfactual/docs
   (causal_rl_bench) make html
-  (causal_rl_bench) cd ../pybullet_fingers
-  (causal_rl_bench) python -m pip install .
   ```
 
