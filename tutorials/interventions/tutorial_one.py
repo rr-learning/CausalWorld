@@ -10,7 +10,6 @@ def example():
         for i in range(200):
             obs, reward, done, info = env.step(env.action_space.sample())
         random_intervention_dict = env.do_single_random_intervention()
-        env.do_intervention(random_intervention_dict)
         print("The random intervention performed is ", random_intervention_dict)
     env.close()
 

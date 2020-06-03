@@ -17,7 +17,10 @@ def example():
                                               episodes_hold=[3],
                                               timesteps_hold=[None])
     env = CurriculumWrapper(env,
-                            interventions_curriculum=curr_curriculum)
+                            intervention_actors=[
+                                VisualInterventionActorPolicy()],
+                            episodes_hold=[3],
+                            timesteps_hold=[None])
 
     for reset_idx in range(40):
         obs = env.reset()

@@ -1,6 +1,6 @@
 from causal_rl_bench.envs.scene.observations import StageObservations
-from causal_rl_bench.envs.scene.objects import Cuboid, StaticCuboid
-from causal_rl_bench.envs.scene.silhouette import SCuboid, SSphere
+from causal_rl_bench.envs.scene.objects import Cuboid, StaticCuboid, MeshObject
+from causal_rl_bench.envs.scene.silhouette import SCuboid, SSphere, SMeshObject
 from causal_rl_bench.utils.state_utils import get_intersection
 import math
 import numpy as np
@@ -72,8 +72,14 @@ class Stage(object):
             self.remove_general_object(name)
         return
 
-    def add_rigid_mesh_object(self, name, file, **object_params):
-        raise Exception(" Not implemented")
+    def add_rigid_mesh_object(self, name, filename, **object_params):
+        if name in self.name_keys:
+            raise Exception("name already exists as key for scene objects")
+        else:
+            self.name_keys.append(name)
+        self.rigid_objects[name] = MeshObject(self.pybullet_client, name,
+                                              filename, **object_params)
+        return
 
     def add_silhoutte_general_object(self, name, shape, **object_params):
         if name in self.name_keys:
@@ -96,8 +102,14 @@ class Stage(object):
             raise Exception("shape is not implemented yet")
         return
 
-    def add_silhoutte_mesh_object(self, name, file, **object_params):
-        raise Exception(" Not implemented")
+    def add_silhoutte_mesh_object(self, name, filename, **object_params):
+        if name in self.name_keys:
+            raise Exception("name already exists as key for scene objects")
+        else:
+            self.name_keys.append(name)
+        self.visual_objects[name] = SMeshObject(self.pybullet_client, name,
+                                                filename, **object_params)
+        return
 
     def finalize_stage(self):
         self.stage_observations = StageObservations(self.rigid_objects.values(),
