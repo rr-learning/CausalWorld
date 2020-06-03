@@ -56,10 +56,15 @@ def load_world(tracker_relative_path, enable_visualization=False):
             intervention_actors = \
                 initialize_intervention_agents(tracker.world_params['wrappers'][wrapper]['agent_params'])
             #initialize intervention curriculum
-            curriculum = InterventionsCurriculum(intervention_actors= intervention_actors,
-                                                 episodes_hold=tracker.world_params['wrappers'][wrapper]['episodes_hold'],
-                                                 timesteps_hold=tracker.world_params['wrappers'][wrapper]['timesteps_hold'])
-            env = CurriculumWrapper(env, curriculum)
+            env = CurriculumWrapper(env,
+                                    intervention_actors=intervention_actors,
+                                    episodes_hold=
+                                    tracker.world_params['wrappers'][wrapper][
+                                        'episodes_hold'],
+                                    timesteps_hold=
+                                    tracker.world_params['wrappers'][wrapper][
+                                        'timesteps_hold']
+                                    )
         else:
             raise Exception("wrapper is not known to be loaded")
     return env

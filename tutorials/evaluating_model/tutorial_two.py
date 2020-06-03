@@ -60,11 +60,10 @@ def evaluate_model():
 
     def policy_fn(obs):
         return model.predict(obs)[0]
-
-    curr_curriculum = InterventionsCurriculum(intervention_actors=[RandomInterventionActorPolicy()],
-                                              episodes_hold=[3],
-                                              timesteps_hold=[None])
-    evaluator = EvaluationPipeline(testing_curriculum=curr_curriculum,
+    evaluator = EvaluationPipeline(intervention_actors=
+                                   [RandomInterventionActorPolicy()],
+                                   episodes_hold=[3],
+                                   timesteps_hold=[None],
                                    tracker_path=log_relative_path,
                                    intervention_split=False,
                                    visualize_evaluation=True,

@@ -10,15 +10,14 @@ from causal_rl_bench.loggers.tracker import Tracker
 
 
 class EvaluationPipeline(object):
-    def __init__(self, testing_curriculum,
-                 tracker_path=None, world_params=None,
-                 task_params=None, intervention_split=True,
-                 training=False, visualize_evaluation=False,
-                 initial_seed=0):
+    def __init__(self, intervention_actors, episodes_hold,
+                 timesteps_hold, tracker_path=None,
+                 world_params=None, task_params=None,
+                 intervention_split=True, training=False,
+                 visualize_evaluation=False, initial_seed=0):
         self.intervention_split = intervention_split
         self.training = training
         self.initial_seed = initial_seed
-        self.testing_curriculum = testing_curriculum
         self.data_recorder = DataRecorder(output_directory=None)
         if tracker_path is not None:
             self.tracker = Tracker(
@@ -62,10 +61,11 @@ class EvaluationPipeline(object):
                                  enable_visualization=visualize_evaluation)
         evaluation_episode_length_in_secs = 1
         self.time_steps_for_evaluation = \
-            int(evaluation_episode_length_in_secs / self.env.robot.dt)
+            int(evaluation_episode_length_in_secs / self.env.dt)
         #wrap now the environment
         self.env = CurriculumWrapper(self.env,
-                                     interventions_curriculum=self.testing_curriculum)
+                                     intervention_actors, episodes_hold,
+                                     timesteps_hold)
 
         self.metrics_list = []
         self.metrics_list.append(MeanSuccessRateMetric())
@@ -95,7 +95,8 @@ class EvaluationPipeline(object):
                             episodes_per_seed * num_seeds
         for i in range(num_seeds):
             self.env.seed(seed=self.initial_seed + i)
-            self.testing_curriculum.reset()
+            self.env.interventions_curriculum.reset()
+            self.env.reset_default_goal()
             for _ in range(episodes_per_seed):
                 current_episode = self.run_episode(policy)
                 self.process_metrics(current_episode)

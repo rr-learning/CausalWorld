@@ -34,7 +34,7 @@ class PushingTaskGenerator(BaseTask):
         self.initial_state["tool_block"]["orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
         self.task_params["goal_block_position"] = \
-            kwargs.get("goal_block_position", np.array([0, 0.15, 0.0425]))
+            kwargs.get("goal_block_position", np.array([0, 0.10, 0.0425]))
         self.task_params["goal_block_orientation"] = \
             kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_end_effector_positions = None

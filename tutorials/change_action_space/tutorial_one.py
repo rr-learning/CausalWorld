@@ -10,8 +10,6 @@ def apply_delta_action():
                 action_mode="joint_positions",
                 normalize_actions=True,
                 normalize_observations=True, skip_frame=1)
-    #TODO:discuss with Manuel if the pd gains needs tuning, I tuned them but
-    #they are very senstive
     env = DeltaAction(env)
     for _ in range(50):
         obs = env.reset()
