@@ -14,8 +14,7 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
         self.selected_object = None
 
     def initialize_actor(self, env):
-        self.low_joint_positions = env.robot.\
-            robot_actions.joint_positions_lower_bounds
+        self.low_joint_positions = env.get_joint_positions_lower_bound()
         return
 
     def add_action(self, action, selected_object):

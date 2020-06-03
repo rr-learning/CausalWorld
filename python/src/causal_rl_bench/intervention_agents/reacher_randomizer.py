@@ -10,9 +10,9 @@ class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
 
     def initialize(self, env):
         self.joint_position_sampler_func = \
-            env.robot.sample_joint_positions
+            env.get_robot().sample_joint_positions
         self.goal_position_sampler_func = \
-            env.robot.sample_end_effector_positions
+            env.get_robot().sample_end_effector_positions
         return
 
     def _act(self, variables_dict):

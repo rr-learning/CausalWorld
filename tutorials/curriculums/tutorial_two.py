@@ -13,9 +13,6 @@ def example():
                 enable_visualization=True)
     #define a curriculum for running and testing it
     #lets get the goal intervention agent and impose it every 3 episodes
-    curr_curriculum = InterventionsCurriculum(intervention_actors=[VisualInterventionActorPolicy()],
-                                              episodes_hold=[3],
-                                              timesteps_hold=[None])
     env = CurriculumWrapper(env,
                             intervention_actors=[
                                 VisualInterventionActorPolicy()],
