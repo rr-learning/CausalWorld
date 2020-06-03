@@ -23,4 +23,9 @@ class ReacherActorPolicy(BaseActorPolicy):
         return
 
     def act(self, obs):
+        """
+
+        :param obs:
+        :return:
+        """
         return self.model.predict(obs, deterministic=True)[0]
