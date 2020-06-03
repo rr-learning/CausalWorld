@@ -19,11 +19,6 @@ class PushingTaskGenerator(BaseTask):
                                             "joint_velocities",
                                             "action_joint_positions",
                                             "end_effector_positions"]
-        self.task_stage_observation_keys = ["tool_block_position",
-                                            "tool_block_orientation",
-                                            "goal_block_position",
-                                            "goal_block_orientation"]
-
         self.task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.08)
         self.task_params["joint_positions"] = \
@@ -61,6 +56,10 @@ class PushingTaskGenerator(BaseTask):
                                                     "goal_block_position"],
                                                 orientation=self.task_params[
                                                     "goal_block_orientation"])
+        self.task_stage_observation_keys = ["tool_block_position",
+                                            "tool_block_orientation",
+                                            "goal_block_position",
+                                            "goal_block_orientation"]
         if self.task_params["joint_positions"] is not None:
             self.initial_state['joint_positions'] = \
                 self.task_params["joint_positions"]

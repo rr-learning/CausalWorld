@@ -18,10 +18,6 @@ class PickingTaskGenerator(BaseTask):
                                             "joint_velocities",
                                             "action_joint_positions",
                                             "end_effector_positions"]
-        self.task_stage_observation_keys = ["tool_block_position",
-                                            "tool_block_orientation",
-                                            "goal_block_position",
-                                            "goal_block_orientation"]
         # TODO: check for nans when bounds are the same in normalization
         self.task_params["goal_height"] = \
             kwargs.get("goal_height", 0.15)
@@ -61,6 +57,10 @@ class PickingTaskGenerator(BaseTask):
                                                 self.initial_state[
                                                     "tool_block"][
                                                     "orientation"])
+        self.task_stage_observation_keys = ["tool_block_position",
+                                            "tool_block_orientation",
+                                            "goal_block_position",
+                                            "goal_block_orientation"]
         if self.task_params["joint_positions"] is not None:
             self.initial_state['joint_positions'] = \
                 self.task_params["joint_positions"]

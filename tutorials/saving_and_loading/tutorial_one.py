@@ -14,11 +14,11 @@ def example():
     env = World(task_gen, skip_frame=1,
                 enable_visualization=True)
     env = DeltaAction(env)
-    curr_curriculum = InterventionsCurriculum(intervention_actors=[VisualInterventionActorPolicy()],
-                                              episodes_hold=[3],
-                                              timesteps_hold=[None])
     env = CurriculumWrapper(env,
-                            interventions_curriculum=curr_curriculum)
+                            intervention_actors=[
+                                VisualInterventionActorPolicy()],
+                            episodes_hold=[3],
+                            timesteps_hold=[None])
 
     for reset_idx in range(10):
         obs = env.reset()
