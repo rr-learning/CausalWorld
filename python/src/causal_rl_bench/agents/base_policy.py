@@ -5,11 +5,24 @@ class BaseActorPolicy(object):
     TaskViewer class
     """
     def __init__(self, identifier=None):
+        """
+
+        :param identifier:
+        """
         self.identifier = identifier
         return
 
     def get_identifier(self):
+        """
+
+        :return:
+        """
         return self.identifier
 
     def act(self, obs):
+        """
+
+        :param obs:
+        :return:
+        """
         raise NotImplementedError()

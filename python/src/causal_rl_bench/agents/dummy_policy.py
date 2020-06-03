@@ -8,8 +8,18 @@ class DummyActorPolicy(BaseActorPolicy):
         return
 
     def act(self, obs):
+        """
+
+        :param obs:
+        :return:
+        """
         return self.action
 
     def add_action(self, action):
+        """
+
+        :param action:
+        :return:
+        """
         self.action = action
         return
