@@ -9,9 +9,23 @@ def example():
     env = ObjectSelectorWrapper(env)
     for _ in range(50):
         obs = env.reset()
-        for i in range(2000):
+        #go up
+        for i in range(80):
             obs, reward, done, info = env.step([0, 1, 0])
             # print(obs)
+        # rotate yaw
+        for i in range(20):
+            obs, reward, done, info = env.step([0, 0, 1])
+            # print(obs)
+        for i in range(50):
+            obs, reward, done, info = env.step([0, 5, 0])
+        for i in range(20):
+            obs, reward, done, info = env.step([0, 0, 1])
+            # print(obs)
+        for i in range(50):
+            obs, reward, done, info = env.step([0, 2, 0])
+            # print(obs)
+        print("reset")
     env.close()
 
 

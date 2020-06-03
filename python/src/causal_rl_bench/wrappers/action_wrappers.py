@@ -11,35 +11,35 @@ class DeltaAction(gym.ActionWrapper):
 
     def action(self, action):
         #Take care of normalization here too
-        if self.env.action_mode == "joint_positions":
+        if self.env.get_action_mode() == "joint_positions":
             #The delta is wrt the last applied
             # joint positions that were sent to the pd controller
-            offset = self.env.robot.last_applied_joint_positions
-        elif self.env.action_mode == "joint_torques":
-            offset = self.env.robot.latest_full_state.torques
-        elif self.env.action_mode == "end_effector_positions":
+            offset = self.env.get_robot().last_applied_joint_positions
+        elif self.env.get_action_mode() == "joint_torques":
+            offset = self.env.get_robot().latest_full_state.torques
+        elif self.env.get_action_mode() == "end_effector_positions":
             # applied joint positions that were sent to the pd controller
-            offset = self.env.robot.compute_end_effector_positions(
-                self.env.robot.last_applied_joint_positions)
+            offset = self.env.get_robot().compute_end_effector_positions(
+                self.env.get_robot().last_applied_joint_positions)
         else:
             raise Exception("action mode is not known")
-        if self.env.robot.normalize_actions:
-            offset = self.env.robot.normalize_observation_for_key(
-                    observation=offset, key=self.env.action_mode)
+        if self.env.get_robot().normalize_actions:
+            offset = self.env.get_robot().normalize_observation_for_key(
+                    observation=offset, key=self.env.get_action_mode())
         return action + offset
 
     def reverse_action(self, action):
-        if self.env.action_mode == "joint_positions":
-            offset = self.env.robot.last_applied_joint_positions
-        elif self.env.action_mode == "joint_torques":
-            offset = self.env.robot.latest_full_state.torques
-        elif self.env.action_mode == "end_effector_positions":
-            offset = self.env.robot.compute_end_effector_positions(
-                         self.env.robot.last_applied_joint_positions)
+        if self.env.get_action_mode() == "joint_positions":
+            offset = self.env.get_robot().last_applied_joint_positions
+        elif self.env.get_action_mode() == "joint_torques":
+            offset = self.env.get_robot().latest_full_state.torques
+        elif self.env.get_action_mode() == "end_effector_positions":
+            offset = self.env.get_robot().compute_end_effector_positions(
+                         self.env.get_robot().last_applied_joint_positions)
         else:
             raise Exception("action mode is not known")
-        if self.env.robot.normalize_actions:
-            offset = self.env.robot.normalize_observation_for_key(
+        if self.env.get_robot().normalize_actions:
+            offset = self.env.get_robot().normalize_observation_for_key(
                     observation=offset, key=self.env.action_mode)
         return action - offset
 

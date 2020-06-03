@@ -389,4 +389,12 @@ class World(gym.Env):
         """
         return self.task.is_in_training_mode()
 
+    def get_joint_positions_lower_bound(self):
+        return self.__robot.robot_actions.\
+            joint_positions_lower_bounds
 
+    def get_action_mode(self):
+        return self.__action_mode
+
+    def get_robot(self):
+        return self.__robot
