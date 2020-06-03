@@ -156,6 +156,7 @@
  | <a href="#M"><strong>M</strong></a>
  | <a href="#R"><strong>R</strong></a>
  | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
  | <a href="#W"><strong>W</strong></a>
  
 </div>
@@ -163,14 +164,12 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
       <li>
-    causal_rl_bench.envs.world
+    causal_rl_bench.envs
 
       <ul>
-        <li><a href="modules/envs/envs.html#module-causal_rl_bench.envs.world">module</a>
+        <li><a href="modules/envs/envs.html#module-causal_rl_bench.envs">module</a>
 </li>
       </ul></li>
-  </ul></td>
-  <td style="width: 33%; vertical-align: top;"><ul>
       <li>
     causal_rl_bench.task_generators
 
@@ -178,7 +177,15 @@
         <li><a href="modules/task_generators/task_generators.html#module-causal_rl_bench.task_generators">module</a>
 </li>
       </ul></li>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.close">close() (causal_rl_bench.envs.world.World method)</a>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.TriFingerRobot.check_feasibility_of_robot_state">check_feasibility_of_robot_state() (causal_rl_bench.envs.TriFingerRobot method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Stage.check_feasiblity_of_stage">check_feasiblity_of_stage() (causal_rl_bench.envs.Stage method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.close">close() (causal_rl_bench.envs.World method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid">Cuboid (class in causal_rl_bench.envs)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -186,11 +193,27 @@
 <h2 id="D">D</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.do_intervention">do_intervention() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.do_intervention">do_intervention() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.do_intervention">(causal_rl_bench.envs.RigidObject method)</a>
 </li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.do_intervention">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.do_intervention">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.do_intervention">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.do_intervention">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.do_intervention">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.do_intervention">(causal_rl_bench.envs.World method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.do_single_random_intervention">do_single_random_intervention() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.do_single_random_intervention">do_single_random_intervention() (causal_rl_bench.envs.World method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -198,7 +221,7 @@
 <h2 id="E">E</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.enforce_max_episode_length">enforce_max_episode_length() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.enforce_max_episode_length">enforce_max_episode_length() (causal_rl_bench.envs.World method)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -206,20 +229,144 @@
 <h2 id="G">G</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.get_current_task_parameters">get_current_task_parameters() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_bounding_box">get_bounding_box() (causal_rl_bench.envs.RigidObject method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.get_bounding_box">(causal_rl_bench.envs.SCuboid method)</a>
 </li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_bounding_box">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.get_bounding_box">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.get_bounding_box">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_bounds">get_bounds() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_bounds">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.get_bounds">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_bounds">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.get_bounds">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.get_bounds">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.get_bounds">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.get_current_task_parameters">get_current_task_parameters() (causal_rl_bench.envs.World method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.get_full_state">get_full_state() (causal_rl_bench.envs.World method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_name">get_name() (causal_rl_bench.envs.RigidObject method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_name">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_rotation_matrix">get_rotation_matrix() (causal_rl_bench.envs.Cuboid method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_state">get_state() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_state">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.get_state">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_state">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.get_state">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.get_state">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.get_state">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_state_size">get_state_size() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_state_size">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.get_state_size">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_state_size">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.get_state_size">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.get_state_size">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.get_state_size">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.get_full_state">get_full_state() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_state_variable_names">get_state_variable_names() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_state_variable_names">(causal_rl_bench.envs.RigidObject method)</a>
 </li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.get_state_variable_names">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_state_variable_names">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.get_state_variable_names">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.get_state_variable_names">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.get_state_variable_names">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_variable_state">get_variable_state() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_variable_state">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.get_variable_state">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_variable_state">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.get_variable_state">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.get_variable_state">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.get_variable_state">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_vertices">get_vertices() (causal_rl_bench.envs.Cuboid method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.get_volume">get_volume() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.get_volume">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.get_volume">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.get_volume">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.get_volume">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.get_volume">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.is_in_training_mode">is_in_training_mode() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.is_in_training_mode">is_in_training_mode() (causal_rl_bench.envs.World method)</a>
 </li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.is_not_fixed">is_not_fixed() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.is_not_fixed">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.is_not_fixed">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
   </ul></td>
 </tr></table>
 
@@ -230,7 +377,7 @@
     module
 
       <ul>
-        <li><a href="modules/envs/envs.html#module-causal_rl_bench.envs.world">causal_rl_bench.envs.world</a>
+        <li><a href="modules/envs/envs.html#module-causal_rl_bench.envs">causal_rl_bench.envs</a>
 </li>
         <li><a href="modules/task_generators/task_generators.html#module-causal_rl_bench.task_generators">causal_rl_bench.task_generators</a>
 </li>
@@ -243,13 +390,15 @@
   <td style="width: 33%; vertical-align: top;"><ul>
       <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator">ReachingTaskGenerator (class in causal_rl_bench.task_generators)</a>
 </li>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.render">render() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.render">render() (causal_rl_bench.envs.World method)</a>
 </li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.reset">reset() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.reset">reset() (causal_rl_bench.envs.World method)</a>
 </li>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.reset_default_goal">reset_default_goal() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.reset_default_goal">reset_default_goal() (causal_rl_bench.envs.World method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject">RigidObject (class in causal_rl_bench.envs)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -257,17 +406,85 @@
 <h2 id="S">S</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.sample_new_goal">sample_new_goal() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.sample_new_goal">sample_new_goal() (causal_rl_bench.envs.World method)</a>
 </li>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.save_world">save_world() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.save_world">save_world() (causal_rl_bench.envs.World method)</a>
 </li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid">SCuboid (class in causal_rl_bench.envs)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.seed">seed() (causal_rl_bench.envs.World method)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.set_full_state">set_full_state() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.set_full_state">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.set_full_state">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.set_full_state">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.set_full_state">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.set_full_state">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.set_full_state">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.set_full_state">(causal_rl_bench.envs.World method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.set_pose">set_pose() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.set_pose">(causal_rl_bench.envs.RigidObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.set_pose">(causal_rl_bench.envs.SCuboid method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.set_pose">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.set_pose">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.set_pose">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.set_pose">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
   </ul></td>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.seed">seed() (causal_rl_bench.envs.world.World method)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.set_state">set_state() (causal_rl_bench.envs.Cuboid method)</a>
+
+      <ul>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.RigidObject.set_state">(causal_rl_bench.envs.RigidObject method)</a>
 </li>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.set_full_state">set_full_state() (causal_rl_bench.envs.world.World method)</a>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SCuboid.set_state">(causal_rl_bench.envs.SCuboid method)</a>
 </li>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World.step">step() (causal_rl_bench.envs.world.World method)</a>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject.set_state">(causal_rl_bench.envs.SilhouetteObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject.set_state">(causal_rl_bench.envs.SMeshObject method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere.set_state">(causal_rl_bench.envs.SSphere method)</a>
+</li>
+        <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid.set_state">(causal_rl_bench.envs.StaticCuboid method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SilhouetteObject">SilhouetteObject (class in causal_rl_bench.envs)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SMeshObject">SMeshObject (class in causal_rl_bench.envs)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.SSphere">SSphere (class in causal_rl_bench.envs)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Stage">Stage (class in causal_rl_bench.envs)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.StaticCuboid">StaticCuboid (class in causal_rl_bench.envs)</a>
+</li>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World.step">step() (causal_rl_bench.envs.World method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.TriFingerRobot">TriFingerRobot (class in causal_rl_bench.envs)</a>
 </li>
   </ul></td>
 </tr></table>
@@ -275,7 +492,11 @@
 <h2 id="W">W</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%; vertical-align: top;"><ul>
-      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.world.World">World (class in causal_rl_bench.envs.world)</a>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.World">World (class in causal_rl_bench.envs)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/envs/envs.html#causal_rl_bench.envs.Cuboid.world_to_cube_r_matrix">world_to_cube_r_matrix() (causal_rl_bench.envs.Cuboid method)</a>
 </li>
   </ul></td>
 </tr></table>
