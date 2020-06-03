@@ -1,7 +1,7 @@
 Envs
 ====
 
-.. automodule:: causal_rl_bench.envs.world
+.. automodule:: causal_rl_bench.envs
 
 World
 -----
@@ -43,7 +43,12 @@ SSphere
 .. autoclass:: SSphere
     :members:
 
-MeshObject
-----------
-.. autoclass:: MeshObject
+RigidObject
+-----------
+.. autoclass:: RigidObject
+    :members:
+
+SilhouetteObject
+----------------
+.. autoclass:: SilhouetteObject
     :members:
