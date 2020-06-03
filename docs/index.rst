@@ -34,6 +34,10 @@ naturally emerging curriculum of tasks.
     env.close()
 
 
+.. toctree::
+   :maxdepth: 3
+   :caption: Contents:
+
    modules/causal_rl_bench.rst
 
 Indices and tables

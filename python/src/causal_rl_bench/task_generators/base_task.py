@@ -33,6 +33,7 @@ class BaseTask(object):
         self.training_intervention_spaces = dict()
         self.testing_intervention_spaces = dict()
         self.initial_state = dict()
+        self.default_state = dict()
         self.finished_episode = False
         self.task_params['intervention_split'] = intervention_split
         self.task_params['training'] = training
@@ -107,6 +108,15 @@ class BaseTask(object):
                     np.random.uniform(intervention_space[visual_object]['position'][0],
                                       intervention_space[visual_object]['position'][1])
         return intervention_dict
+
+    def reset_default_state(self):
+        self.stage.remove_everything()
+        self.task_stage_observation_keys = []
+        self.initial_state = dict(self.default_state)
+        self._set_up_stage_arena()
+        self._set_testing_intervention_spaces()
+        self._set_training_intervention_spaces()
+        self.stage.finalize_stage()
 
     def _set_training_intervention_spaces(self):
         #you can override these easily
@@ -292,6 +302,7 @@ class BaseTask(object):
         self.initial_state['joint_velocities'] = \
             np.zeros([9, ])
         self._set_up_stage_arena()
+        self.default_state.update(dict(self.initial_state))
         self.stage.finalize_stage()
         self.task_params.update(self.initial_state)
         self._set_up_non_default_observations()

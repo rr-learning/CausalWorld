@@ -40,7 +40,7 @@ class SilhouetteObject(object):
         #TODO: this returns a point instead
         return self.pybullet_client.getAABB(self.block_id)
 
-    def get_area(self):
+    def get_volume(self):
         raise NotImplementedError()
 
 
@@ -108,8 +108,8 @@ class SCuboid(SilhouetteObject):
         self.bounding_box = None
         self._set_vertices()
         self._set_bounding_box()
-        self.area = None
-        self._set_area()
+        self._volume = None
+        self._set_volume()
 
     def set_full_state(self, new_state):
         # form dict first
@@ -146,7 +146,7 @@ class SCuboid(SilhouetteObject):
             )
             self._set_vertices()
             self._set_bounding_box()
-            self._set_area()
+            self._set_volume()
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
                 self.block_id, self.position, self.orientation
@@ -193,7 +193,7 @@ class SCuboid(SilhouetteObject):
             self.size = variable_value
             self._set_vertices()
             self._set_bounding_box()
-            self._set_area()
+            self._set_volume()
         elif variable_name == 'color':
             self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(variable_value,
@@ -291,12 +291,12 @@ class SCuboid(SilhouetteObject):
         #low values for each axis
         return self.bounding_box
 
-    def _set_area(self):
-        self.area = self.size[0] * self.size[1] * self.size[2]
+    def _set_volume(self):
+        self._volume = self.size[0] * self.size[1] * self.size[2]
         return
 
-    def get_area(self):
-        return self.area
+    def get_volume(self):
+        return self._volume
 
 
 class SSphere(SilhouetteObject):
@@ -354,6 +354,10 @@ class SSphere(SilhouetteObject):
                                   state_variable_name].shape[0])
             self.state_size += self._state_variable_sizes[-1]
         self.position = position
+        self.bounding_box = None
+        self._set_bounding_box()
+        self._volume = None
+        self._set_volume()
 
     def set_full_state(self, new_state):
         new_state_dict = dict()
@@ -371,6 +375,7 @@ class SSphere(SilhouetteObject):
     def set_state(self, state_dict):
         if 'position' in state_dict:
             self.position = state_dict['position']
+            self._set_bounding_box()
         if 'radius' in state_dict:
             self.radius = np.array(state_dict['radius'])
             self.pybullet_client.removeBody(self.block_id)
@@ -384,6 +389,8 @@ class SSphere(SilhouetteObject):
                 basePosition=self.position,
                 baseOrientation=[0, 0, 0, 1]
             )
+            self._set_bounding_box()
+            self._set_volume()
         elif 'position' in state_dict or 'orientation' in state_dict:
             self.pybullet_client.resetBasePositionAndOrientation(
                 self.block_id, self.position, [0, 0, 0, 1]
@@ -414,6 +421,8 @@ class SSphere(SilhouetteObject):
                 baseOrientation=[0, 0, 0, 1]
             )
             self.radius = np.array(variable_value)
+            self._set_bounding_box()
+            self._set_volume()
         elif variable_name == 'color':
             self.pybullet_client.changeVisualShape(self.block_id, -1,
                                                    rgbaColor=np.append(variable_value,
@@ -474,4 +483,24 @@ class SSphere(SilhouetteObject):
             self.block_id, position, [0, 0, 0, 1]
         )
         self.position = position
+        self._set_bounding_box()
         return
+
+    def _set_bounding_box(self):
+        # low values for each axis
+        low_bound = np.array(self.position) - \
+                    np.array([self.radius, self.radius, self.radius]).flatten()
+        upper_bound = np.array(self.position) + \
+                     np.array([self.radius, self.radius, self.radius]).flatten()
+        self.bounding_box = (tuple(low_bound), tuple(upper_bound))
+
+    def get_bounding_box(self):
+        #low values for each axis
+        return self.bounding_box
+
+    def _set_volume(self):
+        self._volume = (self.radius**3) * 4/3.0 * np.pi
+        return
+
+    def get_volume(self):
+        return self._volume

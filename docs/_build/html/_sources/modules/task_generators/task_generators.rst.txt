@@ -1,17 +1,9 @@
 Task Generators
 ===============
 
-.. automodule:: causal_rl_bench.tasks
+.. automodule:: causal_rl_bench.task_generators
 
-Architecture Task Generator
----------------------------
-.. autoclass:: ArchTask
+Reaching Task
+--------------
+.. autoclass:: ReachingTaskGenerator
     :members:
-    :special-members:
-
-
-Pyramid Task Generator
-----------------------
-.. autoclass:: PyramidTask
-    :members:
-    :special-members:

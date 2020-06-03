@@ -49,7 +49,7 @@ def test_mass():
         obs = env.reset()
         lift_last_finger_first(env, obs)
         desired_grip = grip_block(env)
-        print(env.robot.get_tip_contact_states())
+        print(env.__robot.get_tip_contact_states())
         lift_block(env, desired_grip)
     env.close()
 

@@ -79,7 +79,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
         self.env = env
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
-        self.env.disable_actions()
+        self.env._disable_actions()
         self.observations_order = []
         self.observation_high = []
         curr_variables = self.env.get_current_task_parameters()
@@ -93,7 +93,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
                                               gym.spaces.Discrete(7),
                                               gym.spaces.Discrete(7)))
         self.observations_order.sort()
-        self.env.add_wrapper_info({'object_selector': dict()})
+        self.env._add_wrapper_info({'object_selector': dict()})
 
     def step(self, action):
         #buffer action to the intervention actor

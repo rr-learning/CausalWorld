@@ -22,9 +22,6 @@ class ReachingTaskGenerator(BaseTask):
                                             "joint_velocities",
                                             "end_effector_positions",
                                             "action_joint_positions"]
-        self.task_stage_observation_keys = ["goal_60_position",
-                                            "goal_120_position",
-                                            "goal_300_position"]
         self.task_params['default_goal_60'] = kwargs.get("default_goal_60",
                                                          np.array([0, 0, 0.15]))
         self.task_params['default_goal_120'] = kwargs.get("default_goal_120",
@@ -41,15 +38,21 @@ class ReachingTaskGenerator(BaseTask):
         self.stage.add_silhoutte_general_object(name="goal_60",
                                                 shape="sphere",
                                                 color=np.array([1, 0, 0]),
-                                                position=self.task_params['default_goal_60'])
+                                                position=
+                                                self.task_params['default_goal_60'])
         self.stage.add_silhoutte_general_object(name="goal_120",
                                                 shape="sphere",
                                                 color=np.array([0, 1, 0]),
-                                                position=self.task_params['default_goal_120'])
+                                                position=
+                                                self.task_params['default_goal_120'])
         self.stage.add_silhoutte_general_object(name="goal_300",
                                                 shape="sphere",
                                                 color=np.array([0, 0, 1]),
-                                                position=self.task_params['default_goal_300'])
+                                                position=
+                                                self.task_params['default_goal_300'])
+        self.task_stage_observation_keys = ["goal_60_position",
+                                            "goal_120_position",
+                                            "goal_300_position"]
         self.current_number_of_obstacles = 0
         if self.task_params["joint_positions"] is not None:
             self.initial_state['joint_positions'] = \

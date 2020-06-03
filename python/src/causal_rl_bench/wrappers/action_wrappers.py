@@ -7,7 +7,7 @@ class DeltaAction(gym.ActionWrapper):
     def __init__(self, env):
         super(DeltaAction, self).__init__(env)
         #TODO: discuss the action space of a delta action
-        self.env.add_wrapper_info({'delta_action': dict()})
+        self.env._add_wrapper_info({'delta_action': dict()})
 
     def action(self, action):
         #Take care of normalization here too
@@ -54,7 +54,7 @@ class MovingAverageActionEnvWrapper(gym.ActionWrapper):
         self.__policy = MovingAverageActionWrapperActorPolicy(self.__policy,
                                                               widow_size=widow_size,
                                                               initial_value=initial_value)
-        self.env.add_wrapper_info({'moving_average_action': {'widow_size': widow_size,
+        self.env._add_wrapper_info({'moving_average_action': {'widow_size': widow_size,
                                                              'initial_value': initial_value}})
         return
 

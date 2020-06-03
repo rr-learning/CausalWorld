@@ -1,6 +1,6 @@
-TF-NeuralMPC
-============
+CausalRLBench
+=============
 
 .. toctree::
+    envs/envs
     task_generators/task_generators
-    intervention_policies/intervention_policies

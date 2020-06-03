@@ -1,10 +1,7 @@
-"""
-causal_rl_bench/envs/scene/stage.py
-===================================
-"""
 from causal_rl_bench.envs.scene.observations import StageObservations
 from causal_rl_bench.envs.scene.objects import Cuboid, StaticCuboid
 from causal_rl_bench.envs.scene.silhouette import SCuboid, SSphere
+from causal_rl_bench.utils.state_utils import get_intersection
 import math
 import numpy as np
 
@@ -419,5 +416,16 @@ class Stage(object):
         for contact in self.pybullet_client.getContactPoints():
             if contact[8] < -0.002:
                 return False
+        #check if all the visual objects are within the bb og the available arena
+        for visual_object in self.visual_objects:
+            if get_intersection(self.visual_objects[visual_object].
+                                   get_bounding_box(),
+                                   self._get_stage_bb())/\
+                    self.visual_objects[visual_object].get_volume() < 0.95:
+                return False
         return True
+
+    def _get_stage_bb(self):
+        return (tuple(self.floor_inner_bounding_box[0]),
+                tuple(self.floor_inner_bounding_box[1]))
 
