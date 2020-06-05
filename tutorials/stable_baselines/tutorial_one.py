@@ -84,12 +84,12 @@ if __name__ == '__main__':
     assert (((float(total_time_steps_per_update) /
              num_of_envs)/5).is_integer())
     ppo_config = {"gamma": 0.99,
-                  "n_steps": 600,
-                  "ent_coef": 0.01,
+                  "n_steps": 100000,
+                  "ent_coef": 0,
                   "learning_rate": 0.00025,
                   "vf_coef": 0.5,
-                  "max_grad_norm": 0.5,
-                  "nminibatches": 4,
+                  "max_grad_norm": 10,
+                  "nminibatches": 1000,
                   "noptepochs": 4,
                   "tensorboard_log": log_relative_path}
     train_policy(num_of_envs=num_of_envs,
