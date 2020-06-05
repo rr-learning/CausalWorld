@@ -7,12 +7,16 @@ import numpy as np
 
 
 class Stage(object):
-    """This class holds everything in the arena including the tools used
-    for the goal specified, setting object, creating of objects, removing of
-    objects, checking for collisions, all of this is done here"""
     def __init__(self, pybullet_client, observation_mode,
                  normalize_observations=True,
                  goal_image_pybullet_instance=None):
+        """
+
+        :param pybullet_client:
+        :param observation_mode:
+        :param normalize_observations:
+        :param goal_image_pybullet_instance:
+        """
         self.rigid_objects = dict()
         self.visual_objects = dict()
         self.observation_mode = observation_mode
@@ -35,9 +39,18 @@ class Stage(object):
                 self.goal_image_pybullet_instance._p
             self.goal_image = None
         self.name_keys = []
+        self.default_gravity = [0, 0, -9.81]
+        self.current_gravity = np.array(self.default_gravity)
         return
 
     def add_rigid_general_object(self, name, shape, **object_params):
+        """
+
+        :param name:
+        :param shape:
+        :param object_params:
+        :return:
+        """
         if name in self.name_keys:
             raise Exception("name already exists as key for scene objects")
         else:
@@ -53,6 +66,11 @@ class Stage(object):
         return
 
     def remove_general_object(self, name):
+        """
+
+        :param name:
+        :return:
+        """
         if name not in self.name_keys:
             raise Exception("name does not exists as key for scene objects")
         else:
@@ -68,12 +86,23 @@ class Stage(object):
         return
 
     def remove_everything(self):
+        """
+
+        :return:
+        """
         current_objects = list(self.rigid_objects.keys()) + list(self.visual_objects.keys())
         for name in current_objects:
             self.remove_general_object(name)
         return
 
     def add_rigid_mesh_object(self, name, filename, **object_params):
+        """
+
+        :param name:
+        :param filename:
+        :param object_params:
+        :return:
+        """
         if name in self.name_keys:
             raise Exception("name already exists as key for scene objects")
         else:
@@ -83,6 +112,13 @@ class Stage(object):
         return
 
     def add_silhoutte_general_object(self, name, shape, **object_params):
+        """
+
+        :param name:
+        :param shape:
+        :param object_params:
+        :return:
+        """
         if name in self.name_keys:
             raise Exception("name already exists as key for scene objects")
         else:
@@ -104,6 +140,13 @@ class Stage(object):
         return
 
     def add_silhoutte_mesh_object(self, name, filename, **object_params):
+        """
+
+        :param name:
+        :param filename:
+        :param object_params:
+        :return:
+        """
         if name in self.name_keys:
             raise Exception("name already exists as key for scene objects")
         else:
@@ -113,17 +156,31 @@ class Stage(object):
         return
 
     def finalize_stage(self):
+        """
+
+        :return:
+        """
         self.stage_observations = StageObservations(self.rigid_objects.values(),
                                                     self.visual_objects.values(),
                                                     self.observation_mode,
                                                     self.normalize_observations)
 
     def select_observations(self, observation_keys):
+        """
+
+        :param observation_keys:
+        :return:
+        """
         self.stage_observations.reset_observation_keys()
         for key in observation_keys:
             self.stage_observations.add_observation(key)
 
     def get_full_state(self, state_type='list'):
+        """
+
+        :param state_type:
+        :return:
+        """
         if state_type == 'list':
             stage_state = []
         elif state_type == 'dict':
@@ -144,6 +201,11 @@ class Stage(object):
         return stage_state
 
     def set_full_state(self, new_state):
+        """
+
+        :param new_state:
+        :return:
+        """
         #TODO: under the assumption that the new state has the same number of objects
         start = 0
         for name in self.name_keys:
@@ -166,6 +228,13 @@ class Stage(object):
         return
 
     def set_objects_pose(self, names, positions, orientations):
+        """
+
+        :param names:
+        :param positions:
+        :param orientations:
+        :return:
+        """
         for i in range(len(names)):
             name = names[i]
             if name in self.rigid_objects:
@@ -186,11 +255,20 @@ class Stage(object):
         return
 
     def get_current_observations(self, helper_keys):
+        """
+
+        :param helper_keys:
+        :return:
+        """
         self.latest_observations = \
             self.stage_observations.get_current_observations(helper_keys)
         return self.latest_observations
 
     def get_observation_spaces(self):
+        """
+
+        :return:
+        """
         return self.stage_observations.get_observation_spaces()
 
     def random_position(self, height_limits=(0.05, 0.15),
@@ -198,7 +276,14 @@ class Stage(object):
                         radius_limits=(0.0, 0.15),
                         allowed_section=np.array([[-0.5, -0.5, 0],
                                                   [0.5, 0.5, 0.5]])):
+        """
 
+        :param height_limits:
+        :param angle_limits:
+        :param radius_limits:
+        :param allowed_section:
+        :return:
+        """
         satisfying_constraints = False
         while not satisfying_constraints:
             angle = np.random.uniform(*angle_limits)
@@ -226,7 +311,13 @@ class Stage(object):
     def legacy_random_position(self, height_limits=(0.05, 0.15),
                                 angle_limits=(-2 * math.pi, 2 * math.pi),
                                 radius_limits=(0.0, 0.15)):
+        """
 
+        :param height_limits:
+        :param angle_limits:
+        :param radius_limits:
+        :return:
+        """
         angle = np.random.uniform(*angle_limits)
         radial_distance = np.random.uniform(*radius_limits)
 
@@ -244,14 +335,28 @@ class Stage(object):
         return object_position
 
     def clear(self):
+        """
+
+        :return:
+        """
         self.latest_full_state = None
         self.latest_observations = None
 
     def get_current_object_keys(self):
+        """
+
+        :return:
+        """
         return list(self.rigid_objects.keys()) +  \
                list(self.visual_objects.keys())
 
     def object_intervention(self, key, interventions_dict):
+        """
+
+        :param key:
+        :param interventions_dict:
+        :return:
+        """
         if key in self.rigid_objects:
             object = self.rigid_objects[key]
         elif key in self.visual_objects:
@@ -273,6 +378,10 @@ class Stage(object):
         return
 
     def get_current_variables_values(self):
+        """
+
+        :return:
+        """
         #TODO: not a complete list yet of what we want to expose
         variable_params = dict()
         variable_params["floor_color"] = \
@@ -283,10 +392,17 @@ class Stage(object):
             self.pybullet_client.getDynamicsInfo(self.stage_id, -1)[1]
         variable_params["floor_friction"] = \
             self.pybullet_client.getDynamicsInfo(self.floor_id, -1)[1]
+        variable_params["gravity"] = \
+            self.current_gravity
         variable_params.update(self.get_full_state(state_type='dict'))
         return variable_params
 
     def apply_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         for intervention in interventions_dict:
             if isinstance(interventions_dict[intervention], dict):
                 self.object_intervention(intervention,
@@ -319,6 +435,14 @@ class Stage(object):
                     linkIndex=-1,
                     lateralFriction=interventions_dict[intervention],
                 )
+            elif intervention == "gravity":
+                self.pybullet_client.setGravity(interventions_dict[
+                                                    intervention][0],
+                                                interventions_dict[
+                                                    intervention][1],
+                                                interventions_dict[
+                                                    intervention][2])
+                self.current_gravity = interventions_dict[intervention]
             else:
                 raise Exception("The intervention on stage "
                                 "is not supported yet")
