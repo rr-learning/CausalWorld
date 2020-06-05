@@ -4,11 +4,20 @@ from causal_rl_bench.intervention_agents.base_policy import \
 
 class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, **kwargs):
+        """
+
+        :param kwargs:
+        """
         super(ReacherInterventionActorPolicy, self).__init__()
         self.joint_position_sampler_func = None
         self.goal_position_sampler_func = None
 
     def initialize(self, env):
+        """
+
+        :param env:
+        :return:
+        """
         self.joint_position_sampler_func = \
             env.get_robot().sample_joint_positions
         self.goal_position_sampler_func = \
@@ -16,6 +25,11 @@ class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
         return
 
     def _act(self, variables_dict):
+        """
+
+        :param variables_dict:
+        :return:
+        """
         interventions_dict = dict()
         interventions_dict['joint_positions'] = \
             self.joint_position_sampler_func()
@@ -29,5 +43,9 @@ class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
         return interventions_dict
 
     def get_params(self):
+        """
+
+        :return:
+        """
         return {'reacher_agent': dict()}
 

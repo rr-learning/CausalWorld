@@ -6,6 +6,10 @@ import numpy as np
 
 class PushingTaskGenerator(BaseTask):
     def __init__(self, **kwargs):
+        """
+
+        :param kwargs:
+        """
         super().__init__(task_name="pushing",
                          intervention_split=kwargs.get("intervention_split",
                                                        False),
@@ -37,11 +41,19 @@ class PushingTaskGenerator(BaseTask):
         self.previous_object_orientation = None
 
     def get_description(self):
+        """
+
+        :return:
+        """
         return \
             "Task where the goal is to push " \
             "an object towards a goal position"
 
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         self.stage.add_rigid_general_object(name="tool_block",
                                             shape="cube",
                                             mass=self.task_params[
@@ -66,6 +78,10 @@ class PushingTaskGenerator(BaseTask):
         return
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             #TODO: make it a function of size
@@ -81,6 +97,10 @@ class PushingTaskGenerator(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             self.testing_intervention_spaces[rigid_object]['position'][0][-1] \
@@ -95,6 +115,12 @@ class PushingTaskGenerator(BaseTask):
         return
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
+        """
+
+        :param desired_goal:
+        :param achieved_goal:
+        :return:
+        """
         rewards = list()
         block_position = self.stage.get_object_state('tool_block',
                                                      'position')
@@ -142,6 +168,11 @@ class PushingTaskGenerator(BaseTask):
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
+        """
+
+        :param update_task_info:
+        :return:
+        """
         self.previous_end_effector_positions = \
             update_task_info['current_end_effector_positions']
         self.previous_object_position = \
@@ -151,6 +182,10 @@ class PushingTaskGenerator(BaseTask):
         return
 
     def _set_task_state(self):
+        """
+
+        :return:
+        """
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
@@ -163,6 +198,11 @@ class PushingTaskGenerator(BaseTask):
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         #for example size on goal_or tool should be propagated to the other
         #TODO:if a goal block intervention would lead to change of sides then
         #change the other side as well?

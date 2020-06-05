@@ -12,6 +12,12 @@ from causal_rl_bench.task_generators.pick_and_place import \
 
 
 def task_generator(task_generator_id="reaching", **kwargs):
+    """
+
+    :param task_generator_id:
+    :param kwargs:
+    :return:
+    """
     if task_generator_id == "picking":
         task = PickingTaskGenerator(**kwargs)
     elif task_generator_id == "pushing":

@@ -398,3 +398,6 @@ class World(gym.Env):
 
     def get_robot(self):
         return self.__robot
+
+    def get_tracker(self):
+        return self.__tracker

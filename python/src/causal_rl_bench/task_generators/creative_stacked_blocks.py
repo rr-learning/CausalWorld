@@ -45,15 +45,24 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         self.current_number_of_obstacles = 0
 
     def get_description(self):
+        """
+
+        :return:
+        """
         return "Task where the goal is to stack arbitrary shapes of cuboids"
 
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         number_of_blocks_per_level = int(self.task_params["max_level_width"] \
                                      / self.task_params["blocks_min_size"])
         default_start_position = -(number_of_blocks_per_level *
                                   self.task_params["blocks_min_size"])/2
         default_start_position += self.task_params["blocks_min_size"]/2
-        curr_height = 0.01 - self.task_params["blocks_min_size"]/2
+        curr_height = self.stage.floor_height - \
+                      self.task_params["blocks_min_size"]/2
         change_per_level = 0.005
         rigid_block_side = 0.1
         for level in range(self.task_params["num_of_levels"]):
@@ -103,6 +112,12 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         return
 
     def sample_new_goal(self, training=True, level=None):
+        """
+
+        :param training:
+        :param level:
+        :return:
+        """
         intervention_dict = dict()
         if training:
             intervention_space = self.training_intervention_spaces
@@ -123,6 +138,10 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         return intervention_dict
 
     def get_task_generator_variables_values(self):
+        """
+
+        :return:
+        """
         return {'stack_levels': self.current_stack_levels,
                 'blocks_mass': self.current_blocks_mass,
                 'blocks_min_size': self.current_blocks_min_size,
@@ -130,6 +149,11 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                 'number_of_obstacles': self.current_number_of_obstacles}
 
     def apply_task_generator_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         #TODO: support level removal intervention
         # elif variable_name == 'stack_levels':
         #     #remove levels now
@@ -194,6 +218,10 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         return True, reset_observation_space
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         #for now remove all possible interventions on the goal in general
         #intevrntions on size of objects might become tricky to handle
         #contradicting interventions here?
@@ -215,6 +243,10 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(CreativeStackedBlocksGeneratorTask, self)._set_testing_intervention_spaces()
         for visual_object in self.stage.visual_objects:
             del self.testing_intervention_spaces[visual_object]
@@ -234,6 +266,14 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
 
     def _create_new_challenge(self, num_of_levels, blocks_min_size,
                               blocks_mass, max_level_width):
+        """
+
+        :param num_of_levels:
+        :param blocks_min_size:
+        :param blocks_mass:
+        :param max_level_width:
+        :return:
+        """
         self.stage.remove_everything()
         self.current_number_of_obstacles = 0
         self.task_stage_observation_keys = []
@@ -276,7 +316,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                                        (level_num+1) *
                                        blocks_min_size
                                        + (-blocks_min_size
-                                          /2+0.01)]
+                                          /2+self.stage.floor_height)]
                 self.task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_position')
@@ -395,6 +435,12 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
 
     def _generate_blocks_to_use(self, level_blocks,
                                 min_size):
+        """
+
+        :param level_blocks:
+        :param min_size:
+        :return:
+        """
         new_level_blocks = list(level_blocks)
         for i in range(len(level_blocks)):
             current_level_blocks = level_blocks[i]
@@ -425,6 +471,11 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         return new_level_blocks
 
     def _is_stable_structure(self, level_blocks):
+        """
+
+        :param level_blocks:
+        :return:
+        """
         # [[[width, center][width, center]]]
         current_min = -0.5
         current_max = 0.5
@@ -444,6 +495,12 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         return True
 
     def _get_block_sizes(self, level_blocks, min_size):
+        """
+
+        :param level_blocks:
+        :param min_size:
+        :return:
+        """
         block_sizes = []
         positions = []
         for i in range(len(level_blocks)):

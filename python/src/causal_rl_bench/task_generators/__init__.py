@@ -19,5 +19,6 @@ from causal_rl_bench.task_generators.reaching import \
 from causal_rl_bench.task_generators.towers import \
     TowersGeneratorTask
 
-from causal_rl_bench.task_generators.task import \
-    task_generator
+from causal_rl_bench.task_generators import task
+
+from causal_rl_bench.task_generators.base_task import BaseTask

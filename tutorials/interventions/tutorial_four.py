@@ -3,7 +3,7 @@ from causal_rl_bench.task_generators.task import task_generator
 
 
 def privileged_information():
-    task = task_generator(task_generator_id='pushing')
+    task = task_generator(task_generator_id='stacked_blocks')
     env = World(task=task, enable_visualization=True)
     env.reset()
     for _ in range(10):

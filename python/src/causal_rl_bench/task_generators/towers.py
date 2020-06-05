@@ -43,10 +43,18 @@ class TowersGeneratorTask(BaseTask):
         self.current_tower_center = np.array(self.task_params["tower_center"])
 
     def get_description(self):
+        """
+
+        :return:
+        """
         return "Task where the goal is to stack arbitrary number of towers side by side"
 
     #TODO: add obstacles interventions? up to a 10 obstacles?
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         self._set_up_cuboid(self.current_tower_dims,
                             self.current_number_of_blocks_in_tower,
                             self.current_tower_center)
@@ -55,7 +63,15 @@ class TowersGeneratorTask(BaseTask):
                 self.task_params["joint_positions"]
         return
 
-    def _set_up_cuboid(self, tower_dims, number_of_blocks_in_tower, center_position):
+    def _set_up_cuboid(self, tower_dims, number_of_blocks_in_tower,
+                       center_position):
+        """
+
+        :param tower_dims:
+        :param number_of_blocks_in_tower:
+        :param center_position:
+        :return:
+        """
         self.stage.remove_everything()
         self.task_stage_observation_keys = []
         block_size = tower_dims / number_of_blocks_in_tower
@@ -105,6 +121,10 @@ class TowersGeneratorTask(BaseTask):
         return
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         #for now remove all possible interventions on the goal in general
         #intevrntions on size of objects might become tricky to handle
         #contradicting interventions here?
@@ -124,6 +144,10 @@ class TowersGeneratorTask(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(TowersGeneratorTask, self)._set_testing_intervention_spaces()
         for visual_object in self.stage.visual_objects:
             del self.testing_intervention_spaces[visual_object]
@@ -140,6 +164,12 @@ class TowersGeneratorTask(BaseTask):
         return
 
     def sample_new_goal(self, training=True, level=None):
+        """
+
+        :param training:
+        :param level:
+        :return:
+        """
         intervention_dict = dict()
         if training:
             intervention_space = self.training_intervention_spaces
@@ -160,12 +190,21 @@ class TowersGeneratorTask(BaseTask):
         return intervention_dict
 
     def get_task_generator_variables_values(self):
+        """
+
+        :return:
+        """
         return {'tower_dims': self.current_tower_dims,
                 'blocks_mass': self.current_tool_block_mass,
                 'number_of_blocks_in_tower': self.current_number_of_blocks_in_tower,
                 'tower_center': self.current_tower_center}
 
     def apply_task_generator_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         # TODO: support level removal intervention
         if len(interventions_dict) == 0:
             return True, False

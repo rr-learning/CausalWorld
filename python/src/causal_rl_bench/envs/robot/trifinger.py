@@ -170,7 +170,7 @@ class TriFingerRobot(object):
                 tip_positions, list(self.get_rest_pose()[0]))
         else:
             positions = self.tri_finger.pybullet_inverse_kinematics(
-                tip_positions, default_pose)
+                tip_positions, list(default_pose))
         return positions
 
     def get_current_camera_observations(self):

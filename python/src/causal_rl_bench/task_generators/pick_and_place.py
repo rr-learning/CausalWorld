@@ -5,6 +5,10 @@ from causal_rl_bench.utils.rotation_utils import euler_to_quaternion, quaternion
 
 class PickAndPlaceTaskGenerator(BaseTask):
     def __init__(self, **kwargs):
+        """
+
+        :param kwargs:
+        """
         super().__init__(task_name="pick_and_place",
                          intervention_split=kwargs.get(
                              "intervention_split",
@@ -38,6 +42,10 @@ class PickAndPlaceTaskGenerator(BaseTask):
         self.previous_joint_velocities = None
 
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         self.stage.add_rigid_general_object(name="obstacle",
                                             shape="static_cube",
                                             size=
@@ -70,6 +78,10 @@ class PickAndPlaceTaskGenerator(BaseTask):
         return
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(PickAndPlaceTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             self.training_intervention_spaces[rigid_object]['position'][0][-1] \
@@ -84,6 +96,10 @@ class PickAndPlaceTaskGenerator(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(PickAndPlaceTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             self.testing_intervention_spaces[rigid_object]['position'][0][-1] \
@@ -98,6 +114,10 @@ class PickAndPlaceTaskGenerator(BaseTask):
         return
 
     def _set_task_state(self):
+        """
+
+        :return:
+        """
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
@@ -110,10 +130,20 @@ class PickAndPlaceTaskGenerator(BaseTask):
         return
 
     def get_description(self):
+        """
+
+        :return:
+        """
         return "Task where the goal is to pick a " \
                "cube and then place it in the other side of the wall"
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
+        """
+
+        :param desired_goal:
+        :param achieved_goal:
+        :return:
+        """
         rewards = list()
         block_position = self.stage.get_object_state('tool_block',
                                                      'position')
@@ -161,6 +191,11 @@ class PickAndPlaceTaskGenerator(BaseTask):
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
+        """
+
+        :param update_task_info:
+        :return:
+        """
         self.previous_end_effector_positions = \
             update_task_info['current_end_effector_positions']
         self.previous_object_position = \
@@ -170,6 +205,11 @@ class PickAndPlaceTaskGenerator(BaseTask):
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         #for example size on goal_or tool should be propagated to the other
         if 'goal_block' in interventions_dict:
             if 'size' in interventions_dict['goal_block']:
@@ -186,6 +226,11 @@ class PickAndPlaceTaskGenerator(BaseTask):
         return interventions_dict
 
     def _get_random_block_position_on_side(self, side):
+        """
+
+        :param side:
+        :return:
+        """
         if side == 0:
             return self.stage.random_position(height_limits=0.0425,
                                               allowed_section=np.array([[-0.5, -0.5, 0],
@@ -196,6 +241,12 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                                                         [0.5, 0.5, 0.5]]))
 
     def sample_new_goal(self, training=True, level=None):
+        """
+
+        :param training:
+        :param level:
+        :return:
+        """
         #TODO: discuss this with fred
         rigid_block_side = np.random.randint(0, 2)
         goal_block_side = not rigid_block_side

@@ -1,13 +1,14 @@
-"""
-causal_rl_bench.task_generators/reaching.py
-===========================================
-"""
+
 from causal_rl_bench.task_generators.base_task import BaseTask
 import numpy as np
 
 
 class ReachingTaskGenerator(BaseTask):
     def __init__(self, **kwargs):
+        """
+
+        :param kwargs:
+        """
         super().__init__(task_name="reaching",
                          intervention_split=kwargs.get("intervention_split",
                                                        False),
@@ -35,6 +36,10 @@ class ReachingTaskGenerator(BaseTask):
         self.current_number_of_obstacles = 0
 
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         self.stage.add_silhoutte_general_object(name="goal_60",
                                                 shape="sphere",
                                                 color=np.array([1, 0, 0]),
@@ -60,11 +65,21 @@ class ReachingTaskGenerator(BaseTask):
         return
 
     def get_description(self):
+        """
+
+        :return:
+        """
         return \
             "Task where the goal is to reach a " \
             "point for each finger"
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
+        """
+
+        :param desired_goal:
+        :param achieved_goal:
+        :return:
+        """
         end_effector_positions_goal = desired_goal
         current_end_effector_positions = achieved_goal
         previous_dist_to_goal = np.linalg.norm(
@@ -86,6 +101,11 @@ class ReachingTaskGenerator(BaseTask):
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
+        """
+
+        :param update_task_info:
+        :return:
+        """
         self.previous_end_effector_positions = \
             update_task_info['current_end_effector_positions']
         self.previous_joint_velocities = \
@@ -93,6 +113,10 @@ class ReachingTaskGenerator(BaseTask):
         return
 
     def _set_task_state(self):
+        """
+
+        :return:
+        """
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
@@ -101,6 +125,10 @@ class ReachingTaskGenerator(BaseTask):
         return
 
     def get_desired_goal(self):
+        """
+
+        :return:
+        """
         desired_goal = np.array([])
         desired_goal = np.append(desired_goal,
                                  self.stage.get_object_state('goal_60', 'position'))
@@ -111,12 +139,22 @@ class ReachingTaskGenerator(BaseTask):
         return desired_goal
 
     def get_achieved_goal(self):
+        """
+
+        :return:
+        """
         achieved_goal = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
         return np.array(achieved_goal)
 
     def _goal_distance(self, achieved_goal, desired_goal):
+        """
+
+        :param achieved_goal:
+        :param desired_goal:
+        :return:
+        """
         current_end_effector_positions = achieved_goal
         current_dist_to_goal = np.abs(desired_goal -
                                       current_end_effector_positions)
@@ -124,12 +162,21 @@ class ReachingTaskGenerator(BaseTask):
         return np.array(current_dist_to_goal_mean)
 
     def _check_preliminary_success(self, goal_distance):
+        """
+
+        :param goal_distance:
+        :return:
+        """
         if goal_distance < 0.01:
             return True
         else:
             return False
 
     def get_info(self):
+        """
+
+        :return:
+        """
         info = dict()
         info['possible_solution_intervention'] = dict()
         desired_goal = self.get_desired_goal()
@@ -140,6 +187,10 @@ class ReachingTaskGenerator(BaseTask):
         return info
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         # you can override these easily
         super(ReachingTaskGenerator,
               self)._set_training_intervention_spaces()
@@ -180,6 +231,10 @@ class ReachingTaskGenerator(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(ReachingTaskGenerator,
               self)._set_testing_intervention_spaces()
         lower_bound = (self.stage.floor_inner_bounding_box[1] -
@@ -226,12 +281,21 @@ class ReachingTaskGenerator(BaseTask):
         return
 
     def get_task_generator_variables_values(self):
+        """
+
+        :return:
+        """
         task_generator_variables = dict()
         task_generator_variables['number_of_obstacles'] = \
             self.current_number_of_obstacles
         return task_generator_variables
 
     def apply_task_generator_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         # TODO: support level removal intervention
         if len(interventions_dict) == 0:
             return True, False

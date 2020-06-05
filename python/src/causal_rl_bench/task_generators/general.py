@@ -48,9 +48,17 @@ class GeneralGeneratorTask(BaseTask):
         self.tool_block_size = np.array(self.task_params["tool_block_size"])
 
     def get_description(self):
+        """
+
+        :return:
+        """
         return "Task where the goal is to rearrange available objects into a target configuration"
 
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         self.generate_goal_configuration_with_objects(default_bool=True)
         if self.task_params["joint_positions"] is not None:
             self.initial_state['joint_positions'] = \
@@ -58,6 +66,10 @@ class GeneralGeneratorTask(BaseTask):
         return
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         # for now remove all possible interventions on the goal in general
         # intevrntions on size of objects might become tricky to handle
         # contradicting interventions here?
@@ -75,6 +87,10 @@ class GeneralGeneratorTask(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(GeneralGeneratorTask, self)._set_testing_intervention_spaces()
         for visual_object in self.stage.visual_objects:
             del self.testing_intervention_spaces[visual_object]
@@ -89,6 +105,12 @@ class GeneralGeneratorTask(BaseTask):
         return
 
     def sample_new_goal(self, training=True, level=None):
+        """
+
+        :param training:
+        :param level:
+        :return:
+        """
         intervention_dict = dict()
         if training:
             intervention_space = self.training_intervention_spaces
@@ -106,11 +128,20 @@ class GeneralGeneratorTask(BaseTask):
         return intervention_dict
 
     def get_task_generator_variables_values(self):
+        """
+
+        :return:
+        """
         return {'nums_objects': self.nums_objects,
                 'blocks_mass': self.tool_mass,
                 'tool_block_size': self.tool_block_size}
 
     def apply_task_generator_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         # TODO: support level removal intervention
         if len(interventions_dict) == 0:
             return True, False
@@ -139,6 +170,11 @@ class GeneralGeneratorTask(BaseTask):
         return True, reset_observation_space
 
     def generate_goal_configuration_with_objects(self, default_bool):
+        """
+
+        :param default_bool:
+        :return:
+        """
         #raise the fingers
         self.stage.remove_everything()
         self.task_stage_observation_keys = []
