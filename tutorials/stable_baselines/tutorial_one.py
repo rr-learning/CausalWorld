@@ -83,8 +83,8 @@ if __name__ == '__main__':
     fixed_position = bool(args['fixed_position'])
     assert (((float(total_time_steps_per_update) /
              num_of_envs)/5).is_integer())
-    ppo_config = {"gamma": 0.99,
-                  "n_steps": 100000,
+    ppo_config = {"gamma": 0.9995,
+                  "n_steps": 5000,
                   "ent_coef": 0,
                   "learning_rate": 0.00025,
                   "vf_coef": 0.5,
