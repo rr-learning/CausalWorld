@@ -11,6 +11,7 @@ class MyOwnTask(BaseTask):
                          sparse_reward_weight=1,
                          dense_reward_weights=np.array([]))
 
+    #This is not even needed, it will just be an empty stage
     def _set_up_stage_arena(self):
         self.stage.add_rigid_mesh_object('tool_block',
                                          filename='./assets/719.obj')

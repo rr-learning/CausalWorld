@@ -10,6 +10,16 @@ class BaseTask(object):
                  dense_reward_weights=np.array([]),
                  is_goal_distance_dense=True,
                  calculate_additional_dense_rewards=True):
+        """
+
+        :param task_name:
+        :param intervention_split:
+        :param training:
+        :param sparse_reward_weight:
+        :param dense_reward_weights:
+        :param is_goal_distance_dense:
+        :param calculate_additional_dense_rewards:
+        """
         self.robot = None
         self.stage = None
         self.task_solved = False
@@ -43,36 +53,81 @@ class BaseTask(object):
         return
 
     def is_in_training_mode(self):
+        """
+
+        :return:
+        """
         if self.task_params['intervention_split'] and self.task_params['training']:
             return True
         else:
             return False
 
+    def set_super_sparse_reward(self):
+        """
+
+        :return:
+        """
+        self.task_params['is_goal_distance_dense'] = True
+
     def get_description(self):
+        """
+
+        :return:
+        """
         return
 
     def _set_task_state(self):
+        """
+
+        :return:
+        """
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         # handle the contradictory intervention
         # that changes each other (objects -> silhouettes)
         # and other way around sometimes
         return interventions_dict
 
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         return
 
     def _set_up_non_default_observations(self):
+        """
+
+        :return:
+        """
         return
 
     def get_task_generator_variables_values(self):
+        """
+
+        :return:
+        """
         return {}
 
     def apply_task_generator_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         return True, False
 
     def get_info(self):
+        """
+
+        :return:
+        """
         info = dict()
         info['possible_solution_intervention'] = dict()
         for rigid_object in self.stage.rigid_objects:
@@ -87,12 +142,29 @@ class BaseTask(object):
         return info
 
     def _update_task_state(self, update_task_state_dict):
+        """
+
+        :param update_task_state_dict:
+        :return:
+        """
         return
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
+        """
+
+        :param desired_goal:
+        :param achieved_goal:
+        :return:
+        """
         return np.array([]), None
 
     def sample_new_goal(self, training=True, level=None):
+        """
+
+        :param training:
+        :param level:
+        :return:
+        """
         #TODO: for now we just vary position as a new goal
         #Need to generalize this
         intervention_dict = dict()
@@ -110,6 +182,10 @@ class BaseTask(object):
         return intervention_dict
 
     def reset_default_state(self):
+        """
+
+        :return:
+        """
         self.stage.remove_everything()
         self.task_stage_observation_keys = []
         self.initial_state = dict(self.default_state)
@@ -119,6 +195,10 @@ class BaseTask(object):
         self.stage.finalize_stage()
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         #you can override these easily
         self.training_intervention_spaces = dict()
         self.training_intervention_spaces['joint_positions'] = \
@@ -165,6 +245,10 @@ class BaseTask(object):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         # you can override these easily
         self.testing_intervention_spaces = dict()
         self.testing_intervention_spaces['joint_positions'] = \
@@ -211,6 +295,10 @@ class BaseTask(object):
         return
 
     def get_desired_goal(self):
+        """
+
+        :return:
+        """
         desired_goal = []
         for visual_goal in self.stage.visual_objects:
             desired_goal.append(self.stage.visual_objects[visual_goal]
@@ -218,6 +306,10 @@ class BaseTask(object):
         return np.array(desired_goal)
 
     def get_achieved_goal(self):
+        """
+
+        :return:
+        """
         achieved_goal = []
         for rigid_object in self.stage.rigid_objects:
             if self.stage.rigid_objects[rigid_object].is_not_fixed:
@@ -226,6 +318,12 @@ class BaseTask(object):
         return np.array(achieved_goal)
 
     def _goal_distance(self, achieved_goal, desired_goal):
+        """
+
+        :param achieved_goal:
+        :param desired_goal:
+        :return:
+        """
         # intersection areas / union of all visual_objects
         intersection_area = 0
         #TODO: under the assumption that the visual objects dont intersect
@@ -243,6 +341,11 @@ class BaseTask(object):
         return sparse_reward
 
     def _update_success(self, goal_distance):
+        """
+
+        :param goal_distance:
+        :return:
+        """
         preliminary_success = self._check_preliminary_success(goal_distance)
         if preliminary_success:
             self.task_solved = True
@@ -253,12 +356,21 @@ class BaseTask(object):
         return
 
     def _check_preliminary_success(self, goal_distance):
+        """
+
+        :param goal_distance:
+        :return:
+        """
         if goal_distance > 0.9:
             return True
         else:
             return False
 
     def get_reward(self):
+        """
+
+        :return:
+        """
         desired_goal = self.get_desired_goal()
         achieved_goal = self.get_achieved_goal()
         goal_distance = self._goal_distance(desired_goal=desired_goal,
@@ -283,6 +395,13 @@ class BaseTask(object):
         return reward
 
     def compute_reward(self, achieved_goal, desired_goal, info):
+        """
+
+        :param achieved_goal:
+        :param desired_goal:
+        :param info:
+        :return:
+        """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
         if not self.task_params['is_goal_distance_dense']:
@@ -295,6 +414,12 @@ class BaseTask(object):
         return reward
 
     def init_task(self, robot, stage):
+        """
+
+        :param robot:
+        :param stage:
+        :return:
+        """
         self.robot = robot
         self.stage = stage
         self.initial_state['joint_positions'] = \
@@ -313,6 +438,14 @@ class BaseTask(object):
     def _setup_non_default_robot_observation_key(self, observation_key,
                                                  observation_function,
                                                  lower_bound, upper_bound):
+        """
+
+        :param observation_key:
+        :param observation_function:
+        :param lower_bound:
+        :param upper_bound:
+        :return:
+        """
         self.robot.add_observation(observation_key, lower_bound=lower_bound,
                                    upper_bound=upper_bound)
         self._non_default_robot_observation_funcs[observation_key] = \
@@ -322,6 +455,14 @@ class BaseTask(object):
     def _setup_non_default_stage_observation_key(self, observation_key,
                                                  observation_function,
                                                  lower_bound, upper_bound):
+        """
+
+        :param observation_key:
+        :param observation_function:
+        :param lower_bound:
+        :param upper_bound:
+        :return:
+        """
         self.stage.add_observation(observation_key, lower_bound=lower_bound,
                                    upper_bound=upper_bound)
         self._non_default_stage_observation_funcs[observation_key] = \
@@ -329,6 +470,11 @@ class BaseTask(object):
         return
 
     def reset_task(self, interventions_dict=None):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         self.robot.clear()
         self.stage.clear()
         self.task_solved = False
@@ -378,6 +524,10 @@ class BaseTask(object):
         return success_signal, interventions_info, reset_observation_space_signal
 
     def filter_structured_observations(self):
+        """
+
+        :return:
+        """
         robot_observations_dict = self.robot.\
             get_current_observations(self._robot_observation_helper_keys)
         stage_observations_dict = self.stage.\
@@ -427,9 +577,17 @@ class BaseTask(object):
         return observations_filtered
 
     def get_task_params(self):
+        """
+
+        :return:
+        """
         return self.task_params
 
     def is_done(self):
+        """
+
+        :return:
+        """
         #here we consider that you succeeded if u stayed 0.5 sec in
         #the goal position
         if self.finished_episode:
@@ -440,11 +598,20 @@ class BaseTask(object):
         return self.finished_episode
 
     def set_sparse_reward(self, sparse_reward_weight):
+        """
+
+        :param sparse_reward_weight:
+        :return:
+        """
         self.task_params["sparse_reward_weight"] = \
             sparse_reward_weight
         return
 
     def do_single_random_intervention(self):
+        """
+
+        :return:
+        """
         interventions_dict = dict()
         if self.task_params['training']:
             intervention_space = self.training_intervention_spaces
@@ -476,12 +643,24 @@ class BaseTask(object):
                reset_observation_space_signal
 
     def get_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         return self.training_intervention_spaces
 
     def get_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         return self.testing_intervention_spaces
 
     def get_current_variables_values(self):
+        """
+
+        :return:
+        """
         variable_params = dict()
         #get the robots ones
         variable_params.\
@@ -495,6 +674,10 @@ class BaseTask(object):
         return variable_params
 
     def get_current_task_parameters(self):
+        """
+
+        :return:
+        """
         #this is all the variables that are available and exposed
         current_variables_values = self.get_current_variables_values()
         #filter them only if intervention spaces split is enforced
@@ -520,6 +703,11 @@ class BaseTask(object):
         return task_params_dict
 
     def is_intervention_in_bounds(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         if self.task_params['training']:
             intervention_space = self.training_intervention_spaces
         else:
@@ -545,6 +733,11 @@ class BaseTask(object):
         return True
 
     def divide_intervention_dict(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         #TODO: for now a heuristic for naming conventions
         robot_intervention_keys = \
             self.robot.get_current_variables_values().keys()
@@ -571,6 +764,12 @@ class BaseTask(object):
 
     def apply_interventions(self, interventions_dict,
                             check_bounds=False):
+        """
+
+        :param interventions_dict:
+        :param check_bounds:
+        :return:
+        """
         interventions_info = {'out_bounds': False,
                               'robot_infeasible': None,
                               'stage_infeasible': None,
@@ -620,6 +819,12 @@ class BaseTask(object):
                interventions_info, reset_observation_space_signal
 
     def do_intervention(self, interventions_dict, check_bounds=None):
+        """
+
+        :param interventions_dict:
+        :param check_bounds:
+        :return:
+        """
         if check_bounds is None:
             check_bounds = self.task_params['intervention_split']
         success_signal, interventions_info, reset_observation_space_signal = \

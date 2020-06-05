@@ -107,6 +107,13 @@ class SilhouetteObject(object):
         """
         return self._name
 
+    def get_block_id(self):
+        """
+
+        :return:
+        """
+        return self._block_id
+
 
 class SCuboid(SilhouetteObject):
     def __init__(

@@ -5,12 +5,23 @@ from causal_rl_bench.intervention_agents.base_policy import \
 
 class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, positions=True, orientations=True, **kwargs):
+        """
+
+        :param positions:
+        :param orientations:
+        :param kwargs:
+        """
         super(RigidPoseInterventionActorPolicy, self).__init__()
         self.task_intervention_space = None
         self.positions = positions
         self.orientations = orientations
 
     def initialize(self, env):
+        """
+
+        :param env:
+        :return:
+        """
         self.task_intervention_space =\
             env.task.get_testing_intervention_spaces()
         self.task_intervention_space.\
@@ -18,6 +29,11 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
         return
 
     def _act(self, variables_dict):
+        """
+
+        :param variables_dict:
+        :return:
+        """
         interventions_dict = dict()
         for variable in self.task_intervention_space:
             if variable.startswith('tool'):
@@ -39,5 +55,9 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
         return interventions_dict
 
     def get_params(self):
+        """
+
+        :return:
+        """
         return {'rigid_pose_agent': {'positions': self.positions,
                                      'orientations': self.orientations}}

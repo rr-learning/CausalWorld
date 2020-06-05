@@ -26,6 +26,7 @@ class Stage(object):
         self.latest_observations = None
         self.goal_image_pybullet_instance = goal_image_pybullet_instance
         self.floor_height = 0.01
+        #TODO: discuss this with Manuel and Felix for the bounds
         self.floor_inner_bounding_box = np.array(
             [[-0.15, -0.15, self.floor_height], [0.15, 0.15, 0.3]])
         if self.goal_image_pybullet_instance is not None:
@@ -57,11 +58,11 @@ class Stage(object):
         else:
             self.name_keys.remove(name)
         if name in self.rigid_objects.keys():
-            block_id = self.rigid_objects[name].block_id
+            block_id = self.rigid_objects[name].get_block_id()
             del self.rigid_objects[name]
             self.pybullet_client.removeBody(block_id)
         elif name in self.visual_objects.keys():
-            block_id = self.visual_objects[name].block_id
+            block_id = self.visual_objects[name].get_block_id()
             del self.visual_objects[name]
             self.pybullet_client.removeBody(block_id)
         return

@@ -5,10 +5,19 @@ import numpy as np
 
 class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, **kwargs):
+        """
+
+        :param kwargs:
+        """
         super(VisualInterventionActorPolicy, self).__init__()
         self.task_intervention_space = None
 
     def initialize(self, env):
+        """
+
+        :param env:
+        :return:
+        """
         if env.is_in_training_mode():
             self.task_intervention_space =\
                 env.task.get_testing_intervention_spaces()
@@ -18,6 +27,11 @@ class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
         return
 
     def _act(self, variables_dict):
+        """
+
+        :param variables_dict:
+        :return:
+        """
         interventions_dict = dict()
         for variable in self.task_intervention_space:
             if isinstance(self.task_intervention_space[variable], dict):
@@ -35,4 +49,8 @@ class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
         return interventions_dict
 
     def get_params(self):
+        """
+
+        :return:
+        """
         return {'visual_agent': dict()}

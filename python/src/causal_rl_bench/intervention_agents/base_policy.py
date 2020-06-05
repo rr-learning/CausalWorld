@@ -1,9 +1,3 @@
-"""
-causal_rl_bench/meta_agents/base_policy.py
-=========================================
-"""
-
-
 class BaseInterventionActorPolicy(object):
     """This class indicates the interface of a meta actor"""
     def __init__(self, **kwargs):
@@ -41,9 +35,20 @@ class BaseInterventionActorPolicy(object):
         return interventions_dict
 
     def _act(self, variables_dict):
+        """
+
+        :param variables_dict:
+        :return:
+        """
         return {}
 
     def __validate_intervention_dict(self, variables_dict, intervention_dict):
+        """
+
+        :param variables_dict:
+        :param intervention_dict:
+        :return:
+        """
         for intervention in intervention_dict:
             if intervention not in variables_dict:
                 raise Exception("the meta actor "
@@ -51,5 +56,9 @@ class BaseInterventionActorPolicy(object):
                                 "on a variable that is not part of its input")
 
     def get_params(self):
+        """
+
+        :return:
+        """
         raise Exception("get params is not implemented")
 

@@ -20,8 +20,8 @@ class HERGoalEnvWrapper(gym.GoalEnv):
             self.env.scale_reward_by_dt = False
         self.env.task.task_params['calculate_additional_dense_rewards'] = False
         self.env.task.set_sparse_reward(sparse_reward_weight)
-        self.env.task.task_params['is_goal_distance_dense'] = \
-            is_goal_distance_dense
+        if not is_goal_distance_dense:
+            self.env.task.set_super_sparse_reward()
         self.observation_space = spaces.Dict(dict(desired_goal=spaces.Box(-np.inf,
                                                                           np.inf,
                                                                           shape=goal_space_shape,

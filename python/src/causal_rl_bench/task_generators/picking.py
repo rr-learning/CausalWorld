@@ -4,6 +4,10 @@ import numpy as np
 
 class PickingTaskGenerator(BaseTask):
     def __init__(self, **kwargs):
+        """
+
+        :param kwargs:
+        """
         super().__init__(task_name="picking",
                          intervention_split=kwargs.get(
                              "intervention_split",
@@ -35,10 +39,18 @@ class PickingTaskGenerator(BaseTask):
         self.previous_joint_velocities = None
 
     def get_description(self):
+        """
+
+        :return:
+        """
         return "Task where the goal is to pick a " \
                "cube towards a goal height"
 
     def _set_up_stage_arena(self):
+        """
+
+        :return:
+        """
         self.stage.add_rigid_general_object(name="tool_block",
                                             shape="cube",
                                             mass=self.task_params[
@@ -67,6 +79,10 @@ class PickingTaskGenerator(BaseTask):
         return
 
     def _set_training_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(PickingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             self.training_intervention_spaces[rigid_object]['position'][0][
@@ -87,6 +103,10 @@ class PickingTaskGenerator(BaseTask):
         return
 
     def _set_testing_intervention_spaces(self):
+        """
+
+        :return:
+        """
         super(PickingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self.stage.rigid_objects:
             self.testing_intervention_spaces[rigid_object]['position'][0][
@@ -107,6 +127,12 @@ class PickingTaskGenerator(BaseTask):
         return
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
+        """
+
+        :param desired_goal:
+        :param achieved_goal:
+        :return:
+        """
         rewards = list()
         block_position = self.stage.get_object_state('tool_block',
                                                      'position')
@@ -144,6 +170,11 @@ class PickingTaskGenerator(BaseTask):
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
+        """
+
+        :param update_task_info:
+        :return:
+        """
         self.previous_end_effector_positions = \
             update_task_info['current_end_effector_positions']
         self.previous_object_position = \
@@ -153,6 +184,10 @@ class PickingTaskGenerator(BaseTask):
         return
 
     def _set_task_state(self):
+        """
+
+        :return:
+        """
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
                 self.robot.latest_full_state.position)
@@ -165,6 +200,11 @@ class PickingTaskGenerator(BaseTask):
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         # for example size on goal_or tool should be propagated to the other
         if 'goal_block' in interventions_dict:
             if 'size' in interventions_dict['goal_block']:
@@ -181,6 +221,12 @@ class PickingTaskGenerator(BaseTask):
         return interventions_dict
 
     def sample_new_goal(self, training=True, level=None):
+        """
+
+        :param training:
+        :param level:
+        :return:
+        """
         # TODO: make sure its feasible goal by
         intervention_dict = dict()
         if training:
@@ -193,10 +239,19 @@ class PickingTaskGenerator(BaseTask):
         return intervention_dict
 
     def get_task_generator_variables_values(self):
+        """
+
+        :return:
+        """
         return {'goal_height': self.stage.get_object_state('goal_block',
                                                            'position')[-1]}
 
     def apply_task_generator_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
         reset_observation_space = False
         new_interventions_dict = dict()
         for intervention_variable in interventions_dict:

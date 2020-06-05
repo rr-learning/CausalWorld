@@ -104,11 +104,11 @@ class EvaluationPipeline(object):
         self.env.close()
         scores = self.get_metric_scores()
         scores['total_intervention_steps'] = \
-            self.env.tracker.get_total_intervention_steps()
+            self.env.get_tracker().get_total_intervention_steps()
         scores['total_interventions'] = \
-            self.env.tracker.get_total_interventions()
+            self.env.get_tracker().get_total_interventions()
         scores['total_timesteps'] = \
-            self.env.tracker.get_total_time_steps()
+            self.env.get_tracker().get_total_time_steps()
         scores['num_of_seeds'] = \
             num_seeds
         scores['episodes_per_seed'] = \
@@ -123,15 +123,15 @@ class EvaluationPipeline(object):
                 scores['intervention_set_chosen'] = \
                     "testing"
         scores['total_resets'] = \
-            self.env.tracker.get_total_resets()
+            self.env.get_tracker().get_total_resets()
         scores['total_invalid_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_intervention_steps()
+            self.env.get_tracker().get_total_invalid_intervention_steps()
         scores['total_invalid_robot_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_robot_intervention_steps()
+            self.env.get_tracker().get_total_invalid_robot_intervention_steps()
         scores['total_invalid_stage_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_stage_intervention_steps()
+            self.env.get_tracker().get_total_invalid_stage_intervention_steps()
         scores['total_invalid_task_generator_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_task_generator_intervention_steps()
+            self.env.get_tracker().get_total_invalid_task_generator_intervention_steps()
         scores['total_invalid_out_of_bounds_intervention_steps'] = \
-            self.env.tracker.get_total_invalid_out_of_bounds_intervention_steps()
+            self.env.get_tracker().get_total_invalid_out_of_bounds_intervention_steps()
         return scores

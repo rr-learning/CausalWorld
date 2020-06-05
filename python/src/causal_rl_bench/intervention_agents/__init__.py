@@ -12,3 +12,5 @@ from causal_rl_bench.intervention_agents.visual_agent import \
     VisualInterventionActorPolicy
 from causal_rl_bench.intervention_agents.physical_proporties_agent import \
     PhysicalPropertiesInterventionActorPolicy
+from causal_rl_bench.intervention_agents.base_policy import \
+    BaseInterventionActorPolicy

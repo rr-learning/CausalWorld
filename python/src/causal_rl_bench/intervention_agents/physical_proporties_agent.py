@@ -5,12 +5,22 @@ import numpy as np
 
 class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, group, **kwargs):
+        """
+
+        :param group:
+        :param kwargs:
+        """
         #group can be robot stage floor or tool
         super(PhysicalPropertiesInterventionActorPolicy, self).__init__()
         self.task_intervention_space = None
         self.group = group
 
     def initialize(self, env):
+        """
+
+        :param env:
+        :return:
+        """
         if env.is_in_training_mode():
             self.task_intervention_space =\
                 env.task.get_testing_intervention_spaces()
@@ -20,6 +30,11 @@ class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
         return
 
     def _act(self, variables_dict):
+        """
+
+        :param variables_dict:
+        :return:
+        """
         interventions_dict = dict()
         for variable in self.task_intervention_space:
             if variable.startswith(self.group):
@@ -50,4 +65,8 @@ class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
         return interventions_dict
 
     def get_params(self):
+        """
+
+        :return:
+        """
         return {'physical_properties_agent': {'group': self.group}}

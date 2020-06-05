@@ -115,6 +115,13 @@ class RigidObject(object):
         """
         return self._name
 
+    def get_block_id(self):
+        """
+
+        :return:
+        """
+        return self._block_id
+
 
 class Cuboid(RigidObject):
     def __init__(
