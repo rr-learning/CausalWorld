@@ -4,14 +4,13 @@ from causal_rl_bench.envs.world import World
 from causal_rl_bench.metrics.mean_sucess_rate_metric import \
     MeanSuccessRateMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
-from causal_rl_bench.wrappers.curriculum_wrappers \
-    import CurriculumWrapper
+from causal_rl_bench.wrappers.protocol_wrapper \
+    import ProtocolWrapper
 from causal_rl_bench.loggers.tracker import Tracker
-
+import json
 
 class EvaluationPipeline(object):
-    def __init__(self, intervention_actors, episodes_hold,
-                 timesteps_hold, tracker_path=None,
+    def __init__(self, evaluation_protocols, tracker_path=None,
                  world_params=None, task_params=None,
                  intervention_split=True, training=False,
                  visualize_evaluation=False, initial_seed=0):
@@ -59,23 +58,21 @@ class EvaluationPipeline(object):
                                  seed=self.initial_seed,
                                  data_recorder=self.data_recorder,
                                  enable_visualization=visualize_evaluation)
-        evaluation_episode_length_in_secs = 1
+        evaluation_episode_length_in_secs = self.task.get_max_episode_length()
         self.time_steps_for_evaluation = \
             int(evaluation_episode_length_in_secs / self.env.dt)
-        #wrap now the environment
-        self.env = CurriculumWrapper(self.env,
-                                     intervention_actors, episodes_hold,
-                                     timesteps_hold)
 
+        self.evaluation_env = self.env
+        self.evaluation_protocols = evaluation_protocols
         self.metrics_list = []
         self.metrics_list.append(MeanSuccessRateMetric())
         return
 
     def run_episode(self, policy_fn):
-        obs = self.env.reset()
+        obs = self.evaluation_env.reset()
         for _ in range(self.time_steps_for_evaluation):
             desired_action = policy_fn(obs)
-            obs, rew, done, info = self.env.step(desired_action)
+            obs, rew, done, info = self.evaluation_env.step(desired_action)
         return self.data_recorder.get_current_episode()
 
     def process_metrics(self, episode):
@@ -89,49 +86,55 @@ class EvaluationPipeline(object):
             metrics[metric.name] = metric.get_metric_score()
         return metrics
 
-    def evaluate_policy(self, policy, num_seeds=5,
-                        episodes_per_seed=5):
-        evaluation_budget = self.time_steps_for_evaluation * \
-                            episodes_per_seed * num_seeds
-        for i in range(num_seeds):
-            self.env.seed(seed=self.initial_seed + i)
-            self.env.interventions_curriculum.reset()
-            self.env.reset_default_goal()
-            for _ in range(episodes_per_seed):
+    def evaluate_policy(self, policy):
+        pipeline_scores = dict()
+        for evaluation_protocol in self.evaluation_protocols:
+            self.evaluation_env = ProtocolWrapper(self.env, evaluation_protocol)
+            episodes_in_protocol = evaluation_protocol.get_num_episodes()
+            for _ in range(episodes_in_protocol):
                 current_episode = self.run_episode(policy)
                 self.process_metrics(current_episode)
                 self.data_recorder.clear_recorder()
-        self.env.close()
-        scores = self.get_metric_scores()
-        scores['total_intervention_steps'] = \
-            self.env.get_tracker().get_total_intervention_steps()
-        scores['total_interventions'] = \
-            self.env.get_tracker().get_total_interventions()
-        scores['total_timesteps'] = \
-            self.env.get_tracker().get_total_time_steps()
-        scores['num_of_seeds'] = \
-            num_seeds
-        scores['episodes_per_seed'] = \
-            episodes_per_seed
-        scores['limited_exposed_intervention_variables'] = \
-            self.intervention_split
-        if self.intervention_split:
-            if self.training:
-                scores['intervention_set_chosen'] = \
-                    "training"
-            else:
-                scores['intervention_set_chosen'] = \
-                    "testing"
-        scores['total_resets'] = \
-            self.env.get_tracker().get_total_resets()
-        scores['total_invalid_intervention_steps'] = \
-            self.env.get_tracker().get_total_invalid_intervention_steps()
-        scores['total_invalid_robot_intervention_steps'] = \
-            self.env.get_tracker().get_total_invalid_robot_intervention_steps()
-        scores['total_invalid_stage_intervention_steps'] = \
-            self.env.get_tracker().get_total_invalid_stage_intervention_steps()
-        scores['total_invalid_task_generator_intervention_steps'] = \
-            self.env.get_tracker().get_total_invalid_task_generator_intervention_steps()
-        scores['total_invalid_out_of_bounds_intervention_steps'] = \
-            self.env.get_tracker().get_total_invalid_out_of_bounds_intervention_steps()
-        return scores
+            scores = self.get_metric_scores()
+            scores['total_intervention_steps'] = \
+                self.env.get_tracker().get_total_intervention_steps()
+            scores['total_interventions'] = \
+                self.env.get_tracker().get_total_interventions()
+            scores['total_timesteps'] = \
+                self.env.get_tracker().get_total_time_steps()
+            # Not sure why we should care about intervention_split during evaluation. That is typically
+            # on the designer of the protocol right?
+            # scores['limited_exposed_intervention_variables'] = \
+            #     self.intervention_split
+            # if self.intervention_split:
+            #     if self.training:
+            #         scores['intervention_set_chosen'] = \
+            #             "training"
+            #     else:
+            #         scores['intervention_set_chosen'] = \
+            #             "testing"
+            scores['total_resets'] = \
+                self.env.get_tracker().get_total_resets()
+            # Why are we interested in the invalid interactions here? if they are invalid,
+            # that's the protocol designers fault
+
+            # scores['total_invalid_intervention_steps'] = \
+            #     self.env.get_tracker().get_total_invalid_intervention_steps()
+            # scores['total_invalid_robot_intervention_steps'] = \
+            #     self.env.get_tracker().get_total_invalid_robot_intervention_steps()
+            # scores['total_invalid_stage_intervention_steps'] = \
+            #     self.env.get_tracker().get_total_invalid_stage_intervention_steps()
+            # scores['total_invalid_task_generator_intervention_steps'] = \
+            #     self.env.get_tracker().get_total_invalid_task_generator_intervention_steps()
+            # scores['total_invalid_out_of_bounds_intervention_steps'] = \
+            #     self.env.get_tracker().get_total_invalid_out_of_bounds_intervention_steps()
+            pipeline_scores[evaluation_protocol.get_name()] = scores
+        self.evaluation_env.close()
+        self.pipeline_scores = pipeline_scores
+        return pipeline_scores
+
+    def save_scores(self, evaluation_path):
+        file_path = os.path.join(evaluation_path, 'scores.json')
+        with open(file_path, "w") as json_file:
+            json.dump(self.pipeline_scores, json_file)
+

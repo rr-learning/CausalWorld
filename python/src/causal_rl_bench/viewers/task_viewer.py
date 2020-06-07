@@ -13,8 +13,7 @@ def get_world(task_generator_id, task_params, world_params,
     else:
         task = task_generator(task_generator_id, **task_params)
     env = World(task, **world_params,
-                logging=False,
-                enable_visualization=enable_visualization)
+                logging=False)
     for i in range(len(env_wrappers)):
         env = env_wrappers[i](env, **env_wrappers_args[i])
     return env

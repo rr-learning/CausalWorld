@@ -2,6 +2,7 @@ from causal_rl_bench.task_generators.base_task import BaseTask
 from causal_rl_bench.utils.rotation_utils import quaternion_conjugate, \
     quaternion_mul, euler_to_quaternion
 import numpy as np
+import causal_rl_bench.evaluation.protocols as protocols
 
 
 class PushingTaskGenerator(BaseTask):
@@ -48,6 +49,9 @@ class PushingTaskGenerator(BaseTask):
         return \
             "Task where the goal is to push " \
             "an object towards a goal position"
+
+    def get_max_episode_length(self):
+        return 5
 
     def _set_up_stage_arena(self):
         """
@@ -219,3 +223,13 @@ class PushingTaskGenerator(BaseTask):
                 interventions_dict['goal_block']['size'] = \
                     interventions_dict['tool_block']['size']
         return interventions_dict
+
+    @staticmethod
+    def get_default_evaluation_protocols():
+        evaluation_protocols = [protocols.GoalPosesOOD(),
+                                protocols.InitialPosesOOD(),
+                                protocols.SameMassesOOD(),
+                                protocols.SameColorsOOD(),
+                                protocols.ObjectSizesOOD(),
+                                protocols.FloorFrictionOOD()]
+        return evaluation_protocols

@@ -1,4 +1,4 @@
-class InterventionsCurriculum(object):
+class Curriculum(object):
     def __init__(self, intervention_actors, episodes_hold,
                  timesteps_hold, **kwargs):
         self.intervention_actors = intervention_actors

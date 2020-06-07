@@ -219,6 +219,8 @@ class BaseTask(object):
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
+            self.training_intervention_spaces[rigid_object]['mass'] = \
+                np.array([0.05, 0.1])
         for visual_object in self.stage.visual_objects:
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
@@ -269,6 +271,8 @@ class BaseTask(object):
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
+            self.testing_intervention_spaces[rigid_object]['mass'] = \
+                np.array([0.1, 0.2])
         for visual_object in self.stage.visual_objects:
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
@@ -833,3 +837,6 @@ class BaseTask(object):
         # self._set_task_state()
         return success_signal, interventions_info, \
                reset_observation_space_signal
+
+    def get_max_episode_length(self):
+        return 5

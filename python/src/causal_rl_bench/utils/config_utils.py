@@ -6,7 +6,7 @@ from causal_rl_bench.envs.world import World
 from causal_rl_bench.wrappers import ObjectSelectorWrapper, DeltaAction, MovingAverageActionEnvWrapper, \
     HERGoalEnvWrapper, CurriculumWrapper
 from causal_rl_bench.utils.intervention_agent_utils import initialize_intervention_agents
-from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculum
+from causal_rl_bench.curriculum.curriculum import Curriculum
 
 
 def save_config_file(section_names, config_dicts, file_path):

@@ -1,7 +1,7 @@
 from causal_rl_bench.agents.reacher_policy import ReacherActorPolicy
 from causal_rl_bench.intervention_agents import GoalInterventionActorPolicy, ReacherInterventionActorPolicy
-from causal_rl_bench.curriculum import InterventionsCurriculum
-from causal_rl_bench.evaluation_pipelines.evaluation import EvaluationPipeline
+from causal_rl_bench.curriculum import Curriculum
+from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 
 
 def evaluate_1():

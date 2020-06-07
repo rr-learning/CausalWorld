@@ -1,1 +1,1 @@
-from causal_rl_bench.curriculum.interventions_curriculum import InterventionsCurriculum
+from causal_rl_bench.curriculum.curriculum import Curriculum
