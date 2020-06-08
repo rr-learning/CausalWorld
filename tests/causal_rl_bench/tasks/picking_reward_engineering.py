@@ -23,6 +23,7 @@ def grip_block(env):
     # grasp the block now
     for _ in range(250):
         obs, reward, done, info = env.step(desired_action)
+        print(reward)
     print("reached instead ", obs[27:27+9])
     return desired_action
 
@@ -34,6 +35,7 @@ def lift_block(env, desired_grip):
         desired_action[5] += 0.005
         for _ in range(10):
             obs, reward, done, info = env.step(desired_action)
+            print(reward)
 
 
 def test_mass():
@@ -44,7 +46,7 @@ def test_mass():
                 normalize_actions=False,
                 normalize_observations=False,
                 max_episode_length=10000)
-    for _ in range(10):
+    for _ in range(1):
         obs = env.reset()
         lift_last_finger_first(env, obs)
         desired_grip = grip_block(env)

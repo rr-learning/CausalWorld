@@ -17,7 +17,8 @@ class PickingTaskGenerator(BaseTask):
                          kwargs.get("sparse_reward_weight", 0),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
-                                    np.array([250, 125, 750, 0])))
+                                    np.array([0, 1000, 0, 100, 0, 0, 1000,
+                                              0])))
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -133,6 +134,15 @@ class PickingTaskGenerator(BaseTask):
         :param achieved_goal:
         :return:
         """
+        #rewards order
+        #1) delta how much are you getting the block close to the goal
+        #2) absolute how much the block is close to the goal
+        #3) delta how much are you getting the block close to the center
+        #4) absolute how much is the the block is close to the center
+        #5) delta how much the fingers are close to block
+        #6) absolute how much fingers are close to block
+        #7) mean dist_of closest two fingers outside_bounding_ellipsoid
+        #8) delta in joint velocities
         rewards = list()
         block_position = self.stage.get_object_state('tool_block',
                                                      'position')
@@ -143,12 +153,14 @@ class PickingTaskGenerator(BaseTask):
                                      target_height)
         current_block_to_goal = abs(block_position[2] - target_height)
         rewards.append(previous_block_to_goal - current_block_to_goal)
+        rewards.append(-current_block_to_goal)
         previous_block_to_center = np.sqrt(
             (self.previous_object_position[0] ** 2 +
              self.previous_object_position[1] ** 2))
         current_block_to_center = np.sqrt((block_position[0] ** 2 +
                                            block_position[1] ** 2))
         rewards.append(previous_block_to_center - current_block_to_center)
+        rewards.append(- current_block_to_center)
 
         end_effector_positions = self.robot.compute_end_effector_positions(
             self.robot.latest_full_state.position)
@@ -160,7 +172,18 @@ class PickingTaskGenerator(BaseTask):
             self.previous_object_position)
         rewards.append(previous_distance_from_block -
                        current_distance_from_block)
-
+        rewards.append(- current_distance_from_block)
+        #check for all the fingers if they are inside the sphere or not
+        object_size = self.stage.get_object_state('tool_block',
+                                                  'size')
+        dist_outside_bounding_ellipsoid = np.copy(np.abs(end_effector_positions
+                                                         - block_position))
+        dist_outside_bounding_ellipsoid[dist_outside_bounding_ellipsoid <
+                                        object_size] = 0
+        dist_outside_bounding_ellipsoid = \
+            np.mean(dist_outside_bounding_ellipsoid, axis=1)
+        dist_outside_bounding_ellipsoid.sort()
+        rewards.append(- np.sum(dist_outside_bounding_ellipsoid[:2]))
         rewards.append(- np.linalg.norm(
             joint_velocities - self.previous_joint_velocities))
         update_task_info = {

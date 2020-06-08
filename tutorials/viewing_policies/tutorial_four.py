@@ -20,18 +20,18 @@ def example():
         return model.predict(obs, deterministic=True)[0]
 
     # # Record a video of the policy is done in one line
-    viewer.record_video_of_policy(task=task,
-                                  world_params=world_params,
-                                  policy_fn=policy_fn,
-                                  file_name="pushing_video",
-                                  number_of_resets=10,
-                                  max_time_steps=10*100)
+    # viewer.record_video_of_policy(task=task,
+    #                               world_params=world_params,
+    #                               policy_fn=policy_fn,
+    #                               file_name="pushing_video",
+    #                               number_of_resets=10,
+    #                               max_time_steps=10*100)
 
     # Similarly for interactive visualization in the GUI
     viewer.view_policy(task=task,
                        world_params=world_params,
                        policy_fn=policy_fn,
-                       max_time_steps=40*600,
+                       max_time_steps=40*5000,
                        number_of_resets=40)
 
 
