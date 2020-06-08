@@ -83,13 +83,13 @@ if __name__ == '__main__':
     fixed_position = bool(args['fixed_position'])
     assert (((float(total_time_steps_per_update) /
              num_of_envs)/5).is_integer())
-    ppo_config = {"gamma": 0.9995,
-                  "n_steps": 5000,
-                  "ent_coef": 0,
+    ppo_config = {"gamma": 0.99,
+                  "n_steps": 600,
+                  "ent_coef": 0.01,
                   "learning_rate": 0.00025,
                   "vf_coef": 0.5,
-                  "max_grad_norm": 10,
-                  "nminibatches": 1000,
+                  "max_grad_norm": 0.5,
+                  "nminibatches": 4,
                   "noptepochs": 4,
                   "tensorboard_log": log_relative_path}
     train_policy(num_of_envs=num_of_envs,
