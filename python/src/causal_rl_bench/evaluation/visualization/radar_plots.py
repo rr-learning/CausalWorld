@@ -135,12 +135,13 @@ def radar_plots(output_path, experiments):
     data = get_radar_data_from_experiments(experiments)
     spoke_labels = data.pop(0)
 
-    fig, axes = plt.subplots(figsize=(9, 9), nrows=2, ncols=2,
-                             subplot_kw=dict(projection='radar'))
-    fig.subplots_adjust(wspace=0.25, hspace=0.20, top=0.85, bottom=0.05)
-
     colors = ['b', 'r', 'g', 'm', 'y']
-    for ax, (title, case_data) in zip(axes.flatten(), data):
+    for (title, case_data) in data:
+
+        fig, ax = plt.subplots(figsize=(9, 9), nrows=1, ncols=1,
+                                 subplot_kw=dict(projection='radar'))
+        fig.subplots_adjust(wspace=0.25, hspace=0.20, top=0.85, bottom=0.05)
+
         ax.set_rgrids([0.2, 0.4, 0.6, 0.8])
         ax.set_title(title, weight='bold', size='medium', position=(0.5, 1.1),
                      horizontalalignment='center', verticalalignment='center')
@@ -149,14 +150,13 @@ def radar_plots(output_path, experiments):
             ax.fill(theta, d, facecolor=color, alpha=0.25)
         ax.set_varlabels(spoke_labels)
 
-    # add legend relative to top-left plot
-    ax = axes[0, 0]
-    labels = experiments.keys()
-    legend = ax.legend(labels, loc=(0.9, .95),
-                       labelspacing=0.1, fontsize='small')
+        # add legend relative to top-left plot
+        labels = experiments.keys()
+        legend = ax.legend(labels, loc=(0.9, .95),
+                           labelspacing=0.1, fontsize='small')
 
-    fig.text(0.5, 0.965, 'radar_plots_automatic_evaluation_causal_rl_bench',
-             horizontalalignment='center', color='black', weight='bold',
-             size='large')
+        fig.text(0.5, 0.965, 'radar_plots_automatic_evaluation_causal_rl_bench',
+                 horizontalalignment='center', color='black', weight='bold',
+                 size='large')
 
-    plt.savefig(os.path.join(output_path, 'radar_plots_{}.png'.format(title)))
+        plt.savefig(os.path.join(output_path, 'radar_plots_{}.png'.format(title)))

@@ -46,7 +46,7 @@ def train_policy(num_of_envs,
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
 
-    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256, 128])
+    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
     env = SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
     model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
                  verbose=1, **ppo_config, tensorboard_log=model_path)
@@ -93,7 +93,7 @@ def get_configs(model_num):
                     'intervention_split': True,
                     'training': True,
                     'sparse_reward_weight': 1,
-                    'dense_reward_weights': [1, 1, 1]}
+                    'dense_reward_weights': [10, 1, 0.5]}
 
     if model_num == 0:
         train_configs = {'intervention_actors': [RandomInterventionActorPolicy()],
