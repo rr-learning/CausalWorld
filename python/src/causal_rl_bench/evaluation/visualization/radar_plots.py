@@ -112,7 +112,7 @@ def get_radar_data_from_experiments(experiments):
     data.append(evaluation_protocol_labels)
 
     # TODO infer that from dict once more metrics are added
-    metric_labels = ['mean_success_rate']
+    metric_labels = ['mean_success_rate', 'mean_accumulated_reward_rate']
     for metric_label in metric_labels:
         metric_scores = []
         for experiment in list(experiments.keys()):

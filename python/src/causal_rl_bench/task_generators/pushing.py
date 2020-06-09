@@ -231,5 +231,8 @@ class PushingTaskGenerator(BaseTask):
                                 protocols.SameMassesOOD(),
                                 protocols.SameColorsOOD(),
                                 protocols.ObjectSizesOOD(),
-                                protocols.FloorFrictionOOD()]
+                                protocols.FloorFrictionOOD(),
+                                protocols.RandomInTrainSet(),
+                                protocols.InEpisodePosesChange(),
+                                protocols.DefaultTask()]
         return evaluation_protocols

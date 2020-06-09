@@ -229,7 +229,10 @@ class Cuboid(RigidObject):
             end = start + self.__state_variable_sizes[i]
             if not np.all(current_state[self.__state_variable_names[i]] ==
                           new_state[start:end]):
-                new_state_dict[self.__state_variable_names[i]] = new_state[start:end]
+                if end == start + 1:
+                    new_state_dict[self.__state_variable_names[i]] = new_state[start:end][0]
+                else:
+                    new_state_dict[self.__state_variable_names[i]] = new_state[start:end]
             start = end
         self.set_state(new_state_dict)
         return
@@ -250,7 +253,7 @@ class Cuboid(RigidObject):
         if 'orientation' in state_dict:
             orientation = state_dict['orientation']
         if 'mass' in state_dict:
-            self.__mass = state_dict['mass'][0]
+            self.__mass = state_dict['mass']
         if 'size' in state_dict:
             self._pybullet_client.removeBody(self.__block_id)
             self.__shape_id = self._pybullet_client.createCollisionShape(
@@ -653,7 +656,10 @@ class MeshObject(RigidObject):
             end = start + self.__state_variable_sizes[i]
             if not np.all(current_state[self.__state_variable_names[i]] ==
                           new_state[start:end]):
-                new_state_dict[self.__state_variable_names[i]] = new_state[start:end]
+                if end == start + 1:
+                    new_state_dict[self.__state_variable_names[i]] = new_state[start:end][0]
+                else:
+                    new_state_dict[self.__state_variable_names[i]] = new_state[start:end]
             start = end
         self.set_state(new_state_dict)
         return

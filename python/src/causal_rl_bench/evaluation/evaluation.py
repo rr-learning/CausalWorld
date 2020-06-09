@@ -3,6 +3,9 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.metrics.mean_sucess_rate_metric import \
     MeanSuccessRateMetric
+from causal_rl_bench.envs.world import World
+from causal_rl_bench.metrics.mean_accumulated_reward_metric import \
+    MeanAccumulatedRewardMetric
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.wrappers.protocol_wrapper \
     import ProtocolWrapper
@@ -66,6 +69,7 @@ class EvaluationPipeline(object):
         self.evaluation_protocols = evaluation_protocols
         self.metrics_list = []
         self.metrics_list.append(MeanSuccessRateMetric())
+        self.metrics_list.append(MeanAccumulatedRewardMetric())
         return
 
     def run_episode(self, policy_fn):

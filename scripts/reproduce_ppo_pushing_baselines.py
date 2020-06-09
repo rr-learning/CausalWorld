@@ -73,12 +73,12 @@ def save_config_file(file_path, ppo_config, world_params, task_configs):
 
 def get_configs(model_num):
     world_params = {'skip_frame': 3,
-                    'enable_visualization': False,
+                    'enable_visualization': True,
                     'observation_mode': 'structured',
                     'normalize_observations': True,
                     'enable_goal_image': False,
                     'action_mode': 'joint_positions',
-                    'max_episode_length': 100}
+                    'max_episode_length': 600}
 
     ppo_config = {"gamma": 0.99,
                   "n_steps": 600,
@@ -99,10 +99,20 @@ def get_configs(model_num):
         train_configs = {'intervention_actors': [RandomInterventionActorPolicy()],
                          'episodes_hold': [20],
                          'timesteps_hold': [None]}
+    elif model_num == 1:
+        train_configs = {'intervention_actors': [GoalInterventionActorPolicy()],
+                         'episodes_hold': [20],
+                         'timesteps_hold': [None]}
+    elif model_num == 2:
+        train_configs = {'intervention_actors': [RandomInterventionActorPolicy()],
+                         'episodes_hold': [20],
+                         'timesteps_hold': [None]}
+        world_params = {'max_episode_length': None}
     else:
         train_configs = {'intervention_actors': [GoalInterventionActorPolicy()],
                          'episodes_hold': [20],
                          'timesteps_hold': [None]}
+        world_params = {'max_episode_length': None}
 
     return task_configs, train_configs, world_params, ppo_config
 
@@ -137,6 +147,7 @@ if __name__ == '__main__':
 
 
     # define a method for the policy fn of your trained model
+    # model = PPO2.load('baseline_output/1/model/rl_model_950000_steps.zip')
     def policy_fn(obs):
         return model.predict(obs, deterministic=True)[0]
 
@@ -149,8 +160,8 @@ if __name__ == '__main__':
                                   policy_fn=policy_fn,
                                   file_name=os.path.join(animation_path, "pushing_video"),
                                   number_of_resets=1,
-                                  max_time_steps=100)
-
+                                  max_time_steps=600)
+    # output_path = 'baseline_output/1'
     evaluation_path = os.path.join(output_path, 'evaluation')
     os.makedirs(evaluation_path)
 
