@@ -26,3 +26,10 @@ class MeanSuccessRateMetric(BaseMetric):
         :return:
         """
         return self.success_times / float(self.total_number_of_episodes)
+
+    def reset(self):
+        """
+        :return:
+        """
+        self.success_times = 0
+        self.total_number_of_episodes = 0

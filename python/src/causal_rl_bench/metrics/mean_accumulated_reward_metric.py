@@ -24,3 +24,10 @@ class MeanAccumulatedRewardMetric(BaseMetric):
         :return:
         """
         return self.accumulated_reward / float(self.total_number_of_episodes)
+
+    def reset(self):
+        """
+        :return:
+        """
+        self.accumulated_reward = 0
+        self.total_number_of_episodes = 0

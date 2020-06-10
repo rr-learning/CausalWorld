@@ -90,11 +90,16 @@ class EvaluationPipeline(object):
             metrics[metric.name] = metric.get_metric_score()
         return metrics
 
+    def reset_metric_scores(self):
+        for metric in self.metrics_list:
+            metric.reset()
+
     def evaluate_policy(self, policy):
         pipeline_scores = dict()
         for evaluation_protocol in self.evaluation_protocols:
             self.evaluation_env = ProtocolWrapper(self.env, evaluation_protocol)
-            evaluation_protocol.init(self.evaluation_env, self.env.get_tracker())
+            evaluation_protocol.init_protocol(env=self.evaluation_env,
+                                              tracker=self.env.get_tracker())
             episodes_in_protocol = evaluation_protocol.get_num_episodes()
             for _ in range(episodes_in_protocol):
                 current_episode = self.run_episode(policy)
@@ -107,33 +112,10 @@ class EvaluationPipeline(object):
                 self.env.get_tracker().get_total_interventions()
             scores['total_timesteps'] = \
                 self.env.get_tracker().get_total_time_steps()
-            # Not sure why we should care about intervention_split during evaluation. That is typically
-            # on the designer of the protocol right?
-            # scores['limited_exposed_intervention_variables'] = \
-            #     self.intervention_split
-            # if self.intervention_split:
-            #     if self.training:
-            #         scores['intervention_set_chosen'] = \
-            #             "training"
-            #     else:
-            #         scores['intervention_set_chosen'] = \
-            #             "testing"
             scores['total_resets'] = \
                 self.env.get_tracker().get_total_resets()
-            # Why are we interested in the invalid interactions here? if they are invalid,
-            # that's the protocol designers fault
-
-            # scores['total_invalid_intervention_steps'] = \
-            #     self.env.get_tracker().get_total_invalid_intervention_steps()
-            # scores['total_invalid_robot_intervention_steps'] = \
-            #     self.env.get_tracker().get_total_invalid_robot_intervention_steps()
-            # scores['total_invalid_stage_intervention_steps'] = \
-            #     self.env.get_tracker().get_total_invalid_stage_intervention_steps()
-            # scores['total_invalid_task_generator_intervention_steps'] = \
-            #     self.env.get_tracker().get_total_invalid_task_generator_intervention_steps()
-            # scores['total_invalid_out_of_bounds_intervention_steps'] = \
-            #     self.env.get_tracker().get_total_invalid_out_of_bounds_intervention_steps()
             pipeline_scores[evaluation_protocol.get_name()] = scores
+            self.reset_metric_scores()
         self.evaluation_env.close()
         self.pipeline_scores = pipeline_scores
         return pipeline_scores

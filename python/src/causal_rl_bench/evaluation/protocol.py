@@ -1,5 +1,5 @@
 class Protocol(object):
-    def init(self, env, tracker):
+    def init_protocol(self, env, tracker):
         self.env = env
         self.tracker = tracker
 

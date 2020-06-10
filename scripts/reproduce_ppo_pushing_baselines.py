@@ -18,6 +18,7 @@ import causal_rl_bench.evaluation.visualization.visualiser as vis
 from causal_rl_bench.task_generators.pushing import PushingTaskGenerator
 from causal_rl_bench.intervention_agents import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_rl_bench.benchmark.benchmarks import PUSHING_BENCHMARK
 
 seed = 0
 
@@ -165,7 +166,8 @@ if __name__ == '__main__':
     evaluation_path = os.path.join(output_path, 'evaluation')
     os.makedirs(evaluation_path)
 
-    default_evaluation_protocols = PushingTaskGenerator.get_default_evaluation_protocols()
+    # default_evaluation_protocols = PushingTaskGenerator.get_default_evaluation_protocols()
+    default_evaluation_protocols = PUSHING_BENCHMARK['evaluation_protocols']
 
     evaluator = EvaluationPipeline(evaluation_protocols=
                                    default_evaluation_protocols,
