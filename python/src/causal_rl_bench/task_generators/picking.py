@@ -16,9 +16,9 @@ class PickingTaskGenerator(BaseTask):
                          sparse_reward_weight=
                          kwargs.get("sparse_reward_weight", 0),
                          dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([0, 1000, 0, 100, 0, 0, 1000,
-                                              0])))
+                         kwargs.get("dense_reward_weights",#100000
+                                    np.array([100000, 0, 0, 0, 100000,
+                                              0, 0, 0])))
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
