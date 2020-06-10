@@ -2,7 +2,6 @@ from causal_rl_bench.task_generators.base_task import BaseTask
 from causal_rl_bench.utils.rotation_utils import quaternion_conjugate, \
     quaternion_mul, euler_to_quaternion
 import numpy as np
-import causal_rl_bench.evaluation.protocols as protocols
 
 
 class PushingTaskGenerator(BaseTask):
@@ -224,15 +223,3 @@ class PushingTaskGenerator(BaseTask):
                     interventions_dict['tool_block']['size']
         return interventions_dict
 
-    @staticmethod
-    def get_default_evaluation_protocols():
-        evaluation_protocols = [protocols.GoalPosesOOD(),
-                                protocols.InitialPosesOOD(),
-                                protocols.SameMassesOOD(),
-                                protocols.SameColorsOOD(),
-                                protocols.ObjectSizesOOD(),
-                                protocols.FloorFrictionOOD(),
-                                protocols.RandomInTrainSet(),
-                                protocols.InEpisodePosesChange(),
-                                protocols.DefaultTask()]
-        return evaluation_protocols
