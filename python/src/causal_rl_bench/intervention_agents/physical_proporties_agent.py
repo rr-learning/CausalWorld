@@ -61,7 +61,6 @@ class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
                     interventions_dict[variable] = np.random.uniform(
                         self.task_intervention_space[variable][0],
                         self.task_intervention_space[variable][1])
-        print(interventions_dict)
         return interventions_dict
 
     def get_params(self):

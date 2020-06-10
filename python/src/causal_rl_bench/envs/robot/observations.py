@@ -47,10 +47,10 @@ class TriFingerObservations(object):
             [20] * 3 * num_fingers
 
         self.lower_bounds["cameras"] = \
-            np.zeros(shape=(3, 54, 72, 3), dtype=np.float32)
+            np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
         self.upper_bounds["cameras"] = \
             np.full(shape=(3, 54, 72, 3), fill_value=255,
-                    dtype=np.float32)
+                    dtype=np.float64)
 
         self.observation_functions = dict()
 
@@ -59,9 +59,9 @@ class TriFingerObservations(object):
 
         if observation_mode == "cameras":
             self.observations_keys = ["cameras"]
-            self.low = np.zeros(shape=(3, 54, 72, 3), dtype=np.float32)
+            self.low = np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
             self.high = np.full(shape=(3, 54, 72, 3), fill_value=255,
-                                dtype=np.float32)
+                                dtype=np.float64)
             self.low_norm = 0
             self.high_norm = 1
         elif observation_mode == "structured":
@@ -83,16 +83,16 @@ class TriFingerObservations(object):
         if self.normalized_observations:
             return spaces.Box(low=np.full(shape=self.low.shape,
                                           fill_value=self.low_norm,
-                                          dtype=np.float32),
+                                          dtype=np.float64),
                               high=np.full(shape=self.low.shape,
                                            fill_value=self.high_norm,
-                                           dtype=np.float32),
-                              dtype=np.float32)
+                                           dtype=np.float64),
+                              dtype=np.float64)
         else:
             if self.observation_mode == "structured":
                 return spaces.Box(low=self.low,
                                   high=self.high,
-                                  dtype=np.float32)
+                                  dtype=np.float64)
             else:
                 return spaces.Box(low=self.low,
                                   high=self.high,

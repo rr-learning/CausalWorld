@@ -44,7 +44,6 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
             elif self.current_action[1] == 6:
                 interventions_dict[self.selected_object]['position'][1] -= 0.002
             else:
-                print(self.current_action[1])
                 raise Exception("The passed action mode is not supported")
         if self.current_action[2] != 0:
             euler_orientation = \
@@ -63,7 +62,6 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
             elif self.current_action[2] == 6:
                 euler_orientation[0] -= 0.1
             else:
-                print(self.current_action[2])
                 raise Exception("The passed action mode is not supported")
             interventions_dict[self.selected_object]['orientation'] = \
                 euler_to_quaternion(euler_orientation)
@@ -85,7 +83,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
         for intervention_variable in curr_variables:
             if intervention_variable.startswith("tool"):
                 self.observations_order.append(intervention_variable)
-                self.observation_high.append(np.repeat(np.finfo(np.float32).max, 9))
+                self.observation_high.append(np.repeat(np.finfo(np.float64).max, 9))
         self.observation_high = np.array(self.observation_high)
         self.observation_space = gym.spaces.Box(-self.observation_high, self.observation_high)
         self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(len(self.observations_order)),

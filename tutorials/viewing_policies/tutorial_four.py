@@ -31,7 +31,7 @@ def example():
     viewer.view_policy(task=task,
                        world_params=world_params,
                        policy_fn=policy_fn,
-                       max_time_steps=40*5000,
+                       max_time_steps=40*600,
                        number_of_resets=40)
 
 

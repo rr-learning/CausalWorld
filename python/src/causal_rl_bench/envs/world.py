@@ -184,6 +184,22 @@ class World(gym.Env):
         :param interventions_dict:
         :return:
         """
+        # self.__pybullet_client.resetSimulation()
+        self.__pybullet_client.setPhysicsEngineParameter(
+            deterministicOverlappingPairs=1)
+        # optionally enable EGL for faster headless rendering
+        # try:
+        #     if os.environ["PYBULLET_EGL"]:
+        #         con_mode = self._p.getConnectionInfo()['connectionMethod']
+        #         if con_mode == self._p.DIRECT:
+        #             egl = pkgutil.get_loader('eglRenderer')
+        #             if (egl):
+        #                 self._p.loadPlugin(egl.get_filename(),
+        #                                    "_eglRendererPlugin")
+        #             else:
+        #                 self._p.loadPlugin("eglRendererPlugin")
+        # except:
+        #     pass
         self.__tracker.add_episode_experience(self.__episode_length)
         self.__episode_length = 0
         if interventions_dict is not None:
@@ -202,7 +218,6 @@ class World(gym.Env):
                                              task_name=self.task.task_name,
                                              task_params=self.task.get_task_params(),
                                              world_params=self._get_world_params())
-
         if self.__observation_mode == "cameras" and self.__enable_goal_image:
             current_images = self.__robot.get_current_camera_observations()
             goal_images = self.__stage.get_current_goal_image()

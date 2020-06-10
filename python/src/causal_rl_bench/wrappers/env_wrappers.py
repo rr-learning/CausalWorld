@@ -25,11 +25,11 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         self.observation_space = spaces.Dict(dict(desired_goal=spaces.Box(-np.inf,
                                                                           np.inf,
                                                                           shape=goal_space_shape,
-                                                                          dtype=np.float32),
+                                                                          dtype=np.float64),
                                                   achieved_goal=spaces.Box(-np.inf,
                                                                           np.inf,
                                                                           shape=goal_space_shape,
-                                                                          dtype=np.float32),
+                                                                          dtype=np.float64),
                                                   observation=self.env.observation_space))
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata

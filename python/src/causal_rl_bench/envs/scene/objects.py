@@ -292,6 +292,10 @@ class Cuboid(RigidObject):
             self._pybullet_client.resetBaseVelocity(self.__block_id,
                                                     linear_velocity,
                                                     angular_velocity)
+        position, orientation = \
+            self._pybullet_client.getBasePositionAndOrientation(
+                self.__block_id
+            )
         return
 
     def do_intervention(self, variable_name, variable_value):
