@@ -13,12 +13,12 @@ class SameColorsOOD(Protocol):
     def get_num_episodes(self):
         return self.num_evaluation_episodes
 
-    def get_intervention(self, env, episode, timestep):
+    def get_intervention(self, episode, timestep):
         if timestep == 0:
             intervention_dict = dict()
-            intervention_space = env.task.testing_intervention_spaces
+            intervention_space = self.env.task.testing_intervention_spaces
             color = None
-            for rigid_object in env.task.stage.rigid_objects:
+            for rigid_object in self.env.task.stage.rigid_objects:
                 if rigid_object in intervention_space and \
                         'color' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()

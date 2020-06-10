@@ -13,10 +13,10 @@ class RandomInTrainSet(Protocol):
     def get_num_episodes(self):
         return self.num_evaluation_episodes
 
-    def get_intervention(self, env, episode, timestep):
+    def get_intervention(self, episode, timestep):
         if timestep == 0:
             task_intervention_space = \
-                env.task.get_training_intervention_spaces()
+                self.env.task.get_training_intervention_spaces()
             interventions_dict = dict()
             for variable in task_intervention_space:
                 if isinstance(task_intervention_space[variable], dict):

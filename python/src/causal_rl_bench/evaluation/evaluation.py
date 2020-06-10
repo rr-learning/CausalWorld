@@ -94,6 +94,7 @@ class EvaluationPipeline(object):
         pipeline_scores = dict()
         for evaluation_protocol in self.evaluation_protocols:
             self.evaluation_env = ProtocolWrapper(self.env, evaluation_protocol)
+            evaluation_protocol.init(self.evaluation_env, self.env.get_tracker())
             episodes_in_protocol = evaluation_protocol.get_num_episodes()
             for _ in range(episodes_in_protocol):
                 current_episode = self.run_episode(policy)

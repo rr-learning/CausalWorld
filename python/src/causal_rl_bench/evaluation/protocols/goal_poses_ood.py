@@ -12,8 +12,8 @@ class GoalPosesOOD(Protocol):
     def get_num_episodes(self):
         return self.num_evaluation_episodes
 
-    def get_intervention(self, env, episode, timestep):
+    def get_intervention(self, episode, timestep):
         if timestep == 0:
-            return env.sample_new_goal(training=False, level=None)
+            return self.env.sample_new_goal(training=False, level=None)
         else:
             return None

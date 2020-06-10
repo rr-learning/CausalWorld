@@ -13,5 +13,5 @@ class DefaultTask(Protocol):
     def get_num_episodes(self):
         return self.num_evaluation_episodes
 
-    def get_intervention(self, env, episode, timestep):
+    def get_intervention(self, episode, timestep):
         return None

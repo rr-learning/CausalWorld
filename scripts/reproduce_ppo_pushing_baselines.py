@@ -73,7 +73,7 @@ def save_config_file(file_path, ppo_config, world_params, task_configs):
 
 def get_configs(model_num):
     world_params = {'skip_frame': 3,
-                    'enable_visualization': True,
+                    'enable_visualization': False,
                     'observation_mode': 'structured',
                     'normalize_observations': True,
                     'enable_goal_image': False,
@@ -171,7 +171,7 @@ if __name__ == '__main__':
                                    default_evaluation_protocols,
                                    tracker_path=output_path,
                                    intervention_split=False,
-                                   visualize_evaluation=False,
+                                   visualize_evaluation=True,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)
     evaluator.save_scores(evaluation_path)
