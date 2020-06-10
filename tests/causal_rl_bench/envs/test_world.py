@@ -172,3 +172,7 @@ class TestWorld(unittest.TestCase):
         causal_rl_env.close()
         kuka_env.close()
         return
+
+
+if __name__ == '__main__':
+    unittest.main()

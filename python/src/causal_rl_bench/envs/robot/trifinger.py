@@ -1,6 +1,6 @@
 from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
-from pybullet_fingers.sim_finger import SimFinger
+from causal_rl_bench.envs.pybullet_fingers.sim_finger import SimFinger
 import numpy as np
 import math
 
@@ -19,16 +19,14 @@ class TriFingerRobot(object):
         self.simulation_time = simulation_time
         self.dt = self.simulation_time * self.skip_frame
         self.control_index = -1
-        self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
-                                    "tri")
+        self.tri_finger = SimFinger(self.simulation_time, enable_visualization)
 
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
         self.robot_observations = TriFingerObservations(observation_mode,
                                                         normalize_observations)
         if self.enable_goal_image:
             self.goal_image_instance = SimFinger(self.simulation_time,
-                                                 enable_visualization=False,
-                                                 finger_type="tri")
+                                                 enable_visualization=False)
             self.goal_image_instance_state = \
                 self.goal_image_instance.reset_finger(
                     self.robot_actions.joint_positions_lower_bounds,
