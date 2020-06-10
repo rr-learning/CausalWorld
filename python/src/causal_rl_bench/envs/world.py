@@ -87,7 +87,8 @@ class World(gym.Env):
                                  world_params=self._get_world_params())
         self.__scale_reward_by_dt = True
         self.__disabled_actions = False
-        self.reset()
+        #TODO: I am not sure if this reset is necassary, TO BE CONFIRMED
+        # self.reset()
         return
 
     def __reset_observations_space(self):
@@ -185,8 +186,8 @@ class World(gym.Env):
         :return:
         """
         # self.__pybullet_client.resetSimulation()
-        self.__pybullet_client.setPhysicsEngineParameter(
-            deterministicOverlappingPairs=1)
+
+        self.__robot.tri_finger.reset_world()
         # optionally enable EGL for faster headless rendering
         # try:
         #     if os.environ["PYBULLET_EGL"]:
@@ -410,6 +411,10 @@ class World(gym.Env):
 
     def get_action_mode(self):
         return self.__action_mode
+
+    def set_action_mode(self, action_mode):
+        self.__action_mode = action_mode
+        self.__robot.set_action_mode(action_mode)
 
     def get_robot(self):
         return self.__robot

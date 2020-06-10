@@ -426,6 +426,7 @@ class BaseTask(object):
             self.robot.get_rest_pose()[0]
         self.initial_state['joint_velocities'] = \
             np.zeros([9, ])
+        self.stage.remove_everything()
         self._set_up_stage_arena()
         self.default_state.update(dict(self.initial_state))
         self.stage.finalize_stage()
@@ -475,6 +476,8 @@ class BaseTask(object):
         :param interventions_dict:
         :return:
         """
+        self.stage.remove_everything()
+        self._set_up_stage_arena()
         self.robot.clear()
         self.stage.clear()
         self.task_solved = False

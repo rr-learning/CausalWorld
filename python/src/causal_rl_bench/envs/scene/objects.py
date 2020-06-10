@@ -250,7 +250,7 @@ class Cuboid(RigidObject):
         if 'orientation' in state_dict:
             orientation = state_dict['orientation']
         if 'mass' in state_dict:
-            self.__mass = state_dict['mass'][0]
+            self.__mass = state_dict['mass']
         if 'size' in state_dict:
             self._pybullet_client.removeBody(self.__block_id)
             self.__shape_id = self._pybullet_client.createCollisionShape(
@@ -292,10 +292,6 @@ class Cuboid(RigidObject):
             self._pybullet_client.resetBaseVelocity(self.__block_id,
                                                     linear_velocity,
                                                     angular_velocity)
-        position, orientation = \
-            self._pybullet_client.getBasePositionAndOrientation(
-                self.__block_id
-            )
         return
 
     def do_intervention(self, variable_name, variable_value):
