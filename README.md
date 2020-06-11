@@ -8,6 +8,8 @@ or used in a catkin workspace.
 
 ![](random_interventions.gif)
 
+![](magic_pick_and_place.gif)
+
 ## Install as a pip package in a conda env
 
 1. Clone this repo and then create it's conda environment to install all dependencies.
