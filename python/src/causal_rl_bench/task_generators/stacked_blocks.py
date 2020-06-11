@@ -70,33 +70,36 @@ class StackedBlocksGeneratorTask(BaseTask):
             start_position = default_start_position + change_per_level
             rigid_block_side *= -1
             for i in range(number_of_blocks_per_level):
-                self.stage.add_silhoutte_general_object(name="goal_"+"level_"+
-                                                             str(level)+"_num_"+
-                                                             str(i),
-                                                        shape="cube",
-                                                        position=[start_position,
-                                                                  0, curr_height],
-                                                        orientation=[0, 0, 0, 1],
-                                                        size=np.repeat(self.task_params
-                                                        ["blocks_min_size"], 3))
+                creation_dict = {'name': "goal_"+"level_"+
+                                           str(level)+"_num_"+
+                                           str(i),
+                                 'shape': "cube",
+                                 'position': [start_position,
+                                              0, curr_height],
+                                 'orientation': [0, 0, 0, 1],
+                                 'size': np.repeat(self.task_params
+                                                   ["blocks_min_size"], 3)}
+                self.stage.add_silhoutte_general_object(**creation_dict)
+                self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
                 self.task_stage_observation_keys.append("goal_"+"level_"+
                                                          str(level)+"_num_"+
                                                          str(i)+'_position')
                 self.task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_orientation')
-                self.stage.add_rigid_general_object(name="tool_" + "level_" +
-                                                          str(level) + "_num_" +
-                                                          str(i),
-                                                    shape="cube",
-                                                    position=[start_position,
-                                                              rigid_block_side,
-                                                              curr_height],
-                                                    orientation=[0, 0, 0, 1],
-                                                    size=np.repeat(self.task_params
-                                                        ["blocks_min_size"], 3),
-                                                    mass=self.task_params
-                                                    ["tool_block_mass"])
+                creation_dict = {'name': "tool_" + "level_" +
+                                          str(level) + "_num_" +
+                                          str(i),
+                                 'shape': "cube",
+                                 'position': [start_position,
+                                              rigid_block_side,
+                                              curr_height],
+                                 'orientation': [0, 0, 0, 1],
+                                 'size': np.repeat(self.task_params
+                                                   ["blocks_min_size"], 3),
+                                 'mass': self.task_params["tool_block_mass"]}
+                self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
+                self.stage.add_rigid_general_object(**creation_dict)
                 self.task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_position')
@@ -251,21 +254,24 @@ class StackedBlocksGeneratorTask(BaseTask):
         :param max_level_width:
         :return:
         """
-        self.stage.remove_everything()
+        self.stage.clear_memory()
+        self.robot.tri_finger.reset_world()
+        self.robot.clear()
+        self.stage.clear()
         self.task_stage_observation_keys = []
+        self._creation_list = []
         block_sizes, positions, chosen_y = self._generate_random_target(
             num_of_levels=num_of_levels,
             min_size=blocks_min_size,
             max_level_width=max_level_width)
         for level_num in range(len(block_sizes)):
             for i in range(len(block_sizes[level_num])):
-                self.stage.add_rigid_general_object(
-                    name="tool_" + "level_" + str(level_num) + "_num_" + str(
-                        i),
-                    shape="cube",
-                    size=block_sizes[level_num][i],
-                    color=np.random.uniform(0, 1, size=[3]),
-                    mass=blocks_mass)
+                creation_dict = {'name': "tool_" + "level_" + str(level_num) + "_num_" + str(i),
+                                 'shape': "cube",
+                                 'mass': blocks_mass,
+                                 'color': np.random.uniform(0, 1, size=[3]),
+                                 'size': block_sizes[level_num][i]}
+                self.stage.add_rigid_general_object(**creation_dict)
                 block_position = self.stage.random_position(
                     height_limits=0.0425)
                 block_orientation = euler_to_quaternion(
@@ -274,7 +280,11 @@ class StackedBlocksGeneratorTask(BaseTask):
                     "tool_" + "level_" + str(level_num) + "_num_" + str(i)],
                     positions=[block_position],
                     orientations=[block_orientation])
+                creation_dict['position'] = block_position
+                creation_dict['orientation'] = block_orientation
+                self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
                 trial_index = 0
+                self.stage.pybullet_client.stepSimulation()
                 while not self.stage.check_feasiblity_of_stage() and \
                         trial_index < 10:
                     block_position = self.stage.random_position(
@@ -287,6 +297,9 @@ class StackedBlocksGeneratorTask(BaseTask):
                         positions=[block_position],
                         orientations=[
                             block_orientation])
+                    self._creation_list[-1][1]['position'] = block_position
+                    self._creation_list[-1][1]['orientation'] = block_orientation
+                    self.stage.pybullet_client.stepSimulation()
                     trial_index += 1
                 silhouette_position = [positions[level_num][i], chosen_y,
                                        (level_num+1) *
@@ -305,15 +318,12 @@ class StackedBlocksGeneratorTask(BaseTask):
                 self.task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_orientation')
-                self.stage.add_silhoutte_general_object(name="goal_" +
-                                                             "level_" +
-                                                             str(level_num)+
-                                                             "_num_"+str(i),
-                                                             shape="cube",
-                                                        position=
-                                                        np.array(silhouette_position),
-                                                        size=
-                                                        np.array(block_sizes[level_num][i]))
+                creation_dict = {'name': "goal_" + "level_" + str(level_num)+ "_num_"+str(i),
+                                 'shape': "cube",
+                                 'position': np.array(silhouette_position),
+                                 'size': np.array(block_sizes[level_num][i])}
+                self.stage.add_silhoutte_general_object(**creation_dict)
+                self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
         self.current_stack_levels = num_of_levels
         self.current_blocks_mass = blocks_mass
         self.current_blocks_min_size = blocks_min_size

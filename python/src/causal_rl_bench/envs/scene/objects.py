@@ -260,7 +260,7 @@ class Cuboid(RigidObject):
                 baseCollisionShapeIndex=self.__shape_id,
                 basePosition=position,
                 baseOrientation=orientation,
-                baseMass=self.__mass
+                baseMass=0.02
             )
             self._pybullet_client.changeVisualShape(self.__block_id, -1,
                                                     rgbaColor=
@@ -273,7 +273,7 @@ class Cuboid(RigidObject):
             )
         elif 'mass' in state_dict:
             self._pybullet_client.changeDynamics(self.__block_id, -1,
-                                                 mass=self.__mass)
+                                                 mass=0.02)
 
         if 'color' in  state_dict:
             self.__color = state_dict['color']

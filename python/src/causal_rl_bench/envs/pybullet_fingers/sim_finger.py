@@ -549,3 +549,28 @@ class SimFinger(BaseFinger):
         t = self.append_desired_action(self.Action(position=joint_positions))
         self.step_simulation()
         return self.get_observation(t, update_images=True)
+
+    def finger_intervention(self, joint_positions, joint_velocities=None):
+        """
+        Reset the finger(s) to some random position (sampled in the joint
+        space) and step the robot with this random position
+
+        Args:
+            joint_positions (array-like):  Angular position for each joint.  If
+                None, a random position is sampled.
+            joint_velocities (array-like): Angular velocity for each joint.  If
+                None, its set to 0.
+        """
+        if joint_velocities is None:
+            for i, joint_id in enumerate(self.revolute_joint_ids):
+                self._p.resetJointState(
+                    self.finger_id, joint_id, joint_positions[i]
+                )
+        else:
+            for i, joint_id in enumerate(self.revolute_joint_ids):
+                self._p.resetJointState(
+                    self.finger_id, joint_id, joint_positions[i],
+                    joint_velocities[i]
+                )
+        t = self.append_desired_action(self.Action(position=joint_positions))
+        return self.get_observation(t, update_images=True)

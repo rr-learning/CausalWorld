@@ -52,28 +52,37 @@ class PickingTaskGenerator(BaseTask):
 
         :return:
         """
-        self.stage.add_rigid_general_object(name="tool_block",
-                                            shape="cube",
-                                            mass=self.task_params[
-                                                "tool_block_mass"],
-                                            position=self.initial_state
-                                            ["tool_block"]["position"],
-                                            orientation=self.initial_state
-                                            ["tool_block"]["orientation"])
+        creation_dict = {'name': "tool_block",
+                         'shape': "cube",
+                         'position': self.initial_state
+                         ["tool_block"]["position"],
+                         'orientation': self.initial_state
+                         ["tool_block"]["orientation"],
+                         'mass': self.task_params["tool_block_mass"]}
+        self.stage.add_rigid_general_object(**creation_dict)
+        self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
         goal_block_position = np.array(
             self.initial_state["tool_block"]["position"])
         goal_block_position[-1] = self.task_params["goal_height"]
-        self.stage.add_silhoutte_general_object(name="goal_block",
-                                                shape="cube",
-                                                position=goal_block_position,
-                                                orientation=
-                                                self.initial_state[
-                                                    "tool_block"][
-                                                    "orientation"])
+        creation_dict = {'name': "goal_block",
+                         'shape': "cube",
+                         'position': goal_block_position,
+                         'orientation': self.initial_state
+                         ["tool_block"]["orientation"]}
+        self.stage.add_silhoutte_general_object(**creation_dict)
+        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
         self.task_stage_observation_keys = ["tool_block_position",
                                             "tool_block_orientation",
                                             "goal_block_position",
                                             "goal_block_orientation"]
+        self.task_stage_observation_keys = ["tool_block_position",
+                                            "tool_block_orientation",
+                                            "goal_block_position",
+                                            "goal_block_orientation"]
+        self.initial_state["goal_block"] = dict()
+        self.initial_state["goal_block"]["position"] = goal_block_position
+        self.initial_state["goal_block"]["orientation"] = \
+            np.copy(self.initial_state["tool_block"]["orientation"])
         if self.task_params["joint_positions"] is not None:
             self.initial_state['joint_positions'] = \
                 self.task_params["joint_positions"]
@@ -99,8 +108,6 @@ class PickingTaskGenerator(BaseTask):
             self.training_intervention_spaces[visual_object]['position'][
                 1][-1] \
                 = 0.20
-        self.training_intervention_spaces['goal_height'] = \
-            np.array([0.08, 0.20])
         return
 
     def _set_testing_intervention_spaces(self):
@@ -123,8 +130,6 @@ class PickingTaskGenerator(BaseTask):
             self.testing_intervention_spaces[visual_object]['position'][1][
                 -1] \
                 = 0.25
-        self.testing_intervention_spaces['goal_height'] = \
-            np.array([0.20, 0.25])
         return
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
@@ -252,47 +257,14 @@ class PickingTaskGenerator(BaseTask):
         """
         # TODO: make sure its feasible goal by
         intervention_dict = dict()
+        intervention_dict['goal_block'] = dict()
         if training:
             intervention_space = self.training_intervention_spaces
         else:
             intervention_space = self.testing_intervention_spaces
-        intervention_dict['goal_height'] = np.\
-            random.uniform(intervention_space['goal_height'][0],
-                           intervention_space['goal_height'][1])
+        intervention_dict['goal_block']['position'] = np.array(self.initial_state['tool_block']['position'])
+        intervention_dict['goal_block']['position'][-1] = np.random.uniform(intervention_space
+                                                                            ['goal_block']['position'][0][-1],
+                                                                            intervention_space
+                                                                            ['goal_block']['position'][1][-1])
         return intervention_dict
-
-    def get_task_generator_variables_values(self):
-        """
-
-        :return:
-        """
-        return {'goal_height': self.stage.get_object_state('goal_block',
-                                                           'position')[-1]}
-
-    def apply_task_generator_interventions(self, interventions_dict):
-        """
-
-        :param interventions_dict:
-        :return:
-        """
-        reset_observation_space = False
-        new_interventions_dict = dict()
-        for intervention_variable in interventions_dict:
-            if intervention_variable == "goal_height":
-                new_interventions_dict['goal_block'] = dict()
-                new_interventions_dict['goal_block']['position'] = \
-                    self.stage.get_object_state\
-                    ('tool_block', 'position')
-                new_interventions_dict['goal_block']['orientation'] = \
-                    self.stage.get_object_state\
-                    ('tool_block', 'orientation')
-                new_interventions_dict['goal_block']['position'][-1] = \
-                    interventions_dict["goal_height"]
-            else:
-                raise Exception("this task generator variable "
-                                "is not yet defined")
-        if len(new_interventions_dict) == 0:
-            return True, reset_observation_space
-        else:
-            self.stage.apply_interventions(new_interventions_dict)
-        return True, reset_observation_space

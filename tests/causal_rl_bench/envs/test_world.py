@@ -33,6 +33,7 @@ class TestWorld(unittest.TestCase):
             rewards_v1.append(reward)
         env_v1.close()
 
+        task = task_generator(task_generator_id="reaching")
         env_v2 = World(task=task,
                        enable_visualization=False,
                        seed=27)
@@ -45,6 +46,7 @@ class TestWorld(unittest.TestCase):
             rewards_v2.append(reward)
         env_v2.close()
 
+        task = task_generator(task_generator_id="reaching")
         env_v3 = World(task=task,
                        enable_visualization=False,
                        seed=54)

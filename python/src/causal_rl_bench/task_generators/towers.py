@@ -72,8 +72,15 @@ class TowersGeneratorTask(BaseTask):
         :param center_position:
         :return:
         """
-        self.stage.remove_everything()
+        self.stage.clear_memory()
+        self.robot.tri_finger.reset_world()
+        self.robot.clear()
+        self.stage.clear()
+        joint_positions = self.robot.robot_actions.joint_positions_upper_bounds
+        self.robot.set_full_state(np.append(joint_positions,
+                                            np.zeros(9)))
         self.task_stage_observation_keys = []
+        self._creation_list = []
         block_size = tower_dims / number_of_blocks_in_tower
         curr_height = self.stage.floor_height - block_size[-1] / 2
         rigid_block_position = np.array([-0.12, -0.12, self.stage.floor_height + block_size[-1] / 2])
@@ -85,21 +92,25 @@ class TowersGeneratorTask(BaseTask):
                 curr_x = center_position[0] - tower_dims[0] / 2 - block_size[0] / 2
                 for row in range(number_of_blocks_in_tower[0]):
                     curr_x += block_size[0]
-                    self.stage.add_silhoutte_general_object(name="goal_" + "level_" +
-                                                                 str(level) + "_col_" +
-                                                                 str(col) + "_row_" + str(row),
-                                                            shape="cube",
-                                                            position=[curr_x, curr_y, curr_height],
-                                                            orientation=[0, 0, 0, 1],
-                                                            size=block_size)
-                    self.stage.add_rigid_general_object(name="tool_" + "level_" +
-                                                             str(level) + "_col_" +
-                                                             str(col) + "_row_" + str(row),
-                                                        shape="cube",
-                                                        position=rigid_block_position,
-                                                        orientation=[0, 0, 0, 1],
-                                                        size=block_size,
-                                                        mass=self.current_tool_block_mass)
+                    creation_dict = {'name': "goal_" + "level_" +
+                                             str(level) + "_col_" +
+                                             str(col) + "_row_" + str(row),
+                                     'shape': "cube",
+                                     'position': [curr_x, curr_y, curr_height],
+                                     'orientation': [0, 0, 0, 1],
+                                     'size': block_size}
+                    self.stage.add_silhoutte_general_object(**creation_dict)
+                    self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
+                    creation_dict = {'name': "tool_" + "level_" +
+                                              str(level) + "_col_" +
+                                              str(col) + "_row_" + str(row),
+                                     'shape': "cube",
+                                     'position': np.copy(rigid_block_position),
+                                     'orientation': [0, 0, 0, 1],
+                                     'mass': self.current_tool_block_mass,
+                                     'size': block_size}
+                    self.stage.add_rigid_general_object(**creation_dict)
+                    self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
                     self.task_stage_observation_keys.append("goal_" + "level_" +
                                                              str(level) + "_col_" +
                                                              str(col) + "_row_" + str(row) + '_position')

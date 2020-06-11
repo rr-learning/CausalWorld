@@ -399,8 +399,12 @@ class TriFingerRobot(object):
 
         if "joint_positions" in interventions_dict or \
                 "joint_velocities" in interventions_dict:
-            self.set_full_state(np.append(new_joint_positions,
-                                          new_joint_velcoities))
+            self.latest_full_state = self.tri_finger.finger_intervention(new_joint_positions,
+                                                                         new_joint_velcoities)
+            self.last_action = np.zeros(9, )
+            self.last_clipped_action = np.zeros(9, )
+            if self.action_mode != "joint_torques":
+                self.last_applied_joint_positions = list(new_joint_positions)
         for intervention in interventions_dict:
             if intervention == "joint_velocities" or \
                     intervention == "joint_positions":

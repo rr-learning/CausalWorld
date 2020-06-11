@@ -7,7 +7,7 @@ from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
 from causal_rl_bench.task_generators.task import task_generator
-
+import copy
 
 class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
@@ -186,8 +186,6 @@ class World(gym.Env):
         :return:
         """
         # self.__pybullet_client.resetSimulation()
-
-        self.__robot.tri_finger.reset_world()
         # optionally enable EGL for faster headless rendering
         # try:
         #     if os.environ["PYBULLET_EGL"]:
@@ -204,6 +202,7 @@ class World(gym.Env):
         self.__tracker.add_episode_experience(self.__episode_length)
         self.__episode_length = 0
         if interventions_dict is not None:
+            interventions_dict = copy.deepcopy(interventions_dict)
             self.__tracker.do_intervention(self.task, interventions_dict)
         success_signal, interventions_info, reset_observation_space_signal = \
             self.task.reset_task(interventions_dict)
@@ -418,6 +417,9 @@ class World(gym.Env):
 
     def get_robot(self):
         return self.__robot
+
+    def get_stage(self):
+        return self.__stage
 
     def get_tracker(self):
         return self.__tracker

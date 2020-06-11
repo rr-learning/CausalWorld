@@ -85,6 +85,12 @@ class Stage(object):
             self.pybullet_client.removeBody(block_id)
         return
 
+    def clear_memory(self):
+        self.name_keys = []
+        self.rigid_objects = {}
+        self.visual_objects = {}
+        return
+
     def remove_everything(self):
         """
 
@@ -160,8 +166,8 @@ class Stage(object):
 
         :return:
         """
-        self.stage_observations = StageObservations(self.rigid_objects.values(),
-                                                    self.visual_objects.values(),
+        self.stage_observations = StageObservations(self.rigid_objects,
+                                                    self.visual_objects,
                                                     self.observation_mode,
                                                     self.normalize_observations)
 
@@ -224,7 +230,7 @@ class Stage(object):
         self.latest_full_state = new_state
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
-        self.pybullet_client.stepSimulation()
+        #self.pybullet_client.stepSimulation()
         return
 
     def set_objects_pose(self, names, positions, orientations):
@@ -251,7 +257,7 @@ class Stage(object):
         self.latest_full_state = self.get_full_state()
         if self.goal_image_pybullet_instance is not None:
             self.update_goal_image()
-        self.pybullet_client.stepSimulation()
+        #self.pybullet_client.stepSimulation()
         return
 
     def get_current_observations(self, helper_keys):
@@ -374,7 +380,7 @@ class Stage(object):
             goal_image_object = self.goal_image_visual_objects[key]
             goal_image_object.set_state(interventions_dict)
             self.update_goal_image()
-        self.pybullet_client.stepSimulation()
+        #self.pybullet_client.stepSimulation()
         return
 
     def get_current_variables_values(self):
@@ -551,7 +557,7 @@ class Stage(object):
                 or not.
         """
         for contact in self.pybullet_client.getContactPoints():
-            if contact[8] < -0.002:
+            if contact[8] < -0.08:
                 return False
         #check if all the visual objects are within the bb og the available arena
         for visual_object in self.visual_objects:
@@ -566,3 +572,7 @@ class Stage(object):
         return (tuple(self.floor_inner_bounding_box[0]),
                 tuple(self.floor_inner_bounding_box[1]))
 
+    def update_stage(self):
+        self.stage_observations.rigid_objects = self.rigid_objects
+        self.stage_observations.visual_objects = self.visual_objects
+        return

@@ -49,7 +49,7 @@ class StageObservations(object):
                                   dtype=np.uint8)
 
     def initialize_observations(self):
-        for rigid_object in self.rigid_objects:
+        for rigid_object in self.rigid_objects.values():
             state_keys = rigid_object.get_state().keys()
             object_lower_bounds, object_upper_bounds = \
                 rigid_object.get_bounds()
@@ -63,7 +63,7 @@ class StageObservations(object):
                                         state_key]
                 self.observations_keys.append(rigid_object.get_name() + '_' +
                                               state_key)
-        for visual_object in self.visual_objects:
+        for visual_object in self.visual_objects.values():
             state_keys = visual_object.get_state().keys()
             object_lower_bounds, object_upper_bounds = \
                 visual_object.get_bounds()
@@ -136,11 +136,11 @@ class StageObservations(object):
 
     def get_current_observations(self, helper_keys):
         observations_dict = dict()
-        for rigid_object in self.rigid_objects:
+        for rigid_object in self.rigid_objects.values():
             observations_dict.update({rigid_object.get_name() +'_'+
                                       k : v for k, v in
                                       rigid_object.get_state().items()})
-        for visual_object in self.visual_objects:
+        for visual_object in self.visual_objects.values():
             observations_dict.update({visual_object.get_name() +'_'+
                                       k : v for k, v in
                                       visual_object.get_state().items()})
