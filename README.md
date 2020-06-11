@@ -6,6 +6,8 @@ This package provides the causal rl benchmark. It can be either
 [pip-installed](#install-as-a-pip-package-in-a-conda-env),
 or used in a catkin workspace.
 
+![](random_interventions.gif)
+
 ## Install as a pip package in a conda env
 
 1. Clone this repo and then create it's conda environment to install all dependencies.
