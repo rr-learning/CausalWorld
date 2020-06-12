@@ -2,7 +2,7 @@ from causal_rl_bench.agents.reacher_policy import ReacherActorPolicy
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.intervention_agents import VisualInterventionActorPolicy
-from causal_rl_bench.curriculum import InterventionsCurriculum
+from causal_rl_bench.curriculum import Curriculum
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 
 

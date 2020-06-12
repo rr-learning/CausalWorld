@@ -1,5 +1,5 @@
 import gym
-from causal_rl_bench.curriculum import InterventionsCurriculum
+from causal_rl_bench.curriculum import Curriculum
 
 
 class CurriculumWrapper(gym.Wrapper):
@@ -7,7 +7,7 @@ class CurriculumWrapper(gym.Wrapper):
                  timesteps_hold):
         #TODO: this wrapper can't be loaded at the moment or saved
         super(CurriculumWrapper, self).__init__(env)
-        self.interventions_curriculum = InterventionsCurriculum(
+        self.interventions_curriculum = Curriculum(
             intervention_actors=intervention_actors,
             episodes_hold=episodes_hold,
             timesteps_hold=timesteps_hold)

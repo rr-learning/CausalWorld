@@ -21,3 +21,8 @@ class BaseMetric(object):
         :return:
         """
         raise Exception("not implemendted yet")
+
+    def reset(self):
+        """
+        :return:
+        """

@@ -49,6 +49,9 @@ class PushingTaskGenerator(BaseTask):
             "Task where the goal is to push " \
             "an object towards a goal position"
 
+    def get_max_episode_length(self):
+        return 5
+
     def _set_up_stage_arena(self):
         """
 
@@ -219,3 +222,4 @@ class PushingTaskGenerator(BaseTask):
                 interventions_dict['goal_block']['size'] = \
                     interventions_dict['tool_block']['size']
         return interventions_dict
+
