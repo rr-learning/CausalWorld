@@ -50,6 +50,7 @@ class BaseTask(object):
         self.task_params['is_goal_distance_dense'] = is_goal_distance_dense
         self.task_params['calculate_additional_dense_rewards'] = \
             calculate_additional_dense_rewards
+        self._creation_list = []
         return
 
     def is_in_training_mode(self):
@@ -187,6 +188,8 @@ class BaseTask(object):
         :return:
         """
         self.stage.remove_everything()
+        self.task_stage_observation_keys = []
+        self.robot.tri_finger.reset_world()
         self.task_stage_observation_keys = []
         self.initial_state = dict(self.default_state)
         self._set_up_stage_arena()
@@ -417,6 +420,11 @@ class BaseTask(object):
         reward = goal_distance * self.task_params["sparse_reward_weight"]
         return reward
 
+    def _create_world(self):
+        for arena_object in self._creation_list:
+            arena_object[0](**arena_object[1])
+        return
+
     def init_task(self, robot, stage):
         """
 
@@ -430,6 +438,7 @@ class BaseTask(object):
             self.robot.get_rest_pose()[0]
         self.initial_state['joint_velocities'] = \
             np.zeros([9, ])
+        self.robot.tri_finger.reset_world()
         self._set_up_stage_arena()
         self.default_state.update(dict(self.initial_state))
         self.stage.finalize_stage()
@@ -479,8 +488,12 @@ class BaseTask(object):
         :param interventions_dict:
         :return:
         """
+        self.stage.clear_memory()
+        self.robot.tri_finger.reset_world()
         self.robot.clear()
         self.stage.clear()
+        self._create_world()
+        self.stage.update_stage()
         self.task_solved = False
         self.finished_episode = False
         self.time_steps_elapsed_since_success = 0
@@ -800,17 +813,22 @@ class BaseTask(object):
             current_robot_state = self.robot.get_full_state()
         else:
             current_robot_state = self.robot.get_default_state()
-        self.stage.apply_interventions(stage_interventions_dict)
         self.robot.apply_interventions(robot_interventions_dict)
+        self.stage.apply_interventions(stage_interventions_dict)
         task_generator_intervention_success_signal, reset_observation_space_signal = \
             self.apply_task_generator_interventions \
                 (task_generator_interventions_dict)
-        if not self.stage.check_feasiblity_of_stage():
-            self.stage.set_full_state(current_stage_state)
-            stage_infeasible = True
-        if not self.robot.check_feasibility_of_robot_state():
-            self.robot.set_full_state(current_robot_state)
-            robot_infeasible = True
+        #TODO: this is a hack for now to not check feasibility when adding/removing objects since
+        #The stage state is quite different afterwards and it will be hard to restore its exact state
+        #we dont handle this
+        self.stage.pybullet_client.stepSimulation()
+        if len(task_generator_interventions_dict) == 0:
+            if not self.stage.check_feasiblity_of_stage():
+                self.stage.set_full_state(current_stage_state)
+                stage_infeasible = True
+            if not self.robot.check_feasibility_of_robot_state():
+                self.robot.set_full_state(current_robot_state)
+                robot_infeasible = True
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \

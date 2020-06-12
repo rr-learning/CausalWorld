@@ -32,9 +32,10 @@ class PushingTaskGenerator(BaseTask):
             kwargs.get("tool_block_position", np.array([0, 0, 0.0425]))
         self.initial_state["tool_block"]["orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
-        self.task_params["goal_block_position"] = \
+        self.initial_state["goal_block"] = dict()
+        self.initial_state["goal_block"]["position"] = \
             kwargs.get("goal_block_position", np.array([0, 0.10, 0.0425]))
-        self.task_params["goal_block_orientation"] = \
+        self.initial_state["goal_block"]["orientation"] = \
             kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_end_effector_positions = None
         self.previous_object_position = None
@@ -57,20 +58,23 @@ class PushingTaskGenerator(BaseTask):
 
         :return:
         """
-        self.stage.add_rigid_general_object(name="tool_block",
-                                            shape="cube",
-                                            mass=self.task_params[
-                                                "tool_block_mass"],
-                                            position=self.initial_state
+        creation_dict = {'name': "tool_block",
+                         'shape': "cube",
+                         'position': self.initial_state
                                             ["tool_block"]["position"],
-                                            orientation=self.initial_state
-                                            ["tool_block"]["orientation"])
-        self.stage.add_silhoutte_general_object(name="goal_block",
-                                                shape="cube",
-                                                position=self.task_params[
-                                                    "goal_block_position"],
-                                                orientation=self.task_params[
-                                                    "goal_block_orientation"])
+                         'orientation': self.initial_state
+                         ["tool_block"]["orientation"],
+                         'mass': self.task_params["tool_block_mass"]}
+        self.stage.add_rigid_general_object(**creation_dict)
+        self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
+        creation_dict = {'name': "goal_block",
+                         'shape': "cube",
+                         'position': self.initial_state
+                         ["goal_block"]["position"],
+                         'orientation': self.initial_state
+                         ["goal_block"]["orientation"]}
+        self.stage.add_silhoutte_general_object(**creation_dict)
+        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
         self.task_stage_observation_keys = ["tool_block_position",
                                             "tool_block_orientation",
                                             "goal_block_position",

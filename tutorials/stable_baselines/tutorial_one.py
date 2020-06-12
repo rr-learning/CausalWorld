@@ -63,9 +63,9 @@ if __name__ == '__main__':
     ap.add_argument("--max_episode_length", required=False, default=2500,
                     help="maximum episode length")
     ap.add_argument("--total_time_steps_per_update", required=False,
-                    default=150000, help="total time steps per update")
+                    default=100000, help="total time steps per update")
     ap.add_argument("--num_of_envs", required=False,
-                    default=30, help="number of parallel environments")
+                    default=20, help="number of parallel environments")
     ap.add_argument("--task_name", required=False,
                     default="reaching", help="the task nam for training")
     ap.add_argument("--fixed_position", required=False,
@@ -83,16 +83,14 @@ if __name__ == '__main__':
     fixed_position = bool(args['fixed_position'])
     assert (((float(total_time_steps_per_update) /
              num_of_envs)/5).is_integer())
-    ppo_config = {"gamma": 0.9988,
-                  "n_steps": int(total_time_steps_per_update / num_of_envs),
+    ppo_config = {"gamma": 0.9995,
+                  "n_steps": 5000,
                   "ent_coef": 0,
-                  "learning_rate": 0.001,
-                  "vf_coef": 0.99,
-                  "max_grad_norm": 0.1,
-                  "lam": 0.95,
-                  "nminibatches": 5,
-                  "noptepochs": 100,
-                  "cliprange": 0.2,
+                  "learning_rate": 0.00025,
+                  "vf_coef": 0.5,
+                  "max_grad_norm": 10,
+                  "nminibatches": 1000,
+                  "noptepochs": 4,
                   "tensorboard_log": log_relative_path}
     train_policy(num_of_envs=num_of_envs,
                  log_relative_path=log_relative_path,

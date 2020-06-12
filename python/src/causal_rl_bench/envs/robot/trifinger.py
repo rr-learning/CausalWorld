@@ -1,6 +1,6 @@
 from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
-from pybullet_fingers.sim_finger import SimFinger
+from causal_rl_bench.envs.pybullet_fingers.sim_finger import SimFinger
 import numpy as np
 import math
 
@@ -19,16 +19,14 @@ class TriFingerRobot(object):
         self.simulation_time = simulation_time
         self.dt = self.simulation_time * self.skip_frame
         self.control_index = -1
-        self.tri_finger = SimFinger(self.simulation_time, enable_visualization,
-                                    "tri")
+        self.tri_finger = SimFinger(self.simulation_time, enable_visualization)
 
         self.robot_actions = TriFingerAction(action_mode, normalize_actions)
         self.robot_observations = TriFingerObservations(observation_mode,
                                                         normalize_observations)
         if self.enable_goal_image:
             self.goal_image_instance = SimFinger(self.simulation_time,
-                                                 enable_visualization=False,
-                                                 finger_type="tri")
+                                                 enable_visualization=False)
             self.goal_image_instance_state = \
                 self.goal_image_instance.reset_finger(
                     self.robot_actions.joint_positions_lower_bounds,
@@ -401,8 +399,12 @@ class TriFingerRobot(object):
 
         if "joint_positions" in interventions_dict or \
                 "joint_velocities" in interventions_dict:
-            self.set_full_state(np.append(new_joint_positions,
-                                          new_joint_velcoities))
+            self.latest_full_state = self.tri_finger.finger_intervention(new_joint_positions,
+                                                                         new_joint_velcoities)
+            self.last_action = np.zeros(9, )
+            self.last_clipped_action = np.zeros(9, )
+            if self.action_mode != "joint_torques":
+                self.last_applied_joint_positions = list(new_joint_positions)
         for intervention in interventions_dict:
             if intervention == "joint_velocities" or \
                     intervention == "joint_positions":

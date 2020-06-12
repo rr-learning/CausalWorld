@@ -7,7 +7,7 @@ from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
 from causal_rl_bench.task_generators.task import task_generator
-
+import copy
 
 class World(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
@@ -87,7 +87,8 @@ class World(gym.Env):
                                  world_params=self._get_world_params())
         self.__scale_reward_by_dt = True
         self.__disabled_actions = False
-        self.reset()
+        #TODO: I am not sure if this reset is necassary, TO BE CONFIRMED
+        # self.reset()
         return
 
     def __reset_observations_space(self):
@@ -184,9 +185,24 @@ class World(gym.Env):
         :param interventions_dict:
         :return:
         """
+        # self.__pybullet_client.resetSimulation()
+        # optionally enable EGL for faster headless rendering
+        # try:
+        #     if os.environ["PYBULLET_EGL"]:
+        #         con_mode = self._p.getConnectionInfo()['connectionMethod']
+        #         if con_mode == self._p.DIRECT:
+        #             egl = pkgutil.get_loader('eglRenderer')
+        #             if (egl):
+        #                 self._p.loadPlugin(egl.get_filename(),
+        #                                    "_eglRendererPlugin")
+        #             else:
+        #                 self._p.loadPlugin("eglRendererPlugin")
+        # except:
+        #     pass
         self.__tracker.add_episode_experience(self.__episode_length)
         self.__episode_length = 0
         if interventions_dict is not None:
+            interventions_dict = copy.deepcopy(interventions_dict)
             self.__tracker.do_intervention(self.task, interventions_dict)
         success_signal, interventions_info, reset_observation_space_signal = \
             self.task.reset_task(interventions_dict)
@@ -202,7 +218,6 @@ class World(gym.Env):
                                              task_name=self.task.task_name,
                                              task_params=self.task.get_task_params(),
                                              world_params=self._get_world_params())
-
         if self.__observation_mode == "cameras" and self.__enable_goal_image:
             current_images = self.__robot.get_current_camera_observations()
             goal_images = self.__stage.get_current_goal_image()
@@ -396,8 +411,15 @@ class World(gym.Env):
     def get_action_mode(self):
         return self.__action_mode
 
+    def set_action_mode(self, action_mode):
+        self.__action_mode = action_mode
+        self.__robot.set_action_mode(action_mode)
+
     def get_robot(self):
         return self.__robot
+
+    def get_stage(self):
+        return self.__stage
 
     def get_tracker(self):
         return self.__tracker

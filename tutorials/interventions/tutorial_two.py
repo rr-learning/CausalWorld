@@ -10,7 +10,10 @@ def without_intervention_split():
     for _ in range(10):
         for i in range(200):
             obs, reward, done, info = env.step(env.action_space.sample())
-        success_signal = env.do_intervention({'stage_color': np.random.uniform(0, 1, [3,])})
+        success_signal = env.do_intervention({'stage_color':
+                                                  np.random.uniform(0,
+                                                                    1,
+                                                                    [3, ])})
         print("Intervention success signal", success_signal)
     env.close()
 

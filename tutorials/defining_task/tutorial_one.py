@@ -13,13 +13,14 @@ class MyOwnTask(BaseTask):
 
     #This is not even needed, it will just be an empty stage
     def _set_up_stage_arena(self):
-        self.stage.add_rigid_mesh_object('tool_block',
-                                         filename='./assets/719.obj')
-        self.stage.add_silhoutte_mesh_object('goal_block',
-                                             filename='./assets/719.obj')
-        self.task_stage_observation_keys = ["tool_block_position",
-                                            "tool_block_orientation",
-                                            "goal_block_position"]
+        creation_dict = {'name': "tool_block",
+                         'filename': './assets/719.obj'}
+        self.stage.add_rigid_mesh_object(**creation_dict)
+        self._creation_list.append([self.stage.add_rigid_mesh_object, creation_dict])
+        creation_dict = {'name': "goal_block",
+                         'filename': './assets/719.obj'}
+        self.stage.add_silhoutte_mesh_object(**creation_dict)
+        self._creation_list.append([self.stage.add_silhoutte_mesh_object, creation_dict])
 
 
 def example():

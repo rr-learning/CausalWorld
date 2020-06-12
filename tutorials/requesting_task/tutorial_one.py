@@ -5,7 +5,6 @@ import numpy as np
 
 def example():
     task = task_generator(task_generator_id='picking')
-    task.set_super_sparse_reward()
     env = World(task=task, enable_visualization=True)
     env.reset()
     for _ in range(2000):

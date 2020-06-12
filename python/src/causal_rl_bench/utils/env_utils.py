@@ -22,7 +22,7 @@ def combine_spaces(space_1, space_2):
     upper_bound = np.concatenate((space_1.high, space_2.high))
     return spaces.Box(low=lower_bound,
                       high=upper_bound,
-                      dtype=np.float32)
+                      dtype=np.float64)
 
 
 

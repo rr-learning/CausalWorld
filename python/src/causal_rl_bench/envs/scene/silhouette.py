@@ -318,13 +318,13 @@ class SCuboid(SilhouetteObject):
                 if name == 'type':
                     state.append(self.__type_id)
                 elif name == 'position':
-                    state.extend(self.__position)
+                    state.extend(np.array(self.__position))
                 elif name == 'orientation':
-                    state.extend(self.__orientation)
+                    state.extend(np.array(self.__orientation))
                 elif name == 'size':
-                    state.extend(self.__size)
+                    state.extend(np.array(self.__size))
                 elif name == 'color':
-                    state.extend(self.__color)
+                    state.extend(np.array(self.__color))
         else:
             raise Exception("state type is not supported")
         return state
@@ -550,9 +550,9 @@ class SMeshObject(SilhouetteObject):
         :return:
         """
         if 'position' in state_dict:
-            self.__position = state_dict['position']
+            self.__position = np.array(state_dict['position'])
         if 'orientation' in state_dict:
-            self.__orientation = state_dict['orientation']
+            self.__orientation = np.array(state_dict['orientation'])
         elif 'position' in state_dict or 'orientation' in state_dict:
             self._pybullet_client.resetBasePositionAndOrientation(
                 self.__block_id, self.__position, self.__orientation
@@ -560,7 +560,7 @@ class SMeshObject(SilhouetteObject):
             self.__set_vertices()
             self.__set_bounding_box()
         if 'color' in state_dict:
-            self.__color = state_dict['color']
+            self.__color = np.array(state_dict['color'])
             self._pybullet_client.changeVisualShape(self.__block_id, -1,
                                                     rgbaColor=
                                                     np.append(

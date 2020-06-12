@@ -543,6 +543,13 @@ class Cuboid(RigidObject):
         #TODO: double check if its not the inverse
         return get_rotation_matrix(orientation)
 
+    def get_size(self):
+        """
+
+        :return:
+        """
+        return self.__size
+
 
 class MeshObject(RigidObject):
     def __init__(
@@ -893,6 +900,13 @@ class MeshObject(RigidObject):
         :return:
         """
         return self.__volume
+
+    def get_size(self):
+        """
+
+        :return:
+        """
+        return self.__size
 
 
 class StaticCuboid(RigidObject):
