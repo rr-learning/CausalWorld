@@ -260,7 +260,7 @@ class Cuboid(RigidObject):
                 baseCollisionShapeIndex=self.__shape_id,
                 basePosition=position,
                 baseOrientation=orientation,
-                baseMass=0.02
+                baseMass=self.__mass
             )
             self._pybullet_client.changeVisualShape(self.__block_id, -1,
                                                     rgbaColor=
