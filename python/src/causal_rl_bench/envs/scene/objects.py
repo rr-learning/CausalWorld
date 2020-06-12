@@ -273,7 +273,7 @@ class Cuboid(RigidObject):
             )
         elif 'mass' in state_dict:
             self._pybullet_client.changeDynamics(self.__block_id, -1,
-                                                 mass=0.02)
+                                                 mass=self.__mass)
 
         if 'color' in  state_dict:
             self.__color = state_dict['color']
