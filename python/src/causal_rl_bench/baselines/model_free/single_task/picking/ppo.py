@@ -37,21 +37,22 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
     env = SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
     checkpoint_callback = CheckpointCallback(
-        save_freq=validate_every_timesteps,
+        save_freq=int(validate_every_timesteps/num_of_envs),
         save_path=log_relative_path,
         name_prefix='model')
     model = PPO2(MlpPolicy, env, _init_setup_model=True,
                  policy_kwargs=policy_kwargs,
                  verbose=1, **ppo_config)
-    model.learn(total_timesteps=validate_every_timesteps,
+    model.learn(total_timesteps=total_time_steps,
                 tb_log_name="ppo2",
-                reset_num_timesteps=False,
                 callback=checkpoint_callback)
     return
 
 
 if __name__ == '__main__':
     total_time_steps_per_update = 1000000
+    total_time_steps = 60000000
+    number_of_time_steps_per_iteration = 12000
     num_of_envs = 20
     log_relative_path = 'baseline_picking_ppo'
     maximum_episode_length = 600
@@ -59,7 +60,8 @@ if __name__ == '__main__':
     seed_num = 0
     task_name = 'picking'
     ppo_config = {"gamma": 0.99,
-                  "n_steps": 600,
+                  "n_steps":
+                      int(number_of_time_steps_per_iteration/num_of_envs),
                   "ent_coef": 0.01,
                   "learning_rate": 0.00025,
                   "vf_coef": 0.5,
@@ -73,7 +75,7 @@ if __name__ == '__main__':
                  skip_frame=skip_frame,
                  seed_num=seed_num,
                  ppo_config=ppo_config,
-                 total_time_steps=60000000,
-                 validate_every_timesteps=1000000,
+                 total_time_steps=total_time_steps,
+                 validate_every_timesteps=total_time_steps_per_update,
                  task_name=task_name)
 
