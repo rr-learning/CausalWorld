@@ -26,7 +26,9 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
             env = World(task=task, skip_frame=skip_frame,
                         enable_visualization=False,
                         seed=seed_num + rank, max_episode_length=
-                        maximum_episode_length)
+                        maximum_episode_length,
+                        normalize_actions=False,
+                        normalize_observations=False)
             return env
 
         set_global_seeds(seed_num)
