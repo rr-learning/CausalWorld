@@ -41,7 +41,7 @@ if __name__ == '__main__':
     total_time_steps_per_update = 1000000
     total_time_steps = 60000000
     num_of_envs = 20
-    log_relative_path = 'baseline_picking_ppo'
+    log_relative_path = 'baseline_picking_sac'
     maximum_episode_length = 600
     skip_frame = 3
     seed_num = 0
