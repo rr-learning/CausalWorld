@@ -182,7 +182,7 @@ class Cuboid(RigidObject):
         self.__lower_bounds[self._name + "_mass"] = \
             np.array([0])
         self.__lower_bounds[self._name + "_size"] = \
-            np.array([0.065, 0.065, 0.065])
+            np.array([0.03, 0.03, 0.03])
         self.__lower_bounds[self._name + "_color"] = \
             np.array([0]*3)
 
@@ -612,7 +612,7 @@ class MeshObject(RigidObject):
         self.__lower_bounds[self._name + "_mass"] = \
             np.array([0])
         self.__lower_bounds[self._name + "_size"] = \
-            np.array([0.065, 0.065, 0.065])
+            np.array([0.03, 0.03, 0.03])
         self.__lower_bounds[self._name + "_color"] = \
             np.array([0]*3)
 
@@ -946,7 +946,7 @@ class StaticCuboid(RigidObject):
         self.lower_bounds[self._name + "_orientation"] = \
             np.array([-10] * 4)
         self.lower_bounds[self._name + "_size"] = \
-            np.array([0.065, 0.065, 0.065])
+            np.array([0.03, 0.03, 0.03])
         self.lower_bounds[self._name + "_color"] = \
             np.array([0]*3)
 

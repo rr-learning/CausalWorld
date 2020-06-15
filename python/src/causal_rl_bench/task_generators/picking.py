@@ -60,7 +60,8 @@ class PickingTaskGenerator(BaseTask):
                          ["tool_block"]["orientation"],
                          'mass': self.task_params["tool_block_mass"]}
         self.stage.add_rigid_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
+        self._creation_list.append([self.stage.add_rigid_general_object,
+                                    creation_dict])
         goal_block_position = np.array(
             self.initial_state["tool_block"]["position"])
         goal_block_position[-1] = self.task_params["goal_height"]
@@ -70,15 +71,14 @@ class PickingTaskGenerator(BaseTask):
                          'orientation': self.initial_state
                          ["tool_block"]["orientation"]}
         self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
+        self._creation_list.append([self.stage.add_silhoutte_general_object,
+                                    creation_dict])
         self.task_stage_observation_keys = ["tool_block_position",
                                             "tool_block_orientation",
+                                            "tool_block_size",
                                             "goal_block_position",
-                                            "goal_block_orientation"]
-        self.task_stage_observation_keys = ["tool_block_position",
-                                            "tool_block_orientation",
-                                            "goal_block_position",
-                                            "goal_block_orientation"]
+                                            "goal_block_orientation",
+                                            "goal_block_size"]
         self.initial_state["goal_block"] = dict()
         self.initial_state["goal_block"]["position"] = goal_block_position
         self.initial_state["goal_block"]["orientation"] = \
