@@ -218,7 +218,7 @@ class BaseTask(object):
             self.training_intervention_spaces[rigid_object] = dict()
             self.training_intervention_spaces[rigid_object]['position'] = \
                 np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.3]])
-            if self.stage.rigid_objects['rigid_object'].__class__.__name__ == 'Cuboid':
+            if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
                 self.training_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[rigid_object]['color'] = \
@@ -266,7 +266,7 @@ class BaseTask(object):
             self.testing_intervention_spaces[rigid_object] = dict()
             self.testing_intervention_spaces[rigid_object]['position'] = \
                 np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
-            if self.stage.rigid_objects['rigid_object'].__class__.__name__ == 'Cuboid':
+            if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
                 self.testing_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[rigid_object]['color'] = \

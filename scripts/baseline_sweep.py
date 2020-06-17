@@ -28,6 +28,7 @@ world_seed = 0
 num_of_envs = 4
 
 NUM_RANDOM_SEEDS = 5
+NET_LAYERS = [256, 256]
 
 
 def save_config_file(file_path, world_params, task_configs):
@@ -130,18 +131,18 @@ def get_TD3_model(model_settings, model_path):
     env = get_single_process_env(model_settings)
     n_actions = env.action_space.shape[-1]
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
-    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
-    # TODO: policy kwargs not working yet
+    policy_kwargs = dict(layers=NET_LAYERS)
     model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
+                policy_kwargs=policy_kwargs,
                 verbose=1, tensorboard_log=model_path)
     return model, env
 
 
 def get_SAC_model(model_settings, model_path):
     env = get_single_process_env(model_settings)
-    policy_kwargs = dict(act_fun=tf.nn.relu, net_arch=[256, 256])
-    # TODO: policy kwargs not working yet
+    policy_kwargs = dict(layers=NET_LAYERS)
     model = SAC(SACMlpPolicy, env, _init_setup_model=True,
+                policy_kwargs=policy_kwargs,
                 verbose=1, tensorboard_log=model_path)
     return model, env
 
@@ -156,7 +157,7 @@ def get_PPO_model(model_settings, model_path):
                   "max_grad_norm": 0.5,
                   "nminibatches": 4,
                   "noptepochs": 4}
-    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
+    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=NET_LAYERS)
     model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
                  verbose=1, **ppo_config, tensorboard_log=model_path)
     return model, env
