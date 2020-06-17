@@ -27,6 +27,8 @@ from stable_baselines.ddpg.noise import NormalActionNoise
 world_seed = 0
 num_of_envs = 4
 
+NUM_RANDOM_SEEDS = 5
+
 
 def save_config_file(file_path, world_params, task_configs):
     configs_to_save = {'task_params': task_configs,
@@ -52,7 +54,7 @@ def baseline_model(model_num):
                                       'enable_goal_image': False,
                                       'action_mode': 'joint_positions'}}]
 
-    random_seeds = sweep('seed', np.arange(start=0, stop=5))
+    random_seeds = sweep('seed', np.arange(start=0, stop=NUM_RANDOM_SEEDS))
     algorithms = sweep('algorithm', ['PPO',
                                      'SAC',
                                      'TD3',
@@ -228,7 +230,7 @@ if __name__ == '__main__':
                                                       **model_settings['task_configs']),
                                   world_params=model_settings['world_params'],
                                   policy_fn=policy_fn,
-                                  file_name=os.path.join(animation_path, "pushing_video"),
+                                  file_name=os.path.join(animation_path, "policy"),
                                   number_of_resets=1,
                                   max_time_steps=600)
     evaluation_path = os.path.join(output_path, 'evaluation')

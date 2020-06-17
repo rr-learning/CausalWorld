@@ -218,8 +218,9 @@ class BaseTask(object):
             self.training_intervention_spaces[rigid_object] = dict()
             self.training_intervention_spaces[rigid_object]['position'] = \
                 np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.3]])
-            self.training_intervention_spaces[rigid_object]['size'] = \
-                np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+            if self.stage.rigid_objects['rigid_object'].__class__.__name__ == 'Cuboid':
+                self.training_intervention_spaces[rigid_object]['size'] = \
+                    np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
             self.training_intervention_spaces[rigid_object]['mass'] = \
@@ -228,8 +229,9 @@ class BaseTask(object):
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
                 np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.15]])
-            self.training_intervention_spaces[visual_object]['size'] = \
-                np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+            if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
+                self.training_intervention_spaces[visual_object]['size'] = \
+                    np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[visual_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self.training_intervention_spaces['floor_color'] = \
@@ -264,8 +266,9 @@ class BaseTask(object):
             self.testing_intervention_spaces[rigid_object] = dict()
             self.testing_intervention_spaces[rigid_object]['position'] = \
                 np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
-            self.testing_intervention_spaces[rigid_object]['size'] = \
-                np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+            if self.stage.rigid_objects['rigid_object'].__class__.__name__ == 'Cuboid':
+                self.testing_intervention_spaces[rigid_object]['size'] = \
+                    np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
             self.testing_intervention_spaces[rigid_object]['mass'] = \
@@ -274,8 +277,9 @@ class BaseTask(object):
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
                 np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
-            self.testing_intervention_spaces[visual_object]['size'] = \
-                np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+            if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
+                self.testing_intervention_spaces[visual_object]['size'] = \
+                    np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[visual_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self.testing_intervention_spaces['floor_color'] = \
