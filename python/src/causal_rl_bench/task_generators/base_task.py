@@ -39,7 +39,7 @@ class BaseTask(object):
         self.task_params["sparse_reward_weight"] = sparse_reward_weight
         self.task_params["dense_reward_weights"] = dense_reward_weights
         self.time_steps_elapsed_since_success = 0
-        self.task_params['time_threshold_in_goal_state_secs'] = 0.5
+        self.task_params['time_threshold_in_goal_state_secs'] = 0.1
         self.current_time_secs = 0
         self.training_intervention_spaces = dict()
         self.testing_intervention_spaces = dict()
@@ -63,7 +63,7 @@ class BaseTask(object):
             return True
         else:
             return False
-
+stat
     def set_super_sparse_reward(self):
         """
 
@@ -860,5 +860,8 @@ class BaseTask(object):
                reset_observation_space_signal
 
     def get_max_episode_length(self):
-        default_episode_length = 10
-        return default_episode_length
+        if self.task_params["task_name"] == 'reaching':
+            episode_length = 5
+        else:
+            episode_length = len(self.stage.rigid_objects) * 10
+        return episode_length

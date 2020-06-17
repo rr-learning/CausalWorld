@@ -1,7 +1,7 @@
 import tensorflow as tf
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
-from stable_baselines import TD3, PPO2, SAC
+from stable_baselines import TD3, PPO2, SAC, HER
 from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
 from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.common.policies import MlpPolicy
@@ -17,6 +17,7 @@ from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 import causal_rl_bench.evaluation.visualization.visualiser as vis
 from causal_rl_bench.intervention_agents import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
 from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
     PUSHING_BENCHMARK, \
     PICKING_BENCHMARK, \
@@ -59,7 +60,7 @@ def baseline_model(model_num):
     algorithms = sweep('algorithm', ['PPO',
                                      'SAC',
                                      'TD3',
-                                     'DDPG_HER'])
+                                     'SAC_HER'])
     curriculum_kwargs_1 = {'intervention_actors': [],
                            'actives': []}
     curriculum_kwargs_2 = {'intervention_actors': [GoalInterventionActorPolicy()],
@@ -141,9 +142,28 @@ def get_TD3_model(model_settings, model_path):
 def get_SAC_model(model_settings, model_path):
     env = get_single_process_env(model_settings)
     policy_kwargs = dict(layers=NET_LAYERS)
+    sac_config = {"gamma": 0.98,
+                  "tau": 0.01,
+                  "ent_coef": 'auto',
+                  "target_entropy": -9,
+                  "learning_rate": 0.00025,
+                  "buffer_size": 1000000,
+                  "learning_starts": 1000,
+                  "batch_size": 256}
     model = SAC(SACMlpPolicy, env, _init_setup_model=True,
-                policy_kwargs=policy_kwargs,
+                policy_kwargs=policy_kwargs, **sac_config,
                 verbose=1, tensorboard_log=model_path)
+    return model, env
+
+
+def get_SAC_HER_model(model_settings, model_path):
+    env = get_single_process_env(model_settings)
+    env = HERGoalEnvWrapper(env)
+    model_class = SAC
+    policy_kwargs = dict(layers=NET_LAYERS)
+    model = HER('MlpPolicy', env, model_class, _init_setup_model=True,
+                policy_kwargs=policy_kwargs,
+                n_sampled_goal=4, verbose=1, tensorboard_log=model_path)
     return model, env
 
 
@@ -177,6 +197,9 @@ def train_model_num(model_settings, output_path):
         num_of_active_envs = 1
     elif model_settings['algorithm'] == 'TD3':
         model, env = get_TD3_model(model_settings, model_path)
+        num_of_active_envs = 1
+    elif model_settings['algorithm'] == 'SAC_HER':
+        model, env = get_SAC_HER_model(model_settings, model_path)
         num_of_active_envs = 1
     else:
         model, env = get_PPO_model(model_settings, model_path)
