@@ -1,8 +1,8 @@
 import tensorflow as tf
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
-from stable_baselines import PPO2
-from stable_baselines.common.policies import MlpPolicy
+from stable_baselines import TD3
+from stable_baselines.td3.policies import MlpPolicy
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.task_generators.task import task_generator
 import causal_rl_bench.viewers.task_viewer as viewer
@@ -19,6 +19,7 @@ from causal_rl_bench.task_generators.pushing import PushingTaskGenerator
 from causal_rl_bench.intervention_agents import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 from causal_rl_bench.benchmark.benchmarks import PUSHING_BENCHMARK
+from stable_baselines.ddpg.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise
 
 seed = 0
 
@@ -28,7 +29,6 @@ def train_policy(num_of_envs,
                  world_params,
                  train_configs,
                  task_configs,
-                 ppo_config,
                  total_time_steps,
                  validate_every_timesteps):
     def _make_env(rank):
@@ -47,30 +47,37 @@ def train_policy(num_of_envs,
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
 
-    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
-    env = SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
-    model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
-                 verbose=1, **ppo_config, tensorboard_log=model_path)
+    #policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
 
-    save_config_file(os.path.join(model_path, 'config.json'), ppo_config, world_params, task_configs)
+    task = task_generator(**task_configs)
+    env = World(task=task,
+                **world_params,
+                seed=seed)
+    env = CurriculumWrapper(env,
+                            **train_configs)
+
+    n_actions = env.action_space.shape[-1]
+    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
+
+    model = TD3(MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
+                verbose=1, tensorboard_log=model_path)
+
+    save_config_file(os.path.join(model_path, 'config.json'), world_params, task_configs)
 
     checkpoint_callback = CheckpointCallback(save_freq=validate_every_timesteps,
                                              save_path=model_path,
                                              name_prefix='rl_model')
 
     model.learn(int(total_time_steps), log_interval=1000, callback=checkpoint_callback)
-    env.env_method("save_world", output_path)
+    env.save_world(output_path)
     env.close()
     return model
 
-
-def save_config_file(file_path, ppo_config, world_params, task_configs):
+def save_config_file(file_path, world_params, task_configs):
     configs_to_save = {'task_params': task_configs,
-                       'world_params': world_params,
-                       'ppo_config': ppo_config}
+                       'world_params': world_params}
     with open(file_path, 'w') as fout:
         json.dump(configs_to_save, fout)
-
 
 def get_configs(model_num):
     world_params = {'skip_frame': 3,
@@ -80,15 +87,6 @@ def get_configs(model_num):
                     'enable_goal_image': False,
                     'action_mode': 'joint_positions',
                     'max_episode_length': 600}
-
-    ppo_config = {"gamma": 0.99,
-                  "n_steps": 600,
-                  "ent_coef": 0.01,
-                  "learning_rate": 0.00025,
-                  "vf_coef": 0.5,
-                  "max_grad_norm": 0.5,
-                  "nminibatches": 4,
-                  "noptepochs": 4}
 
     task_configs = {'task_generator_id': 'pushing',
                     'intervention_split': True,
@@ -106,16 +104,16 @@ def get_configs(model_num):
                          'timesteps_hold': [None]}
     elif model_num == 2:
         train_configs = {'intervention_actors': [RandomInterventionActorPolicy()],
-                         'episodes_hold': [1],
+                         'episodes_hold': [20],
                          'timesteps_hold': [None]}
-        world_params = {'max_episode_length': None}
+        world_params['max_episode_length'] = None
     else:
         train_configs = {'intervention_actors': [GoalInterventionActorPolicy()],
-                         'episodes_hold': [1],
+                         'episodes_hold': [20],
                          'timesteps_hold': [None]}
-        world_params = {'max_episode_length': None}
+        world_params['max_episode_length'] = None
 
-    return task_configs, train_configs, world_params, ppo_config
+    return task_configs, train_configs, world_params
 
 
 if __name__ == '__main__':
@@ -132,7 +130,7 @@ if __name__ == '__main__':
     num_of_envs = int(args['num_of_envs'])
     output_path = str(args['output_path'])
 
-    task_configs, train_configs, world_params, ppo_config = get_configs(model_num)
+    task_configs, train_configs, world_params = get_configs(model_num)
 
     output_path = os.path.join(output_path, str(model_num))
     os.makedirs(output_path)
@@ -142,13 +140,11 @@ if __name__ == '__main__':
                          world_params=world_params,
                          train_configs=train_configs,
                          task_configs=task_configs,
-                         ppo_config=ppo_config,
                          total_time_steps=2e8 / 2e4,
-                         validate_every_timesteps=1e6 / 2e3 / num_of_envs)
+                         validate_every_timesteps=1e6 / 2e3)
 
 
     # define a method for the policy fn of your trained model
-    # model = PPO2.load('baseline_output/1/model/rl_model_950000_steps.zip')
     def policy_fn(obs):
         return model.predict(obs, deterministic=True)[0]
 
@@ -178,6 +174,6 @@ if __name__ == '__main__':
     scores = evaluator.evaluate_policy(policy_fn)
     evaluator.save_scores(evaluation_path)
     experiments = dict()
-    experiments['PPO_default'] = scores
+    experiments['TD3_default'] = scores
     vis.generate_visual_analysis(evaluation_path, experiments=experiments)
     print("success")

@@ -15,8 +15,6 @@ dependencies:
   - pandas
   - mpi4py
   - joblib
-  - opencv-python
   - catkin_pkg
   - sphinx_rtd_theme
   - stable-baselines==2.10.0
-  - sphinx_rtd_theme

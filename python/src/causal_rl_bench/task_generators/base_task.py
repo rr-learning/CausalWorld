@@ -178,8 +178,10 @@ class BaseTask(object):
                     'position' in intervention_space[visual_object]:
                 intervention_dict[visual_object] = dict()
                 intervention_dict[visual_object]['position'] = \
-                    np.random.uniform(intervention_space[visual_object]['position'][0],
-                                      intervention_space[visual_object]['position'][1])
+                    self.stage.random_position(
+                        height_limits=intervention_space[visual_object]['position'][:, 2],
+                        radius_limits=intervention_space[visual_object]['position'][:, 0],
+                        angle_limits=intervention_space[visual_object]['position'][:, 1])
         return intervention_dict
 
     def reset_default_state(self):
@@ -214,10 +216,7 @@ class BaseTask(object):
         for rigid_object in self.stage.rigid_objects:
             self.training_intervention_spaces[rigid_object] = dict()
             self.training_intervention_spaces[rigid_object]['position'] = \
-                np.array([self.stage.floor_inner_bounding_box[0],
-                          (self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self.stage.floor_inner_bounding_box[0]])
+                np.array([[0.0, 0, self.stage.floor_height], [0.1, 360, 0.3]])
             self.training_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[rigid_object]['color'] = \
@@ -227,10 +226,7 @@ class BaseTask(object):
         for visual_object in self.stage.visual_objects:
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
-                np.array([self.stage.floor_inner_bounding_box[0],
-                          (self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self.stage.floor_inner_bounding_box[0]])
+                np.array([[0.0, 0, self.stage.floor_height], [0.1, 360, 0.3]])
             self.training_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[visual_object]['color'] = \
@@ -266,10 +262,7 @@ class BaseTask(object):
         for rigid_object in self.stage.rigid_objects:
             self.testing_intervention_spaces[rigid_object] = dict()
             self.testing_intervention_spaces[rigid_object]['position'] = \
-                np.array([(self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                           self.stage.floor_inner_bounding_box[0],
-                          self.stage.floor_inner_bounding_box[1]])
+                np.array([[0.1, 0, self.stage.floor_height], [0.15, 360, 0.3]])
             self.testing_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[rigid_object]['color'] = \
@@ -279,10 +272,7 @@ class BaseTask(object):
         for visual_object in self.stage.visual_objects:
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
-                np.array([(self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                           self.stage.floor_inner_bounding_box[0],
-                          self.stage.floor_inner_bounding_box[1]])
+                np.array([[0.1, 0, self.stage.floor_height], [0.15, 360, 0.3]])
             self.testing_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[visual_object]['color'] = \
@@ -857,4 +847,5 @@ class BaseTask(object):
                reset_observation_space_signal
 
     def get_max_episode_length(self):
-        return 5
+        default_episode_length = 10
+        return default_episode_length

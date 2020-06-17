@@ -29,6 +29,7 @@ class Stage(object):
         self.latest_full_state = None
         self.latest_observations = None
         self.goal_image_pybullet_instance = goal_image_pybullet_instance
+        # TODO: I think the floor height is actually slightly higher (0.115 or sth)
         self.floor_height = 0.01
         #TODO: discuss this with Manuel and Felix for the bounds
         self.floor_inner_bounding_box = np.array(
