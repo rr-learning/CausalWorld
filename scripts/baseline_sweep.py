@@ -46,7 +46,7 @@ def baseline_model(model_num):
                                       'sparse_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
-                                      'enable_visualization': True,
+                                      'enable_visualization': False,
                                       'observation_mode': 'structured',
                                       'normalize_observations': True,
                                       'enable_goal_image': False,
@@ -131,17 +131,20 @@ def get_TD3_model(model_settings, model_path):
     n_actions = env.action_space.shape[-1]
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
+    # TODO: seed and policy kwargs not working yet
+    # model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
+    #             verbose=1, tensorboard_log=model_path,
+    #             policy_kwargs=policy_kwargs,
+    #             seed=model_settings['seed'])
     model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
-                verbose=1, tensorboard_log=model_path,
-                policy_kwargs=policy_kwargs,
-                seed=model_settings['seed'])
+                verbose=1, tensorboard_log=model_path)
     return model, env
 
 
 def get_SAC_model(model_settings, model_path):
     env = get_single_process_env(model_settings)
     policy_kwargs = dict(act_fun=tf.nn.relu, net_arch=[256, 256])
-    # TODO: seed nad policy kwargs not working yet
+    # TODO: seed and policy kwargs not working yet
     # model = SAC(SACMlpPolicy, env, _init_setup_model=True,
     #             verbose=1, tensorboard_log=model_path,
     #             policy_kwargs=policy_kwargs,
@@ -172,8 +175,8 @@ def get_PPO_model(model_settings, model_path):
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = 1000000 / 1e2
-    validate_every_timesteps = 500000 / 1e2
+    total_time_steps = int(1000000 / 1e2)
+    validate_every_timesteps = int(500000 / 1e2)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
     if model_settings['algorithm'] == 'PPO':
@@ -198,7 +201,10 @@ def train_model_num(model_settings, output_path):
                                              name_prefix='model')
 
     model.learn(int(total_time_steps / num_of_active_envs), callback=checkpoint_callback)
-    env.save_world(output_path)
+    if env.__class__.__name__ == 'SubprocVecEnv':
+        env.env_method("save_world", output_path)
+    else:
+        env.save_world(output_path)
     env.close()
 
     return model
