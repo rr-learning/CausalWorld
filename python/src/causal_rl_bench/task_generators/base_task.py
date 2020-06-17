@@ -216,7 +216,7 @@ class BaseTask(object):
         for rigid_object in self.stage.rigid_objects:
             self.training_intervention_spaces[rigid_object] = dict()
             self.training_intervention_spaces[rigid_object]['position'] = \
-                np.array([[0.0, 0, self.stage.floor_height], [0.1, 360, 0.3]])
+                np.array([[0.0, 0, self.stage.floor_height], [0.1, 2 * math.pi, 0.3]])
             self.training_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[rigid_object]['color'] = \
@@ -226,7 +226,7 @@ class BaseTask(object):
         for visual_object in self.stage.visual_objects:
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
-                np.array([[0.0, 0, self.stage.floor_height], [0.1, 360, 0.3]])
+                np.array([[0.0, 0, self.stage.floor_height], [0.09, 2 * math.pi, 0.15]])
             self.training_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[visual_object]['color'] = \
@@ -262,7 +262,7 @@ class BaseTask(object):
         for rigid_object in self.stage.rigid_objects:
             self.testing_intervention_spaces[rigid_object] = dict()
             self.testing_intervention_spaces[rigid_object]['position'] = \
-                np.array([[0.1, 0, self.stage.floor_height], [0.15, 360, 0.3]])
+                np.array([[0.09, 0.15, self.stage.floor_height], [0.15, 2 * math.pi, 0.3]])
             self.testing_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[rigid_object]['color'] = \
@@ -272,7 +272,7 @@ class BaseTask(object):
         for visual_object in self.stage.visual_objects:
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
-                np.array([[0.1, 0, self.stage.floor_height], [0.15, 360, 0.3]])
+                np.array([[0.1, 0, self.stage.floor_height], [0.15, 2 * math.pi, 0.3]])
             self.testing_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[visual_object]['color'] = \

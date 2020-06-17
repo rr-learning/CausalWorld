@@ -8,7 +8,7 @@ class Curriculum(object):
         for actor_index, active in enumerate(self.actives):
             in_episode = active[0] <= episode <= active[1]
             episode_hold = (episode - active[0]) % active[2] == 0
-            time_step_hold = time_step % active[3] == 0
+            time_step_hold = time_step == active[3]
             if in_episode and episode_hold and time_step_hold:
                 interventions_dict.update(
                     self.intervention_actors[actor_index].act(current_task_params))

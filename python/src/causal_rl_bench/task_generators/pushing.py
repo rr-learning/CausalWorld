@@ -29,12 +29,12 @@ class PushingTaskGenerator(BaseTask):
             kwargs.get("joint_positions", None)
         self.initial_state["tool_block"] = dict()
         self.initial_state["tool_block"]["position"] = \
-            kwargs.get("tool_block_position", np.array([0, -0.10, 0.0425]))
+            kwargs.get("tool_block_position", np.array([0, -0.08, 0.0425]))
         self.initial_state["tool_block"]["orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
         self.initial_state["goal_block"] = dict()
         self.initial_state["goal_block"]["position"] = \
-            kwargs.get("goal_block_position", np.array([0, 0.10, 0.0425]))
+            kwargs.get("goal_block_position", np.array([0, 0.08, 0.0425]))
         self.initial_state["goal_block"]["orientation"] = \
             kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_end_effector_positions = None
@@ -49,9 +49,6 @@ class PushingTaskGenerator(BaseTask):
         return \
             "Task where the goal is to push " \
             "an object towards a goal position"
-
-    def get_max_episode_length(self):
-        return 10
 
     def _set_up_stage_arena(self):
         """

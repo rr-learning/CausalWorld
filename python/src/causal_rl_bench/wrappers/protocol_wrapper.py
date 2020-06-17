@@ -23,7 +23,6 @@ class ProtocolWrapper(gym.Wrapper):
     def reset(self):
         self._elapsed_episodes += 1
         self._elapsed_timesteps = 0
-        self.env.reset_default_goal()
         interventions_dict = self.protocol.get_intervention(episode=self._elapsed_episodes,
                                                             timestep=0)
         return self.env.reset(interventions_dict)
