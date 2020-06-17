@@ -119,8 +119,6 @@ def get_multi_process_env(model_settings):
                                     intervention_actors=model_settings["intervention_actors"],
                                     actives=model_settings["actives"])
             return env
-
-        set_global_seeds(world_seed)
         return _init
 
     return SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
@@ -131,11 +129,7 @@ def get_TD3_model(model_settings, model_path):
     n_actions = env.action_space.shape[-1]
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
-    # TODO: seed and policy kwargs not working yet
-    # model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
-    #             verbose=1, tensorboard_log=model_path,
-    #             policy_kwargs=policy_kwargs,
-    #             seed=model_settings['seed'])
+    # TODO: policy kwargs not working yet
     model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
                 verbose=1, tensorboard_log=model_path)
     return model, env
@@ -144,11 +138,7 @@ def get_TD3_model(model_settings, model_path):
 def get_SAC_model(model_settings, model_path):
     env = get_single_process_env(model_settings)
     policy_kwargs = dict(act_fun=tf.nn.relu, net_arch=[256, 256])
-    # TODO: seed and policy kwargs not working yet
-    # model = SAC(SACMlpPolicy, env, _init_setup_model=True,
-    #             verbose=1, tensorboard_log=model_path,
-    #             policy_kwargs=policy_kwargs,
-    #             seed=model_settings['seed'])
+    # TODO: policy kwargs not working yet
     model = SAC(SACMlpPolicy, env, _init_setup_model=True,
                 verbose=1, tensorboard_log=model_path)
     return model, env
@@ -165,10 +155,6 @@ def get_PPO_model(model_settings, model_path):
                   "nminibatches": 4,
                   "noptepochs": 4}
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
-    # TODO: There is an error with the random seed for now
-    # model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
-    #              verbose=1, **ppo_config, tensorboard_log=model_path,
-    #              seed=model_settings['seed'])
     model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
                  verbose=1, **ppo_config, tensorboard_log=model_path)
     return model, env
@@ -179,6 +165,7 @@ def train_model_num(model_settings, output_path):
     validate_every_timesteps = int(500000 / 1e2)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
+    set_global_seeds(model_settings['seed'])
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
