@@ -2,6 +2,7 @@ import numpy as np
 import math
 from causal_rl_bench.utils.state_utils import get_bounding_box_area
 from causal_rl_bench.utils.state_utils import get_intersection
+from causal_rl_bench.utils.rotation_utils import cart2cyl
 
 
 class BaseTask(object):
@@ -216,7 +217,7 @@ class BaseTask(object):
         for rigid_object in self.stage.rigid_objects:
             self.training_intervention_spaces[rigid_object] = dict()
             self.training_intervention_spaces[rigid_object]['position'] = \
-                np.array([[0.0, 0, self.stage.floor_height], [0.1, 2 * math.pi, 0.3]])
+                np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.3]])
             self.training_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[rigid_object]['color'] = \
@@ -226,7 +227,7 @@ class BaseTask(object):
         for visual_object in self.stage.visual_objects:
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
-                np.array([[0.0, 0, self.stage.floor_height], [0.09, 2 * math.pi, 0.15]])
+                np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.15]])
             self.training_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[visual_object]['color'] = \
@@ -262,7 +263,7 @@ class BaseTask(object):
         for rigid_object in self.stage.rigid_objects:
             self.testing_intervention_spaces[rigid_object] = dict()
             self.testing_intervention_spaces[rigid_object]['position'] = \
-                np.array([[0.09, 0.15, self.stage.floor_height], [0.15, 2 * math.pi, 0.3]])
+                np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
             self.testing_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[rigid_object]['color'] = \
@@ -272,7 +273,7 @@ class BaseTask(object):
         for visual_object in self.stage.visual_objects:
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
-                np.array([[0.1, 0, self.stage.floor_height], [0.15, 2 * math.pi, 0.3]])
+                np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
             self.testing_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[visual_object]['color'] = \
@@ -729,7 +730,15 @@ class BaseTask(object):
                         return False
                 else:
                     for sub_variable_name in interventions_dict[intervention]:
-                        if sub_variable_name in intervention_space[intervention] and \
+                        # TODO: not happy with this hack but there is probably no other workaround without
+                        #  translating everything to polar coordinates (not optimal for observation space)
+                        if sub_variable_name == 'position':
+                            cyl_position = cart2cyl(interventions_dict[intervention][sub_variable_name])
+                            if sub_variable_name in intervention_space[intervention] and \
+                                    ((intervention_space[intervention][sub_variable_name][0] > cyl_position).any()
+                                     or (intervention_space[intervention][sub_variable_name][1] < cyl_position).any()):
+                                return False
+                        elif sub_variable_name in intervention_space[intervention] and \
                             ((intervention_space[intervention]
                             [sub_variable_name][0] >
                             interventions_dict[intervention][sub_variable_name]).any() or \
