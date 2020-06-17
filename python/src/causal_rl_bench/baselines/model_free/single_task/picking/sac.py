@@ -46,8 +46,10 @@ if __name__ == '__main__':
     skip_frame = 3
     seed_num = 0
     task_name = 'picking'
-    sac_config = {"gamma": 0.99,
-                  "ent_coef": 0.01,
+    sac_config = {"gamma": 0.98,
+                  "tau": 0.01,
+                  "ent_coef": 'auto',
+                  "target_entropy": -9,
                   "learning_rate": 0.00025,
                   "buffer_size": 1000000,
                   "learning_starts": 1000,

@@ -52,7 +52,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
 if __name__ == '__main__':
     total_time_steps_per_update = 1000000
     total_time_steps = 60000000
-    number_of_time_steps_per_iteration = 12000
+    number_of_time_steps_per_iteration = 120000
     num_of_envs = 20
     log_relative_path = 'baseline_picking_ppo'
     maximum_episode_length = 600
@@ -61,12 +61,12 @@ if __name__ == '__main__':
     task_name = 'picking'
     ppo_config = {"gamma": 0.99,
                   "n_steps":
-                      int(number_of_time_steps_per_iteration/num_of_envs),
+                      int(number_of_time_steps_per_iteration / num_of_envs),
                   "ent_coef": 0.01,
                   "learning_rate": 0.00025,
                   "vf_coef": 0.5,
                   "max_grad_norm": 0.5,
-                  "nminibatches": 4,
+                  "nminibatches": 40,
                   "noptepochs": 4,
                   "tensorboard_log": log_relative_path}
     train_policy(num_of_envs=num_of_envs,
