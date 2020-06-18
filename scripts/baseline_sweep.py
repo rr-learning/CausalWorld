@@ -102,8 +102,7 @@ def get_single_process_env(model_settings):
     task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
     env = World(task=task,
                 **model_settings['world_params'],
-                seed=world_seed,
-                max_episode_length=int(task.get_max_episode_length()*250/model_settings['world_params']['skip_frame']))
+                seed=world_seed)
     env = CurriculumWrapper(env,
                             intervention_actors=model_settings["intervention_actors"],
                             actives=model_settings["actives"])
@@ -116,8 +115,6 @@ def get_multi_process_env(model_settings):
             task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
             env = World(task=task,
                         **model_settings['world_params'],
-                        max_episode_length=int(
-                            task.get_max_episode_length() * 250 / model_settings['world_params']['skip_frame']),
                         seed=world_seed + rank)
             env = CurriculumWrapper(env,
                                     intervention_actors=model_settings["intervention_actors"],

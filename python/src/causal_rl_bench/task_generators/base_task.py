@@ -52,6 +52,9 @@ class BaseTask(object):
         self.task_params['calculate_additional_dense_rewards'] = \
             calculate_additional_dense_rewards
         self._creation_list = []
+        self.fractional_reward = 0
+        self.desired_goal = None
+        self.achieved_goal = None
         return
 
     def is_in_training_mode(self):
@@ -63,7 +66,7 @@ class BaseTask(object):
             return True
         else:
             return False
-stat
+
     def set_super_sparse_reward(self):
         """
 
@@ -131,6 +134,9 @@ stat
         :return:
         """
         info = dict()
+        info['fractional_reward'] = self.fractional_reward
+        info['desired_goal'] = self.desired_goal
+        info['achieved_goal'] = self.achieved_goal
         info['possible_solution_intervention'] = dict()
         for rigid_object in self.stage.rigid_objects:
             #check if there is an equivilant visual object corresponding
@@ -377,6 +383,11 @@ stat
         achieved_goal = self.get_achieved_goal()
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
+        # TODO: this is to avoid computing those things twice for the info dict but should be refactored soon.
+        self.fractional_reward = goal_distance
+        self.desired_goal = desired_goal
+        self.achieved_goal = achieved_goal
+
         self._update_success(goal_distance)
         if not self.task_params['is_goal_distance_dense']:
             if self.is_done():
@@ -406,6 +417,11 @@ stat
         """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
+        # TODO: this is to avoid computing those things twice for the info dict but should be refactored soon.
+        self.fractional_reward = goal_distance
+        self.desired_goal = desired_goal
+        self.achieved_goal = achieved_goal
+
         if not self.task_params['is_goal_distance_dense']:
             #TODO: not exactly right, but its a limitation of HER
             if self._check_preliminary_success(goal_distance):
