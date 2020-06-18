@@ -50,7 +50,7 @@ def baseline_model(model_num):
                                       'sparse_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
-                                      'enable_visualization': False,
+                                      'enable_visualization': True,
                                       'observation_mode': 'structured',
                                       'normalize_observations': True,
                                       'enable_goal_image': False,
@@ -181,14 +181,16 @@ def get_PPO_model(model_settings, model_path):
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = int(1000000 / 1e2)
-    validate_every_timesteps = int(500000 / 1e2)
+    total_time_steps = int(1000000)
+    validate_every_timesteps = int(50000)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
     set_global_seeds(model_settings['seed'])
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
+        total_time_steps = 20000000
+        validate_every_timesteps = 1000000
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
         num_of_active_envs = 1
@@ -210,7 +212,7 @@ def train_model_num(model_settings, output_path):
                                              save_path=model_path,
                                              name_prefix='model')
 
-    model.learn(int(total_time_steps / num_of_active_envs), callback=checkpoint_callback)
+    model.learn(int(total_time_steps), callback=checkpoint_callback)
     if env.__class__.__name__ == 'SubprocVecEnv':
         env.env_method("save_world", output_path)
     else:
@@ -263,7 +265,7 @@ if __name__ == '__main__':
                                    evaluation_protocols,
                                    tracker_path=output_path,
                                    intervention_split=False,
-                                   visualize_evaluation=True,
+                                   visualize_evaluation=False,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)
     evaluator.save_scores(evaluation_path)

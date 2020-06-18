@@ -18,7 +18,7 @@ class PushingTaskGenerator(BaseTask):
                          kwargs.get("sparse_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
-                                    np.array([0, 10, 0])))
+                                    np.array([3, 10, 0.5])))
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
