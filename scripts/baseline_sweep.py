@@ -50,7 +50,7 @@ def baseline_model(model_num):
                                       'sparse_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
-                                      'enable_visualization': True,
+                                      'enable_visualization': False,
                                       'observation_mode': 'structured',
                                       'normalize_observations': True,
                                       'enable_goal_image': False,
