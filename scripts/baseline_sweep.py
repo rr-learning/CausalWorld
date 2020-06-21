@@ -124,11 +124,13 @@ def get_multi_process_env(model_settings):
 
 
 def get_TD3_model(model_settings, model_path):
+    model_settings['train_configs'] = {}
+    policy_kwargs = dict(layers=NET_LAYERS)
+    save_model_settings(os.path.join(model_path, 'model_settings.json'),
+                        model_settings)
     env = get_single_process_env(model_settings)
     n_actions = env.action_space.shape[-1]
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
-    policy_kwargs = dict(layers=NET_LAYERS)
-    model_settings['train_configs'] = {}
     model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
                 policy_kwargs=policy_kwargs,
                 verbose=1, tensorboard_log=model_path)
@@ -136,7 +138,6 @@ def get_TD3_model(model_settings, model_path):
 
 
 def get_SAC_model(model_settings, model_path):
-    env = get_single_process_env(model_settings)
     policy_kwargs = dict(layers=NET_LAYERS)
     sac_config = {"gamma": 0.98,
                   "tau": 0.01,
@@ -147,6 +148,9 @@ def get_SAC_model(model_settings, model_path):
                   "learning_starts": 1000,
                   "batch_size": 256}
     model_settings['train_configs'] = sac_config
+    save_model_settings(os.path.join(model_path, 'model_settings.json'),
+                        model_settings)
+    env = get_single_process_env(model_settings)
     model = SAC(SACMlpPolicy, env, _init_setup_model=True,
                 policy_kwargs=policy_kwargs, **sac_config,
                 verbose=1, tensorboard_log=model_path)
@@ -154,10 +158,12 @@ def get_SAC_model(model_settings, model_path):
 
 
 def get_SAC_HER_model(model_settings, model_path):
-    env = get_single_process_env(model_settings)
-    env = HERGoalEnvWrapper(env)
     model_class = SAC
     policy_kwargs = dict(layers=NET_LAYERS)
+    save_model_settings(os.path.join(model_path, 'model_settings.json'),
+                        model_settings)
+    env = get_single_process_env(model_settings)
+    env = HERGoalEnvWrapper(env)
     model = HER('MlpPolicy', env, model_class, _init_setup_model=True,
                 policy_kwargs=policy_kwargs,
                 n_sampled_goal=4, verbose=1, tensorboard_log=model_path)
@@ -165,7 +171,6 @@ def get_SAC_HER_model(model_settings, model_path):
 
 
 def get_PPO_model(model_settings, model_path):
-    env = get_multi_process_env(model_settings)
     ppo_config = {"gamma": 0.99,
                   "n_steps": 600,
                   "ent_coef": 0.01,
@@ -175,6 +180,9 @@ def get_PPO_model(model_settings, model_path):
                   "nminibatches": 4,
                   "noptepochs": 4}
     model_settings['train_configs'] = ppo_config
+    save_model_settings(os.path.join(model_path, 'model_settings.json'),
+                        model_settings)
+    env = get_multi_process_env(model_settings)
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=NET_LAYERS)
     model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
                  verbose=1, **ppo_config, tensorboard_log=model_path)
@@ -204,9 +212,6 @@ def train_model_num(model_settings, output_path):
     else:
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-
-    save_model_settings(os.path.join(model_path, 'model_settings.json'),
-                        model_settings)
 
     checkpoint_callback = CheckpointCallback(save_freq=int(validate_every_timesteps / num_of_active_envs),
                                              save_path=model_path,
