@@ -18,7 +18,7 @@ class PushingTaskGenerator(BaseTask):
                          kwargs.get("sparse_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
-                                    np.array([3, 10, 0.5])))
+                                    np.array([750, 250, 100])))
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -125,6 +125,17 @@ class PushingTaskGenerator(BaseTask):
         :param achieved_goal:
         :return:
         """
+        # rewards order
+        # 1) delta how much the fingers are close to block
+        # 2) delta how much are you getting the block close to the goal
+        # 2) delta how much the object orientation is close to goal orientation
+        # 1) delta how much are you getting the block close to the goal
+        # 2) absolute how much the block is close to the goal
+        # 3) delta how much are you getting the block close to the center
+        # 4) absolute how much is the the block is close to the center
+        # 6) absolute how much fingers are close to block
+        # 7) mean dist_of closest two fingers outside_bounding_ellipsoid
+        # 8) delta in joint velocities
         rewards = list()
         block_position = self.stage.get_object_state('tool_block',
                                                      'position')
@@ -152,6 +163,8 @@ class PushingTaskGenerator(BaseTask):
                                                self.previous_object_position)
         current_dist_to_goal = np.linalg.norm(goal_position - block_position)
         rewards.append(previous_dist_to_goal - current_dist_to_goal)
+
+        # calculate third reward term
         quat_diff_old = quaternion_mul(np.expand_dims(goal_orientation, 0),
                                        quaternion_conjugate(np.expand_dims(
                                            self.previous_object_orientation,

@@ -7,14 +7,11 @@ from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.common.policies import MlpPolicy
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.task_generators.task import task_generator
-import causal_rl_bench.viewers.task_viewer as viewer
 import argparse
 import os
 import json
 import numpy as np
 from stable_baselines.common.callbacks import CheckpointCallback
-from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-import causal_rl_bench.evaluation.visualization.visualiser as vis
 from causal_rl_bench.intervention_agents import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
@@ -26,7 +23,7 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
 from stable_baselines.ddpg.noise import NormalActionNoise
 
 world_seed = 0
-num_of_envs = 20
+num_of_envs = 4
 
 NUM_RANDOM_SEEDS = 5
 NET_LAYERS = [256, 256]
@@ -182,16 +179,16 @@ def get_PPO_model(model_settings, model_path):
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = int(3000000)
-    validate_every_timesteps = int(500000)
+    total_time_steps = int(1000000)
+    validate_every_timesteps = int(50000)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
     set_global_seeds(model_settings['seed'])
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-        total_time_steps = 40000000
-        validate_every_timesteps = 2000000
+        total_time_steps = 20000000 / 1e3
+        validate_every_timesteps = 1000000 / 1e3
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
         num_of_active_envs = 1
@@ -239,36 +236,3 @@ if __name__ == '__main__':
     model_settings = baseline_model(model_num)
 
     model = train_model_num(model_settings, output_path)
-
-
-    # define a method for the policy fn of your trained model
-    def policy_fn(obs):
-        return model.predict(obs, deterministic=True)[0]
-
-
-    animation_path = os.path.join(output_path, 'animation')
-    os.makedirs(animation_path)
-    # Record a video of the policy is done in one line
-    viewer.record_video_of_policy(task=task_generator(task_generator_id=model_settings['benchmarks']['task_generator_id'],
-                                                      **model_settings['task_configs']),
-                                  world_params=model_settings['world_params'],
-                                  policy_fn=policy_fn,
-                                  file_name=os.path.join(animation_path, "policy"),
-                                  number_of_resets=1,
-                                  max_time_steps=600)
-    evaluation_path = os.path.join(output_path, 'evaluation')
-    os.makedirs(evaluation_path)
-
-    evaluation_protocols = model_settings['benchmarks']['evaluation_protocols']
-
-    evaluator = EvaluationPipeline(evaluation_protocols=
-                                   evaluation_protocols,
-                                   tracker_path=output_path,
-                                   intervention_split=False,
-                                   visualize_evaluation=False,
-                                   initial_seed=0)
-    scores = evaluator.evaluate_policy(policy_fn)
-    evaluator.save_scores(evaluation_path)
-    experiments = dict()
-    experiments[str(model_num)] = scores
-    vis.generate_visual_analysis(evaluation_path, experiments=experiments)

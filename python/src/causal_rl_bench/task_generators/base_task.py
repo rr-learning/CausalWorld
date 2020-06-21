@@ -616,13 +616,15 @@ class BaseTask(object):
 
         :return:
         """
-        #here we consider that you succeeded if u stayed 0.5 sec in
+        #here we consider that you succeeded if u stayed 0.1 sec in
         #the goal position
         if self.finished_episode:
             return True
         if self.task_params['time_threshold_in_goal_state_secs'] <= \
                 (self.robot.dt * self.time_steps_elapsed_since_success):
-            self.finished_episode = True
+            # self.finished_episode = True
+            # TODO: Disable terminal states for now
+            self.finished_episode = False
         return self.finished_episode
 
     def set_sparse_reward(self, sparse_reward_weight):

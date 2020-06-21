@@ -1,9 +1,9 @@
 from causal_rl_bench.metrics.metric_base import BaseMetric
 
 
-class MeanFractionalSuccessRate(BaseMetric):
+class MeanLastFractionalSuccess(BaseMetric):
     def __init__(self):
-        super(MeanFractionalSuccessRate, self).__init__(name='mean_fractional_success_rate')
+        super(MeanLastFractionalSuccess, self).__init__(name='mean_last_fractional_success')
         self.accumulated_success = 0
         self.total_number_of_episodes = 0
         return

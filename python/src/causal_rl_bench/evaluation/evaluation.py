@@ -3,10 +3,12 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.metrics.mean_complete_success_rate import \
     MeanCompleteSuccessRate
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.metrics.mean_accumulated_reward_metric import \
-    MeanAccumulatedRewardMetric
-from causal_rl_bench.metrics.mean_fractional_success_rate import \
-    MeanFractionalSuccessRate
+
+from causal_rl_bench.metrics.mean_last_fractional_success import \
+    MeanLastFractionalSuccess
+from causal_rl_bench.metrics.mean_full_integrated_fractional_success import MeanFullIntegratedFractionalSuccess
+from causal_rl_bench.metrics.mean_last_integrated_fractional_success import MeanLastIntegratedFractionalSuccess
+
 from causal_rl_bench.loggers.data_recorder import DataRecorder
 from causal_rl_bench.wrappers.protocol_wrapper \
     import ProtocolWrapper
@@ -69,9 +71,9 @@ class EvaluationPipeline(object):
         self.evaluation_env = self.env
         self.evaluation_protocols = evaluation_protocols
         self.metrics_list = []
-        self.metrics_list.append(MeanCompleteSuccessRate())
-        self.metrics_list.append(MeanAccumulatedRewardMetric())
-        self.metrics_list.append(MeanFractionalSuccessRate())
+        self.metrics_list.append(MeanFullIntegratedFractionalSuccess())
+        self.metrics_list.append(MeanLastIntegratedFractionalSuccess())
+        self.metrics_list.append(MeanLastFractionalSuccess())
         return
 
     def run_episode(self, policy_fn):
@@ -119,11 +121,15 @@ class EvaluationPipeline(object):
             pipeline_scores[evaluation_protocol.get_name()] = scores
             self.reset_metric_scores()
         self.evaluation_env.close()
+        self.env.close()
         self.pipeline_scores = pipeline_scores
         return pipeline_scores
 
-    def save_scores(self, evaluation_path):
-        file_path = os.path.join(evaluation_path, 'scores.json')
+    def save_scores(self, evaluation_path, prefix=None):
+        if prefix is None:
+            file_path = os.path.join(evaluation_path, 'scores.json')
+        else:
+            file_path = os.path.join(evaluation_path, '{}_scores.json'.format(prefix))
         with open(file_path, "w") as json_file:
-            json.dump(self.pipeline_scores, json_file)
+            json.dump(self.pipeline_scores, json_file, indent=4)
 
