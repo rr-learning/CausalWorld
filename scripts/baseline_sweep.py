@@ -126,13 +126,21 @@ def get_multi_process_env(model_settings):
 def get_TD3_model(model_settings, model_path):
     model_settings['train_configs'] = {}
     policy_kwargs = dict(layers=NET_LAYERS)
+    td3_config = {"gamma": 0.98,
+                  "tau": 0.01,
+                  "ent_coef": 'auto',
+                  "learning_rate": 0.00025,
+                  "buffer_size": 1000000,
+                  "learning_starts": 1000,
+                  "batch_size": 256}
+    model_settings['train_configs'] = td3_config
     save_model_settings(os.path.join(model_path, 'model_settings.json'),
                         model_settings)
     env = get_single_process_env(model_settings)
     n_actions = env.action_space.shape[-1]
     action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
     model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
-                policy_kwargs=policy_kwargs,
+                policy_kwargs=policy_kwargs, **td3_config,
                 verbose=1, tensorboard_log=model_path)
     return model, env
 

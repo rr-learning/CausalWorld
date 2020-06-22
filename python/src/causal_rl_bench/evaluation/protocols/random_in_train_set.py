@@ -4,14 +4,7 @@ import numpy as np
 
 class RandomInTrainSet(Protocol):
     def __init__(self):
-        self.name = 'random_in_train_set'
-        self.num_evaluation_episodes = 10
-
-    def get_name(self):
-        return self.name
-
-    def get_num_episodes(self):
-        return self.num_evaluation_episodes
+        super().__init__('random_in_train_set')
 
     def get_intervention(self, episode, timestep):
         if timestep == 0:
