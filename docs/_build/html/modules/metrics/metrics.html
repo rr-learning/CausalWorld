@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Task Generators &mdash; causal_rl_bench 1.0.0 documentation</title>
+  <title>Metrics &mdash; causal_rl_bench 1.0.0 documentation</title>
   
 
   
@@ -35,8 +35,7 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Agents" href="../agents/agents.html" />
-    <link rel="prev" title="Envs" href="../envs/envs.html" /> 
+    <link rel="prev" title="Intervention Agents" href="../intervention_agents/intervention_agents.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -92,20 +91,14 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="reference internal" href="../causal_rl_bench.html">CausalRLBench</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../envs/envs.html">Envs</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Task Generators</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#basetask">BaseTask</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#reaching-task">Reaching Task</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#towersgeneratortask">TowersGeneratorTask</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pushingtaskgenerator">PushingTaskGenerator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pickandplacetaskgenerator">PickAndPlaceTaskGenerator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#pickingtaskgenerator">PickingTaskGenerator</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#generalgeneratortask">GeneralGeneratorTask</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#creativestackedblocksgeneratortask">CreativeStackedBlocksGeneratorTask</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="../task_generators/task_generators.html">Task Generators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../agents/agents.html">Agents</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../intervention_agents/intervention_agents.html">Intervention Agents</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../metrics/metrics.html">Metrics</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Metrics</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basemetric">BaseMetric</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#meansuccessratemetric">MeanSuccessRateMetric</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -155,13 +148,13 @@
         
           <li><a href="../causal_rl_bench.html">CausalRLBench</a> &raquo;</li>
         
-      <li>Task Generators</li>
+      <li>Metrics</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../_sources/modules/task_generators/task_generators.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/modules/metrics/metrics.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
@@ -174,31 +167,13 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="task-generators">
-<h1>Task Generators<a class="headerlink" href="#task-generators" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="basetask">
-<h2>BaseTask<a class="headerlink" href="#basetask" title="Permalink to this headline">¶</a></h2>
+  <div class="section" id="metrics">
+<h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="basemetric">
+<h2>BaseMetric<a class="headerlink" href="#basemetric" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="reaching-task">
-<h2>Reaching Task<a class="headerlink" href="#reaching-task" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="towersgeneratortask">
-<h2>TowersGeneratorTask<a class="headerlink" href="#towersgeneratortask" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="pushingtaskgenerator">
-<h2>PushingTaskGenerator<a class="headerlink" href="#pushingtaskgenerator" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="pickandplacetaskgenerator">
-<h2>PickAndPlaceTaskGenerator<a class="headerlink" href="#pickandplacetaskgenerator" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="pickingtaskgenerator">
-<h2>PickingTaskGenerator<a class="headerlink" href="#pickingtaskgenerator" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="generalgeneratortask">
-<h2>GeneralGeneratorTask<a class="headerlink" href="#generalgeneratortask" title="Permalink to this headline">¶</a></h2>
-</div>
-<div class="section" id="creativestackedblocksgeneratortask">
-<h2>CreativeStackedBlocksGeneratorTask<a class="headerlink" href="#creativestackedblocksgeneratortask" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="meansuccessratemetric">
+<h2>MeanSuccessRateMetric<a class="headerlink" href="#meansuccessratemetric" title="Permalink to this headline">¶</a></h2>
 </div>
 </div>
 
@@ -210,10 +185,8 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../agents/agents.html" class="btn btn-neutral float-right" title="Agents" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
-      
-        <a href="../envs/envs.html" class="btn btn-neutral float-left" title="Envs" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="../intervention_agents/intervention_agents.html" class="btn btn-neutral float-left" title="Intervention Agents" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
