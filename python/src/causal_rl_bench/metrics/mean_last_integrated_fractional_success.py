@@ -21,7 +21,7 @@ class MeanLastIntegratedFractionalSuccess(BaseMetric):
         in_episode_accumulated_success = 0.0
         for index in range(20):
             in_episode_accumulated_success += episode_obj.infos[-index]['fractional_reward']
-        self.accumulated_success += in_episode_accumulated_success / len(episode_obj.infos)
+        self.accumulated_success += in_episode_accumulated_success / 20
 
     def get_metric_score(self):
         """

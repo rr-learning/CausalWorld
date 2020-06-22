@@ -25,4 +25,8 @@ class ProtocolWrapper(gym.Wrapper):
         self._elapsed_timesteps = 0
         interventions_dict = self.protocol.get_intervention(episode=self._elapsed_episodes,
                                                             timestep=0)
-        return self.env.reset(interventions_dict)
+        observation = self.env.reset()
+        if interventions_dict is not None:
+            self.env.do_intervention(interventions_dict)
+            observation = self.env.task.filter_structured_observations()
+        return observation
