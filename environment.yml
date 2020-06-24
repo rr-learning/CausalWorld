@@ -14,4 +14,3 @@ dependencies:
   - sphinx_rtd_theme
   - tensorflow==1.14.0
   - stable-baselines==2.10.0
-  - mpi4py

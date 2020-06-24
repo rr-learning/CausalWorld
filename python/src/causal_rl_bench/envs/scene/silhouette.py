@@ -159,7 +159,7 @@ class SCuboid(SilhouetteObject):
         self.__lower_bounds[self._name + "_orientation"] = \
             np.array([-10] * 4)
         self.__lower_bounds[self._name + "_size"] = \
-            np.array([0.01, 0.01, 0.01])
+            np.array([0.03, 0.03, 0.03])
         self.__lower_bounds[self._name + "_color"] = \
             np.array([0] * 3)
 
@@ -170,7 +170,7 @@ class SCuboid(SilhouetteObject):
         self.__upper_bounds[self._name + "_orientation"] = \
             np.array([10] * 4)
         self.__upper_bounds[self._name + "_size"] = \
-            np.array([0.3, 0.3, 0.3])
+            np.array([0.1, 0.1, 0.1])
         self.__upper_bounds[self._name + "_color"] = \
             np.array([1] * 3)
 
@@ -492,7 +492,7 @@ class SMeshObject(SilhouetteObject):
         self.__lower_bounds[self._name + "_orientation"] = \
             np.array([-10] * 4)
         self.__lower_bounds[self._name + "_size"] = \
-            np.array([0.01, 0.01, 0.01])
+            np.array([0.03, 0.03, 0.03])
         self.__lower_bounds[self._name + "_color"] = \
             np.array([0] * 3)
 
@@ -503,7 +503,7 @@ class SMeshObject(SilhouetteObject):
         self.__upper_bounds[self._name + "_orientation"] = \
             np.array([10] * 4)
         self.__upper_bounds[self._name + "_size"] = \
-            np.array([0.3, 0.3, 0.3])
+            np.array([0.1, 0.1, 0.1])
         self.__upper_bounds[self._name + "_color"] = \
             np.array([1] * 3)
 
