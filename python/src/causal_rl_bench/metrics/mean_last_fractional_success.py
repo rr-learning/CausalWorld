@@ -1,10 +1,10 @@
 from causal_rl_bench.metrics.metric_base import BaseMetric
 
 
-class MeanSuccessRateMetric(BaseMetric):
+class MeanLastFractionalSuccess(BaseMetric):
     def __init__(self):
-        super(MeanSuccessRateMetric, self).__init__(name='mean_success_rate')
-        self.success_times = 0
+        super(MeanLastFractionalSuccess, self).__init__(name='mean_last_fractional_success')
+        self.accumulated_success = 0
         self.total_number_of_episodes = 0
         return
 
@@ -15,21 +15,18 @@ class MeanSuccessRateMetric(BaseMetric):
         :return:
         """
         self.total_number_of_episodes += 1
-        for done_signal in episode_obj.dones:
-            if done_signal:
-                self.success_times += 1
-                return
+        self.accumulated_success += episode_obj.infos[-1]['fractional_reward']
 
     def get_metric_score(self):
         """
 
         :return:
         """
-        return self.success_times / float(self.total_number_of_episodes)
+        return self.accumulated_success / float(self.total_number_of_episodes)
 
     def reset(self):
         """
         :return:
         """
-        self.success_times = 0
+        self.accumulated_success = 0
         self.total_number_of_episodes = 0

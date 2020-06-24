@@ -35,8 +35,18 @@ naturally emerging curriculum of tasks.
 
 
 .. toctree::
+   :maxdepth: 2
+   :caption: Guide
+
+   guide/install.rst
+   guide/getting_started.rst
+   guide/tutorials.rst
+   guide/task_setups.rst
+   guide/evaluating_policy.rst
+
+.. toctree::
    :maxdepth: 3
-   :caption: Contents:
+   :caption: Contents
 
    modules/causal_rl_bench.rst
 

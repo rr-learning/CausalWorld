@@ -58,12 +58,6 @@ class World(gym.Env):
             self.__stage = Stage(pybullet_client=self.__pybullet_client,
                                  observation_mode=observation_mode,
                                  normalize_observations=normalize_observations)
-        if max_episode_length is None:
-            self.__enforce_episode_length = False
-        else:
-            self.__enforce_episode_length = True
-        self.__max_episode_length = max_episode_length
-        self.__episode_length = 0
 
         gym.Env.__init__(self)
         if task is None:
@@ -81,12 +75,23 @@ class World(gym.Env):
         # TODO: verify spaces here
         self.__setup_viewing_camera()
 
+        if max_episode_length == np.inf:
+            self.__enforce_episode_length = False
+        elif max_episode_length is None:
+            self.__enforce_episode_length = True
+            max_episode_length = int(task.get_max_episode_length() / self.dt)
+        else:
+            self.__enforce_episode_length = True
+        self.__max_episode_length = max_episode_length
+        self.__episode_length = 0
+
         self.__data_recorder = data_recorder
         self.__wrappers_dict = dict()
         self.__tracker = Tracker(task=self.task,
                                  world_params=self._get_world_params())
         self.__scale_reward_by_dt = True
         self.__disabled_actions = False
+
         #TODO: I am not sure if this reset is necassary, TO BE CONFIRMED
         # self.reset()
         return
@@ -129,8 +134,8 @@ class World(gym.Env):
             observation = self.__robot.get_current_camera_observations()
         else:
             observation = self.task.filter_structured_observations()
-        info = self.task.get_info()
         reward = self.task.get_reward()
+        info = self.task.get_info()
         if self.__scale_reward_by_dt:
             reward *= self.dt
         done = self._is_done()

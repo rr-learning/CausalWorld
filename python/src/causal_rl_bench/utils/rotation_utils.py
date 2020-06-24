@@ -18,6 +18,14 @@ def quaternion_conjugate(quaternion):
     return inv_q
 
 
+def cart2cyl(position):
+    x = position[0]
+    y = position[1]
+    z = position[2]
+    rho = np.sqrt(x ** 2 + y ** 2)
+    phi = np.arctan2(y, x)
+    return np.array([rho, phi, z])
+
 def quaternion_mul(q0, q1):
     x0 = q0[:, 0]
     y0 = q0[:, 1]
