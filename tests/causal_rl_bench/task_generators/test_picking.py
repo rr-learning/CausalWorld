@@ -132,9 +132,6 @@ class TestPicking(unittest.TestCase):
                 obs, reward, done, info = self.env.step(actions[i])
                 observations_2.append(obs)
                 rewards_2.append(reward)
-                print("current step ", i)
-                print(np.array(observations_1[i]) -
-                      np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 

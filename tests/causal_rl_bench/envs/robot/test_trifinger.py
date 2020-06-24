@@ -115,7 +115,6 @@ def test_pd_gains():
     if (((current_joint_positions - chosen_action) > 0.1).any()):
         raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
                              format(chosen_action, current_joint_positions))
-    print("verified upper bound")
 
     for _ in range(zero_hold):
         chosen_action = env.action_space.low
@@ -124,8 +123,7 @@ def test_pd_gains():
     if (((current_joint_positions - chosen_action) > 0.1).any()):
         raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
                              format(chosen_action, current_joint_positions))
-    print("verified lower bound")
-    
+
     # for i in range(200):
     #     #check for first finger
     #     chosen_action = np.random.uniform(env.action_space.low, env.action_space.high)
