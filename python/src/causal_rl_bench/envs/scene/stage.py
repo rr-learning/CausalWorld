@@ -207,6 +207,7 @@ class Stage(object):
                                                          self._observation_mode,
                                                          self._normalize_observations,
                                                          cameras=self._cameras)
+            self.update_goal_image()
         else:
             self._stage_observations = StageObservations(self._rigid_objects,
                                                          self._visual_objects,

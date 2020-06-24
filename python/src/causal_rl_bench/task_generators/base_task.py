@@ -82,8 +82,8 @@ class BaseTask(object):
                                  physicsClientId=self.stage._pybullet_client_w_goal_id)
         if self.stage._pybullet_client_w_o_goal_id is not None:
             pybullet. \
-                saveState(pybullet_state['w_o_goal'],
-                          physicsClientId=self.stage._pybullet_client_w_o_goal_id)
+                restoreState(pybullet_state['w_o_goal'],
+                             physicsClientId=self.stage._pybullet_client_w_o_goal_id)
         return
 
     def _save_state(self):
@@ -97,18 +97,7 @@ class BaseTask(object):
     def _restore_state(self, state_dict):
         #remove everything in the arena
         self.stage.remove_everything()
-        if self.stage._pybullet_client_full_id is not None:
-                pybullet.\
-                    restoreState(self._empty_stage,
-                                 physicsClientId=self.stage._pybullet_client_full_id)
-        if self.stage._pybullet_client_w_goal_id is not None:
-                pybullet.\
-                    restoreState(self._empty_stage,
-                                 physicsClientId=self.stage._pybullet_client_w_goal_id)
-        if self.stage._pybullet_client_w_o_goal_id is not None:
-                pybullet.\
-                    restoreState(self._empty_stage,
-                                 physicsClientId=self.stage._pybullet_client_w_o_goal_id)
+        self._restore_pybullet_state(self._empty_stage)
         self.robot.set_full_env_state(state_dict
                                       ['robot_object_state'])
         self.stage.set_full_env_state(
@@ -507,8 +496,7 @@ class BaseTask(object):
             client_id = self.stage._pybullet_client_full_id
         else:
             client_id = self.stage._pybullet_client_w_o_goal_id
-        self._empty_stage = pybullet.saveState(
-                            physicsClientId=client_id)
+        self._empty_stage = self._save_pybullet_state()
         self._set_up_stage_arena()
         self._default_starting_state = \
             self._save_state()

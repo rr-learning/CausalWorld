@@ -7,8 +7,8 @@ class Camera(object):
         self._translation = camera_position
         self._camera_orientation = camera_orientation
         self._pybullet_client_id = pybullet_client_id
-        self._width = 72
-        self._height = 54
+        self._width = 128
+        self._height = 128
         x = self._camera_orientation[0]
         y = self._camera_orientation[1]
         z = self._camera_orientation[2]
@@ -36,5 +36,5 @@ class Camera(object):
                             renderer=pybullet.ER_BULLET_HARDWARE_OPENGL,
                             physicsClientId=self._pybullet_client_id)
         rgb_array = np.array(px)
-        rgb_array = rgb_array[:, :, :3]
+        rgb_array = rgb_array[::-1, :, :3]
         return rgb_array
