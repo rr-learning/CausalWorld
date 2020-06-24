@@ -45,9 +45,9 @@ def run_mpc():
                                    population_size=num_of_particles,
                                    num_elite=num_elite,
                                    action_upper_bound=
-                                   np.array(env.action_space.high),
+                                   np.array(env._action_space.high),
                                    action_lower_bound=
-                                   np.array(env.action_space.low),
+                                   np.array(env._action_space.low),
                                    model=true_model)
     env.reset()
     current_state = env.get_full_state()

@@ -23,9 +23,9 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
         :return:
         """
         self.task_intervention_space =\
-            env.task.get_testing_intervention_spaces()
+            env._task.get_testing_intervention_spaces()
         self.task_intervention_space.\
-            update(env.task.get_training_intervention_spaces())
+            update(env._task.get_training_intervention_spaces())
         return
 
     def _act(self, variables_dict):

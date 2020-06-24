@@ -19,7 +19,7 @@ class TestPushing(unittest.TestCase):
         observations_1 = []
         rewards_1 = []
         horizon = 100
-        actions = [self.env.action_space.sample() for _ in range(horizon)]
+        actions = [self.env._action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         obs = self.env.reset()
         observations_1.append(obs)
@@ -46,7 +46,7 @@ class TestPushing(unittest.TestCase):
         observations_1 = []
         rewards_1 = []
         horizon = 100
-        actions = [self.env.action_space.sample() for _ in range(horizon)]
+        actions = [self.env._action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
         self.env.reset(interventions_dict=new_goal)
@@ -73,7 +73,7 @@ class TestPushing(unittest.TestCase):
         observations_1 = []
         rewards_1 = []
         horizon = 100
-        actions = [self.env.action_space.sample() for _ in range(horizon)]
+        actions = [self.env._action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         self.env.reset()
         for i in range(horizon):
@@ -106,7 +106,7 @@ class TestPushing(unittest.TestCase):
             invalid_interventions_after = env.get_tracker().invalid_intervention_steps
             for _ in range(2):
                 for _ in range(100):
-                    obs, reward, done, info = env.step(env.action_space.low)
+                    obs, reward, done, info = env.step(env._action_space.low)
                     #TODO: this shouldnt be the case when the benchmark is complete
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:

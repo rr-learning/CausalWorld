@@ -49,6 +49,8 @@ class RigidObject(object):
             np.array([-0.5, -0.5, 0])
         self._lower_bounds[self._name + "_orientation"] = \
             np.array([-10] * 4)
+        self._lower_bounds[self._name + "_friction"] = \
+            np.array([0])
         self._lower_bounds[self._name + "_size"] = \
             np.array([0.03, 0.03, 0.03])
         self._lower_bounds[self._name + "_color"] = \
@@ -58,13 +60,15 @@ class RigidObject(object):
             self._lower_bounds[self._name + "_linear_velocity"] = \
                 np.array([-0.5] * 3)
             self._lower_bounds[self._name + "_angular_velocity"] = \
-                np.array([-0.5] * 3)
+                np.array([-np.pi] * 3)
             self._lower_bounds[self._name + "_mass"] = \
-                np.array([0])
+                np.array([0.02])
 
         #decision: type id is not normalized
         self._upper_bounds[self._name + "_type"] = \
             np.array([self._type_id])
+        self._upper_bounds[self._name + "_friction"] = \
+            np.array([10])
         self._upper_bounds[self._name + "_position"] = \
             np.array([0.5] * 3)
         self._upper_bounds[self._name + "_orientation"] = \
@@ -78,7 +82,7 @@ class RigidObject(object):
             self._upper_bounds[self._name + "_linear_velocity"] = \
                 np.array([0.5] * 3)
             self._upper_bounds[self._name + "_angular_velocity"] = \
-                np.array([0.5] * 3)
+                np.array([np.pi] * 3)
             self._upper_bounds[self._name + "_mass"] = \
                 np.array([0.2])
 
@@ -88,11 +92,11 @@ class RigidObject(object):
             self._state_variable_names = ['type', 'position',
                                            'orientation', 'linear_velocity',
                                            'angular_velocity', 'mass',
-                                           'size', 'color']
+                                           'size', 'color', 'friction', 'type']
         else:
             self._state_variable_names = ['type', 'position',
                                            'orientation',
-                                           'size', 'color']
+                                           'size', 'color', 'friction', 'type']
 
         self._state_variable_sizes = []
         self._state_size = 0
@@ -181,6 +185,8 @@ class RigidObject(object):
             return self._size
         elif variable_name == 'color':
             return self._color
+        elif variable_name == 'friction':
+            return self._lateral_friction
 
     def reinit_object(self):
         self.remove()
@@ -275,6 +281,7 @@ class RigidObject(object):
             state["orientation"] = np.array(orientation)
             state["size"] = self._size
             state["color"] = self._color
+            state["friction"] = self._lateral_friction
 
             if self.is_not_fixed():
                 linear_velocity, angular_velocity = \
@@ -315,6 +322,8 @@ class RigidObject(object):
                     state.extend(self._size)
                 elif name == 'color':
                     state.extend(self._color)
+                elif name == 'friction':
+                    state.extend(self._lateral_friction)
         return state
 
     def set_full_state(self, new_state):
@@ -360,6 +369,8 @@ class RigidObject(object):
             orientation = interventions_dict['orientation']
         if 'mass' in interventions_dict:
             self._mass = interventions_dict['mass']
+        if 'friction' in interventions_dict:
+            self._lateral_friction = interventions_dict['friction']
         if 'size' in interventions_dict:
             self._size = interventions_dict['size']
             self._set_volume()
@@ -377,6 +388,8 @@ class RigidObject(object):
                     self._block_ids[i], -1, mass=self._mass,
                     physicsClientId=
                     self._pybullet_client_ids[i])
+        elif 'friction' in interventions_dict:
+            self._set_lateral_friction(self._lateral_friction)
 
         if 'color' in interventions_dict:
             self._color = interventions_dict['color']
@@ -534,8 +547,6 @@ class Cuboid(RigidObject):
         initial_linear_velocity=np.array([0, 0, 0]),
         initial_angular_velocity=np.array([0, 0, 0]),
         lateral_friction=1,
-        spinning_friction=0.001,
-        restitution=0
     ):
         """
 
@@ -557,8 +568,8 @@ class Cuboid(RigidObject):
                                      color=color,
                                      fixed_bool=False,
                                      lateral_friction=lateral_friction,
-                                     spinning_friction=spinning_friction,
-                                     restitution=restitution,
+                                     spinning_friction=0.001,
+                                     restitution=0,
                                      initial_linear_velocity=
                                      initial_linear_velocity,
                                      initial_angular_velocity=
@@ -601,8 +612,6 @@ class Cuboid(RigidObject):
         recreation_params['mass'] = self._mass
         recreation_params['color'] = self._color
         recreation_params['lateral_friction'] = self._lateral_friction
-        recreation_params['spinning_friction'] = self._spinning_friction
-        recreation_params['restitution'] = self._restitution
         recreation_params['initial_linear_velocity'] = \
             linear_velocity
         recreation_params['initial_angular_velocity'] = \

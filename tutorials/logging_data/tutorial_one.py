@@ -26,7 +26,7 @@ def example():
     for _ in range(23):
         env.reset()
         for _ in range(50):
-            env.step(env.action_space.sample())
+            env.step(env._action_space.sample())
     env.close()
 
     # Load the logged episodes

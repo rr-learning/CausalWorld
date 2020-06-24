@@ -204,34 +204,34 @@ class ReachingTaskGenerator(BaseTask):
         # you can override these easily
         super(ReachingTaskGenerator,
               self)._set_training_intervention_spaces()
-        lower_bound = np.array(self.stage.floor_inner_bounding_box[0])
-        upper_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1/2 + \
-                       self.stage.floor_inner_bounding_box[0]
+        lower_bound = np.array(self.stage._floor_inner_bounding_box[0])
+        upper_bound = (self.stage._floor_inner_bounding_box[1] -
+                       self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self.stage._floor_inner_bounding_box[0]
         lower_bound[1] = float(upper_bound[1])
-        upper_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                          self.stage.floor_inner_bounding_box[0]) * 3/4 + \
-                          self.stage.floor_inner_bounding_box[0])[1]
+        upper_bound[1] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 3 / 4 + \
+                          self.stage._floor_inner_bounding_box[0])[1]
         self.training_intervention_spaces['goal_60']['position'] = \
             np.array([lower_bound,
                       upper_bound]) #blue is finger 0, green 240
-        lower_bound = np.array(self.stage.floor_inner_bounding_box[0])
-        upper_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        upper_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 + \
-                          self.stage.floor_inner_bounding_box[0])[1]
+        lower_bound = np.array(self.stage._floor_inner_bounding_box[0])
+        upper_bound = (self.stage._floor_inner_bounding_box[1] -
+                       self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self.stage._floor_inner_bounding_box[0]
+        upper_bound[0] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 4 + \
+                          self.stage._floor_inner_bounding_box[0])[1]
         self.training_intervention_spaces['goal_120']['position'] = \
             np.array([lower_bound,
                       upper_bound])  # blue is finger 0, green 240
-        lower_bound = np.array(self.stage.floor_inner_bounding_box[0])
-        upper_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        upper_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
+        lower_bound = np.array(self.stage._floor_inner_bounding_box[0])
+        upper_bound = (self.stage._floor_inner_bounding_box[1] -
+                       self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self.stage._floor_inner_bounding_box[0]
+        upper_bound[1] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 4 +
+                          self.stage._floor_inner_bounding_box[0])[1]
         self.training_intervention_spaces['goal_300']['position'] = \
             np.array([lower_bound,
                       upper_bound])
@@ -247,40 +247,40 @@ class ReachingTaskGenerator(BaseTask):
         """
         super(ReachingTaskGenerator,
               self)._set_testing_intervention_spaces()
-        lower_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        lower_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 3 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self.stage.floor_inner_bounding_box[1])
+        lower_bound = (self.stage._floor_inner_bounding_box[1] -
+                       self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self.stage._floor_inner_bounding_box[0]
+        lower_bound[0] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 3 / 4 +
+                          self.stage._floor_inner_bounding_box[0])[1]
+        upper_bound = np.array(self.stage._floor_inner_bounding_box[1])
 
         self.testing_intervention_spaces['goal_60']['position'] = \
             np.array([lower_bound,
                       upper_bound])
-        lower_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        lower_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self.stage.floor_inner_bounding_box[1])
-        upper_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 +
-                          self.stage.floor_inner_bounding_box[0])[1]
+        lower_bound = (self.stage._floor_inner_bounding_box[1] -
+                       self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self.stage._floor_inner_bounding_box[0]
+        lower_bound[0] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 4 +
+                          self.stage._floor_inner_bounding_box[0])[1]
+        upper_bound = np.array(self.stage._floor_inner_bounding_box[1])
+        upper_bound[0] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 2 +
+                          self.stage._floor_inner_bounding_box[0])[1]
         self.testing_intervention_spaces['goal_120']['position'] = \
             np.array([lower_bound,
                       upper_bound])
-        lower_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self.stage.floor_inner_bounding_box[0]
-        lower_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self.stage.floor_inner_bounding_box[1])
-        upper_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 +
-                          self.stage.floor_inner_bounding_box[0])[1]
+        lower_bound = (self.stage._floor_inner_bounding_box[1] -
+                       self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self.stage._floor_inner_bounding_box[0]
+        lower_bound[1] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 4 +
+                          self.stage._floor_inner_bounding_box[0])[1]
+        upper_bound = np.array(self.stage._floor_inner_bounding_box[1])
+        upper_bound[1] = ((self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 2 +
+                          self.stage._floor_inner_bounding_box[0])[1]
 
         self.testing_intervention_spaces['goal_300']['position'] = \
             np.array([lower_bound,
@@ -320,8 +320,8 @@ class ReachingTaskGenerator(BaseTask):
                                                         size=
                                                         np.array([0.01, 0.01, 0.01]),
                                                         color=np.array([0, 0, 0]),
-                                                        position=np.random.uniform(self.stage.floor_inner_bounding_box[0],
-                                                                                   self.stage.floor_inner_bounding_box[1]))
+                                                        position=np.random.uniform(self.stage._floor_inner_bounding_box[0],
+                                                                                   self.stage._floor_inner_bounding_box[1]))
                     self.current_number_of_obstacles += 1
             #TODO: if its less than what I have
         else:

@@ -98,7 +98,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
         intervention_dict = self.intervention_actor.act(
             self.env.get_current_task_parameters())
         self.env.do_intervention(intervention_dict)
-        obs, reward, done, info = self.env.step(self.env.action_space.low)
+        obs, reward, done, info = self.env.step(self.env._action_space.low)
         #we will keep done, reward and info and change the observation space
         curr_variables = self.env.get_current_task_parameters()
         new_observations = []

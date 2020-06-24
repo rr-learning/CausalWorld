@@ -14,10 +14,10 @@ class PickingTaskGenerator(BaseTask):
                              False),
                          training=kwargs.get("training", True),
                          sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 0),
+                         kwargs.get("sparse_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",#100000
-                                    np.array([100000, 0, 1000000, 0, 100000,
+                                    np.array([0, 0, 0, 0, 0,
                                               0, 0, 0])))
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
@@ -68,9 +68,13 @@ class PickingTaskGenerator(BaseTask):
                          'orientation': self.task_params
                          ["tool_block_orientation"]}
         self.stage.add_silhoutte_general_object(**creation_dict)
-        self.task_stage_observation_keys = ["tool_block_position",
-                                            "tool_block_orientation",
+        self.task_stage_observation_keys = ["tool_block_type",
                                             "tool_block_size",
+                                            "tool_block_position",
+                                            "tool_block_orientation",
+                                            "tool_block_linear_velocity",
+                                            "tool_block_angular_velocity",
+                                            "goal_block_type",
                                             "goal_block_position",
                                             "goal_block_orientation",
                                             "goal_block_size"]
@@ -83,14 +87,14 @@ class PickingTaskGenerator(BaseTask):
         :return:
         """
         super(PickingTaskGenerator, self)._set_training_intervention_spaces()
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             self.training_intervention_spaces[rigid_object]['position'][0][
                 -1] \
                 = 0.0425
             self.training_intervention_spaces[rigid_object]['position'][1][
                 -1] \
                 = 0.0425
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             self.training_intervention_spaces[visual_object]['position'][
                 0][-1] \
                 = 0.08
@@ -105,14 +109,14 @@ class PickingTaskGenerator(BaseTask):
         :return:
         """
         super(PickingTaskGenerator, self)._set_testing_intervention_spaces()
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             self.testing_intervention_spaces[rigid_object]['position'][0][
                 -1] \
                 = 0.0425
             self.testing_intervention_spaces[rigid_object]['position'][1][
                 -1] \
                 = 0.0425
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             self.testing_intervention_spaces[visual_object]['position'][0][
                 -1] \
                 = 0.20
@@ -252,7 +256,7 @@ class PickingTaskGenerator(BaseTask):
         else:
             intervention_space = self.testing_intervention_spaces
         intervention_dict['goal_block']['position'] = \
-            np.array(self.stage.rigid_objects
+            np.array(self.stage._rigid_objects
                      ['tool_block'].get_initial_position())
         intervention_dict['goal_block']['position'][-1] = \
             np.random.uniform(intervention_space['goal_block']['position']

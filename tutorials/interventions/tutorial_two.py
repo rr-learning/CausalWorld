@@ -9,7 +9,7 @@ def without_intervention_split():
     env.reset()
     for _ in range(10):
         for i in range(200):
-            obs, reward, done, info = env.step(env.action_space.sample())
+            obs, reward, done, info = env.step(env._action_space.sample())
         success_signal = env.do_intervention({'stage_color':
                                                   np.random.uniform(0,
                                                                     1,
@@ -25,7 +25,7 @@ def with_intervention_split_1():
     env.reset()
     for _ in range(10):
         for i in range(200):
-            obs, reward, done, info = env.step(env.action_space.sample())
+            obs, reward, done, info = env.step(env._action_space.sample())
         success_signal = env.do_intervention({'stage_color': np.random.uniform(0, 1, [3, ])})
         print("Intervention success signal", success_signal)
     env.close()
@@ -39,7 +39,7 @@ def with_intervention_split_2():
     env.reset()
     for _ in range(10):
         for i in range(200):
-            obs, reward, done, info = env.step(env.action_space.sample())
+            obs, reward, done, info = env.step(env._action_space.sample())
         success_signal = env.do_intervention({'stage_color':
                                                   np.random.uniform(interventions_space['stage_color'][0],
                                                                     interventions_space['stage_color'][1])})

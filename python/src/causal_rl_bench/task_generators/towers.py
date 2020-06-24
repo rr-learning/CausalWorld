@@ -82,8 +82,8 @@ class TowersGeneratorTask(BaseTask):
         self.task_stage_observation_keys = []
         self._creation_list = []
         block_size = tower_dims / number_of_blocks_in_tower
-        curr_height = self.stage.floor_height - block_size[-1] / 2
-        rigid_block_position = np.array([-0.12, -0.12, self.stage.floor_height + block_size[-1] / 2])
+        curr_height = self.stage._floor_height - block_size[-1] / 2
+        rigid_block_position = np.array([-0.12, -0.12, self.stage._floor_height + block_size[-1] / 2])
         for level in range(number_of_blocks_in_tower[-1]):
             curr_height += block_size[-1]
             curr_y = center_position[1] - tower_dims[1] / 2 - block_size[1] / 2
@@ -140,9 +140,9 @@ class TowersGeneratorTask(BaseTask):
         #intevrntions on size of objects might become tricky to handle
         #contradicting interventions here?
         super(TowersGeneratorTask, self)._set_training_intervention_spaces()
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             del self.training_intervention_spaces[visual_object]
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             del self.training_intervention_spaces[rigid_object]['size']
         self.training_intervention_spaces['number_of_blocks_in_tower'] = \
             np.array([[1, 1, 1], [4, 4,4]])
@@ -160,9 +160,9 @@ class TowersGeneratorTask(BaseTask):
         :return:
         """
         super(TowersGeneratorTask, self)._set_testing_intervention_spaces()
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             del self.testing_intervention_spaces[visual_object]
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             del self.testing_intervention_spaces[rigid_object]['size']
         self.testing_intervention_spaces['number_of_blocks_in_tower'] = \
             np.array([[4, 4, 4], [6, 6, ]])
@@ -237,8 +237,8 @@ class TowersGeneratorTask(BaseTask):
                                 center_position=self.current_tower_center)
         elif "blocks_mass" in interventions_dict:
             new_interventions_dict = dict()
-            for rigid_object in self.stage.rigid_objects:
-                if self.stage.rigid_objects[rigid_object].is_not_fixed:
+            for rigid_object in self.stage._rigid_objects:
+                if self.stage._rigid_objects[rigid_object].is_not_fixed:
                     new_interventions_dict[rigid_object] = dict()
                     new_interventions_dict[rigid_object]['mass'] = \
                         self.current_tool_block_mass

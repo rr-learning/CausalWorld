@@ -60,7 +60,7 @@ class StackedBlocksGeneratorTask(BaseTask):
         default_start_position = -(number_of_blocks_per_level *
                                   self.task_params["blocks_min_size"])/2
         default_start_position += self.task_params["blocks_min_size"]/2
-        curr_height = self.stage.floor_height\
+        curr_height = self.stage._floor_height\
                       - self.task_params["blocks_min_size"]/2
         change_per_level = 0.005
         rigid_block_side = 0.1
@@ -187,8 +187,8 @@ class StackedBlocksGeneratorTask(BaseTask):
                                        max_level_width=self.current_max_level_width)
         elif "blocks_mass" in interventions_dict:
             new_interventions_dict = dict()
-            for rigid_object in self.stage.rigid_objects:
-                if self.stage.rigid_objects[rigid_object].is_not_fixed:
+            for rigid_object in self.stage._rigid_objects:
+                if self.stage._rigid_objects[rigid_object].is_not_fixed:
                     new_interventions_dict[rigid_object] = dict()
                     new_interventions_dict[rigid_object]['mass'] = \
                         self.current_blocks_mass
@@ -210,9 +210,9 @@ class StackedBlocksGeneratorTask(BaseTask):
         #intevrntions on size of objects might become tricky to handle
         #contradicting interventions here?
         super(StackedBlocksGeneratorTask, self)._set_training_intervention_spaces()
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             del self.training_intervention_spaces[visual_object]
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             del self.training_intervention_spaces[rigid_object]['size']
         self.training_intervention_spaces['stack_levels'] = \
             np.array([1, 5])
@@ -230,9 +230,9 @@ class StackedBlocksGeneratorTask(BaseTask):
         :return:
         """
         super(StackedBlocksGeneratorTask, self)._set_testing_intervention_spaces()
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             del self.testing_intervention_spaces[visual_object]
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             del self.testing_intervention_spaces[rigid_object]['size']
         self.testing_intervention_spaces['stack_levels'] = \
             np.array([6, 8])
@@ -305,7 +305,7 @@ class StackedBlocksGeneratorTask(BaseTask):
                                        (level_num+1) *
                                        blocks_min_size
                                        + (-blocks_min_size
-                                          /2+self.stage.floor_height)]
+                                          / 2 + self.stage._floor_height)]
                 self.task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_position')
@@ -341,25 +341,25 @@ class StackedBlocksGeneratorTask(BaseTask):
         :param min_size:
         :return:
         """
-        allowed_boundaries[0][0] = max(self.stage.floor_inner_bounding_box[0][0]
+        allowed_boundaries[0][0] = max(self.stage._floor_inner_bounding_box[0][0]
                                        + min_size,
                                        allowed_boundaries[0][0])
-        allowed_boundaries[1][0] = min(self.stage.floor_inner_bounding_box[1][0]
+        allowed_boundaries[1][0] = min(self.stage._floor_inner_bounding_box[1][0]
                                        - min_size,
                                        allowed_boundaries[1][0])
 
-        allowed_boundaries[0][1] = max(self.stage.floor_inner_bounding_box[0][1]
+        allowed_boundaries[0][1] = max(self.stage._floor_inner_bounding_box[0][1]
                                        + min_size,
                                        allowed_boundaries[0][1])
-        allowed_boundaries[1][1] = min(self.stage.floor_inner_bounding_box[1][1]
+        allowed_boundaries[1][1] = min(self.stage._floor_inner_bounding_box[1][1]
                                        - min_size,
                                        allowed_boundaries[1][1])
         position_x_y = np.random.uniform(allowed_boundaries[0][:2],
                                          allowed_boundaries[1][:2])
         # choose size width, depth, height
         allowed_max_width = min(
-            self.stage.floor_inner_bounding_box[1][0] - position_x_y[0],
-            position_x_y[0] - self.stage.floor_inner_bounding_box[0][0]) * 2
+            self.stage._floor_inner_bounding_box[1][0] - position_x_y[0],
+            position_x_y[0] - self.stage._floor_inner_bounding_box[0][0]) * 2
         allowed_max_width = min(allowed_max_width, max_level_width)
         size = np.random.uniform(min_size,
                                  [allowed_max_width, min_size, min_size])
@@ -378,11 +378,11 @@ class StackedBlocksGeneratorTask(BaseTask):
         :return:
         """
         level_blocks = []
-        current_boundaries = np.array([self.stage.floor_inner_bounding_box[0]
+        current_boundaries = np.array([self.stage._floor_inner_bounding_box[0]
                                        [:2],
-                                       self.stage.floor_inner_bounding_box[1][
+                                       self.stage._floor_inner_bounding_box[1][
                                        :2]])
-        start_z = self.stage.floor_height
+        start_z = self.stage._floor_height
         level_index = 0
         size, position = self._generate_random_block(
             allowed_boundaries=current_boundaries, start_z=start_z,

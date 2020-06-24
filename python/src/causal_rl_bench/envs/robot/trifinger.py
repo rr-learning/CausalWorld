@@ -1,9 +1,7 @@
 from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
-from causal_rl_bench.envs.robot.camera import Camera
 import numpy as np
 import pybullet
-import pinocchio
 
 
 class TriFingerRobot(object):
@@ -17,7 +15,8 @@ class TriFingerRobot(object):
                  pybullet_client_w_o_goal_id,
                  revolute_joint_ids,
                  finger_tip_ids,
-                 pinocchio_utils):
+                 pinocchio_utils,
+                 cameras=None):
         """
 
         :param action_mode:
@@ -53,12 +52,14 @@ class TriFingerRobot(object):
         )
         self._safety_kd = np.array([0.08, 0.08, 0.04] * 3)
         self._max_motor_torque = 0.36
-        if self._pybullet_client_w_goal_id is not None:
-            self._set_finger_state_in_goal_image()
         self._robot_actions = TriFingerAction(action_mode,
                                               normalize_actions)
+        if self._pybullet_client_w_goal_id is not None:
+            self._set_finger_state_in_goal_image()
+        self._tool_cameras = cameras
         self._robot_observations = TriFingerObservations(observation_mode,
-                                                         normalize_observations)
+                                                         normalize_observations,
+                                                         cameras=self._tool_cameras)
         #Take care with the following last action and last clipped action
         # always follow the action mode normalization
         #last_applied_joint_positions is always saved here as
@@ -73,39 +74,6 @@ class TriFingerRobot(object):
         #TODO: repeated
         self._stage_id = 3
         self._floor_id = 2
-        if observation_mode == 'cameras':
-            self._tool_cameras = []
-            self._tool_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4190],
-                       camera_orientation=[0.3760, 0.8690,
-                                           -0.2918, -0.1354],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
-            self._tool_cameras.append(
-                Camera(camera_position=[0.0047, -0.2834, 0.4558],
-                       camera_orientation=[0.9655, -0.0098,
-                                           -0.0065, -0.2603],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
-            self._tool_cameras.append(
-                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
-                       camera_orientation=[-0.3633, 0.8686,
-                                           -0.3141, 0.1220],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
-            self._goal_cameras = []
-            self._goal_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4190],
-                       camera_orientation=[0.3760, 0.8690,
-                                           -0.2918, -0.1354],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
-            self._goal_cameras.append(
-                Camera(camera_position=[0.0047, -0.2834, 0.4558],
-                       camera_orientation=[0.9655, -0.0098,
-                                           -0.0065, -0.2603],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
-            self._goal_cameras.append(
-                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
-                       camera_orientation=[-0.3633, 0.8686,
-                                           -0.3141, 0.1220],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
         self._state_size = 18
         #TODO: move this to pybullet_fingers repo maybe?
         self._link_ids = {'robot_finger_60_link_0': 1,
@@ -139,6 +107,13 @@ class TriFingerRobot(object):
     def get_link_names(self):
         return self._link_ids
 
+    def get_full_env_state(self):
+        return self.get_current_scm_values()
+
+    def set_full_env_state(self, env_state):
+        self.apply_interventions(env_state)
+        return env_state
+
     def update_latest_full_state(self):
         if self._pybullet_client_full_id is not None:
             current_joint_states = pybullet.\
@@ -162,8 +137,8 @@ class TriFingerRobot(object):
             [joint[3] for joint in current_joint_states]
         )
         self._latest_full_state = {'positions': current_position,
-                                  'velocities': current_velocity,
-                                  'torques': current_torques}
+                                   'velocities': current_velocity,
+                                   'torques': current_torques}
         return
 
     def update_images(self):
@@ -216,6 +191,7 @@ class TriFingerRobot(object):
         return self._skip_frame
 
     def get_full_state(self):
+        self.update_latest_full_state()
         return np.append(self._latest_full_state['positions'],
                          self._latest_full_state['velocities'])
 
@@ -408,8 +384,7 @@ class TriFingerRobot(object):
         return positions
 
     def get_current_camera_observations(self):
-        return self._robot_observations.get_current_camera_observations(
-            self._latest_camera_observations)
+        return self._robot_observations.get_current_camera_observations()
 
     def get_rest_pose(self):
         deg45 = np.pi / 4
@@ -427,6 +402,7 @@ class TriFingerRobot(object):
     def get_current_scm_values(self):
         # TODO: not a complete list yet of what we want to expose
         variable_params = dict()
+        self.update_latest_full_state()
         variable_params['joint_positions'] = self._latest_full_state['positions']
         variable_params['joint_velocities'] = self._latest_full_state['velocities']
         if self._pybullet_client_w_o_goal_id is not None:

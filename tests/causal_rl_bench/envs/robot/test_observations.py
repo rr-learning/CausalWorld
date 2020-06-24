@@ -119,7 +119,7 @@ def test_clip_observation(os_default, os_structured_full):
 
 def test_add_and_remove_observation(os_custom_keys_norm):
     os_custom_keys_norm.add_observation("joint_torques")
-    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+    assert os_custom_keys_norm._observations_keys == ["end_effector_positions",
                                                      "action_joint_positions",
                                                      "joint_torques"]
     assert len(os_custom_keys_norm.get_observation_spaces().low) == 27
@@ -127,7 +127,7 @@ def test_add_and_remove_observation(os_custom_keys_norm):
     assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
     assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
     os_custom_keys_norm.remove_observations(["joint_torques"])
-    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+    assert os_custom_keys_norm._observations_keys == ["end_effector_positions",
                                                      "action_joint_positions"]
     assert len(os_custom_keys_norm.get_observation_spaces().low) == 18
     assert len(os_custom_keys_norm.get_observation_spaces().high) == 18
@@ -139,7 +139,7 @@ def test_add_and_remove_observation(os_custom_keys_norm):
 
     os_custom_keys_norm.add_observation("dummy_key", lower_bound=[-4, -4, -4], upper_bound=[2, 2, 2],
                                         observation_fn=dummy_fn)
-    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+    assert os_custom_keys_norm._observations_keys == ["end_effector_positions",
                                                      "action_joint_positions",
                                                      "dummy_key"]
     assert len(os_custom_keys_norm.get_observation_spaces().low) == 21
@@ -147,7 +147,7 @@ def test_add_and_remove_observation(os_custom_keys_norm):
     assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
     assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
     os_custom_keys_norm.remove_observations(["dummy_key"])
-    assert os_custom_keys_norm.observations_keys == ["end_effector_positions",
+    assert os_custom_keys_norm._observations_keys == ["end_effector_positions",
                                                      "action_joint_positions"]
     assert len(os_custom_keys_norm.get_observation_spaces().low) == 18
     assert len(os_custom_keys_norm.get_observation_spaces().high) == 18

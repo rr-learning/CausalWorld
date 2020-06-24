@@ -52,44 +52,66 @@ class BaseTask(object):
             calculate_additional_dense_rewards
         self._current_starting_state = dict()
         self._default_starting_state = dict()
+        self._empty_stage = None
+        self._current_desired_goal = None
+        self._current_achieved_goal = None
+        self._current_goal_distance = None
         return
 
-    def _save_start_state(self):
-        state = dict()
+    def _save_pybullet_state(self):
+        pybullet_state = dict()
         if self.stage._pybullet_client_full_id is not None:
-            state['full'] = \
-                pybullet.saveState(
-                    physicsClientId=self.stage._pybullet_client_full_id)
+                pybullet_state['full'] = pybullet.\
+                    saveState(physicsClientId=self.stage._pybullet_client_full_id)
         if self.stage._pybullet_client_w_goal_id is not None:
-            state['w_goal'] = \
-                pybullet.saveState(
-                    physicsClientId=self.stage._pybullet_client_w_goal_id)
+                pybullet_state['w_goal'] = pybullet.\
+                    saveState(physicsClientId=self.stage._pybullet_client_w_goal_id)
         if self.stage._pybullet_client_w_o_goal_id is not None:
-            state['w_o_goal'] = \
-                pybullet.saveState(
-                    physicsClientId=self.stage._pybullet_client_w_o_goal_id)
+            pybullet_state['w_o_goal'] = pybullet. \
+                saveState(physicsClientId=self.stage._pybullet_client_w_o_goal_id)
+        return pybullet_state
+
+    def _restore_pybullet_state(self, pybullet_state):
+        if self.stage._pybullet_client_full_id is not None:
+                pybullet.\
+                    restoreState(pybullet_state['full'],
+                                 physicsClientId=self.stage._pybullet_client_full_id)
+        if self.stage._pybullet_client_w_goal_id is not None:
+                pybullet.\
+                    restoreState(pybullet_state['w_goal'],
+                                 physicsClientId=self.stage._pybullet_client_w_goal_id)
+        if self.stage._pybullet_client_w_o_goal_id is not None:
+            pybullet. \
+                saveState(pybullet_state['w_o_goal'],
+                          physicsClientId=self.stage._pybullet_client_w_o_goal_id)
+        return
+
+    def _save_state(self):
+        state = dict()
         state['stage_object_state'] = \
-            self.stage.get_full_memory()
+            self.stage.get_full_env_state()
         state['robot_object_state'] = \
-            copy.deepcopy(self.robot.get_full_state())
+            self.robot.get_full_env_state()
         return state
 
     def _restore_state(self, state_dict):
-        if self.stage._pybullet_client_full_id:
+        #remove everything in the arena
+        self.stage.remove_everything()
+        if self.stage._pybullet_client_full_id is not None:
                 pybullet.\
-                    restoreState(state_dict['full'],
+                    restoreState(self._empty_stage,
                                  physicsClientId=self.stage._pybullet_client_full_id)
-        if self.stage._pybullet_client_w_goal_id:
+        if self.stage._pybullet_client_w_goal_id is not None:
                 pybullet.\
-                    restoreState(state_dict['w_goal'],
+                    restoreState(self._empty_stage,
                                  physicsClientId=self.stage._pybullet_client_w_goal_id)
-        if self.stage._pybullet_client_w_o_goal_id:
+        if self.stage._pybullet_client_w_o_goal_id is not None:
                 pybullet.\
-                    restoreState(state_dict['w_o_goal'],
+                    restoreState(self._empty_stage,
                                  physicsClientId=self.stage._pybullet_client_w_o_goal_id)
-        self.robot.set_full_state(state_dict
-                                  ['robot_object_state'])
-        self.stage.set_full_memory(
+        self.robot.set_full_env_state(state_dict
+                                      ['robot_object_state'])
+        self.stage.set_full_env_state(
             state_dict['stage_object_state'])
         return
 
@@ -172,15 +194,17 @@ class BaseTask(object):
         """
         info = dict()
         info['possible_solution_intervention'] = dict()
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             #check if there is an equivilant visual object corresponding
             possible_corresponding_goal = rigid_object.replace('tool', 'goal')
-            if possible_corresponding_goal in self.stage.visual_objects:
+            if possible_corresponding_goal in self.stage._visual_objects:
                 info['possible_solution_intervention'][rigid_object] = dict()
                 info['possible_solution_intervention'][rigid_object]['position'] = \
                     self.stage.get_object_state(possible_corresponding_goal, 'position')
                 info['possible_solution_intervention'][rigid_object]['orientation'] = \
                     self.stage.get_object_state(possible_corresponding_goal, 'orientation')
+        info['ground_truth_scm_variables_values'] = self.get_current_scm_values()
+        info['fractional_success'] = self._current_goal_distance
         return info
 
     def _update_task_state(self, update_task_state_dict):
@@ -214,7 +238,7 @@ class BaseTask(object):
             intervention_space = self.training_intervention_spaces
         else:
             intervention_space = self.testing_intervention_spaces
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             if visual_object in intervention_space and \
                     'position' in intervention_space[visual_object]:
                 intervention_dict[visual_object] = dict()
@@ -252,26 +276,26 @@ class BaseTask(object):
                        -math.radians(30)] * 3])
         #any goal or object in arena put the position
         #and orientation modification
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             self.training_intervention_spaces[rigid_object] = dict()
             self.training_intervention_spaces[rigid_object]['position'] = \
-                np.array([self.stage.floor_inner_bounding_box[0],
-                          (self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self.stage.floor_inner_bounding_box[0]])
+                np.array([self.stage._floor_inner_bounding_box[0],
+                          (self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                          self.stage._floor_inner_bounding_box[0]])
             self.training_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
             self.training_intervention_spaces[rigid_object]['mass'] = \
                 np.array([0.05, 0.1])
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             self.training_intervention_spaces[visual_object] = dict()
             self.training_intervention_spaces[visual_object]['position'] = \
-                np.array([self.stage.floor_inner_bounding_box[0],
-                          (self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self.stage.floor_inner_bounding_box[0]])
+                np.array([self.stage._floor_inner_bounding_box[0],
+                          (self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                          self.stage._floor_inner_bounding_box[0]])
             self.training_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self.training_intervention_spaces[visual_object]['color'] = \
@@ -304,26 +328,26 @@ class BaseTask(object):
                        math.radians(-2)] * 3])
         # any goal or object in arena put the position
         # and orientation modification
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             self.testing_intervention_spaces[rigid_object] = dict()
             self.testing_intervention_spaces[rigid_object]['position'] = \
-                np.array([(self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                           self.stage.floor_inner_bounding_box[0],
-                          self.stage.floor_inner_bounding_box[1]])
+                np.array([(self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                          self.stage._floor_inner_bounding_box[0],
+                          self.stage._floor_inner_bounding_box[1]])
             self.testing_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
             self.testing_intervention_spaces[rigid_object]['mass'] = \
                 np.array([0.1, 0.2])
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             self.testing_intervention_spaces[visual_object] = dict()
             self.testing_intervention_spaces[visual_object]['position'] = \
-                np.array([(self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                           self.stage.floor_inner_bounding_box[0],
-                          self.stage.floor_inner_bounding_box[1]])
+                np.array([(self.stage._floor_inner_bounding_box[1] -
+                           self.stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                          self.stage._floor_inner_bounding_box[0],
+                          self.stage._floor_inner_bounding_box[1]])
             self.testing_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self.testing_intervention_spaces[visual_object]['color'] = \
@@ -348,8 +372,8 @@ class BaseTask(object):
         :return:
         """
         desired_goal = []
-        for visual_goal in self.stage.visual_objects:
-            desired_goal.append(self.stage.visual_objects[visual_goal]
+        for visual_goal in self.stage._visual_objects:
+            desired_goal.append(self.stage._visual_objects[visual_goal]
                                 .get_bounding_box())
         return np.array(desired_goal)
 
@@ -359,9 +383,9 @@ class BaseTask(object):
         :return:
         """
         achieved_goal = []
-        for rigid_object in self.stage.rigid_objects:
-            if self.stage.rigid_objects[rigid_object].is_not_fixed:
-                achieved_goal.append(self.stage.rigid_objects
+        for rigid_object in self.stage._rigid_objects:
+            if self.stage._rigid_objects[rigid_object].is_not_fixed:
+                achieved_goal.append(self.stage._rigid_objects
                                      [rigid_object].get_bounding_box())
         return np.array(achieved_goal)
 
@@ -419,11 +443,11 @@ class BaseTask(object):
 
         :return:
         """
-        desired_goal = self.get_desired_goal()
-        achieved_goal = self.get_achieved_goal()
-        goal_distance = self._goal_distance(desired_goal=desired_goal,
-                                            achieved_goal=achieved_goal)
-        self._update_success(goal_distance)
+        self._current_desired_goal = self.get_desired_goal()
+        self._current_achieved_goal = self.get_achieved_goal()
+        self._current_goal_distance = self._goal_distance(desired_goal=self._current_desired_goal,
+                                                          achieved_goal=self._current_achieved_goal)
+        self._update_success(self._current_goal_distance)
         if not self.task_params['is_goal_distance_dense']:
             if self.is_done():
                 goal_distance = 1
@@ -431,15 +455,15 @@ class BaseTask(object):
                 goal_distance = -1
         if self.task_params['calculate_additional_dense_rewards']:
             dense_rewards, update_task_state_dict = \
-                self._calculate_dense_rewards(achieved_goal=achieved_goal,
-                                              desired_goal=desired_goal)
+                self._calculate_dense_rewards(achieved_goal=self._current_desired_goal,
+                                              desired_goal=self._current_achieved_goal)
             reward = np.sum(np.array(dense_rewards) *
                             self.task_params["dense_reward_weights"]) \
-                            + goal_distance * \
+                            + self._current_goal_distance * \
                      self.task_params["sparse_reward_weight"]
             self._update_task_state(update_task_state_dict)
         else:
-            reward = goal_distance * self.task_params["sparse_reward_weight"]
+            reward = self._current_goal_distance * self.task_params["sparse_reward_weight"]
         return reward
 
     def compute_reward(self, achieved_goal, desired_goal, info):
@@ -479,16 +503,23 @@ class BaseTask(object):
             self.robot.reset_state(
                 joint_positions=self.robot.get_rest_pose()[0],
                 joint_velocities=np.zeros([9, ]))
+        if self.stage._pybullet_client_full_id is not None:
+            client_id = self.stage._pybullet_client_full_id
+        else:
+            client_id = self.stage._pybullet_client_w_o_goal_id
+        self._empty_stage = pybullet.saveState(
+                            physicsClientId=client_id)
         self._set_up_stage_arena()
         self._default_starting_state = \
-            self._save_start_state()
+            self._save_state()
         self._current_starting_state = \
-            self._save_start_state()
+            self._save_state()
         self.stage.finalize_stage()
         self._set_up_non_default_observations()
         # self.task_params.update(self.initial_state)
         self._set_training_intervention_spaces()
         self._set_testing_intervention_spaces()
+        self._set_task_state()
         return
 
     def _setup_non_default_robot_observation_key(self, observation_key,
@@ -552,7 +583,7 @@ class BaseTask(object):
                                          check_bounds=
                                          self.task_params['intervention_split'])
             if success_signal:
-                self._current_starting_state = self._save_start_state()
+                self._current_starting_state = self._save_state()
         self._set_task_state()
         return success_signal, interventions_info, reset_observation_space_signal
 
@@ -571,7 +602,7 @@ class BaseTask(object):
         for key in self.task_robot_observation_keys:
             # dont forget to handle non standard observation here
             if key in self._non_default_robot_observation_funcs:
-                if self.robot.normalize_observations:
+                if self.robot._normalize_observations:
                     normalized_observations = \
                         self.robot.\
                             normalize_observation_for_key\
@@ -590,7 +621,7 @@ class BaseTask(object):
 
         for key in self.task_stage_observation_keys:
             if key in self._non_default_stage_observation_funcs:
-                if self.stage.normalize_observations:
+                if self.stage._normalize_observations:
                     normalized_observations = \
                         self.stage.normalize_observation_for_key\
                             (key=key,
@@ -829,7 +860,7 @@ class BaseTask(object):
         #     current_robot_state = self.robot.get_full_state()
         # else:
         #     current_robot_state = self.robot.get_default_state()
-        current_state = self._save_start_state()
+        current_state = self._save_state()
         self.robot.apply_interventions(robot_interventions_dict)
         self.stage.apply_interventions(stage_interventions_dict)
         task_generator_intervention_success_signal, reset_observation_space_signal = \
@@ -838,14 +869,18 @@ class BaseTask(object):
         #TODO: this is a hack for now to not check feasibility when adding/removing objects since
         #The stage state is quite different afterwards and it will be hard to restore its exact state
         #we dont handle this
-        self.robot.step_simulation()
+
         if len(task_generator_interventions_dict) == 0:
+            pre_contact_check_state = self._save_pybullet_state()
+            self.robot.step_simulation()
             if not self.stage.check_feasiblity_of_stage():
                 stage_infeasible = True
             if not self.robot.check_feasibility_of_robot_state():
                 robot_infeasible = True
             if stage_infeasible or robot_infeasible:
                 self._restore_state(current_state)
+            else:
+                self._restore_pybullet_state(pre_contact_check_state)
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \

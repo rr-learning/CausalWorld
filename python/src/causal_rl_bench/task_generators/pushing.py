@@ -90,13 +90,13 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             #TODO: make it a function of size
             self.training_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
             self.training_intervention_spaces[rigid_object]['position'][1][-1] \
                 = 0.0425
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             self.training_intervention_spaces[visual_object]['position'][0][-1] \
                 = 0.0425
             self.training_intervention_spaces[visual_object]['position'][1][-1] \
@@ -109,12 +109,12 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self.stage._rigid_objects:
             self.testing_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
             self.testing_intervention_spaces[rigid_object]['position'][1][-1] \
                 = 0.0425
-        for visual_object in self.stage.visual_objects:
+        for visual_object in self.stage._visual_objects:
             self.testing_intervention_spaces[visual_object]['position'][0][-1] \
                 = 0.0425
             self.testing_intervention_spaces[visual_object]['position'][1][-1] \

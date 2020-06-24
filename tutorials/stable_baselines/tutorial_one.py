@@ -42,7 +42,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
 
 
 def save_config_file(ppo_config, env, file_path):
-    task_config = env.task.get_task_params()
+    task_config = env._task.get_task_params()
     for task_param in task_config:
         if not isinstance(task_config[task_param], str):
             task_config[task_param] = str(task_config[task_param])

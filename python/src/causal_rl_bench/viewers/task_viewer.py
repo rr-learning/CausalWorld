@@ -12,8 +12,7 @@ def get_world(task_generator_id, task_params, world_params,
         task = task_generator(task_generator_id)
     else:
         task = task_generator(task_generator_id, **task_params)
-    env = World(task, **world_params,
-                logging=False)
+    env = World(task, **world_params, enable_visualization=enable_visualization)
     for i in range(len(env_wrappers)):
         env = env_wrappers[i](env, **env_wrappers_args[i])
     return env
@@ -103,7 +102,7 @@ def record_video_of_random_policy(task, world_params, file_name,
         for i in range(max_time_steps):
             for _ in range(actual_skip_frame):
                 obs, reward, done, info = \
-                    env.step(action=env.action_space.sample())
+                    env.step(action=env._action_space.sample())
                 recorder.capture_frame()
     env.close()
 
