@@ -1,7 +1,9 @@
 import numpy as np
 import math
+import copy
 from causal_rl_bench.utils.state_utils import get_bounding_box_area
 from causal_rl_bench.utils.state_utils import get_intersection
+import pybullet
 
 
 class BaseTask(object):
@@ -42,15 +44,53 @@ class BaseTask(object):
         self.current_time_secs = 0
         self.training_intervention_spaces = dict()
         self.testing_intervention_spaces = dict()
-        self.initial_state = dict()
-        self.default_state = dict()
         self.finished_episode = False
         self.task_params['intervention_split'] = intervention_split
         self.task_params['training'] = training
         self.task_params['is_goal_distance_dense'] = is_goal_distance_dense
         self.task_params['calculate_additional_dense_rewards'] = \
             calculate_additional_dense_rewards
-        self._creation_list = []
+        self._current_starting_state = dict()
+        self._default_starting_state = dict()
+        return
+
+    def _save_start_state(self):
+        state = dict()
+        if self.stage._pybullet_client_full_id is not None:
+            state['full'] = \
+                pybullet.saveState(
+                    physicsClientId=self.stage._pybullet_client_full_id)
+        if self.stage._pybullet_client_w_goal_id is not None:
+            state['w_goal'] = \
+                pybullet.saveState(
+                    physicsClientId=self.stage._pybullet_client_w_goal_id)
+        if self.stage._pybullet_client_w_o_goal_id is not None:
+            state['w_o_goal'] = \
+                pybullet.saveState(
+                    physicsClientId=self.stage._pybullet_client_w_o_goal_id)
+        state['stage_object_state'] = \
+            self.stage.get_full_memory()
+        state['robot_object_state'] = \
+            copy.deepcopy(self.robot.get_full_state())
+        return state
+
+    def _restore_state(self, state_dict):
+        if self.stage._pybullet_client_full_id:
+                pybullet.\
+                    restoreState(state_dict['full'],
+                                 physicsClientId=self.stage._pybullet_client_full_id)
+        if self.stage._pybullet_client_w_goal_id:
+                pybullet.\
+                    restoreState(state_dict['w_goal'],
+                                 physicsClientId=self.stage._pybullet_client_w_goal_id)
+        if self.stage._pybullet_client_w_o_goal_id:
+                pybullet.\
+                    restoreState(state_dict['w_o_goal'],
+                                 physicsClientId=self.stage._pybullet_client_w_o_goal_id)
+        self.robot.set_full_state(state_dict
+                                  ['robot_object_state'])
+        self.stage.set_full_memory(
+            state_dict['stage_object_state'])
         return
 
     def is_in_training_mode(self):
@@ -58,7 +98,8 @@ class BaseTask(object):
 
         :return:
         """
-        if self.task_params['intervention_split'] and self.task_params['training']:
+        if self.task_params['intervention_split'] and \
+                self.task_params['training']:
             return True
         else:
             return False
@@ -182,20 +223,20 @@ class BaseTask(object):
                                       intervention_space[visual_object]['position'][1])
         return intervention_dict
 
-    def reset_default_state(self):
-        """
-
-        :return:
-        """
-        self.stage.remove_everything()
-        self.task_stage_observation_keys = []
-        self.robot.tri_finger.reset_world()
-        self.task_stage_observation_keys = []
-        self.initial_state = dict(self.default_state)
-        self._set_up_stage_arena()
-        self._set_testing_intervention_spaces()
-        self._set_training_intervention_spaces()
-        self.stage.finalize_stage()
+    # def reset_default_state(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.stage.remove_everything()
+    #     self.task_stage_observation_keys = []
+    #     self.robot.tri_finger.reset_world()
+    #     self.task_stage_observation_keys = []
+    #     self.initial_state = dict(self.default_state)
+    #     self._set_up_stage_arena()
+    #     self._set_testing_intervention_spaces()
+    #     self._set_training_intervention_spaces()
+    #     self.stage.finalize_stage()
 
     def _set_training_intervention_spaces(self):
         """
@@ -241,7 +282,7 @@ class BaseTask(object):
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self.training_intervention_spaces['floor_friction'] = \
             np.array([0.3, 0.8])
-        for link in self.robot.link_ids:
+        for link in self.robot.get_link_names():
             self.training_intervention_spaces[link] = dict()
             self.training_intervention_spaces[link]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
@@ -293,7 +334,7 @@ class BaseTask(object):
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self.testing_intervention_spaces['floor_friction'] = \
             np.array([0.6, 0.8])
-        for link in self.robot.link_ids:
+        for link in self.robot.get_link_names():
             self.testing_intervention_spaces[link] = dict()
             self.testing_intervention_spaces[link]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
@@ -420,11 +461,6 @@ class BaseTask(object):
         reward = goal_distance * self.task_params["sparse_reward_weight"]
         return reward
 
-    def _create_world(self):
-        for arena_object in self._creation_list:
-            arena_object[0](**arena_object[1])
-        return
-
     def init_task(self, robot, stage):
         """
 
@@ -434,16 +470,23 @@ class BaseTask(object):
         """
         self.robot = robot
         self.stage = stage
-        self.initial_state['joint_positions'] = \
-            self.robot.get_rest_pose()[0]
-        self.initial_state['joint_velocities'] = \
-            np.zeros([9, ])
-        self.robot.tri_finger.reset_world()
+        if self.task_params["joint_positions"] is not None:
+            self.robot.reset_state(
+                joint_positions=
+                np.array(self.task_params["joint_positions"]),
+                joint_velocities=np.zeros([9, ]))
+        else:
+            self.robot.reset_state(
+                joint_positions=self.robot.get_rest_pose()[0],
+                joint_velocities=np.zeros([9, ]))
         self._set_up_stage_arena()
-        self.default_state.update(dict(self.initial_state))
+        self._default_starting_state = \
+            self._save_start_state()
+        self._current_starting_state = \
+            self._save_start_state()
         self.stage.finalize_stage()
-        self.task_params.update(self.initial_state)
         self._set_up_non_default_observations()
+        # self.task_params.update(self.initial_state)
         self._set_training_intervention_spaces()
         self._set_testing_intervention_spaces()
         return
@@ -488,55 +531,28 @@ class BaseTask(object):
         :param interventions_dict:
         :return:
         """
-        self.stage.clear_memory()
-        self.robot.tri_finger.reset_world()
+        # self.stage.clear_memory()
+        # self.robot.tri_finger.reset_world()
         self.robot.clear()
-        self.stage.clear()
-        self._create_world()
-        self.stage.update_stage()
+        # self.stage.clear()
+        #restore first to the starting state and
+        # then potentially make the intervention]
+        self._restore_state(self._current_starting_state)
+        # self._create_world()
+        # self.stage.update_stage()
         self.task_solved = False
         self.finished_episode = False
         self.time_steps_elapsed_since_success = 0
-        self.current_time = 0
         success_signal = None
         interventions_info = None
         reset_observation_space_signal = False
         if interventions_dict is not None:
-            interventions_dict_copy = interventions_dict
-            #go through initial state vars and see if they are in the dict or not
-            for variable in self.initial_state:
-                if variable not in interventions_dict_copy:
-                    interventions_dict_copy[variable] = self.initial_state[variable]
-                else:
-                    #now it might exist but its subvariables might not
-                    if isinstance(self.initial_state[variable], dict):
-                        for subvariable in self.initial_state[variable]:
-                            if subvariable not in interventions_dict_copy[variable]:
-                                interventions_dict_copy[variable][subvariable] = \
-                                    self.initial_state[variable][subvariable]
             success_signal, interventions_info, reset_observation_space_signal = \
-                self.apply_interventions(interventions_dict_copy,
+                self.apply_interventions(interventions_dict,
                                          check_bounds=
                                          self.task_params['intervention_split'])
             if success_signal:
-                for intervention_variable in self.initial_state:
-                    if intervention_variable in interventions_dict:
-                        if isinstance(self.initial_state[intervention_variable],dict):
-                            for subvariable in self.initial_state[intervention_variable]:
-                                if subvariable in interventions_dict[intervention_variable]:
-                                    self.initial_state[intervention_variable] = \
-                                        interventions_dict_copy[
-                                            intervention_variable]
-                        else:
-                            self.initial_state[intervention_variable] = \
-                                interventions_dict_copy[intervention_variable]
-            else:
-                self.apply_interventions(self.initial_state,
-                                         check_bounds=False)
-
-        else:
-            self.apply_interventions(self.initial_state,
-                                     check_bounds=False)
+                self._current_starting_state = self._save_start_state()
         self._set_task_state()
         return success_signal, interventions_info, reset_observation_space_signal
 
@@ -610,7 +626,7 @@ class BaseTask(object):
         if self.finished_episode:
             return True
         if self.task_params['time_threshold_in_goal_state_secs'] <= \
-                (self.robot.dt * self.time_steps_elapsed_since_success):
+                (self.robot.get_dt() * self.time_steps_elapsed_since_success):
             self.finished_episode = True
         return self.finished_episode
 
@@ -673,7 +689,7 @@ class BaseTask(object):
         """
         return self.testing_intervention_spaces
 
-    def get_current_variables_values(self):
+    def get_current_scm_values(self):
         """
 
         :return:
@@ -681,10 +697,10 @@ class BaseTask(object):
         variable_params = dict()
         #get the robots ones
         variable_params.\
-            update(self.robot.get_current_variables_values())
+            update(self.robot.get_current_scm_values())
         #get the arena
         variable_params. \
-            update(self.stage.get_current_variables_values())
+            update(self.stage.get_current_scm_values())
         #get the task specific params now
         variable_params. \
             update(self.get_task_generator_variables_values())
@@ -757,9 +773,9 @@ class BaseTask(object):
         """
         #TODO: for now a heuristic for naming conventions
         robot_intervention_keys = \
-            self.robot.get_current_variables_values().keys()
+            self.robot.get_current_scm_values().keys()
         stage_intervention_keys = \
-            self.stage.get_current_variables_values().keys()
+            self.stage.get_current_scm_values().keys()
         task_generator_intervention_keys = \
             self.get_task_generator_variables_values().keys()
         robot_interventions_dict = dict()
@@ -808,11 +824,12 @@ class BaseTask(object):
         robot_interventions_dict, stage_interventions_dict, \
         task_generator_interventions_dict = \
             self.divide_intervention_dict(interventions_dict)
-        current_stage_state = self.stage.get_full_state()
-        if self.robot.is_initialized():
-            current_robot_state = self.robot.get_full_state()
-        else:
-            current_robot_state = self.robot.get_default_state()
+        # current_stage_state = self.stage.get_full_state()
+        # if self.robot.is_initialized():
+        #     current_robot_state = self.robot.get_full_state()
+        # else:
+        #     current_robot_state = self.robot.get_default_state()
+        current_state = self._save_start_state()
         self.robot.apply_interventions(robot_interventions_dict)
         self.stage.apply_interventions(stage_interventions_dict)
         task_generator_intervention_success_signal, reset_observation_space_signal = \
@@ -821,14 +838,14 @@ class BaseTask(object):
         #TODO: this is a hack for now to not check feasibility when adding/removing objects since
         #The stage state is quite different afterwards and it will be hard to restore its exact state
         #we dont handle this
-        self.stage.pybullet_client.stepSimulation()
+        self.robot.step_simulation()
         if len(task_generator_interventions_dict) == 0:
             if not self.stage.check_feasiblity_of_stage():
-                self.stage.set_full_state(current_stage_state)
                 stage_infeasible = True
             if not self.robot.check_feasibility_of_robot_state():
-                self.robot.set_full_state(current_robot_state)
                 robot_infeasible = True
+            if stage_infeasible or robot_infeasible:
+                self._restore_state(current_state)
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \

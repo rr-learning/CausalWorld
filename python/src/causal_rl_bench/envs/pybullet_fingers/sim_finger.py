@@ -34,14 +34,6 @@ class SimFinger(BaseFinger):
             velocities during the safety torque check on the joint motors.
         max_motor_torque (float): The maximum allowable torque that can
             be applied to each motor.
-        action_index (int): An index used to enforce the structure of a
-            time-series of length 1 for the action in which the application
-            of the action precedes (in time) the observation corresponding
-            to it. Incremented each time an action is applied.
-        observation_index (int): The corresponding index for the observation
-            to ensure the same structure as the action time-series for the
-            observation time-series (of length 1).
-
     """
 
     def __init__(
@@ -62,17 +54,6 @@ class SimFinger(BaseFinger):
         super().__init__(enable_visualization)
 
         self.time_step = time_step
-        self.position_gains = np.array(
-            [10.0, 10.0, 10.0] * 3
-        )
-        self.velocity_gains = np.array(
-            [0.1, 0.3, 0.001] * 3
-        )
-        self.safety_kd = np.array([0.08, 0.08, 0.04] * 3)
-        self.max_motor_torque = 0.36
-
-        self.action_index = -1
-        self.observation_index = 0
         self.cameras = []
         self.cameras.append(Camera(camera_position=[0.2496, 0.2458, 0.4190],
                                    camera_orientation=[0.3760, 0.8690,
@@ -88,7 +69,6 @@ class SimFinger(BaseFinger):
                                    pybullet_client=self._p))
         self.make_physical_world()
         self.disable_velocity_control()
-        self.latest_observation = None
 
     def reset_world(self):
         self.get_pybullet_client().resetSimulation()
@@ -97,36 +77,41 @@ class SimFinger(BaseFinger):
         self.make_physical_world()
         self.disable_velocity_control()
 
-    def Action(self, torque=None, position=None):
-        """
-        Fill in the fields of the action structure
-
-        Args:
-            torque (array): The torques to apply to the motors
-            position (array): The absolute angular position to which
-                the motors have to be rotated.
-
-        Returns:
-            the_action (Action): the action to be applied to the motors
-        """
+    def apply_action(self, torque=None, position=None):
         if torque is None:
             torque = np.array([0.0] * 3 * 3)
         if position is None:
             position = np.array([np.nan] * 3 * 3)
 
-        action = Action(torque, position)
+        def set_gains(gains, defaults):
+            """Replace NaN entries in gains with values from defaults."""
+            mask = np.isnan(gains)
+            output = copy.copy(gains)
+            output[mask] = defaults[mask]
+            return output
 
-        return action
+        applied_action.position_kp = set_gains(
+            desired_action.position_kp, self.position_gains
+        )
+        applied_action.position_kd = set_gains(
+            desired_action.position_kd, self.velocity_gains
+        )
 
-    def set_real_time_sim(self, switch=0):
-        """
-        Choose to simulate in real-time or use a desired simulation rate
-        Defaults to non-real time
+        torque_command = np.asarray(copy.copy(desired_action.torque))
+        if not np.isnan(desired_action.position).all():
+            torque_command += np.array(
+                self.compute_pd_control_torques(
+                    desired_action.position,
+                    applied_action.position_kp,
+                    applied_action.position_kd,
+                )
+            )
 
-        Args:
-            switch (int, 0/1): 1 to set the simulation in real-time.
-        """
-        self._p.setRealTimeSimulation(switch)
+        applied_action.torque = self._set_motor_torques(
+            torque_command.tolist()
+        )
+
+        return applied_action
 
     def make_physical_world(self):
         """

@@ -4,44 +4,88 @@ from causal_rl_bench.envs.scene.silhouette import SCuboid, SSphere, SMeshObject
 from causal_rl_bench.utils.state_utils import get_intersection
 import math
 import numpy as np
+import pybullet
 
 
 class Stage(object):
-    def __init__(self, pybullet_client, observation_mode,
-                 normalize_observations=True,
-                 goal_image_pybullet_instance=None):
+    def __init__(self, observation_mode,
+                 normalize_observations,
+                 pybullet_client_full_id,
+                 pybullet_client_w_goal_id,
+                 pybullet_client_w_o_goal_id):
         """
 
-        :param pybullet_client:
         :param observation_mode:
         :param normalize_observations:
-        :param goal_image_pybullet_instance:
+        :param pybullet_client_full:
+        :param pybullet_client_w_goal:
+        :param pybullet_client_w_o_goal:
         """
         self.rigid_objects = dict()
         self.visual_objects = dict()
         self.observation_mode = observation_mode
-        self.pybullet_client = pybullet_client
+        self._pybullet_client_full_id = pybullet_client_full_id
+        self._pybullet_client_w_goal_id = pybullet_client_w_goal_id
+        self._pybullet_client_w_o_goal_id = pybullet_client_w_o_goal_id
         #TODO: move the ids from here
         self.floor_id = 2
         self.stage_id = 3
         self.normalize_observations = normalize_observations
         self.stage_observations = None
-        self.latest_full_state = None
-        self.latest_observations = None
-        self.goal_image_pybullet_instance = goal_image_pybullet_instance
+        #TODO: to be deleted below
+        # self.latest_full_state = None
+        # self.latest_observations = None
         self.floor_height = 0.01
         #TODO: discuss this with Manuel and Felix for the bounds
         self.floor_inner_bounding_box = np.array(
             [[-0.15, -0.15, self.floor_height], [0.15, 0.15, 0.3]])
-        if self.goal_image_pybullet_instance is not None:
-            self.goal_image_visual_objects = dict()
-            self.goal_image_pybullet_client = \
-                self.goal_image_pybullet_instance._p
-            self.goal_image = None
         self.name_keys = []
         self.default_gravity = [0, 0, -9.81]
         self.current_gravity = np.array(self.default_gravity)
+        self.visual_object_client_instances = []
+        self.rigid_objects_client_instances = []
+        if self._pybullet_client_full_id is not None:
+            self.visual_object_client_instances.append(
+                self._pybullet_client_full_id)
+            self.rigid_objects_client_instances.append(
+                self._pybullet_client_full_id)
+        if self._pybullet_client_w_o_goal_id is not None:
+            self.rigid_objects_client_instances.append(
+                self._pybullet_client_w_o_goal_id)
+        if self._pybullet_client_w_goal_id is not None:
+            self.visual_object_client_instances.append(
+                self._pybullet_client_w_goal_id)
+        self.goal_image = None
         return
+
+    def get_full_memory(self):
+        memory = {}
+        memory['rigid_objects'] = []
+        for rigid_object_key in self.rigid_objects:
+            memory['rigid_objects'].append(['cube',
+                                            self.rigid_objects
+                                            [rigid_object_key].
+                                           get_recreation_params()])
+        memory['visual_objects'] = []
+        for visual_object_key in self.visual_objects:
+            memory['visual_objects'].append(['cube',
+                                            self.visual_objects
+                                            [visual_object_key].
+                                           get_recreation_params()])
+        # memory['current_gravity'] = copy.deepcopy(self.current_gravity)
+        # self.latest_full_state = None
+        # self.latest_observations = None
+        return memory
+
+    def set_full_memory(self, memory):
+        self.remove_everything()
+        for rigid_object_info in memory['rigid_objects']:
+            self.add_rigid_general_object(shape=rigid_object_info[0],
+                                          **rigid_object_info[1])
+        for visual_object_info in memory['visual_objects']:
+            self.add_silhoutte_general_object(shape=visual_object_info[0],
+                                              **visual_object_info[1])
+        return memory
 
     def add_rigid_general_object(self, name, shape, **object_params):
         """
@@ -56,10 +100,14 @@ class Stage(object):
         else:
             self.name_keys.append(name)
         if shape == "cube":
-            self.rigid_objects[name] = Cuboid(self.pybullet_client, name,
+            self.rigid_objects[name] = Cuboid(self.
+                                              rigid_objects_client_instances,
+                                              name,
                                               **object_params)
         elif shape == "static_cube":
-            self.rigid_objects[name] = StaticCuboid(self.pybullet_client, name,
+            self.rigid_objects[name] = StaticCuboid(self.
+                                                    rigid_objects_client_instances,
+                                                    name,
                                                     **object_params)
         else:
             raise Exception("shape is not yet implemented")
@@ -76,19 +124,11 @@ class Stage(object):
         else:
             self.name_keys.remove(name)
         if name in self.rigid_objects.keys():
-            block_id = self.rigid_objects[name].get_block_id()
+            self.rigid_objects[name].remove()
             del self.rigid_objects[name]
-            self.pybullet_client.removeBody(block_id)
         elif name in self.visual_objects.keys():
-            block_id = self.visual_objects[name].get_block_id()
+            self.visual_objects[name].remove()
             del self.visual_objects[name]
-            self.pybullet_client.removeBody(block_id)
-        return
-
-    def clear_memory(self):
-        self.name_keys = []
-        self.rigid_objects = {}
-        self.visual_objects = {}
         return
 
     def remove_everything(self):
@@ -96,7 +136,8 @@ class Stage(object):
 
         :return:
         """
-        current_objects = list(self.rigid_objects.keys()) + list(self.visual_objects.keys())
+        current_objects = list(self.rigid_objects.keys()) + \
+                           list(self.visual_objects.keys())
         for name in current_objects:
             self.remove_general_object(name)
         return
@@ -113,7 +154,8 @@ class Stage(object):
             raise Exception("name already exists as key for scene objects")
         else:
             self.name_keys.append(name)
-        self.rigid_objects[name] = MeshObject(self.pybullet_client, name,
+        self.rigid_objects[name] = MeshObject(self.rigid_objects_client_instances,
+                                              name,
                                               filename, **object_params)
         return
 
@@ -130,17 +172,16 @@ class Stage(object):
         else:
             self.name_keys.append(name)
         if shape == "cube":
-            self.visual_objects[name] = SCuboid(self.pybullet_client, name,
-                                                **object_params)
-            if self.goal_image_pybullet_instance is not None:
-                self.goal_image_visual_objects[name] = SCuboid(
-                    self.goal_image_pybullet_client, name, **object_params)
+            self.visual_objects[name] = SCuboid(
+                self.visual_object_client_instances, name, **object_params)
+
+            if self.observation_mode == "cameras":
+                self.update_goal_image()
         elif shape == "sphere":
-            self.visual_objects[name] = SSphere(self.pybullet_client, name,
-                                                **object_params)
-            if self.goal_image_pybullet_instance is not None:
-                self.goal_image_visual_objects[name] = SSphere(
-                    self.goal_image_pybullet_client, name, **object_params)
+            self.visual_objects[name] = SSphere(
+                self.visual_object_client_instances, name, **object_params)
+            if self.observation_mode == "cameras":
+                self.update_goal_image()
         else:
             raise Exception("shape is not implemented yet")
         return
@@ -157,7 +198,8 @@ class Stage(object):
             raise Exception("name already exists as key for scene objects")
         else:
             self.name_keys.append(name)
-        self.visual_objects[name] = SMeshObject(self.pybullet_client, name,
+        self.visual_objects[name] = SMeshObject(self.visual_object_client_instances,
+                                                name,
                                                 filename, **object_params)
         return
 
@@ -223,12 +265,9 @@ class Stage(object):
                 object = self.visual_objects[name]
                 end = start + object.get_state_size()
                 object.set_full_state(new_state[start:end])
-                if self.goal_image_pybullet_instance is not None:
-                    goal_image_object = self.goal_image_visual_objects[name]
-                    goal_image_object.set_full_state(new_state[start:end])
             start = end
-        self.latest_full_state = new_state
-        if self.goal_image_pybullet_instance is not None:
+        # self.latest_full_state = new_state
+        if self.observation_mode == "cameras":
             self.update_goal_image()
         #self.pybullet_client.stepSimulation()
         return
@@ -249,13 +288,10 @@ class Stage(object):
             elif name in self.visual_objects:
                 object = self.visual_objects[name]
                 object.set_pose(positions[i], orientations[i])
-                if self.goal_image_pybullet_instance is not None:
-                    goal_image_object = self.goal_image_visual_objects[name]
-                    goal_image_object.set_pose(positions[i], orientations[i])
             else:
                 raise Exception("Object {} doesnt exist".format(name))
-        self.latest_full_state = self.get_full_state()
-        if self.goal_image_pybullet_instance is not None:
+        # self.latest_full_state = self.get_full_state()
+        if self.observation_mode == "cameras":
             self.update_goal_image()
         #self.pybullet_client.stepSimulation()
         return
@@ -266,9 +302,7 @@ class Stage(object):
         :param helper_keys:
         :return:
         """
-        self.latest_observations = \
-            self.stage_observations.get_current_observations(helper_keys)
-        return self.latest_observations
+        return self.stage_observations.get_current_observations(helper_keys)
 
     def get_observation_spaces(self):
         """
@@ -345,8 +379,9 @@ class Stage(object):
 
         :return:
         """
-        self.latest_full_state = None
-        self.latest_observations = None
+        # self.latest_full_state = None
+        # self.latest_observations = None
+        return
 
     def get_current_object_keys(self):
         """
@@ -371,33 +406,35 @@ class Stage(object):
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
         # save the old state of the object before intervention
-        old_state = object.get_state(state_type='list')
-        object.set_state(interventions_dict)
-        if key in self.visual_objects and \
-                self.goal_image_pybullet_instance is not None:
-            #TODO: under the impression that an intervention of visuals are always
-            #feasible
-            goal_image_object = self.goal_image_visual_objects[key]
-            goal_image_object.set_state(interventions_dict)
+        object.apply_interventions(interventions_dict)
+        if self.observation_mode == "cameras":
             self.update_goal_image()
         #self.pybullet_client.stepSimulation()
         return
 
-    def get_current_variables_values(self):
+    def get_current_scm_values(self):
         """
 
         :return:
         """
         #TODO: not a complete list yet of what we want to expose
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id is not None
+        else:
+            client = self._pybullet_client_full_id
         variable_params = dict()
         variable_params["floor_color"] = \
-            self.pybullet_client.getVisualShapeData(self.floor_id)[0][7][:3]
+            pybullet.getVisualShapeData(self.floor_id,
+                                      physicsClientId=client)[0][7][:3]
         variable_params["stage_color"] = \
-            self.pybullet_client.getVisualShapeData(self.stage_id)[0][7][:3]
+            pybullet.getVisualShapeData(self.stage_id,
+                                      physicsClientId=client)[0][7][:3]
         variable_params["stage_friction"] = \
-            self.pybullet_client.getDynamicsInfo(self.stage_id, -1)[1]
+            pybullet.getDynamicsInfo(self.stage_id, -1,
+                                     physicsClientId=client)[1]
         variable_params["floor_friction"] = \
-            self.pybullet_client.getDynamicsInfo(self.floor_id, -1)[1]
+            pybullet.getDynamicsInfo(self.floor_id, -1,
+                                     physicsClientId=client)[1]
         variable_params["gravity"] = \
             self.current_gravity
         variable_params.update(self.get_full_state(state_type='dict'))
@@ -414,45 +451,58 @@ class Stage(object):
                 self.object_intervention(intervention,
                                              interventions_dict[intervention])
             elif intervention == "floor_color":
-                self.pybullet_client.changeVisualShape(
-                    self.floor_id, -1, rgbaColor=np.append(
-                        interventions_dict[intervention], 1))
-                if self.goal_image_pybullet_instance is not None:
-                    self.goal_image_pybullet_instance.changeVisualShape(
+                for client in self.visual_object_client_instances:
+                    pybullet.changeVisualShape(
                         self.floor_id, -1, rgbaColor=np.append(
-                            interventions_dict[intervention], 1))
+                            interventions_dict[intervention], 1),
+                        physicsClientId=client
+                        )
+                for client in self.rigid_objects_client_instances:
+                    pybullet.changeVisualShape(
+                        self.floor_id, -1, rgbaColor=np.append(
+                            interventions_dict[intervention], 1),
+                        physicsClientId=client)
             elif intervention == "stage_color":
-                self.pybullet_client.changeVisualShape(
-                    self.stage_id, -1, rgbaColor=np.append(
-                        interventions_dict[intervention], 1))
-                if self.goal_image_pybullet_instance is not None:
-                    self.goal_image_pybullet_instance.changeVisualShape(
+                for client in self.visual_object_client_instances:
+                    pybullet.changeVisualShape(
                         self.stage_id, -1, rgbaColor=np.append(
-                            interventions_dict[intervention], 1))
+                            interventions_dict[intervention], 1),
+                        physicsClientId=client)
+                for client in self.rigid_objects_client_instances:
+                    pybullet.changeVisualShape(
+                        self.stage_id, -1, rgbaColor=np.append(
+                            interventions_dict[intervention], 1),
+                        physicsClientId=client)
             elif intervention == "stage_friction":
-                self.pybullet_client.changeDynamics(
-                    bodyUniqueId=self.stage_id,
-                    linkIndex=-1,
-                    lateralFriction=interventions_dict[intervention],
-                )
+                for client in self.rigid_objects_client_instances:
+                    pybullet.changeDynamics(
+                        bodyUniqueId=self.stage_id,
+                        linkIndex=-1,
+                        lateralFriction=interventions_dict[intervention],
+                        physicsClientId=client)
             elif intervention == "floor_friction":
-                self.pybullet_client.changeDynamics(
-                    bodyUniqueId=self.floor_id,
-                    linkIndex=-1,
-                    lateralFriction=interventions_dict[intervention],
-                )
+                for client in self.rigid_objects_client_instances:
+                    pybullet.changeDynamics(
+                        bodyUniqueId=self.floor_id,
+                        linkIndex=-1,
+                        lateralFriction=interventions_dict[intervention],
+                        physicsClientId=client)
             elif intervention == "gravity":
-                self.pybullet_client.setGravity(interventions_dict[
-                                                    intervention][0],
-                                                interventions_dict[
-                                                    intervention][1],
-                                                interventions_dict[
-                                                    intervention][2])
+                for client in self.rigid_objects_client_instances:
+                    pybullet.setGravity(interventions_dict[
+                                        intervention][0],
+                                      interventions_dict[
+                                        intervention][1],
+                                       interventions_dict[
+                                        intervention][2],
+                                        physicsClientId=client)
                 self.current_gravity = interventions_dict[intervention]
             else:
                 raise Exception("The intervention on stage "
                                 "is not supported yet")
-        self.latest_full_state = self.get_full_state()
+        if self.observation_mode == "cameras":
+            self.update_goal_image()
+        # self.latest_full_state = self.get_full_state()
         return
 
     def get_object_full_state(self, key):
@@ -466,9 +516,11 @@ class Stage(object):
 
     def get_object_state(self, key, state_variable):
         if key in self.rigid_objects:
-            return np.array(self.rigid_objects[key].get_variable_state(state_variable))
+            return np.array(self.rigid_objects[key].get_variable_state(
+                state_variable))
         elif key in self.visual_objects:
-            return np.array(self.visual_objects[key].get_variable_state(state_variable))
+            return np.array(self.visual_objects[key].get_variable_state(
+                state_variable))
         else:
             raise Exception("The key {} passed doesn't exist in the stage yet"
                             .format(key))
@@ -483,34 +535,39 @@ class Stage(object):
                             .format(key))
 
     def are_blocks_colliding(self, block1, block2):
-        for contact in self.pybullet_client.getContactPoints():
+        for contact in pybullet.getContactPoints(
+                physicsClientId=self.rigid_objects_client_instances[0]):
             if (contact[1] == block1.block_id and contact[2] == block2.block_id) or \
                     (contact[2] == block1.block_id and contact[1] == block2.block_id):
                 return True
         return False
 
     def check_stage_free_of_colliding_blocks(self):
-        for contact in self.pybullet_client.getContactPoints():
+        for contact in pybullet.getContactPoints(
+                physicsClientId=self.rigid_objects_client_instances[0]):
             if contact[1] > 3 and contact[2] > 3:
                 return False
         return True
 
     def is_colliding_with_stage(self, block1):
-        for contact in self.pybullet_client.getContactPoints():
+        for contact in pybullet.getContactPoints(
+                physicsClientId=self.rigid_objects_client_instances[0]):
             if (contact[1] == block1.block_id and contact[2] == self.stage_id) or \
                     (contact[2] == block1.block_id and contact[1] == self.stage_id):
                 return True
         return False
 
     def is_colliding_with_floor(self, block1):
-        for contact in self.pybullet_client.getContactPoints():
+        for contact in pybullet.getContactPoints(
+                physicsClientId=self.rigid_objects_client_instances[0]):
             if (contact[1] == block1.block_id and contact[2] == self.floor_id) or \
                     (contact[2] == block1.block_id and contact[1] == self.floor_id):
                 return True
         return False
 
     def get_normal_interaction_force_between_blocks(self, block1, block2):
-        for contact in self.pybullet_client.getContactPoints():
+        for contact in pybullet.getContactPoints(
+                physicsClientId=self.rigid_objects_client_instances[0]):
             if (contact[1] == block1.block_id and contact[2] == block2.block_id) or \
                     (contact[2] == block1.block_id and contact[1] == block2.block_id):
                 return contact[9]*np.array(contact[7])
@@ -556,7 +613,8 @@ class Stage(object):
                 A boolean indicating whether the stage is in a collision state
                 or not.
         """
-        for contact in self.pybullet_client.getContactPoints():
+        for contact in pybullet.getContactPoints(
+                physicsClientId=self.rigid_objects_client_instances[0]):
             if contact[8] < -0.08:
                 return False
         #check if all the visual objects are within the bb og the available arena
@@ -571,8 +629,3 @@ class Stage(object):
     def _get_stage_bb(self):
         return (tuple(self.floor_inner_bounding_box[0]),
                 tuple(self.floor_inner_bounding_box[1]))
-
-    def update_stage(self):
-        self.stage_observations.rigid_objects = self.rigid_objects
-        self.stage_observations.visual_objects = self.visual_objects
-        return

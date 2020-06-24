@@ -152,7 +152,9 @@ class StageObservations(object):
         # now normalize everything here
         if self.normalized_observations:
             for key in observations_dict.keys():
-                observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
+                observations_dict[key] = \
+                    self.normalize_observation_for_key(
+                        observations_dict[key], key)
         return observations_dict
 
     def remove_observations(self, observations):

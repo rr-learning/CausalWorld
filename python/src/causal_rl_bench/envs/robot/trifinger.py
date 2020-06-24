@@ -1,185 +1,415 @@
 from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
-from causal_rl_bench.envs.pybullet_fingers.sim_finger import SimFinger
+from causal_rl_bench.envs.robot.camera import Camera
 import numpy as np
-import math
+import pybullet
+import pinocchio
 
 
 class TriFingerRobot(object):
-    def __init__(self, action_mode, observation_mode,
-                 enable_visualization=True, skip_frame=20,
-                 normalize_actions=True, normalize_observations=True,
-                 enable_goal_image=False, simulation_time=0.004):
-        self.normalize_actions = normalize_actions
-        self.normalize_observations = normalize_observations
-        self.action_mode = action_mode
-        self.enable_goal_image = enable_goal_image
-        self.observation_mode = observation_mode
-        self.skip_frame = skip_frame
-        self.simulation_time = simulation_time
-        self.dt = self.simulation_time * self.skip_frame
-        self.control_index = -1
-        self.tri_finger = SimFinger(self.simulation_time, enable_visualization)
+    def __init__(self, action_mode, robot_id,
+                 observation_mode,
+                 skip_frame, normalize_actions,
+                 normalize_observations,
+                 simulation_time,
+                 pybullet_client_full_id,
+                 pybullet_client_w_goal_id,
+                 pybullet_client_w_o_goal_id,
+                 revolute_joint_ids,
+                 finger_tip_ids,
+                 pinocchio_utils):
+        """
 
-        self.robot_actions = TriFingerAction(action_mode, normalize_actions)
-        self.robot_observations = TriFingerObservations(observation_mode,
-                                                        normalize_observations)
-        if self.enable_goal_image:
-            self.goal_image_instance = SimFinger(self.simulation_time,
-                                                 enable_visualization=False)
-            self.goal_image_instance_state = \
-                self.goal_image_instance.reset_finger(
-                    self.robot_actions.joint_positions_lower_bounds,
-                    np.zeros(9, ))
-        #Take care with the following last action and last clipped action always follow the action mode normalization
-        #last_applied_joint_positions is always saved here as denormalized but when its part of the obs space then it follows
+        :param action_mode:
+        :param observation_mode:
+        :param skip_frame:
+        :param normalize_actions:
+        :param normalize_observations:
+        :param simulation_time:
+        :param pybullet_client_full:
+        :param pybullet_client_w_goal:
+        :param pybullet_client_w_o_goal:
+        """
+        self._pybullet_client_full_id = pybullet_client_full_id
+        self._pybullet_client_w_goal_id = pybullet_client_w_goal_id
+        self._pybullet_client_w_o_goal_id = pybullet_client_w_o_goal_id
+        self._revolute_joint_ids = revolute_joint_ids
+        self._finger_tip_ids = finger_tip_ids
+        self._pinocchio_utils = pinocchio_utils
+        self._normalize_actions = normalize_actions
+        self._normalize_observations = normalize_observations
+        self._action_mode = action_mode
+        self._observation_mode = observation_mode
+        self._skip_frame = skip_frame
+        self._robot_id = robot_id
+        self._simulation_time = simulation_time
+        self._dt = self._simulation_time * self._skip_frame
+        self._control_index = -1
+        self._position_gains = np.array(
+            [10.0, 10.0, 10.0] * 3
+        )
+        self._velocity_gains = np.array(
+            [0.1, 0.3, 0.001] * 3
+        )
+        self._safety_kd = np.array([0.08, 0.08, 0.04] * 3)
+        self._max_motor_torque = 0.36
+        if self._pybullet_client_w_goal_id is not None:
+            self._set_finger_state_in_goal_image()
+        self._robot_actions = TriFingerAction(action_mode,
+                                              normalize_actions)
+        self._robot_observations = TriFingerObservations(observation_mode,
+                                                         normalize_observations)
+        #Take care with the following last action and last clipped action
+        # always follow the action mode normalization
+        #last_applied_joint_positions is always saved here as
+        # denormalized but when its part of the obs space then it follows
         #the observation mode
-        self.last_action = None
-        self.last_clipped_action = None
+        self._last_action = None
+        self._last_clipped_action = None
         if action_mode != "joint_torques":
-            self.last_applied_joint_positions = None
-        self.latest_full_state = None
-        self.state_size = 18
+            self._last_applied_joint_positions = None
+        self._latest_full_state = None
+        self._latest_camera_observations = None
+        #TODO: repeated
+        self._stage_id = 3
+        self._floor_id = 2
+        if observation_mode == 'cameras':
+            self._tool_cameras = []
+            self._tool_cameras.append(
+                Camera(camera_position=[0.2496, 0.2458, 0.4190],
+                       camera_orientation=[0.3760, 0.8690,
+                                           -0.2918, -0.1354],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
+            self._tool_cameras.append(
+                Camera(camera_position=[0.0047, -0.2834, 0.4558],
+                       camera_orientation=[0.9655, -0.0098,
+                                           -0.0065, -0.2603],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
+            self._tool_cameras.append(
+                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
+                       camera_orientation=[-0.3633, 0.8686,
+                                           -0.3141, 0.1220],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
+            self._goal_cameras = []
+            self._goal_cameras.append(
+                Camera(camera_position=[0.2496, 0.2458, 0.4190],
+                       camera_orientation=[0.3760, 0.8690,
+                                           -0.2918, -0.1354],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
+            self._goal_cameras.append(
+                Camera(camera_position=[0.0047, -0.2834, 0.4558],
+                       camera_orientation=[0.9655, -0.0098,
+                                           -0.0065, -0.2603],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
+            self._goal_cameras.append(
+                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
+                       camera_orientation=[-0.3633, 0.8686,
+                                           -0.3141, 0.1220],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
+        self._state_size = 18
         #TODO: move this to pybullet_fingers repo maybe?
-        self.link_ids = {'robot_finger_60_link_0': 1,
-                         'robot_finger_60_link_1': 2,
-                         'robot_finger_60_link_2': 3,
-                         'robot_finger_60_link_3': 4,
-                         'robot_finger_120_link_0': 6,
-                         'robot_finger_120_link_1': 7,
-                         'robot_finger_120_link_2': 8,
-                         'robot_finger_120_link_3': 9,
-                         'robot_finger_300_link_0': 11,
-                         'robot_finger_300_link_1': 12,
-                         'robot_finger_300_link_2': 13,
-                         'robot_finger_300_link_3': 14}
-        self.visual_shape_ids_ids = {'robot_finger_60_link_0': 0,
-                                     'robot_finger_60_link_1': 1,
-                                     'robot_finger_60_link_2': 2,
-                                     'robot_finger_60_link_3': 3,
-                                     'robot_finger_120_link_0': 4,
-                                     'robot_finger_120_link_1': 5,
-                                     'robot_finger_120_link_2': 6,
-                                     'robot_finger_120_link_3': 7,
-                                     'robot_finger_300_link_0': 8,
-                                     'robot_finger_300_link_1': 9,
-                                     'robot_finger_300_link_2': 10,
-                                     'robot_finger_300_link_3': 11}
+        self._link_ids = {'robot_finger_60_link_0': 1,
+                          'robot_finger_60_link_1': 2,
+                          'robot_finger_60_link_2': 3,
+                          'robot_finger_60_link_3': 4,
+                          'robot_finger_120_link_0': 6,
+                          'robot_finger_120_link_1': 7,
+                          'robot_finger_120_link_2': 8,
+                          'robot_finger_120_link_3': 9,
+                          'robot_finger_300_link_0': 11,
+                          'robot_finger_300_link_1': 12,
+                          'robot_finger_300_link_2': 13,
+                          'robot_finger_300_link_3': 14}
+        self._visual_shape_ids = {'robot_finger_60_link_0': 0,
+                                  'robot_finger_60_link_1': 1,
+                                  'robot_finger_60_link_2': 2,
+                                  'robot_finger_60_link_3': 3,
+                                  'robot_finger_120_link_0': 4,
+                                  'robot_finger_120_link_1': 5,
+                                  'robot_finger_120_link_2': 6,
+                                  'robot_finger_120_link_3': 7,
+                                  'robot_finger_300_link_0': 8,
+                                  'robot_finger_300_link_1': 9,
+                                  'robot_finger_300_link_2': 10,
+                                  'robot_finger_300_link_3': 11}
+        #disable velocity control mode
+        self._disable_velocity_control()
         return
 
+    def get_link_names(self):
+        return self._link_ids
+
+    def update_latest_full_state(self):
+        if self._pybullet_client_full_id is not None:
+            current_joint_states = pybullet.\
+                getJointStates(
+                 self._robot_id, self._revolute_joint_ids,
+                 physicsClientId=self._pybullet_client_full_id
+            )
+        else:
+            current_joint_states = pybullet.\
+                getJointStates(
+                 self._robot_id, self._revolute_joint_ids,
+                 physicsClientId=self._pybullet_client_w_o_goal_id
+            )
+        current_position = np.array(
+            [joint[0] for joint in current_joint_states]
+        )
+        current_velocity = np.array(
+            [joint[1] for joint in current_joint_states]
+        )
+        current_torques = np.array(
+            [joint[3] for joint in current_joint_states]
+        )
+        self._latest_full_state = {'positions': current_position,
+                                  'velocities': current_velocity,
+                                  'torques': current_torques}
+        return
+
+    def update_images(self):
+        #TODO: this is just a sekelton for now
+        observations = []
+        observations.append(self._tool_cameras[0].get_image())
+        self._latest_camera_observations = observations
+
+    def compute_pd_control_torques(self, joint_positions):
+        """
+        Compute torque command to reach given target position using a PD
+        controller.
+
+        Args:
+            joint_positions (array-like, shape=(n,)):  Desired joint positions.
+
+        Returns:
+            List of torques to be sent to the joints of the finger in order to
+            reach the specified joint_positions.
+        """
+        position_error = joint_positions - self._latest_full_state['positions']
+        position_feedback = np.asarray(self._position_gains) * \
+                            position_error
+        velocity_feedback = np.asarray(self._velocity_gains) * \
+                            self._latest_full_state['velocities']
+        joint_torques = position_feedback - velocity_feedback
+        return joint_torques
+
     def set_action_mode(self, action_mode):
-        self.action_mode = action_mode
-        self.robot_actions = TriFingerAction(action_mode,
-                                             self.normalize_actions)
+        self._action_mode = action_mode
+        self._robot_actions = TriFingerAction(action_mode,
+                                              self._normalize_actions)
 
     def get_action_mode(self):
-        return self.action_mode
+        return self._action_mode
 
     def set_observation_mode(self, observation_mode):
-        self.observation_mode = observation_mode
-        self.robot_observations = \
+        self._observation_mode = observation_mode
+        self._robot_observations = \
             TriFingerObservations(observation_mode,
-                                  self.normalize_observations)
+                                  self._normalize_observations)
 
     def get_observation_mode(self):
-        return self.observation_mode
+        return self._observation_mode
 
     def set_skip_frame(self, skip_frame):
-        self.skip_frame = skip_frame
+        self._skip_frame = skip_frame
 
     def get_skip_frame(self):
-        return self.skip_frame
+        return self._skip_frame
 
     def get_full_state(self):
-        return np.append(self.latest_full_state.position,
-                         self.latest_full_state.velocity)
+        return np.append(self._latest_full_state['positions'],
+                         self._latest_full_state['velocities'])
 
     def set_full_state(self, state):
-        self.latest_full_state = self.tri_finger.\
-            reset_finger(state[:9], state[9:])
-        # here the previous actions will all be zeros to avoid dealing with different action modes for now
-        self.last_action = np.zeros(9, )
-        self.last_clipped_action = np.zeros(9, )
-        if self.action_mode != "joint_torques":
-            self.last_applied_joint_positions = list(state[:9])
+        self._set_finger_state(state[:9], state[9:])
+        # here the previous actions will all be zeros to
+        # avoid dealing with different action modes for now
+        self._last_action = np.zeros(9, )
+        self._last_clipped_action = np.zeros(9, )
+        if self._action_mode != "joint_torques":
+            self._last_applied_joint_positions = list(state[:9])
         return
 
     def get_last_action(self):
-        return self.last_action
+        return self._last_action
 
     def get_last_clipped_action(self):
-        return self.last_clipped_action
+        return self._last_clipped_action
 
     def get_last_applied_joint_positions(self):
-        return self.last_applied_joint_positions
+        return self._last_applied_joint_positions
 
     def get_observation_spaces(self):
-        return self.robot_observations.get_observation_spaces()
+        return self._robot_observations.get_observation_spaces()
 
     def get_action_spaces(self):
-        return self.robot_actions.get_action_space()
+        return self._robot_actions.get_action_space()
 
     def get_state_size(self):
-        return self.state_size
+        return self._state_size
 
-    #TODO: refactor in the pybullet_fingers repo
-    def get_pybullet_client(self):
-        return self.tri_finger._p
+    def step_simulation(self):
+        if self._pybullet_client_full_id is not None:
+            pybullet.stepSimulation(
+                physicsClientId=self._pybullet_client_full_id)
+        if self._pybullet_client_w_o_goal_id is not None:
+            pybullet.stepSimulation(
+                physicsClientId=self._pybullet_client_w_o_goal_id)
+        return
 
     def apply_action(self, action):
-        self.control_index += 1
-        clipped_action = self.robot_actions.clip_action(action)
+        self._control_index += 1
+        clipped_action = self._robot_actions.clip_action(action)
         action_to_apply = clipped_action
-        if self.normalize_actions:
-            action_to_apply = self.robot_actions.denormalize_action(clipped_action)
-        if self.action_mode == "joint_positions":
-            finger_action = self.tri_finger.Action(position=action_to_apply)
-            self.last_applied_joint_positions = action_to_apply
-        elif self.action_mode == "joint_torques":
+        if self._normalize_actions:
+            action_to_apply = self._robot_actions.denormalize_action(clipped_action)
+        if self._action_mode == "joint_positions":
+            self._last_applied_joint_positions = action_to_apply
+            for _ in range(self._skip_frame):
+                desired_torques = \
+                    self.compute_pd_control_torques(action_to_apply)
+                self.send_torque_commands(
+                    desired_torque_commands=desired_torques)
+                self.step_simulation()
+        elif self._action_mode == "joint_torques":
             #TODO: deal with clipped action here and observation part too
-            finger_action = self.tri_finger.Action(torque=action_to_apply)
-        elif self.action_mode == "end_effector_positions":
+            for _ in range(self._skip_frame):
+                self.send_torque_commands(
+                    desired_torque_commands=action_to_apply)
+                self.step_simulation()
+        elif self._action_mode == "end_effector_positions":
             #TODO: check if the desired tip positions are in the feasible set
             joint_positions = self.get_joint_positions_from_tip_positions\
-                (action_to_apply, list(self.latest_full_state.position))
-            finger_action = self.tri_finger.Action(position=joint_positions)
-            self.last_applied_joint_positions = joint_positions
+                (action_to_apply, list(self._latest_full_state['positions']))
+            self._last_applied_joint_positions = joint_positions
+            for _ in range(self._skip_frame):
+                desired_torques = \
+                    self.compute_pd_control_torques(joint_positions)
+                self.send_torque_commands(
+                    desired_torque_commands=desired_torques)
+                self.step_simulation()
         else:
             raise Exception("The action mode {} is not supported".
-                            format(self.action_mode))
-        for _ in range(self.skip_frame):
-            t = self.tri_finger.append_desired_action(finger_action)
-            self.tri_finger.step_simulation()
-        if self.observation_mode == "cameras":
-            state = \
-                self.tri_finger.get_observation(t, update_images=True)
-        else:
-            state = \
-                self.tri_finger.get_observation(t, update_images=False)
-        self.latest_full_state = state
-        self.last_action = action
-        self.last_clipped_action = clipped_action
+                            format(self._action_mode))
+
+        self.update_latest_full_state()
+        #now we get the observations
+        if self._observation_mode == "cameras":
+            self.update_images()
+        self._last_action = action
+        self._last_clipped_action = clipped_action
         return
+
+    def get_dt(self):
+        return self._dt
+
+    def get_latest_full_state(self):
+        return self._latest_full_state
+
+    def send_torque_commands(self, desired_torque_commands):
+        """
+
+        :param desired_torque_commands:
+        :return:
+        """
+        torque_commands = self._safety_torque_check(desired_torque_commands)
+        if self._pybullet_client_w_o_goal_id is not None:
+            pybullet.setJointMotorControlArray(
+                bodyUniqueId=self._robot_id,
+                jointIndices=self._revolute_joint_ids,
+                controlMode=pybullet.TORQUE_CONTROL,
+                forces=torque_commands,
+                physicsClientId=self._pybullet_client_w_o_goal_id
+            )
+        if self._pybullet_client_full_id is not None:
+            pybullet.setJointMotorControlArray(
+                bodyUniqueId=self._robot_id,
+                jointIndices=self._revolute_joint_ids,
+                controlMode=pybullet.TORQUE_CONTROL,
+                forces=torque_commands,
+                physicsClientId=self._pybullet_client_full_id
+            )
+        return torque_commands
+
+    def _safety_torque_check(self, desired_torques):
+        """
+
+        :param desired_torques:
+        :return:
+        """
+        applied_torques = np.clip(
+            np.asarray(desired_torques),
+            -self._max_motor_torque,
+            +self._max_motor_torque,
+        )
+        applied_torques -= self._safety_kd * self._latest_full_state['velocities']
+
+        applied_torques = list(
+            np.clip(
+                np.asarray(applied_torques),
+                -self._max_motor_torque,
+                +self._max_motor_torque,
+            )
+        )
+
+        return applied_torques
+
+    def inverse_kinematics(self, desired_tip_positions, rest_pose):
+        """
+
+        :param desired_tip_positions:
+        :param rest_pose:
+        :return:
+        """
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
+        joint_pos = np.zeros([9])
+        finger_tip_ids = self._finger_tip_ids
+        final_joint_pose = pybullet.calculateInverseKinematics2(self._robot_id,
+                                                               [finger_tip_ids[0], finger_tip_ids[1],
+                                                                finger_tip_ids[2]],
+                                                               [desired_tip_positions[0:3], desired_tip_positions[3:6],
+                                                                desired_tip_positions[6:]],
+                                                                solver=pybullet.IK_DLS,
+                                                                currentPositions=rest_pose,
+                                                                physicsClientId=client)
+        joint_pos[:3] = final_joint_pose[:3]
+        final_joint_pose = pybullet.calculateInverseKinematics2(self._robot_id,
+                                                               [finger_tip_ids[1], finger_tip_ids[0],
+                                                                finger_tip_ids[2]],
+                                                               [desired_tip_positions[3:6], desired_tip_positions[0:3],
+                                                                desired_tip_positions[6:]],
+                                                                solver=pybullet.IK_DLS,
+                                                                currentPositions=rest_pose,
+                                                                physicsClientId=client)
+        joint_pos[3:6] = final_joint_pose[3:6]
+        final_joint_pose = pybullet.calculateInverseKinematics2(self._robot_id,
+                                                               [finger_tip_ids[2], finger_tip_ids[0],
+                                                                finger_tip_ids[1]],
+                                                               [desired_tip_positions[6:], desired_tip_positions[0:3],
+                                                                desired_tip_positions[3:6]],
+                                                                solver=pybullet.IK_DLS,
+                                                                currentPositions=rest_pose,
+                                                                physicsClientId=client)
+        joint_pos[6:] = final_joint_pose[6:]
+        if np.isnan(joint_pos).any():
+            joint_pos = rest_pose
+        return joint_pos
 
     def get_joint_positions_from_tip_positions(self, tip_positions,
                                                default_pose=None):
         if default_pose is None:
-            positions = self.tri_finger.pybullet_inverse_kinematics(
+            positions = self.inverse_kinematics(
                 tip_positions, list(self.get_rest_pose()[0]))
         else:
-            positions = self.tri_finger.pybullet_inverse_kinematics(
+            positions = self.inverse_kinematics(
                 tip_positions, list(default_pose))
         return positions
 
     def get_current_camera_observations(self):
-        return self.robot_observations.get_current_camera_observations(
-            self.latest_full_state)
-
-    def get_goal_image_instance_pybullet(self):
-        if self.enable_goal_image:
-            return self.goal_image_instance
-        else:
-            raise Exception("goal image is not enabled")
+        return self._robot_observations.get_current_camera_observations(
+            self._latest_camera_observations)
 
     def get_rest_pose(self):
         deg45 = np.pi / 4
@@ -194,41 +424,41 @@ class TriFingerRobot(object):
         return np.append(self.get_rest_pose()[0],
                          np.zeros(9))
 
-    def get_current_variables_values(self):
+    def get_current_scm_values(self):
         # TODO: not a complete list yet of what we want to expose
         variable_params = dict()
-        if self.is_initialized():
-            state = self.get_full_state()
+        variable_params['joint_positions'] = self._latest_full_state['positions']
+        variable_params['joint_velocities'] = self._latest_full_state['velocities']
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
         else:
-            state = self.get_default_state()
-        variable_params['joint_positions'] = state[:9]
-        variable_params['joint_velocities'] = state[9:]
-        for robot_finger_link in self.link_ids:
+            client = self._pybullet_client_full_id
+        for robot_finger_link in self._link_ids:
             variable_params[robot_finger_link] = dict()
             variable_params[robot_finger_link]['color'] = \
-                self.get_pybullet_client(). \
-                    getVisualShapeData(self.tri_finger.finger_id) \
-                    [self.visual_shape_ids_ids[robot_finger_link]][7][:3]
+                pybullet.getVisualShapeData(self._robot_id,
+                                          physicsClientId=client)\
+                       [self._visual_shape_ids[robot_finger_link]][7][:3]
             variable_params[robot_finger_link]['mass'] = \
-                self.get_pybullet_client(). \
-                    getDynamicsInfo(self.tri_finger.finger_id,
-                                    self.link_ids[robot_finger_link])[0]
+                pybullet.getDynamicsInfo(self._robot_id,
+                                       self._link_ids[robot_finger_link],
+                                       physicsClientId=client)[0]
         return variable_params
 
     def get_current_observations(self, helper_keys):
-        return self.robot_observations.get_current_observations(
-            self.latest_full_state, helper_keys)
+        return self._robot_observations.get_current_observations(
+            self._latest_full_state, helper_keys)
 
     def compute_end_effector_positions(self, joint_positions):
-        tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
+        tip_positions = self._pinocchio_utils.forward_kinematics(
             joint_positions
         )
         end_effector_position = np.concatenate(tip_positions)
         return end_effector_position
 
     def _compute_end_effector_positions(self, robot_state):
-        tip_positions = self.tri_finger.pinocchio_utils.forward_kinematics(
-            robot_state.position
+        tip_positions = self._pinocchio_utils.forward_kinematics(
+            robot_state['positions']
         )
         end_effector_position = np.concatenate(tip_positions)
         return end_effector_position
@@ -239,25 +469,25 @@ class TriFingerRobot(object):
         #this observation shouldnt be used in torque control
         last_joints_action_applied = self.get_last_applied_joint_positions()
         #always denormalized by default
-        if self.normalize_observations:
+        if self._normalize_observations:
             last_joints_action_applied = self.normalize_observation_for_key(
                 observation=last_joints_action_applied,
                 key='action_joint_positions')
         return last_joints_action_applied
 
     def clear(self):
-        self.last_action = None
-        self.last_clipped_action = None
-        self.last_applied_joint_positions = None
-        self.latest_full_state = None
-        self.control_index = -1
+        self._last_action = np.zeros(9, )
+        self._last_clipped_action = np.zeros(9, )
+        self.update_latest_full_state()
+        self._last_applied_joint_positions = self._latest_full_state['positions']
+        self._control_index = -1
         return
 
     def reset_state(self, joint_positions=None,
                     joint_velocities=None,
                     end_effector_positions=None):
-        self.latest_full_state = None
-        self.control_index = -1
+        self._latest_full_state = None
+        self._control_index = -1
         if end_effector_positions is not None:
             joint_positions = self.get_joint_positions_from_tip_positions(
                 end_effector_positions, list(self.get_rest_pose()[0]))
@@ -265,21 +495,20 @@ class TriFingerRobot(object):
             joint_positions = list(self.get_rest_pose()[0])
         if joint_velocities is None:
             joint_velocities = np.zeros(9)
-        self.latest_full_state = self.tri_finger.reset_finger(joint_positions,
-                                                              joint_velocities)
+        self._set_finger_state(joint_positions, joint_velocities)
         #here the previous actions will all be zeros to avoid dealing with different action modes for now
-        self.last_action = np.zeros(9,)
-        self.last_clipped_action = np.zeros(9,)
-        if self.action_mode != "joint_torques":
-            self.last_applied_joint_positions = list(joint_positions)
+        self._last_action = np.zeros(9, )
+        self._last_clipped_action = np.zeros(9, )
+        if self._action_mode != "joint_torques":
+            self._last_applied_joint_positions = list(joint_positions)
         return
 
     def sample_joint_positions(self, sampling_strategy="separated"):
         if sampling_strategy == "uniform":
             #TODO: need to check for collisions here and if its feasible or not
-            positions = np.random.uniform(self.robot_actions.
+            positions = np.random.uniform(self._robot_actions.
                                           joint_positions_lower_bounds,
-                                          self.robot_actions.
+                                          self._robot_actions.
                                           joint_positions_upper_bounds)
         elif sampling_strategy == "separated":
             #TODO: double check this function
@@ -289,7 +518,7 @@ class TriFingerRobot(object):
                         low=[-np.pi / 2, np.deg2rad(-77.5), np.deg2rad(-172)],
                         high=[np.pi / 2, np.deg2rad(257.5), np.deg2rad(-2)],
                     )
-                    tip_pos = self.tri_finger.pinocchio_utils.forward_kinematics(
+                    tip_pos = self.compute_end_effector_positions(
                         np.concatenate(
                             [joint_pos for i in
                              range(3)]
@@ -301,10 +530,10 @@ class TriFingerRobot(object):
                             (np.pi / 6 < angle < 5 / 6 * np.pi)
                             and (tip_pos[1] > 0)
                             and (0.02 < dist_to_center < 0.2)
-                            and np.all(self.robot_actions.
+                            and np.all(self._robot_actions.
                                                joint_positions_lower_bounds
                                        [0:3] < joint_pos)
-                            and np.all(self.robot_actions.
+                            and np.all(self._robot_actions.
                                                joint_positions_upper_bounds
                                        [0:3] > joint_pos)
                     ):
@@ -338,52 +567,69 @@ class TriFingerRobot(object):
         return tip_positions
 
     def forward_simulation(self, time=1):
-        n_steps = int(time / self.simulation_time)
-        for _ in range(n_steps):
-            self.get_pybullet_client().stepSimulation()
+        n_steps = int(time / self._simulation_time)
+        if self._pybullet_client_w_o_goal_id is not None:
+            for _ in range(n_steps):
+                pybullet.stepSimulation(
+                    physicsClientId=self._pybullet_client_w_o_goal_id
+                )
+        if self._pybullet_client_full_id is not None:
+            for _ in range(n_steps):
+                pybullet.stepSimulation(
+                    physicsClientId=self._pybullet_client_full_id
+                )
         return
 
     def select_observations(self, observation_keys):
-        self.robot_observations.reset_observation_keys()
+        self._robot_observations.reset_observation_keys()
         for key in observation_keys:
             if key == "end_effector_positions":
-                self.robot_observations.add_observation(
+                self._robot_observations.add_observation(
                     "end_effector_positions",
                     observation_fn=self._compute_end_effector_positions)
             elif key == "action_joint_positions":
                 #check that its possible
-                if self.action_mode == "joint_torques":
+                if self._action_mode == "joint_torques":
                     raise Exception("action_joint_positions is not supported "
                                     "for joint torques action mode")
-                self.robot_observations.add_observation(
+                self._robot_observations.add_observation(
                     "action_joint_positions",
                     observation_fn=self._process_action_joint_positions)
             else:
-                self.robot_observations.add_observation(key)
+                self._robot_observations.add_observation(key)
         return
 
     def close(self):
-        self.tri_finger.disconnect_from_simulation()
-        if self.enable_goal_image:
-            self.goal_image_instance.disconnect_from_simulation()
+        if self._pybullet_client_full_id is not None:
+            pybullet.disconnect(
+                physicsClientId=self._pybullet_client_full_id)
+        if self._pybullet_client_w_o_goal_id is not None:
+            pybullet.disconnect(
+                physicsClientId=self._pybullet_client_w_o_goal_id
+            )
+        if self._pybullet_client_w_goal_id is not None:
+            pybullet.disconnect(
+                physicsClientId=self._pybullet_client_w_goal_id
+            )
+        return
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):
-        self.robot_observations.add_observation(observation_key,
-                                                lower_bound,
-                                                upper_bound,
-                                                observation_fn)
+        self._robot_observations.add_observation(observation_key,
+                                                 lower_bound,
+                                                 upper_bound,
+                                                 observation_fn)
 
     def normalize_observation_for_key(self, observation, key):
-        return self.robot_observations.normalize_observation_for_key(
+        return self._robot_observations.normalize_observation_for_key(
             observation, key)
 
     def denormalize_observation_for_key(self, observation, key):
-        return self.robot_observations.denormalize_observation_for_key(
+        return self._robot_observations.denormalize_observation_for_key(
             observation, key)
 
     def apply_interventions(self, interventions_dict):
-        #only will do such an intervention if its a feasible one
+        #TODO: add friction of each link
         if self.is_initialized():
             old_state = self.get_full_state()
         else:
@@ -399,12 +645,11 @@ class TriFingerRobot(object):
 
         if "joint_positions" in interventions_dict or \
                 "joint_velocities" in interventions_dict:
-            self.latest_full_state = self.tri_finger.finger_intervention(new_joint_positions,
-                                                                         new_joint_velcoities)
-            self.last_action = np.zeros(9, )
-            self.last_clipped_action = np.zeros(9, )
-            if self.action_mode != "joint_torques":
-                self.last_applied_joint_positions = list(new_joint_positions)
+            self._set_finger_state(new_joint_positions, new_joint_velcoities)
+            self._last_action = np.zeros(9, )
+            self._last_clipped_action = np.zeros(9, )
+            if self._action_mode != "joint_torques":
+                self._last_applied_joint_positions = list(new_joint_positions)
         for intervention in interventions_dict:
             if intervention == "joint_velocities" or \
                     intervention == "joint_positions":
@@ -413,25 +658,45 @@ class TriFingerRobot(object):
                 for sub_intervention_variable in \
                         interventions_dict[intervention]:
                     if sub_intervention_variable == 'color':
-                        self.get_pybullet_client().changeVisualShape(
-                            self.tri_finger.finger_id,
-                            self.link_ids[intervention],
-                            rgbaColor=np.append(
-                                interventions_dict[intervention]
-                                [sub_intervention_variable], 1))
-                        if self.enable_goal_image:
-                            self.goal_image_instance._p.changeVisualShape(
-                                self.tri_finger.finger_id,
-                                self.link_ids[intervention],
+                        if self._pybullet_client_w_goal_id is not None:
+                            pybullet.changeVisualShape(
+                                self._robot_id,
+                                self._link_ids[intervention],
                                 rgbaColor=np.append(
                                     interventions_dict[intervention]
-                                    [sub_intervention_variable], 1))
+                                    [sub_intervention_variable], 1),
+                                physicsClientId=self._pybullet_client_w_goal_id)
+                        if self._pybullet_client_w_o_goal_id is not None:
+                            pybullet.changeVisualShape(
+                                self._robot_id,
+                                self._link_ids[intervention],
+                                rgbaColor=np.append(
+                                    interventions_dict[intervention]
+                                    [sub_intervention_variable], 1),
+                                physicsClientId=self._pybullet_client_w_o_goal_id)
+                        if self._pybullet_client_full_id is not None:
+                            pybullet.changeVisualShape(
+                                self._robot_id,
+                                self._link_ids[intervention],
+                                rgbaColor=np.append(
+                                    interventions_dict[intervention]
+                                    [sub_intervention_variable], 1),
+                                physicsClientId=self._pybullet_client_full_id)
                     elif sub_intervention_variable == 'mass':
-                        self.get_pybullet_client().changeDynamics\
-                            (self.tri_finger.finger_id,
-                             self.link_ids[intervention], mass=
-                             interventions_dict[intervention]
-                             [sub_intervention_variable])
+                        if self._pybullet_client_w_o_goal_id is not None:
+                            pybullet.changeDynamics \
+                                (self._robot_id,
+                                 self._link_ids[intervention], mass=
+                                 interventions_dict[intervention]
+                                 [sub_intervention_variable],
+                                 physicsClientId=self._pybullet_client_w_o_goal_id)
+                        if self._pybullet_client_full_id is not None:
+                            pybullet.changeDynamics \
+                                (self._robot_id,
+                                 self._link_ids[intervention], mass=
+                                 interventions_dict[intervention]
+                                 [sub_intervention_variable],
+                                 physicsClientId=self._pybullet_client_full_id)
                     else:
                         raise Exception(
                             "The intervention state variable specified is "
@@ -456,40 +721,56 @@ class TriFingerRobot(object):
                 A boolean indicating whether the stage is in a collision state
                 or not.
         """
-        for contact in self.tri_finger._p.getContactPoints():
-            if (contact[1] == self.tri_finger.finger_id or
-                contact[2] == self.tri_finger.finger_id) and \
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
+        for contact in pybullet.getContactPoints(physicsClientId=client):
+            if (contact[1] == self._robot_id or
+                contact[2] == self._robot_id) and \
                     contact[8] < -0.005:
                 return False
         return True
 
     def is_initialized(self):
-        if self.latest_full_state is None:
+        if self._latest_full_state is None:
             return False
         else:
             return True
 
     def is_self_colliding(self):
-        for contact in self.tri_finger._p.getContactPoints():
-            if contact[1] == self.tri_finger.finger_id and \
-                    contact[2] == self.tri_finger.finger_id:
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
+        for contact in pybullet.getContactPoints(physicsClientId=client):
+            if contact[1] == self._robot_id and \
+                    contact[2] == self._robot_id:
                 return True
         return False
 
     def is_colliding_with_stage(self):
-        for contact in self.tri_finger._p.getContactPoints():
-            if (contact[1] == self.tri_finger.finger_id and contact[2]
-                == self.tri_finger.stage_id) or \
-                    (contact[2] == self.tri_finger.finger_id and contact[1]
-                     == self.tri_finger.stage_id):
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
+        for contact in pybullet.getContactPoints(physicsClientId=client):
+            if (contact[1] == self._robot_id and contact[2]
+                == self._stage_id) or \
+                    (contact[2] == self._robot_id and contact[1]
+                     == self._stage_id):
                 return True
         return False
 
     def is_in_contact_with_block(self, block):
-        for contact in self.tri_finger._p.getContactPoints():
-            if (contact[1] == self.tri_finger.finger_id and
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
+        for contact in pybullet.getContactPoints(physicsClientId=client):
+            if (contact[1] == self._robot_id and
                 contact[2] == block.block_id) or \
-                    (contact[2] == self.tri_finger.finger_id and
+                    (contact[2] == self._robot_id and
                      contact[1] == block.block_id):
                 return True
         return False
@@ -497,26 +778,30 @@ class TriFingerRobot(object):
     def get_normal_interaction_force_with_block(self, block,
                                                 finger_tip_number):
         # TODO: doesnt account for several contacts per body
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
         if finger_tip_number == 60:
-            idx = self.link_ids['robot_finger_60_link_3']
+            idx = self._link_ids['robot_finger_60_link_3']
         elif finger_tip_number == 120:
-            idx = self.link_ids['robot_finger_120_link_3']
+            idx = self._link_ids['robot_finger_120_link_3']
         elif finger_tip_number == 300:
-            idx = self.link_ids['robot_finger_300_link_3']
+            idx = self._link_ids['robot_finger_300_link_3']
         else:
             raise Exception("finger tip number doesnt exist")
 
-        for contact in self.tri_finger._p.getContactPoints():
-            if (contact[1] == self.tri_finger.finger_id and
+        for contact in pybullet.getContactPoints(physicsClientId=client):
+            if (contact[1] == self._robot_id and
                 contact[2] == block.block_id) or \
-                    (contact[2] == self.tri_finger.finger_id
+                    (contact[2] == self._robot_id
                      and contact[1] == block.block_id):
                 return contact[9]*np.array(contact[7])
-            for contact in self.tri_finger._p.getContactPoints():
-                if (contact[1] == self.tri_finger.finger_id
+            for contact in pybullet.getContactPoints(physicsClientId=client):
+                if (contact[1] == self._robot_id
                     and contact[2] == block.block_id
                     and contact[3] == idx) or  \
-                        (contact[2] == self.tri_finger.finger_id
+                        (contact[2] == self._robot_id
                          and contact[1] == block.block_id
                      and contact[4] == idx):
                     return contact[9] * np.array(contact[7])
@@ -524,20 +809,93 @@ class TriFingerRobot(object):
 
     def get_tip_contact_states(self):
         #TODO: only support open and closed states (should support slipping too)
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id is not None
+        else:
+            client = self._pybullet_client_full_id
         contact_tips = [0, 0, 0] #all are open
-        for contact in self.tri_finger._p.getContactPoints():
-            if contact[1] == self.tri_finger.finger_id:
-                if contact[3] == self.link_ids['robot_finger_60_link_3']:
+        for contact in pybullet.getContactPoints(physicsClientId=client):
+            if contact[1] == self._robot_id:
+                if contact[3] == self._link_ids['robot_finger_60_link_3']:
                     contact_tips[0] = 1
-                elif contact[3] == self.link_ids['robot_finger_120_link_3']:
+                elif contact[3] == self._link_ids['robot_finger_120_link_3']:
                     contact_tips[1] = 1
-                elif contact[3] == self.link_ids['robot_finger_300_link_3']:
+                elif contact[3] == self._link_ids['robot_finger_300_link_3']:
                     contact_tips[2] = 1
-            elif contact[2] == self.tri_finger.finger_id:
-                if contact[4] == self.link_ids['robot_finger_60_link_3']:
+            elif contact[2] == self._robot_id:
+                if contact[4] == self._link_ids['robot_finger_60_link_3']:
                     contact_tips[0] = 1
-                elif contact[4] == self.link_ids['robot_finger_180_link_3']:
+                elif contact[4] == self._link_ids['robot_finger_180_link_3']:
                     contact_tips[1] = 1
-                elif contact[4] == self.link_ids['robot_finger_300_link_3']:
+                elif contact[4] == self._link_ids['robot_finger_300_link_3']:
                     contact_tips[2] = 1
         return contact_tips
+
+    def _disable_velocity_control(self):
+        """
+        To disable the high friction velocity motors created by
+        default at all revolute and prismatic joints while loading them from
+        the urdf.
+        """
+        if self._pybullet_client_full_id is not None:
+            pybullet.setJointMotorControlArray(
+                bodyUniqueId=self._robot_id,
+                jointIndices=self._revolute_joint_ids,
+                controlMode=pybullet.VELOCITY_CONTROL,
+                targetVelocities=[0] * len(self._revolute_joint_ids),
+                forces=[0] * len(self._revolute_joint_ids),
+                physicsClientId=self._pybullet_client_full_id)
+        if self._pybullet_client_w_o_goal_id is not None:
+            pybullet.setJointMotorControlArray(
+                bodyUniqueId=self._robot_id,
+                jointIndices=self._revolute_joint_ids,
+                controlMode=pybullet.VELOCITY_CONTROL,
+                targetVelocities=[0] * len(self._revolute_joint_ids),
+                forces=[0] * len(self._revolute_joint_ids),
+                physicsClientId=
+                self._pybullet_client_w_o_goal_id
+            )
+
+    def _set_finger_state(self, joint_positions,
+                         joint_velocities=None):
+        if self._pybullet_client_full_id is not None:
+            if joint_velocities is None:
+                for i, joint_id in enumerate(self._revolute_joint_ids):
+                    pybullet.resetJointState(
+                        self._robot_id, joint_id, joint_positions[i],
+                        physicsClientId =self._pybullet_client_full_id
+                    )
+            else:
+                for i, joint_id in enumerate(self._revolute_joint_ids):
+                    pybullet.resetJointState(
+                        self._robot_id, joint_id, joint_positions[i],
+                        joint_velocities[i],
+                        physicsClientId=self._pybullet_client_full_id
+                    )
+
+        if self._pybullet_client_w_o_goal_id is not None:
+            if joint_velocities is None:
+                for i, joint_id in enumerate(self._revolute_joint_ids):
+                    pybullet.resetJointState(
+                        self._robot_id, joint_id, joint_positions[i],
+                        physicsClientId=self._pybullet_client_w_o_goal_id
+                    )
+            else:
+                for i, joint_id in enumerate(self._revolute_joint_ids):
+                    pybullet.resetJointState(
+                        self._robot_id, joint_id, joint_positions[i],
+                        joint_velocities[i],
+                        physicsClientId=self._pybullet_client_w_o_goal_id
+                    )
+        self.update_latest_full_state()
+        return
+
+    def _set_finger_state_in_goal_image(self):
+        joint_positions = \
+            self._robot_actions.joint_positions_lower_bounds
+        for i, joint_id in enumerate(self._revolute_joint_ids):
+            pybullet.resetJointState(
+                self._robot_id, joint_id, joint_positions[i],
+                physicsClientId=self._pybullet_client_w_goal_id
+            )
+        return

@@ -29,11 +29,10 @@ class PickingTaskGenerator(BaseTask):
         self.task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.02)
         self.task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
-        self.initial_state["tool_block"] = dict()
-        self.initial_state["tool_block"]["position"] = \
+            kwargs.get("joint_positions", )
+        self.task_params["tool_block_position"] = \
             kwargs.get("tool_block_position", np.array([0, 0, 0.0425]))
-        self.initial_state["tool_block"]["orientation"] = \
+        self.task_params["tool_block_orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_object_position = None
         self.previous_end_effector_positions = None
@@ -54,38 +53,28 @@ class PickingTaskGenerator(BaseTask):
         """
         creation_dict = {'name': "tool_block",
                          'shape': "cube",
-                         'position': self.initial_state
-                         ["tool_block"]["position"],
-                         'orientation': self.initial_state
-                         ["tool_block"]["orientation"],
+                         'initial_position': self.task_params
+                         ["tool_block_position"],
+                         'initial_orientation': self.task_params
+                         ["tool_block_orientation"],
                          'mass': self.task_params["tool_block_mass"]}
         self.stage.add_rigid_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_rigid_general_object,
-                                    creation_dict])
         goal_block_position = np.array(
-            self.initial_state["tool_block"]["position"])
+            self.task_params["tool_block_position"])
         goal_block_position[-1] = self.task_params["goal_height"]
         creation_dict = {'name': "goal_block",
                          'shape': "cube",
                          'position': goal_block_position,
-                         'orientation': self.initial_state
-                         ["tool_block"]["orientation"]}
+                         'orientation': self.task_params
+                         ["tool_block_orientation"]}
         self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object,
-                                    creation_dict])
         self.task_stage_observation_keys = ["tool_block_position",
                                             "tool_block_orientation",
                                             "tool_block_size",
                                             "goal_block_position",
                                             "goal_block_orientation",
                                             "goal_block_size"]
-        self.initial_state["goal_block"] = dict()
-        self.initial_state["goal_block"]["position"] = goal_block_position
-        self.initial_state["goal_block"]["orientation"] = \
-            np.copy(self.initial_state["tool_block"]["orientation"])
-        if self.task_params["joint_positions"] is not None:
-            self.initial_state['joint_positions'] = \
-                self.task_params["joint_positions"]
+
         return
 
     def _set_training_intervention_spaces(self):
@@ -153,7 +142,7 @@ class PickingTaskGenerator(BaseTask):
                                                      'position')
         target_height = self.stage.get_object_state('goal_block',
                                                      'position')[-1]
-        joint_velocities = self.robot.latest_full_state.velocity
+        joint_velocities = self.robot.get_latest_full_state()['velocities']
         previous_block_to_goal = abs(self.previous_object_position[2] -
                                      target_height)
         current_block_to_goal = abs(block_position[2] - target_height)
@@ -168,7 +157,7 @@ class PickingTaskGenerator(BaseTask):
         rewards.append(- current_block_to_center)
 
         end_effector_positions = self.robot.compute_end_effector_positions(
-            self.robot.latest_full_state.position)
+            self.robot.get_latest_full_state()['positions'])
         end_effector_positions = end_effector_positions.reshape(-1, 3)
         current_distance_from_block = np.linalg.norm(end_effector_positions -
                                                      block_position)
@@ -218,13 +207,13 @@ class PickingTaskGenerator(BaseTask):
         """
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
-                self.robot.latest_full_state.position)
+                self.robot.get_latest_full_state()['positions'])
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
             self.stage.get_object_state('tool_block', 'position')
         self.previous_joint_velocities = \
-            self.robot.latest_full_state.velocity
+            self.robot.get_latest_full_state()['velocities']
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):
@@ -262,9 +251,12 @@ class PickingTaskGenerator(BaseTask):
             intervention_space = self.training_intervention_spaces
         else:
             intervention_space = self.testing_intervention_spaces
-        intervention_dict['goal_block']['position'] = np.array(self.initial_state['tool_block']['position'])
-        intervention_dict['goal_block']['position'][-1] = np.random.uniform(intervention_space
-                                                                            ['goal_block']['position'][0][-1],
-                                                                            intervention_space
-                                                                            ['goal_block']['position'][1][-1])
+        intervention_dict['goal_block']['position'] = \
+            np.array(self.stage.rigid_objects
+                     ['tool_block'].get_initial_position())
+        intervention_dict['goal_block']['position'][-1] = \
+            np.random.uniform(intervention_space['goal_block']['position']
+                              [0][-1],
+                              intervention_space['goal_block']['position']
+                              [1][-1])
         return intervention_dict

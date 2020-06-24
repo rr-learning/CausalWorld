@@ -180,11 +180,14 @@ class TriFingerObservations(object):
         observations_dict = dict()
         for observation in self.observations_keys:
             if observation == "joint_positions":
-                observations_dict["joint_positions"] = robot_state.position
+                observations_dict["joint_positions"] = \
+                    robot_state['positions']
             elif observation == "joint_torques":
-                observations_dict["joint_torques"] = robot_state.torque
+                observations_dict["joint_torques"] = \
+                    robot_state['torques']
             elif observation == "joint_velocities":
-                observations_dict["joint_velocities"] = robot_state.velocity
+                observations_dict["joint_velocities"] = \
+                    robot_state['velocities']
             elif observation == "cameras":
                 camera_obs = np.stack((robot_state.camera_60,
                                       robot_state.camera_180,
@@ -198,11 +201,14 @@ class TriFingerObservations(object):
         #add the helper observations as well
         for observation in helper_keys:
             if observation == "joint_positions":
-                observations_dict["joint_positions"] = robot_state.position
+                observations_dict["joint_positions"] = \
+                    robot_state['positions']
             elif observation == "joint_torques":
-                observations_dict["joint_torques"] = robot_state.torque
+                observations_dict["joint_torques"] = \
+                    robot_state['torques']
             elif observation == "joint_velocities":
-                observations_dict["joint_velocities"] = robot_state.velocity
+                observations_dict["joint_velocities"] = \
+                    robot_state['velocities']
             elif observation == "cameras":
                 camera_obs = np.stack((robot_state.camera_60,
                                       robot_state.camera_180,
