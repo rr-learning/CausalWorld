@@ -57,6 +57,12 @@ class Stage(object):
         self._goal_image = None
         return
 
+    def get_floor_height(self):
+        return self._floor_height
+
+    def get_arena_bb(self):
+        return self._floor_inner_bounding_box
+
     def get_rigid_objects(self):
         return self._rigid_objects
 
@@ -67,27 +73,55 @@ class Stage(object):
         env_state = {}
         env_state['rigid_objects'] = []
         for rigid_object_key in self._rigid_objects:
-            env_state['rigid_objects'].append(['cube',
-                                            self._rigid_objects
-                                            [rigid_object_key].
-                                           get_recreation_params()])
+            if isinstance(self._rigid_objects[rigid_object_key], Cuboid):
+                env_state['rigid_objects'].append(['cube',
+                                                   self._rigid_objects
+                                                   [rigid_object_key].
+                                                   get_recreation_params()])
+            if isinstance(self._rigid_objects[rigid_object_key], StaticCuboid):
+                env_state['rigid_objects'].append(['static_cube',
+                                                   self._rigid_objects
+                                                   [rigid_object_key].
+                                                   get_recreation_params()])
+            if isinstance(self._rigid_objects[rigid_object_key], MeshObject):
+                env_state['rigid_objects'].append(['mesh',
+                                                   self._rigid_objects
+                                                   [rigid_object_key].
+                                                   get_recreation_params()])
         env_state['visual_objects'] = []
         for visual_object_key in self._visual_objects:
-            env_state['visual_objects'].append(['cube',
-                                            self._visual_objects
-                                            [visual_object_key].
-                                           get_recreation_params()])
+            if isinstance(self._visual_objects[visual_object_key], SCuboid):
+                env_state['visual_objects'].append(['cube',
+                                                   self._visual_objects
+                                                   [visual_object_key].
+                                                   get_recreation_params()])
+            if isinstance(self._visual_objects[visual_object_key], SSphere):
+                env_state['visual_objects'].append(['sphere',
+                                                    self._visual_objects
+                                                    [visual_object_key].
+                                                    get_recreation_params()])
+            if isinstance(self._visual_objects[visual_object_key], SMeshObject):
+                env_state['visual_objects'].append(['mesh',
+                                                    self._visual_objects
+                                                    [visual_object_key].
+                                                    get_recreation_params()])
         env_state['arena_scm_values'] = self.get_current_scm_values_for_arena()
         return env_state
 
     def set_full_env_state(self, env_state):
         self.remove_everything()
         for rigid_object_info in env_state['rigid_objects']:
-            self.add_rigid_general_object(shape=rigid_object_info[0],
-                                          **rigid_object_info[1])
+            if rigid_object_info[0] == 'mesh':
+                self.add_rigid_mesh_object(**rigid_object_info[1])
+            else:
+                self.add_rigid_general_object(shape=rigid_object_info[0],
+                                              **rigid_object_info[1])
         for visual_object_info in env_state['visual_objects']:
-            self.add_silhoutte_general_object(shape=visual_object_info[0],
-                                              **visual_object_info[1])
+            if visual_object_info[0] == 'mesh':
+                self.add_silhoutte_mesh_object(**visual_object_info[1])
+            else:
+                self.add_silhoutte_general_object(shape=visual_object_info[0],
+                                                  **visual_object_info[1])
         self.apply_interventions(env_state['arena_scm_values'])
         #update the stage observations with them
         self._stage_observations.visual_objects = self._rigid_objects

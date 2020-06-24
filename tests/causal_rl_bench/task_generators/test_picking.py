@@ -9,7 +9,7 @@ class TestPicking(unittest.TestCase):
     def setUp(self):
         self.task = task_generator(task_generator_id="picking")
         self.env = World(task=self.task,
-                         enable_visualization=True,
+                         enable_visualization=False,
                          skip_frame=1,
                          action_mode="end_effector_positions",
                          normalize_actions=False,
@@ -74,17 +74,17 @@ class TestPicking(unittest.TestCase):
                 obs, reward, done, info = self.env.step(desired_action)
         return obs
 
-    def test_02_mass(self):
-        self.env.set_action_mode('end_effector_positions')
-        intervention = {'tool_block': {'mass': 0.02}}
-        self.env.do_intervention(interventions_dict=intervention)
-        for _ in range(1):
-            obs = self.env.reset()
-            self.lift_last_finger_first(obs)
-            desired_grip = self.grip_block()
-            self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
-            final_obs = self.lift_block(desired_grip)
-            # self.assertGreater(final_obs[38], 0.2, "the block didn't get lifted")
+    # def test_02_mass(self):
+    #     self.env.set_action_mode('end_effector_positions')
+    #     intervention = {'tool_block': {'mass': 0.02}}
+    #     self.env.do_intervention(interventions_dict=intervention)
+    #     for _ in range(1):
+    #         obs = self.env.reset()
+    #         self.lift_last_finger_first(obs)
+    #         desired_grip = self.grip_block()
+    #         self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
+    #         final_obs = self.lift_block(desired_grip)
+    #         self.assertGreater(final_obs[38], 0.2, "the block didn't get lifted")
     #
     # def test_08_mass(self):
     #     self.env.set_action_mode('end_effector_positions')

@@ -5,7 +5,7 @@ import numpy as np
 
 
 def example():
-    task = task_generator(task_generator_id='pushing')
+    task = task_generator(task_generator_id='reaching')
     env = World(task=task, enable_visualization=True,
                 action_mode="joint_positions",
                 normalize_observations=False,
@@ -13,8 +13,8 @@ def example():
                 skip_frame=10)
     horizon = 100
     actions = [env.action_space.sample() for _ in range(horizon)]
-    new_goal = env.sample_new_goal()
-    env.reset(interventions_dict=new_goal)
+    # new_goal = env.sample_new_goal()
+    # env.reset(interventions_dict=new_goal)
     # env.reset()
     # obs = env.reset(interventions_dict=new_goal)
     # print(obs[-20:-20 + 7])

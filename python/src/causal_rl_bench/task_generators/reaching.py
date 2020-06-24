@@ -1,4 +1,3 @@
-
 from causal_rl_bench.task_generators.base_task import BaseTask
 import numpy as np
 
@@ -23,12 +22,14 @@ class ReachingTaskGenerator(BaseTask):
                                             "joint_velocities",
                                             "end_effector_positions",
                                             "action_joint_positions"]
-        self.task_params['default_goal_60'] = kwargs.get("default_goal_60",
-                                                         np.array([0, 0, 0.15]))
-        self.task_params['default_goal_120'] = kwargs.get("default_goal_120",
-                                                          np.array([0, 0, 0.2]))
-        self.task_params['default_goal_300'] = kwargs.get("default_goal_300",
-                                                          np.array([0, 0, 0.25]))
+        self.task_params['default_goal_60'] = \
+            kwargs.get("default_goal_60", np.array([0, 0, 0.15]))
+        self.task_params['default_goal_120'] = \
+            kwargs.get("default_goal_120", np.array([0, 0, 0.2]))
+        self.task_params['default_goal_300'] = \
+            kwargs.get("default_goal_300", np.array([0, 0, 0.25]))
+        self.task_params["joint_positions"] = \
+            kwargs.get("joint_positions", None)
         self.task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self.previous_end_effector_positions = None
@@ -45,32 +46,20 @@ class ReachingTaskGenerator(BaseTask):
                          'color': np.array([1, 0, 0]),
                          'position': self.task_params['default_goal_60']}
         self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
         creation_dict = {'name': "goal_120",
                          'shape': "sphere",
                          'color': np.array([0, 1, 0]),
                          'position': self.task_params['default_goal_120']}
         self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
         creation_dict = {'name': "goal_300",
                          'shape': "sphere",
                          'color': np.array([0, 0, 1]),
                          'position': self.task_params['default_goal_300']}
         self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
         self.task_stage_observation_keys = ["goal_60_position",
                                             "goal_120_position",
                                             "goal_300_position"]
         self.current_number_of_obstacles = 0
-        self.initial_state['goal_60'] = dict()
-        self.initial_state['goal_60']['position'] = self.task_params['default_goal_60']
-        self.initial_state['goal_120'] = dict()
-        self.initial_state['goal_120']['position'] = self.task_params['default_goal_120']
-        self.initial_state['goal_300'] = dict()
-        self.initial_state['goal_300']['position'] = self.task_params['default_goal_300']
-        if self.task_params["joint_positions"] is not None:
-            self.initial_state['joint_positions'] = \
-                self.task_params["joint_positions"]
         return
 
     def get_description(self):
@@ -99,14 +88,14 @@ class ReachingTaskGenerator(BaseTask):
         rewards = list()
         rewards.append(previous_dist_to_goal - current_dist_to_goal)
         rewards.append(-current_dist_to_goal)
-        rewards.append(-np.linalg.norm(self.robot.latest_full_state.torque))
+        rewards.append(-np.linalg.norm(self.robot.get_latest_full_state()['torques']))
         rewards.append(-np.linalg.norm(np.abs(
-            self.robot.latest_full_state.velocity -
+            self.robot.get_latest_full_state()['velocities'] -
             self.previous_joint_velocities), ord=2))
         update_task_info = {'current_end_effector_positions':
                                 current_end_effector_positions,
                             'current_velocity': np.copy(
-                                self.robot.latest_full_state.velocity)}
+                                self.robot.get_latest_full_state()['velocities'])}
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
@@ -116,9 +105,9 @@ class ReachingTaskGenerator(BaseTask):
         :return:
         """
         self.previous_end_effector_positions = \
-            update_task_info['current_end_effector_positions']
+            np.array(update_task_info['current_end_effector_positions'])
         self.previous_joint_velocities = \
-            update_task_info['current_velocity']
+            np.array(update_task_info['current_velocity'])
         return
 
     def _set_task_state(self):
@@ -129,9 +118,9 @@ class ReachingTaskGenerator(BaseTask):
         self.current_number_of_obstacles = 0
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
-                self.robot.latest_full_state.position)
+                self.robot.get_latest_full_state()['positions'])
         self.previous_joint_velocities = np.copy(
-            self.robot.latest_full_state.velocity)
+            self.robot.get_latest_full_state()['velocities'])
         return
 
     def get_desired_goal(self):
@@ -155,7 +144,7 @@ class ReachingTaskGenerator(BaseTask):
         """
         achieved_goal = \
             self.robot.compute_end_effector_positions(
-                self.robot.latest_full_state.position)
+                self.robot.get_latest_full_state()['positions'])
         return np.array(achieved_goal)
 
     def _goal_distance(self, achieved_goal, desired_goal):
@@ -193,7 +182,8 @@ class ReachingTaskGenerator(BaseTask):
         info['possible_solution_intervention']['joint_positions'] = \
             self.robot.get_joint_positions_from_tip_positions(desired_goal,
                                                               list(
-                                                                  self.robot.latest_full_state.position))
+                                                                  self.robot.
+                                                                      get_latest_full_state()['positions']))
         return info
 
     def _set_training_intervention_spaces(self):

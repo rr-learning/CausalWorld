@@ -109,20 +109,28 @@ class World(gym.Env):
                                      skip_frame=skip_frame,
                                      robot_id=self._robot_id,
                                      normalize_actions=normalize_actions,
-                                     normalize_observations=normalize_observations,
+                                     normalize_observations=
+                                     normalize_observations,
                                      simulation_time=self._simulation_time,
-                                     pybullet_client_full_id=self._pybullet_client_full_id,
-                                     pybullet_client_w_goal_id=self._pybullet_client_w_goal_id,
-                                     pybullet_client_w_o_goal_id=self._pybullet_client_w_o_goal_id,
-                                     revolute_joint_ids=self._revolute_joint_ids,
+                                     pybullet_client_full_id=
+                                     self._pybullet_client_full_id,
+                                     pybullet_client_w_goal_id=
+                                     self._pybullet_client_w_goal_id,
+                                     pybullet_client_w_o_goal_id=
+                                     self._pybullet_client_w_o_goal_id,
+                                     revolute_joint_ids=
+                                     self._revolute_joint_ids,
                                      finger_tip_ids=self.finger_tip_ids,
                                      pinocchio_utils=self.pinocchio_utils,
                                      cameras=self._tool_cameras)
         self._stage = Stage(observation_mode=observation_mode,
                             normalize_observations=normalize_observations,
-                            pybullet_client_full_id=self._pybullet_client_full_id,
-                            pybullet_client_w_goal_id=self._pybullet_client_w_goal_id,
-                            pybullet_client_w_o_goal_id=self._pybullet_client_w_o_goal_id,
+                            pybullet_client_full_id=
+                            self._pybullet_client_full_id,
+                            pybullet_client_w_goal_id=
+                            self._pybullet_client_w_goal_id,
+                            pybullet_client_w_o_goal_id=
+                            self._pybullet_client_w_o_goal_id,
                             cameras=self._goal_cameras)
         if max_episode_length is None:
             self._enforce_episode_length = False
@@ -145,7 +153,7 @@ class World(gym.Env):
             (1 / self._simulation_time) / self._skip_frame
         # TODO: verify spaces here
         #TODO: we postpone this function for now
-        # self.__setup_viewing_camera()
+        self._setup_viewing_camera()
 
         self._data_recorder = data_recorder
         self._wrappers_dict = dict()
@@ -400,37 +408,50 @@ class World(gym.Env):
         :param mode:
         :return:
         """
-        (_, _, px, _, _) = self.__pybullet_client.getCameraImage(
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
+        (_, _, px, _, _) = pybullet.getCameraImage(
             width=self._render_width, height=self._render_height,
             viewMatrix=self.view_matrix,
             projectionMatrix=self.proj_matrix,
-            renderer=pybullet.ER_BULLET_HARDWARE_OPENGL
+            renderer=pybullet.ER_BULLET_HARDWARE_OPENGL,
+            physicsClientId=client
         )
         rgb_array = np.array(px)
         rgb_array = rgb_array[:, :, :3]
         return rgb_array
 
-    def __setup_viewing_camera(self):
+    def _setup_viewing_camera(self):
         """
 
         :return:
         """
+        if self._pybullet_client_w_o_goal_id is not None:
+            client = self._pybullet_client_w_o_goal_id
+        else:
+            client = self._pybullet_client_full_id
         self._cam_dist = 1
         self._cam_yaw = 0
         self._cam_pitch = -60
         self._render_width = 320
         self._render_height = 240
         base_pos = [0, 0, 0]
-        self.view_matrix = self.__pybullet_client.computeViewMatrixFromYawPitchRoll(
+
+        self.view_matrix = pybullet.computeViewMatrixFromYawPitchRoll(
             cameraTargetPosition=base_pos,
             distance=self._cam_dist,
             yaw=self._cam_yaw,
             pitch=self._cam_pitch,
             roll=0,
-            upAxisIndex=2)
-        self.proj_matrix = self.__pybullet_client.computeProjectionMatrixFOV(
+            upAxisIndex=2,
+            physicsClientId=client)
+        self.proj_matrix = pybullet.computeProjectionMatrixFOV(
             fov=60, aspect=float(self._render_width) / self._render_height,
-            nearVal=0.1, farVal=100.0)
+            nearVal=0.1, farVal=100.0,
+            physicsClientId=client
+        )
 
     def get_current_task_parameters(self):
         """

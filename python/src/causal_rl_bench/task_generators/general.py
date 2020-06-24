@@ -60,9 +60,6 @@ class GeneralGeneratorTask(BaseTask):
         :return:
         """
         self.generate_goal_configuration_with_objects(default_bool=True)
-        if self.task_params["joint_positions"] is not None:
-            self.initial_state['joint_positions'] = \
-                self.task_params["joint_positions"]
         return
 
     def _set_training_intervention_spaces(self):
@@ -74,9 +71,9 @@ class GeneralGeneratorTask(BaseTask):
         # intevrntions on size of objects might become tricky to handle
         # contradicting interventions here?
         super(GeneralGeneratorTask, self)._set_training_intervention_spaces()
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             del self.training_intervention_spaces[visual_object]
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             del self.training_intervention_spaces[rigid_object]['size']
         self.training_intervention_spaces['nums_objects'] = \
             np.array([1, 15])
@@ -92,9 +89,9 @@ class GeneralGeneratorTask(BaseTask):
         :return:
         """
         super(GeneralGeneratorTask, self)._set_testing_intervention_spaces()
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             del self.testing_intervention_spaces[visual_object]
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             del self.testing_intervention_spaces[rigid_object]['size']
         self.training_intervention_spaces['nums_objects'] = \
             np.array([15, 20])
@@ -152,12 +149,13 @@ class GeneralGeneratorTask(BaseTask):
             self.tool_block_size = interventions_dict["tool_block_size"]
         if "blocks_mass" in interventions_dict:
             self.tool_mass = interventions_dict["blocks_mass"]
-        if "nums_objects" in interventions_dict or "tool_block_size" in interventions_dict:
+        if "nums_objects" in interventions_dict or "tool_block_size" in \
+                interventions_dict:
             self.generate_goal_configuration_with_objects(default_bool=False)
         elif "blocks_mass" in interventions_dict:
             new_interventions_dict = dict()
-            for rigid_object in self.stage._rigid_objects:
-                if self.stage._rigid_objects[rigid_object].is_not_fixed:
+            for rigid_object in self.stage.get_rigid_objects():
+                if self.stage.get_rigid_objects()[rigid_object].is_not_fixed:
                     new_interventions_dict[rigid_object] = dict()
                     new_interventions_dict[rigid_object]['mass'] = \
                         self.tool_mass
@@ -176,53 +174,54 @@ class GeneralGeneratorTask(BaseTask):
         :return:
         """
         #raise the fingers
-        self.stage.clear_memory()
-        self.robot.tri_finger.reset_world()
-        self.robot.clear()
-        self.stage.clear()
+        self.stage.remove_everything()
         self.task_stage_observation_keys = []
-        self._creation_list = []
-        joint_positions = self.robot.robot_actions.joint_positions_upper_bounds
-        self.robot.set_full_state(np.append(joint_positions,
-                                            np.zeros(9)))
+        joint_positions = self.robot.get_upper_joint_positions()
+        self.robot.reset_state(joint_positions=joint_positions,
+                               joint_velocities=np.zeros(9))
         # self.task_params["object_configs_list"] = []
         # self.rigid_objects_names = []
         for object_num in range(self.nums_objects):
             if default_bool:
-                dropping_position = self.default_drop_positions[object_num % len(self.default_drop_positions)]
+                dropping_position = self.default_drop_positions[
+                    object_num % len(self.default_drop_positions)]
                 dropping_orientation = [0, 0, 0, 1]
             else:
-                dropping_position = np.random.uniform(self.stage._floor_inner_bounding_box[0],
-                                                      self.stage._floor_inner_bounding_box[1])
-                dropping_orientation = euler_to_quaternion(np.random.uniform(low=0, high=2 * math.pi, size=3))
+                dropping_position = np.random.uniform(self.stage.get_arena_bb()[0],
+                                                      self.stage.get_arena_bb()[1])
+                dropping_orientation = euler_to_quaternion(np.random.uniform(
+                    low=0, high=2 * math.pi, size=3))
             creation_dict = {'name': "tool_"+str(object_num),
                              'shape': "cube",
-                             'position': dropping_position,
-                             'orientation': dropping_orientation,
+                             'initial_position': dropping_position,
+                             'initial_orientation': dropping_orientation,
                              'mass': self.tool_mass,
                              'size': np.repeat(self.tool_block_size, 3)}
             self.stage.add_rigid_general_object(**creation_dict)
-            self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
-            self.task_stage_observation_keys.append("tool_" + str(object_num) + '_position')
-            self.task_stage_observation_keys.append("tool_" + str(object_num) + '_orientation')
+            self.task_stage_observation_keys.append("tool_" +
+                                                    str(object_num)
+                                                    + '_position')
+            self.task_stage_observation_keys.append("tool_" +
+                                                    str(object_num)
+                                                    + '_orientation')
             # turn on simulation for 0.5 seconds
             self.robot.forward_simulation(time=0.2)
         for rigid_object in self.stage._rigid_objects:
             #search for the rigid object in the creation list
-            rigid_object_creation_dict = None
-            for created_object in self._creation_list:
-                if created_object[1]['name'] == rigid_object:
-                    rigid_object_creation_dict = created_object[1]
-                    break
             creation_dict = {'name': rigid_object.replace('tool', 'goal'),
                              'shape': "cube",
-                             'position': self.stage.get_object_state(rigid_object, 'position'),
-                             'orientation': self.stage.get_object_state(rigid_object, 'orientation'),
+                             'position':
+                                 self.stage.get_object_state(
+                                     rigid_object, 'position'),
+                             'orientation':
+                                 self.stage.get_object_state(
+                                     rigid_object, 'orientation'),
                              'size': np.repeat(self.tool_block_size, 3)}
             self.stage.add_silhoutte_general_object(**creation_dict)
-            self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
-            self.task_stage_observation_keys.append(rigid_object.replace('tool', 'goal') + '_position')
-            self.task_stage_observation_keys.append(rigid_object.replace('tool', 'goal') + '_orientation')
+            self.task_stage_observation_keys.append(
+                rigid_object.replace('tool', 'goal') + '_position')
+            self.task_stage_observation_keys.append(
+                rigid_object.replace('tool', 'goal') + '_orientation')
             #choose a random position for the rigid object now
             trial_index = 1
             block_position = self.stage.random_position(
@@ -232,9 +231,7 @@ class GeneralGeneratorTask(BaseTask):
             self.stage.set_objects_pose(names=[rigid_object],
                                         positions=[block_position],
                                         orientations=[block_orientation])
-            rigid_object_creation_dict['position'] = block_position
-            rigid_object_creation_dict['orientation'] = block_orientation
-            self.stage.pybullet_client.stepSimulation()
+            self.robot.step_simulation()
             while not self.stage.check_feasiblity_of_stage() and \
                     trial_index < 10:
                 block_position = self.stage.random_position(
@@ -244,8 +241,10 @@ class GeneralGeneratorTask(BaseTask):
                 self.stage.set_objects_pose(names=[rigid_object],
                                             positions=[block_position],
                                             orientations=[block_orientation])
-                rigid_object_creation_dict['position'] = block_position
-                rigid_object_creation_dict['orientation'] = block_orientation
-                self.stage.pybullet_client.stepSimulation()
+                self.robot.step_simulation()
                 trial_index += 1
+        self.robot.update_latest_full_state()
+        self.robot.reset_state(
+            joint_positions=self.robot.get_rest_pose()[0],
+            joint_velocities=np.zeros([9, ]))
         return

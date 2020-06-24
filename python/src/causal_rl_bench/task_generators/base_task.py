@@ -47,6 +47,7 @@ class BaseTask(object):
         self.finished_episode = False
         self.task_params['intervention_split'] = intervention_split
         self.task_params['training'] = training
+        self.task_params["joint_positions"] = None
         self.task_params['is_goal_distance_dense'] = is_goal_distance_dense
         self.task_params['calculate_additional_dense_rewards'] = \
             calculate_additional_dense_rewards
@@ -457,8 +458,8 @@ class BaseTask(object):
                 goal_distance = -1
         if self.task_params['calculate_additional_dense_rewards']:
             dense_rewards, update_task_state_dict = \
-                self._calculate_dense_rewards(achieved_goal=self._current_desired_goal,
-                                              desired_goal=self._current_achieved_goal)
+                self._calculate_dense_rewards(achieved_goal=self._current_achieved_goal,
+                                              desired_goal=self._current_desired_goal)
             reward = np.sum(np.array(dense_rewards) *
                             self.task_params["dense_reward_weights"]) \
                             + self._current_goal_distance * \
@@ -739,7 +740,7 @@ class BaseTask(object):
         :return:
         """
         #this is all the variables that are available and exposed
-        current_variables_values = self.get_current_variables_values()
+        current_variables_values = self.get_current_scm_values()
         #filter them only if intervention spaces split is enforced
         if self.task_params['intervention_split']:
             #choose intervention space
