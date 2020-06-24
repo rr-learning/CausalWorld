@@ -138,7 +138,7 @@ class World(gym.Env):
 
         self._task.init_task(self._robot, self._stage)
         self._reset_observations_space()
-        self._action_space = self._robot.get_action_spaces()
+        self.action_space = self._robot.get_action_spaces()
         self._skip_frame = skip_frame
         self.dt = self._simulation_time * self._skip_frame
         self.metadata['video.frames_per_second'] = \
@@ -183,24 +183,19 @@ class World(gym.Env):
 
         :return:
         """
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "cameras" and self.observation_space is None:
             self._stage.select_observations(["goal_image"])
             self.observation_space = combine_spaces(
                 self._robot.get_observation_spaces(),
                 self._stage.get_observation_spaces())
-        if not self._observation_mode == "cameras":
+        elif self._observation_mode == "cameras" and self.observation_space is not None:
+            return
+        else:
             self._robot.select_observations(self._task.task_robot_observation_keys)
             self._stage.select_observations(self._task.task_stage_observation_keys)
             self.observation_space = \
                 combine_spaces(self._robot.get_observation_spaces(),
                                self._stage.get_observation_spaces())
-        elif self._observation_mode == "cameras":
-            self._stage.select_observations(["goal_image"])
-            self.observation_space = combine_spaces(
-                self._robot.get_observation_spaces(),
-                self._stage.get_observation_spaces())
-        else:
-            self.observation_space = self._robot.get_observation_spaces()
         return
 
     def step(self, action):

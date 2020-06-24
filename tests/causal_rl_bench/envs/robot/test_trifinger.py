@@ -109,7 +109,7 @@ def test_pd_gains():
     #test bounds first
 
     for _ in range(zero_hold):
-        chosen_action = env._action_space.high
+        chosen_action = env.action_space.high
         obs, reward, done, info = env.step(chosen_action)
     current_joint_positions = obs[:9]
     if (((current_joint_positions - chosen_action) > 0.1).any()):
@@ -118,7 +118,7 @@ def test_pd_gains():
     print("verified upper bound")
 
     for _ in range(zero_hold):
-        chosen_action = env._action_space.low
+        chosen_action = env.action_space.low
         obs, reward, done, info = env.step(chosen_action)
     current_joint_positions = obs[:9]
     if (((current_joint_positions - chosen_action) > 0.1).any()):

@@ -29,7 +29,7 @@ def example():
     env.reset()
     for _ in range(2000):
         obs, reward, done, info = \
-            env.step(env._action_space.sample())
+            env.step(env.action_space.sample())
         random_intervention_dict = env.do_single_random_intervention()
     env.close()
 

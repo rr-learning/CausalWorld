@@ -63,8 +63,6 @@ class StageObservations(object):
                 self.upper_bounds[rigid_object.get_name() + '_' + state_key] = \
                     object_upper_bounds[rigid_object.get_name() + '_' +
                                         state_key]
-                self.observations_keys.append(rigid_object.get_name() + '_' +
-                                              state_key)
         for visual_object in self.visual_objects.values():
             state_keys = visual_object.get_state().keys()
             object_lower_bounds, object_upper_bounds = \
@@ -76,13 +74,12 @@ class StageObservations(object):
                 self.upper_bounds[visual_object.get_name() + '_' + state_key] = \
                     object_upper_bounds[visual_object.get_name() + '_' +
                                                state_key]
-                self.observations_keys.append(visual_object.get_name() + '_' +
-                                              state_key)
         return
 
     def reset_observation_keys(self):
         self.observations_keys = []
-        self.set_observation_spaces()
+        self.low = np.array([])
+        self.high = np.array([])
 
     def is_observation_key_known(self, observation_key):
         if observation_key not in self.lower_bounds.keys():

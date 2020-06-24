@@ -28,7 +28,7 @@ class TestWorld(unittest.TestCase):
         obs = env_v1.reset()
         observations_v1.append(obs)
         for _ in range(horizon):
-            obs, reward, done, info = env_v1.step(env_v1._action_space.low)
+            obs, reward, done, info = env_v1.step(env_v1.action_space.low)
             observations_v1.append(obs)
             rewards_v1.append(reward)
         env_v1.close()
@@ -41,7 +41,7 @@ class TestWorld(unittest.TestCase):
         obs = env_v2.reset()
         observations_v2.append(obs)
         for _ in range(horizon):
-            obs, reward, done, info = env_v2.step(env_v2._action_space.low)
+            obs, reward, done, info = env_v2.step(env_v2.action_space.low)
             observations_v2.append(obs)
             rewards_v2.append(reward)
         env_v2.close()
@@ -54,7 +54,7 @@ class TestWorld(unittest.TestCase):
         obs = env_v3.reset()
         observations_v3.append(obs)
         for _ in range(horizon):
-            obs, reward, done, info = env_v3.step(env_v3._action_space.low)
+            obs, reward, done, info = env_v3.step(env_v3.action_space.low)
             observations_v3.append(obs)
             rewards_v3.append(reward)
         env_v3.close()
@@ -77,10 +77,10 @@ class TestWorld(unittest.TestCase):
                      enable_visualization=False,
                      seed=0)
         observations_env1_v1, rewards_env1_v1, _, _ = env1.step(
-            env1._action_space.low)
+            env1.action_space.low)
         env2.reset()
         observations_env2_v1, rewards_env2_v1, _, _ = env2.step(
-            env2._action_space.low)
+            env2.action_space.low)
         env1.close()
         env2.close()
         assert np.array_equal(observations_env2_v1, observations_env1_v1)
@@ -116,7 +116,7 @@ class TestWorld(unittest.TestCase):
         kuka_step_time = end - start
 
         start = time.time()
-        causal_rl_env.step(causal_rl_env._action_space.sample())
+        causal_rl_env.step(causal_rl_env.action_space.sample())
         end = time.time()
         causal_rl_step_time = end - start
         self.assertLess(causal_rl_step_time, kuka_step_time*7)
@@ -166,7 +166,7 @@ class TestWorld(unittest.TestCase):
         kuka_step_time = end - start
 
         start = time.time()
-        causal_rl_env.step(causal_rl_env._action_space.sample())
+        causal_rl_env.step(causal_rl_env.action_space.sample())
         end = time.time()
         causal_rl_step_time = end - start
         self.assertLess(causal_rl_step_time, kuka_step_time*1.5)

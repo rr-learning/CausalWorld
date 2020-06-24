@@ -172,6 +172,9 @@ class TriFingerRobot(object):
         self._robot_actions = TriFingerAction(action_mode,
                                               self._normalize_actions)
 
+    def get_upper_joint_positions(self):
+        return self._robot_actions.joint_positions_upper_bounds
+
     def get_action_mode(self):
         return self._action_mode
 

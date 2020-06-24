@@ -58,9 +58,6 @@ class TowersGeneratorTask(BaseTask):
         self._set_up_cuboid(self.current_tower_dims,
                             self.current_number_of_blocks_in_tower,
                             self.current_tower_center)
-        if self.task_params["joint_positions"] is not None:
-            self.initial_state['joint_positions'] = \
-                self.task_params["joint_positions"]
         return
 
     def _set_up_cuboid(self, tower_dims, number_of_blocks_in_tower,
@@ -72,15 +69,11 @@ class TowersGeneratorTask(BaseTask):
         :param center_position:
         :return:
         """
-        self.stage.clear_memory()
-        self.robot.tri_finger.reset_world()
-        self.robot.clear()
-        self.stage.clear()
-        joint_positions = self.robot.robot_actions.joint_positions_upper_bounds
+        self.stage.remove_everything()
+        joint_positions = self.robot.get_upper_joint_positions()
         self.robot.set_full_state(np.append(joint_positions,
                                             np.zeros(9)))
         self.task_stage_observation_keys = []
-        self._creation_list = []
         block_size = tower_dims / number_of_blocks_in_tower
         curr_height = self.stage._floor_height - block_size[-1] / 2
         rigid_block_position = np.array([-0.12, -0.12, self.stage._floor_height + block_size[-1] / 2])
@@ -100,27 +93,43 @@ class TowersGeneratorTask(BaseTask):
                                      'orientation': [0, 0, 0, 1],
                                      'size': block_size}
                     self.stage.add_silhoutte_general_object(**creation_dict)
-                    self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
                     creation_dict = {'name': "tool_" + "level_" +
                                               str(level) + "_col_" +
                                               str(col) + "_row_" + str(row),
                                      'shape': "cube",
-                                     'position': np.copy(rigid_block_position),
-                                     'orientation': [0, 0, 0, 1],
+                                     'initial_position': np.copy(rigid_block_position),
+                                     'initial_orientation': [0, 0, 0, 1],
                                      'mass': self.current_tool_block_mass,
                                      'size': block_size}
                     self.stage.add_rigid_general_object(**creation_dict)
-                    self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
+                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_type')
+                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_size')
+                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_position')
+                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_orientation')
+                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_linear_velocity')
+                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_angular_velocity')
+                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_type')
+                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                            str(level) + "_col_" +
+                                                            str(col) + "_row_" + str(row) + '_size')
                     self.task_stage_observation_keys.append("goal_" + "level_" +
                                                              str(level) + "_col_" +
                                                              str(col) + "_row_" + str(row) + '_position')
                     self.task_stage_observation_keys.append("goal_" + "level_" +
-                                                             str(level) + "_col_" +
-                                                             str(col) + "_row_" + str(row) + '_orientation')
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
-                                                             str(level) + "_col_" +
-                                                             str(col) + "_row_" + str(row) + '_position')
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
                                                              str(level) + "_col_" +
                                                              str(col) + "_row_" + str(row) + '_orientation')
                     rigid_block_position[:2] += block_size[:2]
@@ -140,9 +149,9 @@ class TowersGeneratorTask(BaseTask):
         #intevrntions on size of objects might become tricky to handle
         #contradicting interventions here?
         super(TowersGeneratorTask, self)._set_training_intervention_spaces()
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             del self.training_intervention_spaces[visual_object]
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             del self.training_intervention_spaces[rigid_object]['size']
         self.training_intervention_spaces['number_of_blocks_in_tower'] = \
             np.array([[1, 1, 1], [4, 4,4]])
@@ -160,9 +169,9 @@ class TowersGeneratorTask(BaseTask):
         :return:
         """
         super(TowersGeneratorTask, self)._set_testing_intervention_spaces()
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             del self.testing_intervention_spaces[visual_object]
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             del self.testing_intervention_spaces[rigid_object]['size']
         self.testing_intervention_spaces['number_of_blocks_in_tower'] = \
             np.array([[4, 4, 4], [6, 6, ]])
@@ -237,8 +246,8 @@ class TowersGeneratorTask(BaseTask):
                                 center_position=self.current_tower_center)
         elif "blocks_mass" in interventions_dict:
             new_interventions_dict = dict()
-            for rigid_object in self.stage._rigid_objects:
-                if self.stage._rigid_objects[rigid_object].is_not_fixed:
+            for rigid_object in self.stage.get_rigid_objects():
+                if self.stage.get_rigid_objects()[rigid_object].is_not_fixed:
                     new_interventions_dict[rigid_object] = dict()
                     new_interventions_dict[rigid_object]['mass'] = \
                         self.current_tool_block_mass

@@ -8,7 +8,7 @@ def goal_interventions():
     env.reset()
     for _ in range(10):
         for i in range(200):
-            obs, reward, done, info = env.step(env._action_space.sample())
+            obs, reward, done, info = env.step(env.action_space.sample())
         goal_intervention_dict = env.sample_new_goal()
         print("new goal chosen: ", goal_intervention_dict)
         success_signal = env.do_intervention(goal_intervention_dict)

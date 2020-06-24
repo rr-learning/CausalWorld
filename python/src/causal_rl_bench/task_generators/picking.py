@@ -75,9 +75,9 @@ class PickingTaskGenerator(BaseTask):
                                             "tool_block_linear_velocity",
                                             "tool_block_angular_velocity",
                                             "goal_block_type",
+                                            "goal_block_size"
                                             "goal_block_position",
-                                            "goal_block_orientation",
-                                            "goal_block_size"]
+                                            "goal_block_orientation"]
 
         return
 
@@ -87,14 +87,14 @@ class PickingTaskGenerator(BaseTask):
         :return:
         """
         super(PickingTaskGenerator, self)._set_training_intervention_spaces()
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             self.training_intervention_spaces[rigid_object]['position'][0][
                 -1] \
                 = 0.0425
             self.training_intervention_spaces[rigid_object]['position'][1][
                 -1] \
                 = 0.0425
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             self.training_intervention_spaces[visual_object]['position'][
                 0][-1] \
                 = 0.08
@@ -109,14 +109,14 @@ class PickingTaskGenerator(BaseTask):
         :return:
         """
         super(PickingTaskGenerator, self)._set_testing_intervention_spaces()
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             self.testing_intervention_spaces[rigid_object]['position'][0][
                 -1] \
                 = 0.0425
             self.testing_intervention_spaces[rigid_object]['position'][1][
                 -1] \
                 = 0.0425
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             self.testing_intervention_spaces[visual_object]['position'][0][
                 -1] \
                 = 0.20
@@ -256,7 +256,7 @@ class PickingTaskGenerator(BaseTask):
         else:
             intervention_space = self.testing_intervention_spaces
         intervention_dict['goal_block']['position'] = \
-            np.array(self.stage._rigid_objects
+            np.array(self.stage.get_rigid_objects()
                      ['tool_block'].get_initial_position())
         intervention_dict['goal_block']['position'][-1] = \
             np.random.uniform(intervention_space['goal_block']['position']

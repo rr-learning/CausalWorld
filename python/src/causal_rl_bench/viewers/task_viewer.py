@@ -102,7 +102,7 @@ def record_video_of_random_policy(task, world_params, file_name,
         for i in range(max_time_steps):
             for _ in range(actual_skip_frame):
                 obs, reward, done, info = \
-                    env.step(action=env._action_space.sample())
+                    env.step(action=env.action_space.sample())
                 recorder.capture_frame()
     env.close()
 

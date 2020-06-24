@@ -92,17 +92,30 @@ class BaseTask(object):
             self.stage.get_full_env_state()
         state['robot_object_state'] = \
             self.robot.get_full_env_state()
+        state['task_observations'] = \
+            copy.deepcopy(self.task_stage_observation_keys)
         return state
 
     def _restore_state(self, state_dict):
         #remove everything in the arena
+        #old number of rigid objects and number of visual objects
+        old_number_of_rigid_objects = len(self.stage.get_rigid_objects())
+        old_number_of_visual_objects = len(self.stage.get_visual_objects())
+        reset_observation_space = False
         self.stage.remove_everything()
         self._restore_pybullet_state(self._empty_stage)
         self.robot.set_full_env_state(state_dict
                                       ['robot_object_state'])
         self.stage.set_full_env_state(
             state_dict['stage_object_state'])
-        return
+        new_number_of_rigid_objects = len(self.stage.get_rigid_objects())
+        new_number_of_visual_objects = len(self.stage.get_visual_objects())
+        if old_number_of_rigid_objects != new_number_of_rigid_objects:
+            reset_observation_space = True
+        if old_number_of_visual_objects != new_number_of_visual_objects:
+            reset_observation_space = True
+        self.task_stage_observation_keys = state_dict['task_observations']
+        return reset_observation_space
 
     def is_in_training_mode(self):
         """
@@ -492,10 +505,6 @@ class BaseTask(object):
             self.robot.reset_state(
                 joint_positions=self.robot.get_rest_pose()[0],
                 joint_velocities=np.zeros([9, ]))
-        if self.stage._pybullet_client_full_id is not None:
-            client_id = self.stage._pybullet_client_full_id
-        else:
-            client_id = self.stage._pybullet_client_w_o_goal_id
         self._empty_stage = self._save_pybullet_state()
         self._set_up_stage_arena()
         self._default_starting_state = \
@@ -556,7 +565,7 @@ class BaseTask(object):
         # self.stage.clear()
         #restore first to the starting state and
         # then potentially make the intervention]
-        self._restore_state(self._current_starting_state)
+        reset_observation_space_signal = self._restore_state(self._current_starting_state)
         # self._create_world()
         # self.stage.update_stage()
         self.task_solved = False
@@ -564,7 +573,6 @@ class BaseTask(object):
         self.time_steps_elapsed_since_success = 0
         success_signal = None
         interventions_info = None
-        reset_observation_space_signal = False
         if interventions_dict is not None:
             success_signal, interventions_info, reset_observation_space_signal = \
                 self.apply_interventions(interventions_dict,

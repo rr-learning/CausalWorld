@@ -57,6 +57,12 @@ class Stage(object):
         self._goal_image = None
         return
 
+    def get_rigid_objects(self):
+        return self._rigid_objects
+
+    def get_visual_objects(self):
+        return self._visual_objects
+
     def get_full_env_state(self):
         env_state = {}
         env_state['rigid_objects'] = []
@@ -83,6 +89,9 @@ class Stage(object):
             self.add_silhoutte_general_object(shape=visual_object_info[0],
                                               **visual_object_info[1])
         self.apply_interventions(env_state['arena_scm_values'])
+        #update the stage observations with them
+        self._stage_observations.visual_objects = self._rigid_objects
+        self._stage_observations.visual_objects = self._visual_objects
         return env_state
 
     def add_rigid_general_object(self, name, shape, **object_params):
@@ -222,8 +231,10 @@ class Stage(object):
         :return:
         """
         self._stage_observations.reset_observation_keys()
+        self._stage_observations.initialize_observations()
         for key in observation_keys:
             self._stage_observations.add_observation(key)
+        self._stage_observations.set_observation_spaces()
 
     def get_full_state(self, state_type='list'):
         """

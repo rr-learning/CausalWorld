@@ -10,11 +10,11 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         super(HERGoalEnvWrapper, self).__init__()
         self.env = env
         self.metadata = self.env.metadata
-        self.action_space = env._action_space
+        self.action_space = env.action_space
         current_goal = self.env._task.get_achieved_goal()
         goal_space_shape = current_goal.shape
         #TODO: get the actual bonds here for proper normalization maybe?
-        self.action_space = self.env._action_space
+        self.action_space = self.env.action_space
         self.env._task.task_params['time_threshold_in_goal_state_secs'] = self.env.dt
         if not is_goal_distance_dense:
             self.env.scale_reward_by_dt = False

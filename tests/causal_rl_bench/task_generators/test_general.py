@@ -19,7 +19,7 @@ class TestGeneral(unittest.TestCase):
         observations_1 = []
         rewards_1 = []
         horizon = 100
-        actions = [self.env._action_space.sample() for _ in range(horizon)]
+        actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         obs = self.env.reset()
         observations_1.append(obs)
@@ -46,7 +46,7 @@ class TestGeneral(unittest.TestCase):
         observations_1 = []
         rewards_1 = []
         horizon = 100
-        actions = [self.env._action_space.sample() for _ in range(horizon)]
+        actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
         self.env.do_intervention(new_goal)
@@ -71,7 +71,7 @@ class TestGeneral(unittest.TestCase):
         observations_1 = []
         rewards_1 = []
         horizon = 100
-        actions = [self.env._action_space.sample() for _ in range(horizon)]
+        actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         self.env.reset()
         for i in range(horizon):
