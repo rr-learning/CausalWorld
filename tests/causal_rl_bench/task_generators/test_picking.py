@@ -184,7 +184,7 @@ class TestPicking(unittest.TestCase):
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:
                         assert np.array_equal(new_goal['goal_block']['position'],
-                                              obs[-10:-7])
+                                              obs[-7:-4])
                 env.reset()
 
         env.close()

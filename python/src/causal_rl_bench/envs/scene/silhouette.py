@@ -299,6 +299,11 @@ class SilhouetteObject(object):
 
         :return:
         """
+        position, orientation = \
+            pybullet.getBasePositionAndOrientation(
+                self._block_ids[0],
+                physicsClientId=
+                self._pybullet_client_ids[0])
         vertices = [[1, 1, -1],
                     [1, -1, -1],
                     [-1, 1, -1],
@@ -307,9 +312,9 @@ class SilhouetteObject(object):
                     [1, -1, 1],
                     [-1, 1, 1],
                     [-1, -1, 1]]
-        vertices = [self._position + (point * self._size / 2)
+        vertices = [position + (point * self._size / 2)
                     for point in vertices]
-        return rotate_points(np.array(vertices), self._orientation)
+        return rotate_points(np.array(vertices), orientation)
 
     def get_size(self):
         """

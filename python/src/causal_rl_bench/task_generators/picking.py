@@ -29,7 +29,7 @@ class PickingTaskGenerator(BaseTask):
         self.task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.02)
         self.task_params["joint_positions"] = \
-            kwargs.get("joint_positions", )
+            kwargs.get("joint_positions", None)
         self.task_params["tool_block_position"] = \
             kwargs.get("tool_block_position", np.array([0, 0, 0.0425]))
         self.task_params["tool_block_orientation"] = \
@@ -75,7 +75,7 @@ class PickingTaskGenerator(BaseTask):
                                             "tool_block_linear_velocity",
                                             "tool_block_angular_velocity",
                                             "goal_block_type",
-                                            "goal_block_size"
+                                            "goal_block_size",
                                             "goal_block_position",
                                             "goal_block_orientation"]
 

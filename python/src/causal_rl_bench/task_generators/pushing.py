@@ -18,7 +18,7 @@ class PushingTaskGenerator(BaseTask):
                          kwargs.get("sparse_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
-                                    np.array([0, 10, 0])))
+                                    np.array([1, 1, 1])))
         self.task_robot_observation_keys = ["joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -27,15 +27,13 @@ class PushingTaskGenerator(BaseTask):
             kwargs.get("tool_block_mass", 0.08)
         self.task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
-        self.initial_state["tool_block"] = dict()
-        self.initial_state["tool_block"]["position"] = \
+        self.task_params["tool_block_position"] = \
             kwargs.get("tool_block_position", np.array([0, 0, 0.0425]))
-        self.initial_state["tool_block"]["orientation"] = \
+        self.task_params["tool_block_orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
-        self.initial_state["goal_block"] = dict()
-        self.initial_state["goal_block"]["position"] = \
+        self.task_params["goal_block_position"] = \
             kwargs.get("goal_block_position", np.array([0, 0.10, 0.0425]))
-        self.initial_state["goal_block"]["orientation"] = \
+        self.task_params["goal_block_orientation"] = \
             kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_end_effector_positions = None
         self.previous_object_position = None
@@ -60,28 +58,29 @@ class PushingTaskGenerator(BaseTask):
         """
         creation_dict = {'name': "tool_block",
                          'shape': "cube",
-                         'position': self.initial_state
-                                            ["tool_block"]["position"],
-                         'orientation': self.initial_state
-                         ["tool_block"]["orientation"],
+                         'initial_position': self.task_params
+                         ["tool_block_position"],
+                         'initial_orientation': self.task_params
+                         ["goal_block_position"],
                          'mass': self.task_params["tool_block_mass"]}
         self.stage.add_rigid_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_rigid_general_object, creation_dict])
         creation_dict = {'name': "goal_block",
                          'shape': "cube",
-                         'position': self.initial_state
-                         ["goal_block"]["position"],
-                         'orientation': self.initial_state
-                         ["goal_block"]["orientation"]}
+                         'position': self.task_params
+                         ["goal_block_position"],
+                         'orientation':  self.task_params
+                         ["goal_block_orientation"]}
         self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
-        self.task_stage_observation_keys = ["tool_block_position",
+        self.task_stage_observation_keys = ["tool_block_type",
+                                            "tool_block_size",
+                                            "tool_block_position",
                                             "tool_block_orientation",
+                                            "tool_block_linear_velocity",
+                                            "tool_block_angular_velocity",
+                                            "goal_block_type",
+                                            "goal_block_size",
                                             "goal_block_position",
                                             "goal_block_orientation"]
-        if self.task_params["joint_positions"] is not None:
-            self.initial_state['joint_positions'] = \
-                self.task_params["joint_positions"]
         return
 
     def _set_training_intervention_spaces(self):
@@ -90,13 +89,13 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             #TODO: make it a function of size
             self.training_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
             self.training_intervention_spaces[rigid_object]['position'][1][-1] \
                 = 0.0425
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             self.training_intervention_spaces[visual_object]['position'][0][-1] \
                 = 0.0425
             self.training_intervention_spaces[visual_object]['position'][1][-1] \
@@ -109,12 +108,12 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
-        for rigid_object in self.stage._rigid_objects:
+        for rigid_object in self.stage.get_rigid_objects():
             self.testing_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
             self.testing_intervention_spaces[rigid_object]['position'][1][-1] \
                 = 0.0425
-        for visual_object in self.stage._visual_objects:
+        for visual_object in self.stage.get_visual_objects():
             self.testing_intervention_spaces[visual_object]['position'][0][-1] \
                 = 0.0425
             self.testing_intervention_spaces[visual_object]['position'][1][-1] \
@@ -138,7 +137,7 @@ class PushingTaskGenerator(BaseTask):
         goal_orientation = self.stage.get_object_state('goal_block',
                                                        'orientation')
         end_effector_positions = self.robot.compute_end_effector_positions(
-            self.robot.latest_full_state.position)
+            self.robot.get_latest_full_state()['positions'])
         end_effector_positions = end_effector_positions.reshape(-1, 3)
 
         # calculate first reward term
@@ -195,7 +194,7 @@ class PushingTaskGenerator(BaseTask):
         """
         self.previous_end_effector_positions = \
             self.robot.compute_end_effector_positions(
-                self.robot.latest_full_state.position)
+                self.robot.get_latest_full_state()['positions'])
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
