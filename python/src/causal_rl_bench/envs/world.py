@@ -42,6 +42,8 @@ class World(gym.Env):
         self._enable_visualization = enable_visualization
         self.seed(seed)
         self._simulation_time = 1. / 250
+        self._skip_frame = skip_frame
+        self.dt = self._simulation_time * self._skip_frame
         self._joint_names = [
             "finger_upper_link_0",
             "finger_middle_link_0",
@@ -132,6 +134,17 @@ class World(gym.Env):
                             pybullet_client_w_o_goal_id=
                             self._pybullet_client_w_o_goal_id,
                             cameras=self._goal_cameras)
+
+        if max_episode_length == np.inf:
+            self._enforce_episode_length = False
+        elif max_episode_length is None:
+            self._enforce_episode_length = True
+            max_episode_length = int(task.get_max_episode_length() / self.dt)
+        else:
+            self.__enforce_episode_length = True
+        self._max_episode_length = max_episode_length
+        self._episode_length = 0
+
         if max_episode_length is None:
             self._enforce_episode_length = False
         else:
@@ -147,8 +160,7 @@ class World(gym.Env):
         self._task.init_task(self._robot, self._stage)
         self._reset_observations_space()
         self.action_space = self._robot.get_action_spaces()
-        self._skip_frame = skip_frame
-        self.dt = self._simulation_time * self._skip_frame
+
         self.metadata['video.frames_per_second'] = \
             (1 / self._simulation_time) / self._skip_frame
         # TODO: verify spaces here

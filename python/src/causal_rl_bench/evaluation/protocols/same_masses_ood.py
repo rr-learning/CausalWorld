@@ -4,14 +4,7 @@ import numpy as np
 
 class SameMassesOOD(Protocol):
     def __init__(self):
-        self.name = 'same_masses_ood'
-        self.num_evaluation_episodes = 10
-
-    def get_name(self):
-        return self.name
-
-    def get_num_episodes(self):
-        return self.num_evaluation_episodes
+        super().__init__('same_masses_ood')
 
     def get_intervention(self, episode, timestep):
         if timestep == 0:

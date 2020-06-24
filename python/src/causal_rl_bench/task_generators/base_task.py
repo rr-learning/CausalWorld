@@ -3,6 +3,7 @@ import math
 import copy
 from causal_rl_bench.utils.state_utils import get_bounding_box_area
 from causal_rl_bench.utils.state_utils import get_intersection
+from causal_rl_bench.utils.rotation_utils import cart2cyl
 import pybullet
 
 
@@ -40,7 +41,7 @@ class BaseTask(object):
         self.task_params["sparse_reward_weight"] = sparse_reward_weight
         self.task_params["dense_reward_weights"] = dense_reward_weights
         self.time_steps_elapsed_since_success = 0
-        self.task_params['time_threshold_in_goal_state_secs'] = 0.5
+        self.task_params['time_threshold_in_goal_state_secs'] = 0.1
         self.current_time_secs = 0
         self.training_intervention_spaces = dict()
         self.testing_intervention_spaces = dict()
@@ -196,6 +197,9 @@ class BaseTask(object):
         :return:
         """
         info = dict()
+        info['fractional_reward'] = self.fractional_reward
+        info['desired_goal'] = self.desired_goal
+        info['achieved_goal'] = self.achieved_goal
         info['possible_solution_intervention'] = dict()
         for rigid_object in self.stage._rigid_objects:
             #check if there is an equivilant visual object corresponding
@@ -246,8 +250,10 @@ class BaseTask(object):
                     'position' in intervention_space[visual_object]:
                 intervention_dict[visual_object] = dict()
                 intervention_dict[visual_object]['position'] = \
-                    np.random.uniform(intervention_space[visual_object]['position'][0],
-                                      intervention_space[visual_object]['position'][1])
+                    self.stage.random_position(
+                        height_limits=intervention_space[visual_object]['position'][:, 2],
+                        radius_limits=intervention_space[visual_object]['position'][:, 0],
+                        angle_limits=intervention_space[visual_object]['position'][:, 1])
         return intervention_dict
 
     # def reset_default_state(self):
@@ -288,6 +294,12 @@ class BaseTask(object):
                           self.stage._floor_inner_bounding_box[0]])
             self.training_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+# =======
+#                 np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.3]])
+#             if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
+#                 self.training_intervention_spaces[rigid_object]['size'] = \
+#                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+# >>>>>>> origin/master
             self.training_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
             self.training_intervention_spaces[rigid_object]['mass'] = \
@@ -301,6 +313,12 @@ class BaseTask(object):
                           self.stage._floor_inner_bounding_box[0]])
             self.training_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+# =======
+#                 np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.15]])
+#             if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
+#                 self.training_intervention_spaces[visual_object]['size'] = \
+#                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+# >>>>>>> origin/master
             self.training_intervention_spaces[visual_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self.training_intervention_spaces['floor_color'] = \
@@ -340,6 +358,12 @@ class BaseTask(object):
                           self.stage._floor_inner_bounding_box[1]])
             self.testing_intervention_spaces[rigid_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+# =======
+#                 np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
+#             if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
+#                 self.testing_intervention_spaces[rigid_object]['size'] = \
+#                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+# >>>>>>> origin/master
             self.testing_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
             self.testing_intervention_spaces[rigid_object]['mass'] = \
@@ -353,6 +377,12 @@ class BaseTask(object):
                           self.stage._floor_inner_bounding_box[1]])
             self.testing_intervention_spaces[visual_object]['size'] = \
                 np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+# =======
+#                 np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
+#             if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
+#                 self.testing_intervention_spaces[visual_object]['size'] = \
+#                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+# >>>>>>> origin/master
             self.testing_intervention_spaces[visual_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self.testing_intervention_spaces['floor_color'] = \
@@ -479,6 +509,11 @@ class BaseTask(object):
         """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
+        # TODO: this is to avoid computing those things twice for the info dict but should be refactored soon.
+        self.fractional_reward = goal_distance
+        self.desired_goal = desired_goal
+        self.achieved_goal = achieved_goal
+
         if not self.task_params['is_goal_distance_dense']:
             #TODO: not exactly right, but its a limitation of HER
             if self._check_preliminary_success(goal_distance):
@@ -649,13 +684,19 @@ class BaseTask(object):
 
         :return:
         """
-        #here we consider that you succeeded if u stayed 0.5 sec in
+        #here we consider that you succeeded if u stayed 0.1 sec in
         #the goal position
         if self.finished_episode:
             return True
         if self.task_params['time_threshold_in_goal_state_secs'] <= \
                 (self.robot.get_dt() * self.time_steps_elapsed_since_success):
             self.finished_episode = True
+# =======
+#                 (self.robot.dt * self.time_steps_elapsed_since_success):
+#             # self.finished_episode = True
+#             # TODO: Disable terminal states for now
+#             self.finished_episode = False
+# >>>>>>> origin/master
         return self.finished_episode
 
     def set_sparse_reward(self, sparse_reward_weight):
@@ -783,7 +824,15 @@ class BaseTask(object):
                         return False
                 else:
                     for sub_variable_name in interventions_dict[intervention]:
-                        if sub_variable_name in intervention_space[intervention] and \
+                        # TODO: not happy with this hack but there is probably no other workaround without
+                        #  translating everything to polar coordinates (not optimal for observation space)
+                        if sub_variable_name == 'position':
+                            cyl_position = cart2cyl(interventions_dict[intervention][sub_variable_name])
+                            if sub_variable_name in intervention_space[intervention] and \
+                                    ((intervention_space[intervention][sub_variable_name][0] > cyl_position).any()
+                                     or (intervention_space[intervention][sub_variable_name][1] < cyl_position).any()):
+                                return False
+                        elif sub_variable_name in intervention_space[intervention] and \
                             ((intervention_space[intervention]
                             [sub_variable_name][0] >
                             interventions_dict[intervention][sub_variable_name]).any() or \
@@ -906,4 +955,8 @@ class BaseTask(object):
                reset_observation_space_signal
 
     def get_max_episode_length(self):
-        return 5
+        if self.task_params["task_name"] == 'reaching':
+            episode_length = 5
+        else:
+            episode_length = len(self.stage.get_rigid_objects()) * 10
+        return episode_length
