@@ -134,23 +134,6 @@ class World(gym.Env):
                             pybullet_client_w_o_goal_id=
                             self._pybullet_client_w_o_goal_id,
                             cameras=self._goal_cameras)
-
-        if max_episode_length == np.inf:
-            self._enforce_episode_length = False
-        elif max_episode_length is None:
-            self._enforce_episode_length = True
-            max_episode_length = int(task.get_max_episode_length() / self.dt)
-        else:
-            self.__enforce_episode_length = True
-        self._max_episode_length = max_episode_length
-        self._episode_length = 0
-
-        if max_episode_length is None:
-            self._enforce_episode_length = False
-        else:
-            self._enforce_episode_length = True
-        self._max_episode_length = max_episode_length
-        self._episode_length = 0
         gym.Env.__init__(self)
         if task is None:
             self._task = task_generator("reaching")
@@ -166,7 +149,15 @@ class World(gym.Env):
         # TODO: verify spaces here
         #TODO: we postpone this function for now
         self._setup_viewing_camera()
-
+        if max_episode_length == np.inf:
+            self._enforce_episode_length = False
+        elif max_episode_length is None:
+            self._enforce_episode_length = True
+            max_episode_length = int(task.get_max_episode_length() / self.dt)
+        else:
+            self._enforce_episode_length = True
+        self._max_episode_length = max_episode_length
+        self._episode_length = 0
         self._data_recorder = data_recorder
         self._wrappers_dict = dict()
         self._tracker = Tracker(task=self._task,

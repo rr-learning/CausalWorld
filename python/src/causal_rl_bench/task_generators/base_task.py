@@ -197,9 +197,8 @@ class BaseTask(object):
         :return:
         """
         info = dict()
-        info['fractional_reward'] = self.fractional_reward
-        info['desired_goal'] = self.desired_goal
-        info['achieved_goal'] = self.achieved_goal
+        info['desired_goal'] = self._current_desired_goal
+        info['achieved_goal'] = self._current_achieved_goal
         info['possible_solution_intervention'] = dict()
         for rigid_object in self.stage._rigid_objects:
             #check if there is an equivilant visual object corresponding
