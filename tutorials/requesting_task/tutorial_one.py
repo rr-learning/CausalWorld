@@ -5,11 +5,11 @@ import numpy as np
 
 
 def example():
-    task = task_generator(task_generator_id='pushing')
+    task = task_generator(task_generator_id='picking')
     env = World(task=task, enable_visualization=True,
                 action_mode="joint_positions",
                 skip_frame=10)
-    horizon = 100
+    horizon = 10000
     # print(env.get_current_task_parameters())
     actions = [env.action_space.sample() for _ in range(horizon)]
     # # new_goal = env.sample_new_goal()
@@ -17,7 +17,6 @@ def example():
     # # env.reset()
     # # obs = env.reset(interventions_dict=new_goal)
     # # print(obs[-20:-20 + 7])
-    # env.do_intervention({'goal_block': {'position': [0, 0, 0.8]}})
     # print("first")
     # for i in range(100):
     #     obs, reward, done, info = env.step(actions[i])
@@ -27,11 +26,11 @@ def example():
     #     # plt.show()
     #     #
     #     # print(obs[-20:-20 + 7])
-    env.reset(interventions_dict={'number_of_obstacles': 2})
+    env.reset(interventions_dict={'goal_block': {'cylindrical_position': [0.1, np.pi, 0.2]}})
     print("second")
     obs = env.reset()
     # print(obs[-20:-20 + 7])
-    for i in range(100):
+    for i in range(10000):
         obs, reward, done, info = env.step(actions[i])
         print(reward)
         # print(obs[-20:-20 + 7])

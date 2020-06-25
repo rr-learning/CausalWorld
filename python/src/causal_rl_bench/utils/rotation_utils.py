@@ -29,7 +29,7 @@ def cart2cyl(position):
 
 def cyl2cart(position):
     x = position[0]*np.cos(position[1])
-    y = position[1]*np.sin(position[2])
+    y = position[0]*np.sin(position[1])
     z = position[2]
     return np.array([x, y, z])
 

@@ -1,7 +1,7 @@
 import pybullet
 import numpy as np
 from causal_rl_bench.utils.rotation_utils import rotate_points, \
-    get_transformation_matrix, get_rotation_matrix
+    get_transformation_matrix, get_rotation_matrix, cyl2cart
 import copy
 
 
@@ -357,6 +357,8 @@ class RigidObject(object):
         :return:
         """
         #TODO: Add frictions to apply interventions
+        if 'cylindrical_position' in interventions_dict:
+            interventions_dict['cartesian_position'] = cyl2cart(interventions_dict['cylindrical_position'])
         if 'cartesian_position' not in interventions_dict or \
                 'orientation' not in interventions_dict:
             position, orientation = pybullet.\
