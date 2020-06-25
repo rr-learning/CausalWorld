@@ -124,7 +124,6 @@ class EvaluationPipeline(object):
             pipeline_scores[evaluation_protocol.get_name()] = scores
             self.reset_metric_scores()
         self.evaluation_env.close()
-        self.env.close()
         self.pipeline_scores = pipeline_scores
         return pipeline_scores
 

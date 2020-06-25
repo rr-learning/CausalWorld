@@ -1,7 +1,7 @@
 class Protocol(object):
     def __init__(self, name):
         self.name = name
-        self.num_evaluation_episodes = 2
+        self.num_evaluation_episodes = 50
 
     def init_protocol(self, env, tracker):
         self.env = env
