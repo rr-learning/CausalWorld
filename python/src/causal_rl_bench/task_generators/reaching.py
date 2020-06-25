@@ -18,7 +18,7 @@ class ReachingTaskGenerator(BaseTask):
                          kwargs.get("dense_reward_weights",
                                     np.array([100000,
                                               0, 0, 0])))
-        self.task_robot_observation_keys = ["time_left_for_task",
+        self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "end_effector_positions",
@@ -57,9 +57,9 @@ class ReachingTaskGenerator(BaseTask):
                          'color': np.array([0, 0, 1]),
                          'position': self._task_params['default_goal_300']}
         self._stage.add_silhoutte_general_object(**creation_dict)
-        self.task_stage_observation_keys = ["goal_60_position",
-                                            "goal_120_position",
-                                            "goal_300_position"]
+        self._task_stage_observation_keys = ["goal_60_cartesian_position",
+                                            "goal_120_cartesian_position",
+                                            "goal_300_cartesian_position"]
         self.current_number_of_obstacles = 0
         return
 
@@ -131,11 +131,11 @@ class ReachingTaskGenerator(BaseTask):
         """
         desired_goal = np.array([])
         desired_goal = np.append(desired_goal,
-                                 self._stage.get_object_state('goal_60', 'position'))
+                                 self._stage.get_object_state('goal_60', 'cartesian_position'))
         desired_goal = np.append(desired_goal,
-                                 self._stage.get_object_state('goal_120', 'position'))
+                                 self._stage.get_object_state('goal_120', 'cartesian_position'))
         desired_goal = np.append(desired_goal,
-                                 self._stage.get_object_state('goal_300', 'position'))
+                                 self._stage.get_object_state('goal_300', 'cartesian_position'))
         return desired_goal
 
     def get_achieved_goal(self):
@@ -203,7 +203,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 3 / 4 + \
                           self._stage._floor_inner_bounding_box[0])[1]
-        self._training_intervention_spaces['goal_60']['position'] = \
+        self._training_intervention_spaces['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound]) #blue is finger 0, green 240
         lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
@@ -213,7 +213,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 1 / 4 + \
                           self._stage._floor_inner_bounding_box[0])[1]
-        self._training_intervention_spaces['goal_120']['position'] = \
+        self._training_intervention_spaces['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])  # blue is finger 0, green 240
         lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
@@ -223,7 +223,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 1 / 4 +
                           self._stage._floor_inner_bounding_box[0])[1]
-        self._training_intervention_spaces['goal_300']['position'] = \
+        self._training_intervention_spaces['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         self._training_intervention_spaces['number_of_obstacles'] = \
@@ -246,7 +246,7 @@ class ReachingTaskGenerator(BaseTask):
                           self._stage._floor_inner_bounding_box[0])[1]
         upper_bound = np.array(self._stage._floor_inner_bounding_box[1])
 
-        self._testing_intervention_spaces['goal_60']['position'] = \
+        self._testing_intervention_spaces['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         lower_bound = (self._stage._floor_inner_bounding_box[1] -
@@ -259,7 +259,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 1 / 2 +
                           self._stage._floor_inner_bounding_box[0])[1]
-        self._testing_intervention_spaces['goal_120']['position'] = \
+        self._testing_intervention_spaces['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         lower_bound = (self._stage._floor_inner_bounding_box[1] -
@@ -273,7 +273,7 @@ class ReachingTaskGenerator(BaseTask):
                            self._stage._floor_inner_bounding_box[0]) * 1 / 2 +
                           self._stage._floor_inner_bounding_box[0])[1]
 
-        self._testing_intervention_spaces['goal_300']['position'] = \
+        self._testing_intervention_spaces['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         #TODO:dicuss this!
@@ -315,10 +315,10 @@ class ReachingTaskGenerator(BaseTask):
                                                          position=np.random.uniform(self._stage._floor_inner_bounding_box[0],
                                                                                     self._stage._floor_inner_bounding_box[1]))
                     self.current_number_of_obstacles += 1
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_type")
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_size")
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_position")
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_orientation")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_type")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_size")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_cartesian_position")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_orientation")
             #TODO: if its less than what I have
         else:
             raise Exception("this task generator variable "

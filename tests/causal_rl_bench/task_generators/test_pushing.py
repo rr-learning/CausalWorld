@@ -85,7 +85,7 @@ class TestPushing(unittest.TestCase):
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             if i == 50:
-                success_signal = self.env.do_intervention({'tool_block': {'position': [0.1, 0.1, 0.0425]}})
+                success_signal = self.env.do_intervention({'tool_block': {'cartesian_position': [0.1, 0.1, 0.0425]}})
         observations_2 = []
         rewards_2 = []
         self.env.reset()
@@ -110,7 +110,7 @@ class TestPushing(unittest.TestCase):
                     #TODO: this shouldnt be the case when the benchmark is complete
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:
-                        assert np.array_equal(new_goal['goal_block']['position'], obs[-7:-4])
+                        assert np.array_equal(new_goal['goal_block']['cartesian_position'], obs[-7:-4])
                 env.reset()
 
         env.close()

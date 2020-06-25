@@ -35,11 +35,11 @@ class ReacherInterventionActorPolicy(BaseInterventionActorPolicy):
             self.joint_position_sampler_func()
         new_goal = self.goal_position_sampler_func()
         interventions_dict['goal_60'] = dict()
-        interventions_dict['goal_60']['position'] = new_goal[:3]
+        interventions_dict['goal_60']['cartesian_position'] = new_goal[:3]
         interventions_dict['goal_120'] = dict()
-        interventions_dict['goal_120']['position'] = new_goal[3:6]
+        interventions_dict['goal_120']['cartesian_position'] = new_goal[3:6]
         interventions_dict['goal_300'] = dict()
-        interventions_dict['goal_300']['position'] = new_goal[6:]
+        interventions_dict['goal_300']['cartesian_position'] = new_goal[6:]
         return interventions_dict
 
     def get_params(self):

@@ -45,7 +45,7 @@ class RigidObject(object):
         self._upper_bounds = dict()
         self._lower_bounds[self._name + "_type"] = \
             np.array([self._type_id])
-        self._lower_bounds[self._name + "_position"] = \
+        self._lower_bounds[self._name + "_cartesian_position"] = \
             np.array([-0.5, -0.5, 0])
         self._lower_bounds[self._name + "_orientation"] = \
             np.array([-10] * 4)
@@ -69,7 +69,7 @@ class RigidObject(object):
             np.array([self._type_id])
         self._upper_bounds[self._name + "_friction"] = \
             np.array([10])
-        self._upper_bounds[self._name + "_position"] = \
+        self._upper_bounds[self._name + "_cartesian_position"] = \
             np.array([0.5] * 3)
         self._upper_bounds[self._name + "_orientation"] = \
             np.array([10] * 4)
@@ -89,12 +89,12 @@ class RigidObject(object):
         self._state_variable_names = []
 
         if self.is_not_fixed():
-            self._state_variable_names = ['type', 'position',
+            self._state_variable_names = ['type', 'cartesian_position',
                                            'orientation', 'linear_velocity',
                                            'angular_velocity', 'mass',
                                            'size', 'color', 'friction', 'type']
         else:
-            self._state_variable_names = ['type', 'position',
+            self._state_variable_names = ['type', 'cartesian_position',
                                            'orientation',
                                            'size', 'color', 'friction', 'type']
 
@@ -155,7 +155,7 @@ class RigidObject(object):
         """
         if variable_name == 'type':
             return self._type_id
-        elif variable_name == 'position':
+        elif variable_name == 'cartesian_position':
             position, orientation = pybullet.getBasePositionAndOrientation(
                 self._block_ids[0], physicsClientId=self._pybullet_client_ids[0]
             )
@@ -277,7 +277,7 @@ class RigidObject(object):
                 physicsClientId =
                 self._pybullet_client_ids[0])
             state["type"] = self._type_id
-            state["position"] = np.array(position)
+            state["cartesian_position"] = np.array(position)
             state["orientation"] = np.array(orientation)
             state["size"] = self._size
             state["color"] = self._color
@@ -308,7 +308,7 @@ class RigidObject(object):
             for name in self._state_variable_names:
                 if name == 'type':
                     state.append(self._type_id)
-                elif name == 'position':
+                elif name == 'cartesian_position':
                     state.extend(position)
                 elif name == 'orientation':
                     state.extend(orientation)
@@ -357,14 +357,14 @@ class RigidObject(object):
         :return:
         """
         #TODO: Add frictions to apply interventions
-        if 'position' not in interventions_dict or \
+        if 'cartesian_position' not in interventions_dict or \
                 'orientation' not in interventions_dict:
             position, orientation = pybullet.\
                 getBasePositionAndOrientation(self._block_ids[0],
                                               physicsClientId=
                                               self._pybullet_client_ids[0])
-        if 'position' in interventions_dict:
-            position = interventions_dict['position']
+        if 'cartesian_position' in interventions_dict:
+            position = interventions_dict['cartesian_position']
         if 'orientation' in interventions_dict:
             orientation = interventions_dict['orientation']
         if 'mass' in interventions_dict:
@@ -375,7 +375,7 @@ class RigidObject(object):
             self._size = interventions_dict['size']
             self._set_volume()
             self.reinit_object()
-        elif 'position' in interventions_dict or 'orientation' in \
+        elif 'cartesian_position' in interventions_dict or 'orientation' in \
                 interventions_dict:
             for i in range(0, len(self._pybullet_client_ids)):
                 pybullet.resetBasePositionAndOrientation(

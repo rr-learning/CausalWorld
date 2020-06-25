@@ -13,11 +13,11 @@ class InEpisodePosesChange(Protocol):
             intervention_space = self.env._task._training_intervention_spaces
             for rigid_object in self.env._task._stage._rigid_objects:
                 if rigid_object in intervention_space and \
-                        'position' in intervention_space[rigid_object]:
+                        'cartesian_position' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()
-                    intervention_dict[rigid_object]['position'] = \
-                        np.random.uniform(intervention_space[rigid_object]['position'][0],
-                                          intervention_space[rigid_object]['position'][1])
+                    intervention_dict[rigid_object]['cartesian_position'] = \
+                        np.random.uniform(intervention_space[rigid_object]['cartesian_position'][0],
+                                          intervention_space[rigid_object]['cartesian_position'][1])
             return intervention_dict
         else:
             return None

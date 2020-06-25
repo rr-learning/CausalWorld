@@ -21,7 +21,7 @@ class GeneralGeneratorTask(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([])))
-        self.task_robot_observation_keys = ["time_left_for_task",
+        self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -176,7 +176,7 @@ class GeneralGeneratorTask(BaseTask):
         """
         #raise the fingers
         self._stage.remove_everything()
-        self.task_stage_observation_keys = []
+        self._task_stage_observation_keys = []
         joint_positions = self._robot.get_upper_joint_positions()
         self._robot.reset_state(joint_positions=joint_positions,
                                 joint_velocities=np.zeros(9))
@@ -199,22 +199,22 @@ class GeneralGeneratorTask(BaseTask):
                              'mass': self.tool_mass,
                              'size': np.repeat(self.tool_block_size, 3)}
             self._stage.add_rigid_general_object(**creation_dict)
-            self.task_stage_observation_keys.append("tool_" +
+            self._task_stage_observation_keys.append("tool_" +
                                                     str(object_num)
                                                     + '_type')
-            self.task_stage_observation_keys.append("tool_" +
+            self._task_stage_observation_keys.append("tool_" +
                                                     str(object_num)
                                                     + '_size')
-            self.task_stage_observation_keys.append("tool_" +
+            self._task_stage_observation_keys.append("tool_" +
                                                     str(object_num)
-                                                    + '_position')
-            self.task_stage_observation_keys.append("tool_" +
+                                                    + '_cartesian_position')
+            self._task_stage_observation_keys.append("tool_" +
                                                     str(object_num)
                                                     + '_orientation')
-            self.task_stage_observation_keys.append("tool_" +
+            self._task_stage_observation_keys.append("tool_" +
                                                     str(object_num)
                                                     + '_linear_velocity')
-            self.task_stage_observation_keys.append("tool_" +
+            self._task_stage_observation_keys.append("tool_" +
                                                     str(object_num)
                                                     + '_angular_velocity')
             # turn on simulation for 0.5 seconds
@@ -231,13 +231,13 @@ class GeneralGeneratorTask(BaseTask):
                                      rigid_object, 'orientation'),
                              'size': np.repeat(self.tool_block_size, 3)}
             self._stage.add_silhoutte_general_object(**creation_dict)
-            self.task_stage_observation_keys.append(
+            self._task_stage_observation_keys.append(
                 rigid_object.replace('tool', 'goal') + '_type')
-            self.task_stage_observation_keys.append(
+            self._task_stage_observation_keys.append(
                 rigid_object.replace('tool', 'goal') + '_size')
-            self.task_stage_observation_keys.append(
-                rigid_object.replace('tool', 'goal') + '_position')
-            self.task_stage_observation_keys.append(
+            self._task_stage_observation_keys.append(
+                rigid_object.replace('tool', 'goal') + '_cartesian_position')
+            self._task_stage_observation_keys.append(
                 rigid_object.replace('tool', 'goal') + '_orientation')
             #choose a random position for the rigid object now
             trial_index = 1

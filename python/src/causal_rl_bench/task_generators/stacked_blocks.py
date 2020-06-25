@@ -21,7 +21,7 @@ class StackedBlocksGeneratorTask(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([])))
-        self.task_robot_observation_keys = ["time_left_for_task",
+        self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -83,22 +83,22 @@ class StackedBlocksGeneratorTask(BaseTask):
                                                    ["blocks_min_size"], 3),
                                  'mass': self._task_params["tool_block_mass"]}
                 self._stage.add_rigid_general_object(**creation_dict)
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_type')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_size')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
-                                                        str(i) + '_position')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(i) + '_cartesian_position')
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_orientation')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_linear_velocity')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_angular_velocity')
                 creation_dict = {'name': "goal_" + "level_" +
@@ -111,16 +111,16 @@ class StackedBlocksGeneratorTask(BaseTask):
                                  'size': np.repeat(self._task_params
                                                    ["blocks_min_size"], 3)}
                 self._stage.add_silhoutte_general_object(**creation_dict)
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_type')
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_size')
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level) + "_num_" +
-                                                        str(i) + '_position')
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                        str(i) + '_cartesian_position')
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_orientation')
                 start_position += self._task_params["blocks_min_size"]
@@ -276,7 +276,7 @@ class StackedBlocksGeneratorTask(BaseTask):
         :return:
         """
         self._stage.remove_everything()
-        self.task_stage_observation_keys = []
+        self._task_stage_observation_keys = []
         block_sizes, positions, chosen_y = self._generate_random_target(
             num_of_levels=num_of_levels,
             min_size=blocks_min_size,
@@ -319,34 +319,34 @@ class StackedBlocksGeneratorTask(BaseTask):
                                        blocks_min_size
                                        + (-blocks_min_size
                                           / 2 + self._stage.get_floor_height())]
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_type')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_size')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
-                                                        str(i) + '_position')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(i) + '_cartesian_position')
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_orientation')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_linear_velocity')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_angular_velocity')
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_type')
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_size')
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level_num) + "_num_" +
-                                                        str(i) + '_position')
-                self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                        str(i) + '_cartesian_position')
+                self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_orientation')
                 creation_dict = {'name': "goal_" + "level_" + str(level_num)+ "_num_"+str(i),

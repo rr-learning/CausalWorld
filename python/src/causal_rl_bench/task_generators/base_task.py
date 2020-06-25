@@ -203,8 +203,8 @@ class BaseTask(object):
             possible_corresponding_goal = rigid_object.replace('tool', 'goal')
             if possible_corresponding_goal in self._stage._visual_objects:
                 info['possible_solution_intervention'][rigid_object] = dict()
-                info['possible_solution_intervention'][rigid_object]['position'] = \
-                    self._stage.get_object_state(possible_corresponding_goal, 'position')
+                info['possible_solution_intervention'][rigid_object]['cartesian_position'] = \
+                    self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
                 info['possible_solution_intervention'][rigid_object]['orientation'] = \
                     self._stage.get_object_state(possible_corresponding_goal, 'orientation')
         info['ground_truth_scm_variables_values'] = self.get_current_scm_values()
@@ -244,13 +244,13 @@ class BaseTask(object):
             intervention_space = self._testing_intervention_spaces
         for visual_object in self._stage._visual_objects:
             if visual_object in intervention_space and \
-                    'position' in intervention_space[visual_object]:
+                    'cartesian_position' in intervention_space[visual_object]:
                 intervention_dict[visual_object] = dict()
-                intervention_dict[visual_object]['position'] = \
+                intervention_dict[visual_object]['cartesian_position'] = \
                     self._stage.random_position(
-                        height_limits=intervention_space[visual_object]['position'][:, 2],
-                        radius_limits=intervention_space[visual_object]['position'][:, 0],
-                        angle_limits=intervention_space[visual_object]['position'][:, 1])
+                        height_limits=intervention_space[visual_object]['cartesian_position'][:, 2],
+                        radius_limits=intervention_space[visual_object]['cartesian_position'][:, 0],
+                        angle_limits=intervention_space[visual_object]['cartesian_position'][:, 1])
         return intervention_dict
 
     # def reset_default_state(self):
@@ -259,9 +259,9 @@ class BaseTask(object):
     #     :return:
     #     """
     #     self.stage.remove_everything()
-    #     self.task_stage_observation_keys = []
+    #     self._task_stage_observation_keys = []
     #     self.robot.tri_finger.reset_world()
-    #     self.task_stage_observation_keys = []
+    #     self._task_stage_observation_keys = []
     #     self.initial_state = dict(self.default_state)
     #     self._set_up_stage_arena()
     #     self._set_testing_intervention_spaces()
@@ -284,38 +284,32 @@ class BaseTask(object):
         #and orientation modification
         for rigid_object in self._stage._rigid_objects:
             self._training_intervention_spaces[rigid_object] = dict()
-            self._training_intervention_spaces[rigid_object]['position'] = \
+            self._training_intervention_spaces[rigid_object]['cartesian_position'] = \
                 np.array([self._stage._floor_inner_bounding_box[0],
                           (self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
                           self._stage._floor_inner_bounding_box[0]])
-            self._training_intervention_spaces[rigid_object]['size'] = \
-                np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-# =======
-#                 np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.3]])
-#             if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
-#                 self.training_intervention_spaces[rigid_object]['size'] = \
-#                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-# >>>>>>> origin/master
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'] = \
+                np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
+            if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
+                self._training_intervention_spaces[rigid_object]['size'] = \
+                    np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self._training_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
             self._training_intervention_spaces[rigid_object]['mass'] = \
                 np.array([0.05, 0.1])
         for visual_object in self._stage._visual_objects:
             self._training_intervention_spaces[visual_object] = dict()
-            self._training_intervention_spaces[visual_object]['position'] = \
+            self._training_intervention_spaces[visual_object]['cartesian_position'] = \
                 np.array([self._stage._floor_inner_bounding_box[0],
                           (self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
                           self._stage._floor_inner_bounding_box[0]])
-            self._training_intervention_spaces[visual_object]['size'] = \
-                np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-# =======
-#                 np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.15]])
-#             if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
-#                 self.training_intervention_spaces[visual_object]['size'] = \
-#                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-# >>>>>>> origin/master
+            self._training_intervention_spaces[visual_object]['cylindrical_position'] = \
+                np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
+            if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
+                self._training_intervention_spaces[visual_object]['size'] = \
+                    np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self._training_intervention_spaces[visual_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self._training_intervention_spaces['floor_color'] = \
@@ -348,38 +342,32 @@ class BaseTask(object):
         # and orientation modification
         for rigid_object in self._stage._rigid_objects:
             self._testing_intervention_spaces[rigid_object] = dict()
-            self._testing_intervention_spaces[rigid_object]['position'] = \
+            self._testing_intervention_spaces[rigid_object]['cartesian_position'] = \
                 np.array([(self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
                           self._stage._floor_inner_bounding_box[0],
                           self._stage._floor_inner_bounding_box[1]])
-            self._testing_intervention_spaces[rigid_object]['size'] = \
-                np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-# =======
-#                 np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
-#             if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
-#                 self.testing_intervention_spaces[rigid_object]['size'] = \
-#                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-# >>>>>>> origin/master
+            self._testing_intervention_spaces[rigid_object]['cylindrical_position'] = \
+                np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
+            if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
+                self._testing_intervention_spaces[rigid_object]['size'] = \
+                    np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self._testing_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
             self._testing_intervention_spaces[rigid_object]['mass'] = \
                 np.array([0.1, 0.2])
         for visual_object in self._stage._visual_objects:
             self._testing_intervention_spaces[visual_object] = dict()
-            self._testing_intervention_spaces[visual_object]['position'] = \
+            self._testing_intervention_spaces[visual_object]['cartesian_position'] = \
                 np.array([(self._stage._floor_inner_bounding_box[1] -
                            self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
                           self._stage._floor_inner_bounding_box[0],
                           self._stage._floor_inner_bounding_box[1]])
-            self._testing_intervention_spaces[visual_object]['size'] = \
-                np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-# =======
-#                 np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
-#             if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
-#                 self.testing_intervention_spaces[visual_object]['size'] = \
-#                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-# >>>>>>> origin/master
+            self._testing_intervention_spaces[visual_object]['cylindrical_position'] = \
+                np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
+            if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
+                self._testing_intervention_spaces[visual_object]['size'] = \
+                    np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self._testing_intervention_spaces[visual_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self._testing_intervention_spaces['floor_color'] = \
@@ -505,8 +493,6 @@ class BaseTask(object):
         """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
-        # TODO: this is to avoid computing those things twice for the info dict but should be refactored soon.
-
         if not self._task_params['is_goal_distance_dense']:
             #TODO: not exactly right, but its a limitation of HER
             if self._check_preliminary_success(goal_distance):
@@ -810,15 +796,7 @@ class BaseTask(object):
                         return False
                 else:
                     for sub_variable_name in interventions_dict[intervention]:
-                        # TODO: not happy with this hack but there is probably no other workaround without
-                        #  translating everything to polar coordinates (not optimal for observation space)
-                        if sub_variable_name == 'position':
-                            cyl_position = cart2cyl(interventions_dict[intervention][sub_variable_name])
-                            if sub_variable_name in intervention_space[intervention] and \
-                                    ((intervention_space[intervention][sub_variable_name][0] > cyl_position).any()
-                                     or (intervention_space[intervention][sub_variable_name][1] < cyl_position).any()):
-                                return False
-                        elif sub_variable_name in intervention_space[intervention] and \
+                        if sub_variable_name in intervention_space[intervention] and \
                             ((intervention_space[intervention]
                             [sub_variable_name][0] >
                             interventions_dict[intervention][sub_variable_name]).any() or \

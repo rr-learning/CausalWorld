@@ -19,7 +19,7 @@ class PushingTaskGenerator(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([750, 250, 100])))
-        self.task_robot_observation_keys = ["time_left_for_task",
+        self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -69,15 +69,15 @@ class PushingTaskGenerator(BaseTask):
                          'orientation':  self._task_params
                          ["goal_block_orientation"]}
         self._stage.add_silhoutte_general_object(**creation_dict)
-        self.task_stage_observation_keys = ["tool_block_type",
+        self._task_stage_observation_keys = ["tool_block_type",
                                             "tool_block_size",
-                                            "tool_block_position",
+                                            "tool_block_cartesian_position",
                                             "tool_block_orientation",
                                             "tool_block_linear_velocity",
                                             "tool_block_angular_velocity",
                                             "goal_block_type",
                                             "goal_block_size",
-                                            "goal_block_position",
+                                            "goal_block_cartesian_position",
                                             "goal_block_orientation"]
         return
 
@@ -89,14 +89,14 @@ class PushingTaskGenerator(BaseTask):
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
             #TODO: make it a function of size
-            self._training_intervention_spaces[rigid_object]['position'][0][-1] \
+            self._training_intervention_spaces[rigid_object]['cartesian_position'][0][-1] \
                 = 0.0425
-            self._training_intervention_spaces[rigid_object]['position'][1][-1] \
+            self._training_intervention_spaces[rigid_object]['cartesian_position'][1][-1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._training_intervention_spaces[visual_object]['position'][0][-1] \
+            self._training_intervention_spaces[visual_object]['cartesian_position'][0][-1] \
                 = 0.0425
-            self._training_intervention_spaces[visual_object]['position'][1][-1] \
+            self._training_intervention_spaces[visual_object]['cartesian_position'][1][-1] \
                 = 0.0425
         return
 
@@ -107,14 +107,14 @@ class PushingTaskGenerator(BaseTask):
         """
         super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
-            self._testing_intervention_spaces[rigid_object]['position'][0][-1] \
+            self._testing_intervention_spaces[rigid_object]['cartesian_position'][0][-1] \
                 = 0.0425
-            self._testing_intervention_spaces[rigid_object]['position'][1][-1] \
+            self._testing_intervention_spaces[rigid_object]['cartesian_position'][1][-1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._testing_intervention_spaces[visual_object]['position'][0][-1] \
+            self._testing_intervention_spaces[visual_object]['cartesian_position'][0][-1] \
                 = 0.0425
-            self._testing_intervention_spaces[visual_object]['position'][1][-1] \
+            self._testing_intervention_spaces[visual_object]['cartesian_position'][1][-1] \
                 = 0.0425
         return
 
@@ -138,11 +138,11 @@ class PushingTaskGenerator(BaseTask):
         # 8) delta in joint velocities
         rewards = list()
         block_position = self._stage.get_object_state('tool_block',
-                                                     'position')
+                                                     'cartesian_position')
         block_orientation = self._stage.get_object_state('tool_block',
                                                         'orientation')
         goal_position = self._stage.get_object_state('goal_block',
-                                                    'position')
+                                                    'cartesian_position')
         goal_orientation = self._stage.get_object_state('goal_block',
                                                        'orientation')
         end_effector_positions = self._robot.compute_end_effector_positions(
@@ -209,7 +209,7 @@ class PushingTaskGenerator(BaseTask):
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
-            self._stage.get_object_state('tool_block', 'position')
+            self._stage.get_object_state('tool_block', 'cartesian_position')
         self.previous_object_orientation = \
             self._stage.get_object_state('tool_block', 'orientation')
         return

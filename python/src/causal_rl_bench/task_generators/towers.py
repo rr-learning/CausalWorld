@@ -19,7 +19,7 @@ class TowersGeneratorTask(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([])))
-        self.task_robot_observation_keys = ["time_left_for_task",
+        self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -74,7 +74,7 @@ class TowersGeneratorTask(BaseTask):
         joint_positions = self._robot.get_upper_joint_positions()
         self._robot.set_full_state(np.append(joint_positions,
                                              np.zeros(9)))
-        self.task_stage_observation_keys = []
+        self._task_stage_observation_keys = []
         block_size = tower_dims / number_of_blocks_in_tower
         curr_height = self._stage._floor_height - block_size[-1] / 2
         rigid_block_position = np.array([-0.12, -0.12, self._stage._floor_height + block_size[-1] / 2])
@@ -103,34 +103,34 @@ class TowersGeneratorTask(BaseTask):
                                      'mass': self.current_tool_block_mass,
                                      'size': block_size}
                     self._stage.add_rigid_general_object(**creation_dict)
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                    self._task_stage_observation_keys.append("tool_" + "level_" +
                                                             str(level) + "_col_" +
                                                             str(col) + "_row_" + str(row) + '_type')
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                    self._task_stage_observation_keys.append("tool_" + "level_" +
                                                             str(level) + "_col_" +
                                                             str(col) + "_row_" + str(row) + '_size')
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                    self._task_stage_observation_keys.append("tool_" + "level_" +
                                                             str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_position')
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                            str(col) + "_row_" + str(row) + '_cartesian_position')
+                    self._task_stage_observation_keys.append("tool_" + "level_" +
                                                             str(level) + "_col_" +
                                                             str(col) + "_row_" + str(row) + '_orientation')
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                    self._task_stage_observation_keys.append("tool_" + "level_" +
                                                             str(level) + "_col_" +
                                                             str(col) + "_row_" + str(row) + '_linear_velocity')
-                    self.task_stage_observation_keys.append("tool_" + "level_" +
+                    self._task_stage_observation_keys.append("tool_" + "level_" +
                                                             str(level) + "_col_" +
                                                             str(col) + "_row_" + str(row) + '_angular_velocity')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level) + "_col_" +
                                                             str(col) + "_row_" + str(row) + '_type')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level) + "_col_" +
                                                             str(col) + "_row_" + str(row) + '_size')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                              str(level) + "_col_" +
-                                                             str(col) + "_row_" + str(row) + '_position')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                             str(col) + "_row_" + str(row) + '_cartesian_position')
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                              str(level) + "_col_" +
                                                              str(col) + "_row_" + str(row) + '_orientation')
                     rigid_block_position[:2] += block_size[:2]

@@ -21,7 +21,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([])))
-        self.task_robot_observation_keys = ["time_left_for_task",
+        self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -84,22 +84,22 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                                                    ["blocks_min_size"], 3),
                                  'mass': self._task_params["tool_block_mass"]}
                 self._stage.add_rigid_general_object(**creation_dict)
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_type')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_size')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
-                                                        str(i) + '_position')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(i) + '_cartesian_position')
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_orientation')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_linear_velocity')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_angular_velocity')
                 if level in [0, self._task_params["num_of_levels"] - 1]:
@@ -113,16 +113,16 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                                      'size': np.repeat(self._task_params
                                                        ["blocks_min_size"], 3)}
                     self._stage.add_silhoutte_general_object(**creation_dict)
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level) + "_num_" +
                                                             str(i) + '_type')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level) + "_num_" +
                                                             str(i) + '_size')
-                    self.task_stage_observation_keys.append("goal_"+"level_"+
+                    self._task_stage_observation_keys.append("goal_"+"level_"+
                                                              str(level)+"_num_"+
-                                                             str(i)+'_position')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                             str(i)+'_cartesian_position')
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level) + "_num_" +
                                                             str(i) + '_orientation')
                 start_position += self._task_params["blocks_min_size"]
@@ -205,12 +205,12 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                                                 self._stage.get_arena_bb()[0],
                                                 self._stage.get_arena_bb()[1]))
                     self.current_number_of_obstacles += 1
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_type")
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_size")
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_position")
-                    self.task_stage_observation_keys.append("obstacle_" + str(i) + "_orientation")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_type")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_size")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_cartesian_position")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_orientation")
             if len(interventions_dict) == 1:
-                return True, False
+                return True, True
         if "max_level_width" in interventions_dict:
             self.current_max_level_width = interventions_dict["max_level_width"]
         if "blocks_min_size" in interventions_dict:
@@ -306,7 +306,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         """
         self.current_number_of_obstacles = 0
         self._stage.remove_everything()
-        self.task_stage_observation_keys = []
+        self._task_stage_observation_keys = []
         block_sizes, positions, chosen_y = self._generate_random_target(
             num_of_levels=num_of_levels,
             min_size=blocks_min_size,
@@ -349,22 +349,22 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                                        blocks_min_size
                                        + (-blocks_min_size
                                           / 2 + self._stage.get_floor_height())]
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_type')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_size')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
-                                                        str(i) + '_position')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                                                        str(i) + '_cartesian_position')
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_orientation')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_linear_velocity')
-                self.task_stage_observation_keys.append("tool_" + "level_" +
+                self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_angular_velocity')
                 if level_num in [0, num_of_levels - 1]:
@@ -373,16 +373,16 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                                      'position': np.array(silhouette_position),
                                      'size': np.array(block_sizes[level_num][i])}
                     self._stage.add_silhoutte_general_object(**creation_dict)
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level_num) + "_num_" +
                                                             str(i) + '_type')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level_num) + "_num_" +
                                                             str(i) + '_size')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level_num) + "_num_" +
-                                                            str(i) + '_position')
-                    self.task_stage_observation_keys.append("goal_" + "level_" +
+                                                            str(i) + '_cartesian_position')
+                    self._task_stage_observation_keys.append("goal_" + "level_" +
                                                             str(level_num) + "_num_" +
                                                             str(i) + '_orientation')
         self.current_stack_levels = num_of_levels

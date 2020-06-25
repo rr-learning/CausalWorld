@@ -20,7 +20,7 @@ class PickingTaskGenerator(BaseTask):
                                     np.array([250, 0, 125,
                                               0, 750, 0, 0,
                                               0.005])))
-        self.task_robot_observation_keys = ["time_left_for_task",
+        self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
@@ -70,15 +70,15 @@ class PickingTaskGenerator(BaseTask):
                          'orientation': self._task_params
                          ["tool_block_orientation"]}
         self._stage.add_silhoutte_general_object(**creation_dict)
-        self.task_stage_observation_keys = ["tool_block_type",
+        self._task_stage_observation_keys = ["tool_block_type",
                                             "tool_block_size",
-                                            "tool_block_position",
+                                            "tool_block_cartesian_position",
                                             "tool_block_orientation",
                                             "tool_block_linear_velocity",
                                             "tool_block_angular_velocity",
                                             "goal_block_type",
                                             "goal_block_size",
-                                            "goal_block_position",
+                                            "goal_block_cartesian_position",
                                             "goal_block_orientation"]
 
         return
@@ -90,17 +90,17 @@ class PickingTaskGenerator(BaseTask):
         """
         super(PickingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
-            self._training_intervention_spaces[rigid_object]['position'][0][
+            self._training_intervention_spaces[rigid_object]['cartesian_position'][0][
                 -1] \
                 = 0.0425
-            self._training_intervention_spaces[rigid_object]['position'][1][
+            self._training_intervention_spaces[rigid_object]['cartesian_position'][1][
                 -1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._training_intervention_spaces[visual_object]['position'][
+            self._training_intervention_spaces[visual_object]['cartesian_position'][
                 0][-1] \
                 = 0.08
-            self._training_intervention_spaces[visual_object]['position'][
+            self._training_intervention_spaces[visual_object]['cartesian_position'][
                 1][-1] \
                 = 0.20
         return
@@ -112,17 +112,17 @@ class PickingTaskGenerator(BaseTask):
         """
         super(PickingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
-            self._testing_intervention_spaces[rigid_object]['position'][0][
+            self._testing_intervention_spaces[rigid_object]['cartesian_position'][0][
                 -1] \
                 = 0.0425
-            self._testing_intervention_spaces[rigid_object]['position'][1][
+            self._testing_intervention_spaces[rigid_object]['cartesian_position'][1][
                 -1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._testing_intervention_spaces[visual_object]['position'][0][
+            self._testing_intervention_spaces[visual_object]['cartesian_position'][0][
                 -1] \
                 = 0.20
-            self._testing_intervention_spaces[visual_object]['position'][1][
+            self._testing_intervention_spaces[visual_object]['cartesian_position'][1][
                 -1] \
                 = 0.25
         return
@@ -145,9 +145,9 @@ class PickingTaskGenerator(BaseTask):
         #8) delta in joint velocities
         rewards = list()
         block_position = self._stage.get_object_state('tool_block',
-                                                     'position')
+                                                     'cartesian_position')
         target_height = self._stage.get_object_state('goal_block',
-                                                     'position')[-1]
+                                                     'cartesian_position')[-1]
         joint_velocities = self._robot.get_latest_full_state()['velocities']
         previous_block_to_goal = abs(self.previous_object_position[2] -
                                      target_height)
@@ -217,7 +217,7 @@ class PickingTaskGenerator(BaseTask):
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
-            self._stage.get_object_state('tool_block', 'position')
+            self._stage.get_object_state('tool_block', 'cartesian_position')
         self.previous_joint_velocities = \
             self._robot.get_latest_full_state()['velocities']
         return
@@ -257,12 +257,12 @@ class PickingTaskGenerator(BaseTask):
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
-        intervention_dict['goal_block']['position'] = \
+        intervention_dict['goal_block']['cartesian_position'] = \
             np.array(self._stage.get_rigid_objects()
                      ['tool_block'].get_initial_position())
-        intervention_dict['goal_block']['position'][-1] = \
-            np.random.uniform(intervention_space['goal_block']['position']
+        intervention_dict['goal_block']['cartesian_position'][-1] = \
+            np.random.uniform(intervention_space['goal_block']['cartesian_position']
                               [0][-1],
-                              intervention_space['goal_block']['position']
+                              intervention_space['goal_block']['cartesian_position']
                               [1][-1])
         return intervention_dict
