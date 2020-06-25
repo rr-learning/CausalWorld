@@ -32,9 +32,9 @@ def os_custom_keys_norm():
 
 
 lower_obs_space_structured_full = np.array([-math.radians(70), -math.radians(70),
-                                            -math.radians(160)] * 3 + [-20] * 3 * 3 +[-0.36, -0.36, -0.36] * 3)
+                                            -math.radians(160)] * 3 + [-50] * 3 * 3 +[-0.36, -0.36, -0.36] * 3)
 upper_obs_space_structured_full = np.array([math.radians(70), 0, math.radians(-2)] * 3
-                                           + [20] * 3 * 3 +[0.36, 0.36, 0.36] * 3)
+                                           + [50] * 3 * 3 +[0.36, 0.36, 0.36] * 3)
 
 upper_99_structured_norm = np.array([0.99] * 27)
 upper_100_structured_norm = np.array([1.0] * 27)
@@ -153,8 +153,3 @@ def test_add_and_remove_observation(os_custom_keys_norm):
     assert len(os_custom_keys_norm.get_observation_spaces().high) == 18
     assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
     assert (os_custom_keys_norm.get_observation_spaces().high == 1.).all()
-
-
-@pytest.mark.skip
-def test_get_current_observations():
-    assert False
