@@ -7,7 +7,7 @@ import numpy as np
 def example():
     task = task_generator(task_generator_id='picking')
     env = World(task=task, enable_visualization=True,
-                action_mode="joint_positions",
+                action_mode="joint_torques",
                 skip_frame=10)
     horizon = 10000
     # print(env.get_current_task_parameters())

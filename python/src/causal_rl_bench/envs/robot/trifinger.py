@@ -571,10 +571,6 @@ class TriFingerRobot(object):
                     "end_effector_positions",
                     observation_fn=self._compute_end_effector_positions)
             elif key == "action_joint_positions":
-                #check that its possible
-                if self._action_mode == "joint_torques":
-                    raise Exception("action_joint_positions is not supported "
-                                    "for joint torques action mode")
                 self._robot_observations.add_observation(
                     "action_joint_positions",
                     observation_fn=self._process_action_joint_positions)
