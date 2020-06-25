@@ -260,8 +260,8 @@ class GeneralGeneratorTask(BaseTask):
                                              orientations=[block_orientation])
                 self._robot.step_simulation()
                 trial_index += 1
-        self._robot.update_latest_full_state()
         self._robot.reset_state(
             joint_positions=self._robot.get_rest_pose()[0],
             joint_velocities=np.zeros([9, ]))
+        self._robot.update_latest_full_state()
         return

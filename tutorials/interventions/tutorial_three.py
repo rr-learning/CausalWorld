@@ -3,7 +3,7 @@ from causal_rl_bench.task_generators.task import task_generator
 
 
 def goal_interventions():
-    task = task_generator(task_generator_id='reaching')
+    task = task_generator(task_generator_id='picking')
     env = World(task=task, enable_visualization=True)
     env.reset()
     for _ in range(10):

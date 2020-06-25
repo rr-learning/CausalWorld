@@ -101,4 +101,3 @@ if __name__ == '__main__':
                  total_time_steps=60000000,
                  validate_every_timesteps=1000000,
                  task_name=task_name)
-

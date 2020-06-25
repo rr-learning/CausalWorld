@@ -1,6 +1,7 @@
 from causal_rl_bench.utils.task_utils import get_suggested_grip_locations
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
+from causal_rl_bench.utils.rotation_utils import cyl2cart
 import numpy as np
 import unittest
 
@@ -180,7 +181,8 @@ class TestPicking(unittest.TestCase):
                     #TODO: this shouldnt be the case when the benchmark is complete
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:
-                        assert np.array_equal(new_goal['goal_block']['cartesian_position'],
+                        assert np.array_equal(cyl2cart(new_goal['goal_block']
+                                              ['cylindrical_position']),
                                               obs[-7:-4])
                 env.reset()
 

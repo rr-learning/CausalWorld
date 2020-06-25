@@ -1,4 +1,5 @@
 from causal_rl_bench.task_generators.task import task_generator
+from causal_rl_bench.utils.rotation_utils import cyl2cart
 from causal_rl_bench.envs.world import World
 import numpy as np
 import unittest
@@ -110,7 +111,8 @@ class TestPickAndPlace(unittest.TestCase):
                     #TODO: this shouldnt be the case when the benchmark is complete
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:
-                        assert np.array_equal(new_goal['goal_block']['cartesian_position'], obs[-18:-15])
+                        assert np.array_equal(cyl2cart(new_goal['goal_block']
+                                              ['cylindrical_position']), obs[-18:-15])
                 env.reset()
 
         env.close()
