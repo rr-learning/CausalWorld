@@ -26,6 +26,14 @@ def cart2cyl(position):
     phi = np.arctan2(y, x)
     return np.array([rho, phi, z])
 
+
+def cyl2cart(position):
+    x = position[0]*np.cos(position[1])
+    y = position[0]*np.sin(position[1])
+    z = position[2]
+    return np.array([x, y, z])
+
+
 def quaternion_mul(q0, q1):
     x0 = q0[:, 0]
     y0 = q0[:, 1]

@@ -28,5 +28,5 @@ class ProtocolWrapper(gym.Wrapper):
         observation = self.env.reset()
         if interventions_dict is not None:
             self.env.do_intervention(interventions_dict)
-            observation = self.env.task.filter_structured_observations()
+            observation = self.env._task.filter_structured_observations()
         return observation

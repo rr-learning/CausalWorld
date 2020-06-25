@@ -38,8 +38,8 @@ def load_world(tracker_relative_path, enable_visualization=False):
     tracker = Tracker(file_path=os.path.join(tracker_relative_path,
                                              'tracker'))
     task_stats = tracker.task_stats_log[0]
-    task = task_generator(task_generator_id=task_stats.task_name,
-                          **task_stats.task_params)
+    task = task_generator(task_generator_id=task_stats._task_name,
+                          **task_stats._task_params)
     env = World(task, **tracker.world_params,
                 enable_visualization=enable_visualization)
     for wrapper in tracker.world_params['wrappers']:

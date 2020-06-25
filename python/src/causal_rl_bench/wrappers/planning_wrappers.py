@@ -29,20 +29,20 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
         interventions_dict['joint_positions'] = self.low_joint_positions
         interventions_dict[self.selected_object] = dict()
         if self.current_action[1] != 0:
-            interventions_dict[self.selected_object]['position'] = \
-                variables_dict[self.selected_object]['position']
+            interventions_dict[self.selected_object]['cartesian_position'] = \
+                variables_dict[self.selected_object]['cartesian_position']
             if self.current_action[1] == 1:
-                interventions_dict[self.selected_object]['position'][-1] += 0.002
+                interventions_dict[self.selected_object]['cartesian_position'][-1] += 0.002
             elif self.current_action[1] == 2:
-                interventions_dict[self.selected_object]['position'][-1] -= 0.002
+                interventions_dict[self.selected_object]['cartesian_position'][-1] -= 0.002
             elif self.current_action[1] == 3:
-                interventions_dict[self.selected_object]['position'][0] += 0.002
+                interventions_dict[self.selected_object]['cartesian_position'][0] += 0.002
             elif self.current_action[1] == 4:
-                interventions_dict[self.selected_object]['position'][0] -= 0.002
+                interventions_dict[self.selected_object]['cartesian_position'][0] -= 0.002
             elif self.current_action[1] == 5:
-                interventions_dict[self.selected_object]['position'][1] += 0.002
+                interventions_dict[self.selected_object]['cartesian_position'][1] += 0.002
             elif self.current_action[1] == 6:
-                interventions_dict[self.selected_object]['position'][1] -= 0.002
+                interventions_dict[self.selected_object]['cartesian_position'][1] -= 0.002
             else:
                 raise Exception("The passed action mode is not supported")
         if self.current_action[2] != 0:
@@ -103,7 +103,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
         curr_variables = self.env.get_current_task_parameters()
         new_observations = []
         for observation_var in self.observations_order:
-            new_observations.append(curr_variables[observation_var]['position'])
+            new_observations.append(curr_variables[observation_var]['cartesian_position'])
             new_observations.append(quaternion_to_euler(curr_variables[observation_var]['orientation']))
             new_observations.append(curr_variables[observation_var]['size'])
         return np.array(new_observations).flatten(), reward, done, info

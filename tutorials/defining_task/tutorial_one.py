@@ -14,13 +14,13 @@ class MyOwnTask(BaseTask):
     #This is not even needed, it will just be an empty stage
     def _set_up_stage_arena(self):
         creation_dict = {'name': "tool_block",
-                         'filename': './assets/719.obj'}
-        self.stage.add_rigid_mesh_object(**creation_dict)
-        self._creation_list.append([self.stage.add_rigid_mesh_object, creation_dict])
+                         'filename': './assets/719.obj',
+                         'initial_position': [0, 0, 0.1]}
+        self._stage.add_rigid_mesh_object(**creation_dict)
         creation_dict = {'name': "goal_block",
-                         'filename': './assets/719.obj'}
-        self.stage.add_silhoutte_mesh_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_mesh_object, creation_dict])
+                         'filename': './assets/719.obj',
+                         'position': [0, 0, 0.1]}
+        self._stage.add_silhoutte_mesh_object(**creation_dict)
 
 
 def example():
@@ -28,8 +28,9 @@ def example():
     env = World(task=task, enable_visualization=True)
     env.reset()
     for _ in range(2000):
-        obs, reward, done, info = \
-            env.step(env.action_space.sample())
+        for _ in range(10):
+            obs, reward, done, info = \
+                env.step(env.action_space.sample())
         random_intervention_dict = env.do_single_random_intervention()
     env.close()
 

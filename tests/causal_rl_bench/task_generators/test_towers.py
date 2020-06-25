@@ -49,8 +49,7 @@ class TestTowers(unittest.TestCase):
         actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
-        self.env.do_intervention(new_goal)
-        self.env.reset()
+        self.env.reset(interventions_dict=new_goal)
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             observations_1.append(obs)
@@ -83,7 +82,7 @@ class TestTowers(unittest.TestCase):
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             if i == 50:
-                success_signal = self.env.do_intervention({'tool_level_0_col_0_row_0': {'position': [0, 0, 2]}})
+                success_signal = self.env.do_intervention({'tool_level_0_col_0_row_0': {'cartesian_position': [0, 0, 2]}})
         observations_2 = []
         rewards_2 = []
         self.env.reset()

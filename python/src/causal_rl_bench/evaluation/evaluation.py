@@ -42,9 +42,12 @@ class EvaluationPipeline(object):
                                        intervention_split=intervention_split,
                                        training=training)
         if tracker_path:
-            if world_params is not None:
-                if 'seed' in self.tracker.world_params:
-                    del self.tracker.world_params['seed']
+            if 'seed' in self.tracker.world_params:
+                del self.tracker.world_params['seed']
+            if 'simulation_time' in self.tracker.world_params:
+                del self.tracker.world_params['simulation_time']
+            if 'wrappers' in self.tracker.world_params:
+                del self.tracker.world_params['wrappers']
             self.env = World(self.task,
                              **self.tracker.world_params,
                              seed=self.initial_seed,
@@ -64,7 +67,7 @@ class EvaluationPipeline(object):
                                  seed=self.initial_seed,
                                  data_recorder=self.data_recorder,
                                  enable_visualization=visualize_evaluation)
-        evaluation_episode_length_in_secs = self.task.get_max_episode_length()
+        evaluation_episode_length_in_secs = self.task.get_default_max_episode_length()
         self.time_steps_for_evaluation = \
             int(evaluation_episode_length_in_secs / self.env.dt)
 
@@ -102,7 +105,7 @@ class EvaluationPipeline(object):
         pipeline_scores = dict()
         for evaluation_protocol in self.evaluation_protocols:
             self.evaluation_env = ProtocolWrapper(self.env, evaluation_protocol)
-            evaluation_protocol.init_protocol(env=self.evaluation_env,
+            evaluation_protocol.init_protocol(env=self.env,
                                               tracker=self.env.get_tracker())
             episodes_in_protocol = evaluation_protocol.get_num_episodes()
             for _ in range(episodes_in_protocol):
@@ -121,7 +124,6 @@ class EvaluationPipeline(object):
             pipeline_scores[evaluation_protocol.get_name()] = scores
             self.reset_metric_scores()
         self.evaluation_env.close()
-        self.env.close()
         self.pipeline_scores = pipeline_scores
         return pipeline_scores
 

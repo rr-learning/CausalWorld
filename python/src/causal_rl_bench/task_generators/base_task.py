@@ -1,8 +1,10 @@
 import numpy as np
 import math
+import copy
 from causal_rl_bench.utils.state_utils import get_bounding_box_area
 from causal_rl_bench.utils.state_utils import get_intersection
 from causal_rl_bench.utils.rotation_utils import cart2cyl
+import pybullet
 
 
 class BaseTask(object):
@@ -21,48 +23,106 @@ class BaseTask(object):
         :param is_goal_distance_dense:
         :param calculate_additional_dense_rewards:
         """
-        self.robot = None
-        self.stage = None
-        self.task_solved = False
-        self.task_name = task_name
-        self.task_robot_observation_keys = []
-        self.task_stage_observation_keys = []
+        self._robot = None
+        self._stage = None
+        self._task_solved = False
+        self._task_name = task_name
+        self._task_robot_observation_keys = []
+        self._task_stage_observation_keys = []
         # the helper keys are observations that are not included in the task observations but it will be needed in reward
         # calculation or new observations calculation
         self._robot_observation_helper_keys = []
         self._stage_observation_helper_keys = []
         self._non_default_robot_observation_funcs = dict()
         self._non_default_stage_observation_funcs = dict()
-        self.current_full_observations_dict = dict()
-        self.task_params = dict()
-        self.task_params["task_name"] = self.task_name
-        self.task_params["sparse_reward_weight"] = sparse_reward_weight
-        self.task_params["dense_reward_weights"] = dense_reward_weights
-        self.time_steps_elapsed_since_success = 0
-        self.task_params['time_threshold_in_goal_state_secs'] = 0.1
-        self.current_time_secs = 0
-        self.training_intervention_spaces = dict()
-        self.testing_intervention_spaces = dict()
-        self.initial_state = dict()
-        self.default_state = dict()
-        self.finished_episode = False
-        self.task_params['intervention_split'] = intervention_split
-        self.task_params['training'] = training
-        self.task_params['is_goal_distance_dense'] = is_goal_distance_dense
-        self.task_params['calculate_additional_dense_rewards'] = \
+        self._current_full_observations_dict = dict()
+        self._task_params = dict()
+        self._task_params["task_name"] = self._task_name
+        self._task_params["sparse_reward_weight"] = sparse_reward_weight
+        self._task_params["dense_reward_weights"] = dense_reward_weights
+        self._training_intervention_spaces = dict()
+        self._testing_intervention_spaces = dict()
+        self._task_params['intervention_split'] = intervention_split
+        self._task_params['training'] = training
+        self._task_params["joint_positions"] = None
+        self._task_params['is_goal_distance_dense'] = is_goal_distance_dense
+        self._task_params['calculate_additional_dense_rewards'] = \
             calculate_additional_dense_rewards
-        self._creation_list = []
-        self.fractional_reward = 0
-        self.desired_goal = None
-        self.achieved_goal = None
+        self._current_starting_state = dict()
+        self._default_starting_state = dict()
+        self._empty_stage = None
+        self._current_desired_goal = None
+        self._current_achieved_goal = None
+        self._current_goal_distance = None
+        self._max_episode_length = None
         return
+
+    def _save_pybullet_state(self):
+        pybullet_state = dict()
+        if self._stage._pybullet_client_full_id is not None:
+                pybullet_state['full'] = pybullet.\
+                    saveState(physicsClientId=self._stage._pybullet_client_full_id)
+        if self._stage._pybullet_client_w_goal_id is not None:
+                pybullet_state['w_goal'] = pybullet.\
+                    saveState(physicsClientId=self._stage._pybullet_client_w_goal_id)
+        if self._stage._pybullet_client_w_o_goal_id is not None:
+            pybullet_state['w_o_goal'] = pybullet. \
+                saveState(physicsClientId=self._stage._pybullet_client_w_o_goal_id)
+        return pybullet_state
+
+    def _restore_pybullet_state(self, pybullet_state):
+        if self._stage._pybullet_client_full_id is not None:
+                pybullet.\
+                    restoreState(pybullet_state['full'],
+                                 physicsClientId=self._stage._pybullet_client_full_id)
+        if self._stage._pybullet_client_w_goal_id is not None:
+                pybullet.\
+                    restoreState(pybullet_state['w_goal'],
+                                 physicsClientId=self._stage._pybullet_client_w_goal_id)
+        if self._stage._pybullet_client_w_o_goal_id is not None:
+            pybullet. \
+                restoreState(pybullet_state['w_o_goal'],
+                             physicsClientId=self._stage._pybullet_client_w_o_goal_id)
+        return
+
+    def _save_state(self):
+        state = dict()
+        state['stage_object_state'] = \
+            self._stage.get_full_env_state()
+        state['robot_object_state'] = \
+            self._robot.get_full_env_state()
+        state['task_observations'] = \
+            copy.deepcopy(self._task_stage_observation_keys)
+        return state
+
+    def _restore_state(self, state_dict):
+        #remove everything in the arena
+        #old number of rigid objects and number of visual objects
+        old_number_of_rigid_objects = len(self._stage.get_rigid_objects())
+        old_number_of_visual_objects = len(self._stage.get_visual_objects())
+        reset_observation_space = False
+        self._stage.remove_everything()
+        self._restore_pybullet_state(self._empty_stage)
+        self._robot.set_full_env_state(state_dict
+                                      ['robot_object_state'])
+        self._stage.set_full_env_state(
+            state_dict['stage_object_state'])
+        new_number_of_rigid_objects = len(self._stage.get_rigid_objects())
+        new_number_of_visual_objects = len(self._stage.get_visual_objects())
+        if old_number_of_rigid_objects != new_number_of_rigid_objects:
+            reset_observation_space = True
+        if old_number_of_visual_objects != new_number_of_visual_objects:
+            reset_observation_space = True
+        self._task_stage_observation_keys = state_dict['task_observations']
+        return reset_observation_space
 
     def is_in_training_mode(self):
         """
 
         :return:
         """
-        if self.task_params['intervention_split'] and self.task_params['training']:
+        if self._task_params['intervention_split'] and \
+                self._task_params['training']:
             return True
         else:
             return False
@@ -72,7 +132,7 @@ class BaseTask(object):
 
         :return:
         """
-        self.task_params['is_goal_distance_dense'] = True
+        self._task_params['is_goal_distance_dense'] = True
 
     def get_description(self):
         """
@@ -134,19 +194,21 @@ class BaseTask(object):
         :return:
         """
         info = dict()
-        info['fractional_reward'] = self.fractional_reward
-        info['desired_goal'] = self.desired_goal
-        info['achieved_goal'] = self.achieved_goal
+        info['desired_goal'] = self._current_desired_goal
+        info['achieved_goal'] = self._current_achieved_goal
+        info['success'] = self._task_solved
         info['possible_solution_intervention'] = dict()
-        for rigid_object in self.stage.rigid_objects:
+        for rigid_object in self._stage._rigid_objects:
             #check if there is an equivilant visual object corresponding
             possible_corresponding_goal = rigid_object.replace('tool', 'goal')
-            if possible_corresponding_goal in self.stage.visual_objects:
+            if possible_corresponding_goal in self._stage._visual_objects:
                 info['possible_solution_intervention'][rigid_object] = dict()
-                info['possible_solution_intervention'][rigid_object]['position'] = \
-                    self.stage.get_object_state(possible_corresponding_goal, 'position')
+                info['possible_solution_intervention'][rigid_object]['cartesian_position'] = \
+                    self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
                 info['possible_solution_intervention'][rigid_object]['orientation'] = \
-                    self.stage.get_object_state(possible_corresponding_goal, 'orientation')
+                    self._stage.get_object_state(possible_corresponding_goal, 'orientation')
+        info['ground_truth_scm_variables_values'] = self.get_current_scm_values()
+        info['fractional_success'] = self._current_goal_distance
         return info
 
     def _update_task_state(self, update_task_state_dict):
@@ -177,34 +239,37 @@ class BaseTask(object):
         #Need to generalize this
         intervention_dict = dict()
         if training:
-            intervention_space = self.training_intervention_spaces
+            intervention_space = self._training_intervention_spaces
         else:
-            intervention_space = self.testing_intervention_spaces
-        for visual_object in self.stage.visual_objects:
+            intervention_space = self._testing_intervention_spaces
+        for visual_object in self._stage._visual_objects:
             if visual_object in intervention_space and \
-                    'position' in intervention_space[visual_object]:
+                    'cylindrical_position' in intervention_space[visual_object]:
                 intervention_dict[visual_object] = dict()
-                intervention_dict[visual_object]['position'] = \
-                    self.stage.random_position(
-                        height_limits=intervention_space[visual_object]['position'][:, 2],
-                        radius_limits=intervention_space[visual_object]['position'][:, 0],
-                        angle_limits=intervention_space[visual_object]['position'][:, 1])
+                intervention_dict[visual_object]['cylindrical_position'] = \
+                    cart2cyl(self._stage.random_position(
+                        height_limits=intervention_space[visual_object]
+                                      ['cylindrical_position'][:, 2],
+                        radius_limits=intervention_space[visual_object]
+                                      ['cylindrical_position'][:, 0],
+                        angle_limits=intervention_space[visual_object]
+                                     ['cylindrical_position'][:, 1]))
         return intervention_dict
 
-    def reset_default_state(self):
-        """
-
-        :return:
-        """
-        self.stage.remove_everything()
-        self.task_stage_observation_keys = []
-        self.robot.tri_finger.reset_world()
-        self.task_stage_observation_keys = []
-        self.initial_state = dict(self.default_state)
-        self._set_up_stage_arena()
-        self._set_testing_intervention_spaces()
-        self._set_training_intervention_spaces()
-        self.stage.finalize_stage()
+    # def reset_default_state(self):
+    #     """
+    #
+    #     :return:
+    #     """
+    #     self.stage.remove_everything()
+    #     self._task_stage_observation_keys = []
+    #     self.robot.tri_finger.reset_world()
+    #     self._task_stage_observation_keys = []
+    #     self.initial_state = dict(self.default_state)
+    #     self._set_up_stage_arena()
+    #     self._set_testing_intervention_spaces()
+    #     self._set_training_intervention_spaces()
+    #     self.stage.finalize_stage()
 
     def _set_training_intervention_spaces(self):
         """
@@ -212,45 +277,55 @@ class BaseTask(object):
         :return:
         """
         #you can override these easily
-        self.training_intervention_spaces = dict()
-        self.training_intervention_spaces['joint_positions'] = \
+        self._training_intervention_spaces = dict()
+        self._training_intervention_spaces['joint_positions'] = \
             np.array([[-math.radians(70), -math.radians(70),
                        -math.radians(160)] * 3,
                       [math.radians(40), -math.radians(20),
                        -math.radians(30)] * 3])
         #any goal or object in arena put the position
         #and orientation modification
-        for rigid_object in self.stage.rigid_objects:
-            self.training_intervention_spaces[rigid_object] = dict()
-            self.training_intervention_spaces[rigid_object]['position'] = \
-                np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.3]])
-            if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
-                self.training_intervention_spaces[rigid_object]['size'] = \
+        for rigid_object in self._stage._rigid_objects:
+            self._training_intervention_spaces[rigid_object] = dict()
+            # self._training_intervention_spaces[rigid_object]['cartesian_position'] = \
+            #     np.array([self._stage._floor_inner_bounding_box[0],
+            #               (self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0]])
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'] = \
+                np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
+            if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
+                self._training_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-            self.training_intervention_spaces[rigid_object]['color'] = \
+            self._training_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-            self.training_intervention_spaces[rigid_object]['mass'] = \
+            self._training_intervention_spaces[rigid_object]['mass'] = \
                 np.array([0.05, 0.1])
-        for visual_object in self.stage.visual_objects:
-            self.training_intervention_spaces[visual_object] = dict()
-            self.training_intervention_spaces[visual_object]['position'] = \
-                np.array([[0.0, - math.pi, self.stage.floor_height], [0.09, math.pi, 0.15]])
-            if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
-                self.training_intervention_spaces[visual_object]['size'] = \
+        for visual_object in self._stage._visual_objects:
+            self._training_intervention_spaces[visual_object] = dict()
+            # self._training_intervention_spaces[visual_object]['cartesian_position'] = \
+            #     np.array([self._stage._floor_inner_bounding_box[0],
+            #               (self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0]])
+            self._training_intervention_spaces[visual_object]['cylindrical_position'] = \
+                np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
+            if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
+                self._training_intervention_spaces[visual_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-            self.training_intervention_spaces[visual_object]['color'] = \
+            self._training_intervention_spaces[visual_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-        self.training_intervention_spaces['floor_color'] = \
+        self._training_intervention_spaces['floor_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-        self.training_intervention_spaces['stage_color'] = \
+        self._training_intervention_spaces['stage_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-        self.training_intervention_spaces['floor_friction'] = \
+        self._training_intervention_spaces['floor_friction'] = \
             np.array([0.3, 0.8])
-        for link in self.robot.link_ids:
-            self.training_intervention_spaces[link] = dict()
-            self.training_intervention_spaces[link]['color'] = \
+        for link in self._robot.get_link_names():
+            self._training_intervention_spaces[link] = dict()
+            self._training_intervention_spaces[link]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-            self.training_intervention_spaces[link]['mass'] = \
+            self._training_intervention_spaces[link]['mass'] = \
                 np.array([0.2, 0.6])
         return
 
@@ -260,45 +335,55 @@ class BaseTask(object):
         :return:
         """
         # you can override these easily
-        self.testing_intervention_spaces = dict()
-        self.testing_intervention_spaces['joint_positions'] = \
+        self._testing_intervention_spaces = dict()
+        self._testing_intervention_spaces['joint_positions'] = \
             np.array([[math.radians(40), -math.radians(20),
                        -math.radians(30)] * 3,
                       [math.radians(70), 0,
                        math.radians(-2)] * 3])
         # any goal or object in arena put the position
         # and orientation modification
-        for rigid_object in self.stage.rigid_objects:
-            self.testing_intervention_spaces[rigid_object] = dict()
-            self.testing_intervention_spaces[rigid_object]['position'] = \
-                np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
-            if self.stage.rigid_objects[rigid_object].__class__.__name__ == 'Cuboid':
-                self.testing_intervention_spaces[rigid_object]['size'] = \
+        for rigid_object in self._stage._rigid_objects:
+            self._testing_intervention_spaces[rigid_object] = dict()
+            # self._testing_intervention_spaces[rigid_object]['cartesian_position'] = \
+            #     np.array([(self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0],
+            #               self._stage._floor_inner_bounding_box[1]])
+            self._testing_intervention_spaces[rigid_object]['cylindrical_position'] = \
+                np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
+            if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
+                self._testing_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-            self.testing_intervention_spaces[rigid_object]['color'] = \
+            self._testing_intervention_spaces[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-            self.testing_intervention_spaces[rigid_object]['mass'] = \
+            self._testing_intervention_spaces[rigid_object]['mass'] = \
                 np.array([0.1, 0.2])
-        for visual_object in self.stage.visual_objects:
-            self.testing_intervention_spaces[visual_object] = dict()
-            self.testing_intervention_spaces[visual_object]['position'] = \
-                np.array([[0.09, - math.pi, self.stage.floor_height], [0.15, math.pi, 0.3]])
-            if self.stage.visual_objects[visual_object].__class__.__name__ == 'SCuboid':
-                self.testing_intervention_spaces[visual_object]['size'] = \
+        for visual_object in self._stage._visual_objects:
+            self._testing_intervention_spaces[visual_object] = dict()
+            # self._testing_intervention_spaces[visual_object]['cartesian_position'] = \
+            #     np.array([(self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0],
+            #               self._stage._floor_inner_bounding_box[1]])
+            self._testing_intervention_spaces[visual_object]['cylindrical_position'] = \
+                np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
+            if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
+                self._testing_intervention_spaces[visual_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-            self.testing_intervention_spaces[visual_object]['color'] = \
+            self._testing_intervention_spaces[visual_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-        self.testing_intervention_spaces['floor_color'] = \
+        self._testing_intervention_spaces['floor_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-        self.testing_intervention_spaces['stage_color'] = \
+        self._testing_intervention_spaces['stage_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-        self.testing_intervention_spaces['floor_friction'] = \
+        self._testing_intervention_spaces['floor_friction'] = \
             np.array([0.6, 0.8])
-        for link in self.robot.link_ids:
-            self.testing_intervention_spaces[link] = dict()
-            self.testing_intervention_spaces[link]['color'] = \
+        for link in self._robot.get_link_names():
+            self._testing_intervention_spaces[link] = dict()
+            self._testing_intervention_spaces[link]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-            self.testing_intervention_spaces[link]['mass'] = \
+            self._testing_intervention_spaces[link]['mass'] = \
                 np.array([0.6, 0.8])
         return
 
@@ -308,8 +393,8 @@ class BaseTask(object):
         :return:
         """
         desired_goal = []
-        for visual_goal in self.stage.visual_objects:
-            desired_goal.append(self.stage.visual_objects[visual_goal]
+        for visual_goal in self._stage._visual_objects:
+            desired_goal.append(self._stage._visual_objects[visual_goal]
                                 .get_bounding_box())
         return np.array(desired_goal)
 
@@ -319,9 +404,9 @@ class BaseTask(object):
         :return:
         """
         achieved_goal = []
-        for rigid_object in self.stage.rigid_objects:
-            if self.stage.rigid_objects[rigid_object].is_not_fixed:
-                achieved_goal.append(self.stage.rigid_objects
+        for rigid_object in self._stage._rigid_objects:
+            if self._stage._rigid_objects[rigid_object].is_not_fixed:
+                achieved_goal.append(self._stage._rigid_objects
                                      [rigid_object].get_bounding_box())
         return np.array(achieved_goal)
 
@@ -356,11 +441,9 @@ class BaseTask(object):
         """
         preliminary_success = self._check_preliminary_success(goal_distance)
         if preliminary_success:
-            self.task_solved = True
-            self.time_steps_elapsed_since_success += 1
+            self._task_solved = True
         else:
-            self.task_solved = False
-            self.time_steps_elapsed_since_success = 0
+            self._task_solved = False
         return
 
     def _check_preliminary_success(self, goal_distance):
@@ -379,32 +462,28 @@ class BaseTask(object):
 
         :return:
         """
-        desired_goal = self.get_desired_goal()
-        achieved_goal = self.get_achieved_goal()
-        goal_distance = self._goal_distance(desired_goal=desired_goal,
-                                            achieved_goal=achieved_goal)
-        # TODO: this is to avoid computing those things twice for the info dict but should be refactored soon.
-        self.fractional_reward = goal_distance
-        self.desired_goal = desired_goal
-        self.achieved_goal = achieved_goal
-
-        self._update_success(goal_distance)
-        if not self.task_params['is_goal_distance_dense']:
-            if self.is_done():
+        self._current_desired_goal = self.get_desired_goal()
+        self._current_achieved_goal = self.get_achieved_goal()
+        self._current_goal_distance = self._goal_distance(desired_goal=self._current_desired_goal,
+                                                          achieved_goal=self._current_achieved_goal)
+        goal_distance = self._current_goal_distance
+        self._update_success(self._current_goal_distance)
+        if not self._task_params['is_goal_distance_dense']:
+            if self._task_solved:
                 goal_distance = 1
             else:
                 goal_distance = -1
-        if self.task_params['calculate_additional_dense_rewards']:
+        if self._task_params['calculate_additional_dense_rewards']:
             dense_rewards, update_task_state_dict = \
-                self._calculate_dense_rewards(achieved_goal=achieved_goal,
-                                              desired_goal=desired_goal)
+                self._calculate_dense_rewards(achieved_goal=self._current_achieved_goal,
+                                              desired_goal=self._current_desired_goal)
             reward = np.sum(np.array(dense_rewards) *
-                            self.task_params["dense_reward_weights"]) \
-                            + goal_distance * \
-                     self.task_params["sparse_reward_weight"]
+                            self._task_params["dense_reward_weights"]) \
+                        + goal_distance * \
+                        self._task_params["sparse_reward_weight"]
             self._update_task_state(update_task_state_dict)
         else:
-            reward = goal_distance * self.task_params["sparse_reward_weight"]
+            reward = goal_distance * self._task_params["sparse_reward_weight"]
         return reward
 
     def compute_reward(self, achieved_goal, desired_goal, info):
@@ -417,47 +496,59 @@ class BaseTask(object):
         """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
-        # TODO: this is to avoid computing those things twice for the info dict but should be refactored soon.
-        self.fractional_reward = goal_distance
-        self.desired_goal = desired_goal
-        self.achieved_goal = achieved_goal
-
-        if not self.task_params['is_goal_distance_dense']:
+        if not self._task_params['is_goal_distance_dense']:
             #TODO: not exactly right, but its a limitation of HER
             if self._check_preliminary_success(goal_distance):
                 goal_distance = 1
             else:
                 goal_distance = -1
-        reward = goal_distance * self.task_params["sparse_reward_weight"]
+        reward = goal_distance * self._task_params["sparse_reward_weight"]
         return reward
 
-    def _create_world(self):
-        for arena_object in self._creation_list:
-            arena_object[0](**arena_object[1])
-        return
-
-    def init_task(self, robot, stage):
+    def init_task(self, robot, stage, max_episode_length):
         """
 
         :param robot:
         :param stage:
         :return:
         """
-        self.robot = robot
-        self.stage = stage
-        self.initial_state['joint_positions'] = \
-            self.robot.get_rest_pose()[0]
-        self.initial_state['joint_velocities'] = \
-            np.zeros([9, ])
-        self.robot.tri_finger.reset_world()
+        self._robot = robot
+        self._stage = stage
+        if self._task_params["joint_positions"] is not None:
+            self._robot.reset_state(
+                joint_positions=
+                np.array(self._task_params["joint_positions"]),
+                joint_velocities=np.zeros([9, ]))
+        else:
+            self._robot.reset_state(
+                joint_positions=self._robot.get_rest_pose()[0],
+                joint_velocities=np.zeros([9, ]))
+        self._empty_stage = self._save_pybullet_state()
         self._set_up_stage_arena()
-        self.default_state.update(dict(self.initial_state))
-        self.stage.finalize_stage()
-        self.task_params.update(self.initial_state)
+        self._default_starting_state = \
+            self._save_state()
+        self._current_starting_state = \
+            self._save_state()
+        self._stage.finalize_stage()
+        if max_episode_length is None:
+            self._max_episode_length = self.get_default_max_episode_length()
+        else:
+            self._max_episode_length = max_episode_length
+        self._setup_non_default_robot_observation_key('time_left_for_task',
+                                                      self._calculate_time_left,
+                                                      lower_bound=np.array([0]),
+                                                      upper_bound=np.array([self._max_episode_length]))
         self._set_up_non_default_observations()
+        # self.task_params.update(self.initial_state)
         self._set_training_intervention_spaces()
         self._set_testing_intervention_spaces()
+        self._set_task_state()
         return
+
+    def _calculate_time_left(self):
+        current_control_index = self._robot.get_control_index()
+        time_spent = (current_control_index + 1) * self._robot.get_dt()
+        return self._max_episode_length - time_spent
 
     def _setup_non_default_robot_observation_key(self, observation_key,
                                                  observation_function,
@@ -470,8 +561,8 @@ class BaseTask(object):
         :param upper_bound:
         :return:
         """
-        self.robot.add_observation(observation_key, lower_bound=lower_bound,
-                                   upper_bound=upper_bound)
+        self._robot.add_observation(observation_key, lower_bound=lower_bound,
+                                    upper_bound=upper_bound)
         self._non_default_robot_observation_funcs[observation_key] = \
             observation_function
         return
@@ -487,8 +578,8 @@ class BaseTask(object):
         :param upper_bound:
         :return:
         """
-        self.stage.add_observation(observation_key, lower_bound=lower_bound,
-                                   upper_bound=upper_bound)
+        self._stage.add_observation(observation_key, lower_bound=lower_bound,
+                                    upper_bound=upper_bound)
         self._non_default_stage_observation_funcs[observation_key] = \
             observation_function
         return
@@ -499,55 +590,18 @@ class BaseTask(object):
         :param interventions_dict:
         :return:
         """
-        self.stage.clear_memory()
-        self.robot.tri_finger.reset_world()
-        self.robot.clear()
-        self.stage.clear()
-        self._create_world()
-        self.stage.update_stage()
-        self.task_solved = False
-        self.finished_episode = False
-        self.time_steps_elapsed_since_success = 0
-        self.current_time = 0
+        self._robot.clear()
+        reset_observation_space_signal = self._restore_state(self._current_starting_state)
+        self._task_solved = False
         success_signal = None
         interventions_info = None
-        reset_observation_space_signal = False
         if interventions_dict is not None:
-            interventions_dict_copy = interventions_dict
-            #go through initial state vars and see if they are in the dict or not
-            for variable in self.initial_state:
-                if variable not in interventions_dict_copy:
-                    interventions_dict_copy[variable] = self.initial_state[variable]
-                else:
-                    #now it might exist but its subvariables might not
-                    if isinstance(self.initial_state[variable], dict):
-                        for subvariable in self.initial_state[variable]:
-                            if subvariable not in interventions_dict_copy[variable]:
-                                interventions_dict_copy[variable][subvariable] = \
-                                    self.initial_state[variable][subvariable]
             success_signal, interventions_info, reset_observation_space_signal = \
-                self.apply_interventions(interventions_dict_copy,
+                self.apply_interventions(interventions_dict,
                                          check_bounds=
-                                         self.task_params['intervention_split'])
+                                         self._task_params['intervention_split'])
             if success_signal:
-                for intervention_variable in self.initial_state:
-                    if intervention_variable in interventions_dict:
-                        if isinstance(self.initial_state[intervention_variable],dict):
-                            for subvariable in self.initial_state[intervention_variable]:
-                                if subvariable in interventions_dict[intervention_variable]:
-                                    self.initial_state[intervention_variable] = \
-                                        interventions_dict_copy[
-                                            intervention_variable]
-                        else:
-                            self.initial_state[intervention_variable] = \
-                                interventions_dict_copy[intervention_variable]
-            else:
-                self.apply_interventions(self.initial_state,
-                                         check_bounds=False)
-
-        else:
-            self.apply_interventions(self.initial_state,
-                                     check_bounds=False)
+                self._current_starting_state = self._save_state()
         self._set_task_state()
         return success_signal, interventions_info, reset_observation_space_signal
 
@@ -556,19 +610,19 @@ class BaseTask(object):
 
         :return:
         """
-        robot_observations_dict = self.robot.\
+        robot_observations_dict = self._robot.\
             get_current_observations(self._robot_observation_helper_keys)
-        stage_observations_dict = self.stage.\
+        stage_observations_dict = self._stage.\
             get_current_observations(self._stage_observation_helper_keys)
-        self.current_full_observations_dict = dict(robot_observations_dict)
-        self.current_full_observations_dict.update(stage_observations_dict)
+        self._current_full_observations_dict = dict(robot_observations_dict)
+        self._current_full_observations_dict.update(stage_observations_dict)
         observations_filtered = np.array([])
-        for key in self.task_robot_observation_keys:
+        for key in self._task_robot_observation_keys:
             # dont forget to handle non standard observation here
             if key in self._non_default_robot_observation_funcs:
-                if self.robot.normalize_observations:
+                if self._robot._normalize_observations:
                     normalized_observations = \
-                        self.robot.\
+                        self._robot.\
                             normalize_observation_for_key\
                             (key=key, observation= self._non_default_robot_observation_funcs[key]())
                     observations_filtered = \
@@ -581,13 +635,13 @@ class BaseTask(object):
             else:
                 observations_filtered = \
                     np.append(observations_filtered,
-                              np.array(self.current_full_observations_dict[key]))
+                              np.array(self._current_full_observations_dict[key]))
 
-        for key in self.task_stage_observation_keys:
+        for key in self._task_stage_observation_keys:
             if key in self._non_default_stage_observation_funcs:
-                if self.stage.normalize_observations:
+                if self._stage._normalize_observations:
                     normalized_observations = \
-                        self.stage.normalize_observation_for_key\
+                        self._stage.normalize_observation_for_key\
                             (key=key,
                              observation=self._non_default_stage_observation_funcs[key]())
                     observations_filtered = \
@@ -600,7 +654,7 @@ class BaseTask(object):
             else:
                 observations_filtered = \
                     np.append(observations_filtered,
-                              np.array(self.current_full_observations_dict[key]))
+                              np.array(self._current_full_observations_dict[key]))
 
         return observations_filtered
 
@@ -609,7 +663,7 @@ class BaseTask(object):
 
         :return:
         """
-        return self.task_params
+        return self._task_params
 
     def is_done(self):
         """
@@ -618,14 +672,7 @@ class BaseTask(object):
         """
         #here we consider that you succeeded if u stayed 0.1 sec in
         #the goal position
-        if self.finished_episode:
-            return True
-        if self.task_params['time_threshold_in_goal_state_secs'] <= \
-                (self.robot.dt * self.time_steps_elapsed_since_success):
-            # self.finished_episode = True
-            # TODO: Disable terminal states for now
-            self.finished_episode = False
-        return self.finished_episode
+        return False
 
     def set_sparse_reward(self, sparse_reward_weight):
         """
@@ -633,7 +680,7 @@ class BaseTask(object):
         :param sparse_reward_weight:
         :return:
         """
-        self.task_params["sparse_reward_weight"] = \
+        self._task_params["sparse_reward_weight"] = \
             sparse_reward_weight
         return
 
@@ -643,10 +690,10 @@ class BaseTask(object):
         :return:
         """
         interventions_dict = dict()
-        if self.task_params['training']:
-            intervention_space = self.training_intervention_spaces
+        if self._task_params['training']:
+            intervention_space = self._training_intervention_spaces
         else:
-            intervention_space = self.testing_intervention_spaces
+            intervention_space = self._testing_intervention_spaces
         # choose random variable one intervention  only and intervene
         if len(intervention_space) == 0:
             return False, {}, {}
@@ -677,16 +724,16 @@ class BaseTask(object):
 
         :return:
         """
-        return self.training_intervention_spaces
+        return self._training_intervention_spaces
 
     def get_testing_intervention_spaces(self):
         """
 
         :return:
         """
-        return self.testing_intervention_spaces
+        return self._testing_intervention_spaces
 
-    def get_current_variables_values(self):
+    def get_current_scm_values(self):
         """
 
         :return:
@@ -694,10 +741,10 @@ class BaseTask(object):
         variable_params = dict()
         #get the robots ones
         variable_params.\
-            update(self.robot.get_current_variables_values())
+            update(self._robot.get_current_scm_values())
         #get the arena
         variable_params. \
-            update(self.stage.get_current_variables_values())
+            update(self._stage.get_current_scm_values())
         #get the task specific params now
         variable_params. \
             update(self.get_task_generator_variables_values())
@@ -709,22 +756,23 @@ class BaseTask(object):
         :return:
         """
         #this is all the variables that are available and exposed
-        current_variables_values = self.get_current_variables_values()
+        current_variables_values = self.get_current_scm_values()
         #filter them only if intervention spaces split is enforced
-        if self.task_params['intervention_split']:
+        if self._task_params['intervention_split']:
             #choose intervention space
-            if self.task_params['training']:
-                intervention_space = self.training_intervention_spaces
+            if self._task_params['training']:
+                intervention_space = self._training_intervention_spaces
             else:
-                intervention_space = self.testing_intervention_spaces
+                intervention_space = self._testing_intervention_spaces
             task_params_dict = dict()
             for variable_name in intervention_space:
                 if isinstance(
                         intervention_space[variable_name], dict):
                     task_params_dict[variable_name] = dict()
                     for subvariable_name in intervention_space[variable_name]:
-                        task_params_dict[variable_name][subvariable_name] = \
-                            current_variables_values[variable_name][subvariable_name]
+                        if subvariable_name != 'cylindrical_position': #TODO: this is a dirty hack for now that cylindrical position are not part of the objects variables
+                            task_params_dict[variable_name][subvariable_name] = \
+                                current_variables_values[variable_name][subvariable_name]
                 else:
                     task_params_dict[variable_name] = current_variables_values[variable_name]
         else:
@@ -738,10 +786,10 @@ class BaseTask(object):
         :param interventions_dict:
         :return:
         """
-        if self.task_params['training']:
-            intervention_space = self.training_intervention_spaces
+        if self._task_params['training']:
+            intervention_space = self._training_intervention_spaces
         else:
-            intervention_space = self.testing_intervention_spaces
+            intervention_space = self._testing_intervention_spaces
         for intervention in interventions_dict:
             if intervention in intervention_space:
                 if not isinstance(interventions_dict[intervention], dict):
@@ -752,15 +800,7 @@ class BaseTask(object):
                         return False
                 else:
                     for sub_variable_name in interventions_dict[intervention]:
-                        # TODO: not happy with this hack but there is probably no other workaround without
-                        #  translating everything to polar coordinates (not optimal for observation space)
-                        if sub_variable_name == 'position':
-                            cyl_position = cart2cyl(interventions_dict[intervention][sub_variable_name])
-                            if sub_variable_name in intervention_space[intervention] and \
-                                    ((intervention_space[intervention][sub_variable_name][0] > cyl_position).any()
-                                     or (intervention_space[intervention][sub_variable_name][1] < cyl_position).any()):
-                                return False
-                        elif sub_variable_name in intervention_space[intervention] and \
+                        if sub_variable_name in intervention_space[intervention] and \
                             ((intervention_space[intervention]
                             [sub_variable_name][0] >
                             interventions_dict[intervention][sub_variable_name]).any() or \
@@ -778,9 +818,9 @@ class BaseTask(object):
         """
         #TODO: for now a heuristic for naming conventions
         robot_intervention_keys = \
-            self.robot.get_current_variables_values().keys()
+            self._robot.get_current_scm_values().keys()
         stage_intervention_keys = \
-            self.stage.get_current_variables_values().keys()
+            self._stage.get_current_scm_values().keys()
         task_generator_intervention_keys = \
             self.get_task_generator_variables_values().keys()
         robot_interventions_dict = dict()
@@ -829,27 +869,32 @@ class BaseTask(object):
         robot_interventions_dict, stage_interventions_dict, \
         task_generator_interventions_dict = \
             self.divide_intervention_dict(interventions_dict)
-        current_stage_state = self.stage.get_full_state()
-        if self.robot.is_initialized():
-            current_robot_state = self.robot.get_full_state()
-        else:
-            current_robot_state = self.robot.get_default_state()
-        self.robot.apply_interventions(robot_interventions_dict)
-        self.stage.apply_interventions(stage_interventions_dict)
+        # current_stage_state = self.stage.get_full_state()
+        # if self.robot.is_initialized():
+        #     current_robot_state = self.robot.get_full_state()
+        # else:
+        #     current_robot_state = self.robot.get_default_state()
+        current_state = self._save_state()
+        self._robot.apply_interventions(robot_interventions_dict)
+        self._stage.apply_interventions(stage_interventions_dict)
         task_generator_intervention_success_signal, reset_observation_space_signal = \
             self.apply_task_generator_interventions \
                 (task_generator_interventions_dict)
         #TODO: this is a hack for now to not check feasibility when adding/removing objects since
         #The stage state is quite different afterwards and it will be hard to restore its exact state
         #we dont handle this
-        self.stage.pybullet_client.stepSimulation()
+
         if len(task_generator_interventions_dict) == 0:
-            if not self.stage.check_feasiblity_of_stage():
-                self.stage.set_full_state(current_stage_state)
+            pre_contact_check_state = self._save_pybullet_state()
+            self._robot.step_simulation()
+            if not self._stage.check_feasiblity_of_stage():
                 stage_infeasible = True
-            if not self.robot.check_feasibility_of_robot_state():
-                self.robot.set_full_state(current_robot_state)
+            if not self._robot.check_feasibility_of_robot_state():
                 robot_infeasible = True
+            if stage_infeasible or robot_infeasible:
+                self._restore_state(current_state)
+            else:
+                self._restore_pybullet_state(pre_contact_check_state)
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \
@@ -869,7 +914,7 @@ class BaseTask(object):
         :return:
         """
         if check_bounds is None:
-            check_bounds = self.task_params['intervention_split']
+            check_bounds = self._task_params['intervention_split']
         success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)
@@ -877,9 +922,9 @@ class BaseTask(object):
         return success_signal, interventions_info, \
                reset_observation_space_signal
 
-    def get_max_episode_length(self):
-        if self.task_params["task_name"] == 'reaching':
+    def get_default_max_episode_length(self):
+        if self._task_params["task_name"] == 'reaching':
             episode_length = 5
         else:
-            episode_length = len(self.stage.rigid_objects) * 10
+            episode_length = len(self._stage.get_rigid_objects()) * 10
         return episode_length

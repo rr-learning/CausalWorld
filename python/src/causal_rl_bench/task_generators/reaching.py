@@ -1,4 +1,3 @@
-
 from causal_rl_bench.task_generators.base_task import BaseTask
 import numpy as np
 
@@ -19,17 +18,19 @@ class ReachingTaskGenerator(BaseTask):
                          kwargs.get("dense_reward_weights",
                                     np.array([100000,
                                               0, 0, 0])))
-        self.task_robot_observation_keys = ["joint_positions",
+        self._task_robot_observation_keys = ["time_left_for_task",
+                                            "joint_positions",
                                             "joint_velocities",
-                                            "end_effector_positions",
-                                            "action_joint_positions"]
-        self.task_params['default_goal_60'] = kwargs.get("default_goal_60",
-                                                         np.array([0, 0, 0.15]))
-        self.task_params['default_goal_120'] = kwargs.get("default_goal_120",
-                                                          np.array([0, 0, 0.2]))
-        self.task_params['default_goal_300'] = kwargs.get("default_goal_300",
-                                                          np.array([0, 0, 0.25]))
-        self.task_params["joint_positions"] = \
+                                            "end_effector_positions"]
+        self._task_params['default_goal_60'] = \
+            kwargs.get("default_goal_60", np.array([0, 0, 0.15]))
+        self._task_params['default_goal_120'] = \
+            kwargs.get("default_goal_120", np.array([0, 0, 0.2]))
+        self._task_params['default_goal_300'] = \
+            kwargs.get("default_goal_300", np.array([0, 0, 0.25]))
+        self._task_params["joint_positions"] = \
+            kwargs.get("joint_positions", None)
+        self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self.previous_end_effector_positions = None
         self.previous_joint_velocities = None
@@ -43,34 +44,22 @@ class ReachingTaskGenerator(BaseTask):
         creation_dict = {'name': "goal_60",
                          'shape': "sphere",
                          'color': np.array([1, 0, 0]),
-                         'position': self.task_params['default_goal_60']}
-        self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
+                         'position': self._task_params['default_goal_60']}
+        self._stage.add_silhoutte_general_object(**creation_dict)
         creation_dict = {'name': "goal_120",
                          'shape': "sphere",
                          'color': np.array([0, 1, 0]),
-                         'position': self.task_params['default_goal_120']}
-        self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
+                         'position': self._task_params['default_goal_120']}
+        self._stage.add_silhoutte_general_object(**creation_dict)
         creation_dict = {'name': "goal_300",
                          'shape': "sphere",
                          'color': np.array([0, 0, 1]),
-                         'position': self.task_params['default_goal_300']}
-        self.stage.add_silhoutte_general_object(**creation_dict)
-        self._creation_list.append([self.stage.add_silhoutte_general_object, creation_dict])
-        self.task_stage_observation_keys = ["goal_60_position",
-                                            "goal_120_position",
-                                            "goal_300_position"]
+                         'position': self._task_params['default_goal_300']}
+        self._stage.add_silhoutte_general_object(**creation_dict)
+        self._task_stage_observation_keys = ["goal_60_cartesian_position",
+                                            "goal_120_cartesian_position",
+                                            "goal_300_cartesian_position"]
         self.current_number_of_obstacles = 0
-        self.initial_state['goal_60'] = dict()
-        self.initial_state['goal_60']['position'] = self.task_params['default_goal_60']
-        self.initial_state['goal_120'] = dict()
-        self.initial_state['goal_120']['position'] = self.task_params['default_goal_120']
-        self.initial_state['goal_300'] = dict()
-        self.initial_state['goal_300']['position'] = self.task_params['default_goal_300']
-        if self.task_params["joint_positions"] is not None:
-            self.initial_state['joint_positions'] = \
-                self.task_params["joint_positions"]
         return
 
     def get_description(self):
@@ -99,14 +88,14 @@ class ReachingTaskGenerator(BaseTask):
         rewards = list()
         rewards.append(previous_dist_to_goal - current_dist_to_goal)
         rewards.append(-current_dist_to_goal)
-        rewards.append(-np.linalg.norm(self.robot.latest_full_state.torque))
+        rewards.append(-np.linalg.norm(self._robot.get_latest_full_state()['torques']))
         rewards.append(-np.linalg.norm(np.abs(
-            self.robot.latest_full_state.velocity -
+            self._robot.get_latest_full_state()['velocities'] -
             self.previous_joint_velocities), ord=2))
         update_task_info = {'current_end_effector_positions':
                                 current_end_effector_positions,
                             'current_velocity': np.copy(
-                                self.robot.latest_full_state.velocity)}
+                                self._robot.get_latest_full_state()['velocities'])}
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
@@ -116,9 +105,9 @@ class ReachingTaskGenerator(BaseTask):
         :return:
         """
         self.previous_end_effector_positions = \
-            update_task_info['current_end_effector_positions']
+            np.array(update_task_info['current_end_effector_positions'])
         self.previous_joint_velocities = \
-            update_task_info['current_velocity']
+            np.array(update_task_info['current_velocity'])
         return
 
     def _set_task_state(self):
@@ -128,10 +117,10 @@ class ReachingTaskGenerator(BaseTask):
         """
         self.current_number_of_obstacles = 0
         self.previous_end_effector_positions = \
-            self.robot.compute_end_effector_positions(
-                self.robot.latest_full_state.position)
+            self._robot.compute_end_effector_positions(
+                self._robot.get_latest_full_state()['positions'])
         self.previous_joint_velocities = np.copy(
-            self.robot.latest_full_state.velocity)
+            self._robot.get_latest_full_state()['velocities'])
         return
 
     def get_desired_goal(self):
@@ -141,11 +130,11 @@ class ReachingTaskGenerator(BaseTask):
         """
         desired_goal = np.array([])
         desired_goal = np.append(desired_goal,
-                                 self.stage.get_object_state('goal_60', 'position'))
+                                 self._stage.get_object_state('goal_60', 'cartesian_position'))
         desired_goal = np.append(desired_goal,
-                                 self.stage.get_object_state('goal_120', 'position'))
+                                 self._stage.get_object_state('goal_120', 'cartesian_position'))
         desired_goal = np.append(desired_goal,
-                                 self.stage.get_object_state('goal_300', 'position'))
+                                 self._stage.get_object_state('goal_300', 'cartesian_position'))
         return desired_goal
 
     def get_achieved_goal(self):
@@ -154,8 +143,8 @@ class ReachingTaskGenerator(BaseTask):
         :return:
         """
         achieved_goal = \
-            self.robot.compute_end_effector_positions(
-                self.robot.latest_full_state.position)
+            self._robot.compute_end_effector_positions(
+                self._robot.get_latest_full_state()['positions'])
         return np.array(achieved_goal)
 
     def _goal_distance(self, achieved_goal, desired_goal):
@@ -191,9 +180,10 @@ class ReachingTaskGenerator(BaseTask):
         info['possible_solution_intervention'] = dict()
         desired_goal = self.get_desired_goal()
         info['possible_solution_intervention']['joint_positions'] = \
-            self.robot.get_joint_positions_from_tip_positions(desired_goal,
-                                                              list(
-                                                                  self.robot.latest_full_state.position))
+            self._robot.get_joint_positions_from_tip_positions(desired_goal,
+                                                               list(
+                                                                  self._robot.
+                                                                      get_latest_full_state()['positions']))
         return info
 
     def _set_training_intervention_spaces(self):
@@ -204,38 +194,38 @@ class ReachingTaskGenerator(BaseTask):
         # you can override these easily
         super(ReachingTaskGenerator,
               self)._set_training_intervention_spaces()
-        lower_bound = np.array(self.stage.floor_inner_bounding_box[0])
-        upper_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1/2 + \
-                       self.stage.floor_inner_bounding_box[0]
+        lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
+        upper_bound = (self._stage._floor_inner_bounding_box[1] -
+                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self._stage._floor_inner_bounding_box[0]
         lower_bound[1] = float(upper_bound[1])
-        upper_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                          self.stage.floor_inner_bounding_box[0]) * 3/4 + \
-                          self.stage.floor_inner_bounding_box[0])[1]
-        self.training_intervention_spaces['goal_60']['position'] = \
+        upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 3 / 4 + \
+                          self._stage._floor_inner_bounding_box[0])[1]
+        self._training_intervention_spaces['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound]) #blue is finger 0, green 240
-        lower_bound = np.array(self.stage.floor_inner_bounding_box[0])
-        upper_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        upper_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 + \
-                          self.stage.floor_inner_bounding_box[0])[1]
-        self.training_intervention_spaces['goal_120']['position'] = \
+        lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
+        upper_bound = (self._stage._floor_inner_bounding_box[1] -
+                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self._stage._floor_inner_bounding_box[0]
+        upper_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 + \
+                          self._stage._floor_inner_bounding_box[0])[1]
+        self._training_intervention_spaces['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])  # blue is finger 0, green 240
-        lower_bound = np.array(self.stage.floor_inner_bounding_box[0])
-        upper_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        upper_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        self.training_intervention_spaces['goal_300']['position'] = \
+        lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
+        upper_bound = (self._stage._floor_inner_bounding_box[1] -
+                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self._stage._floor_inner_bounding_box[0]
+        upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 +
+                          self._stage._floor_inner_bounding_box[0])[1]
+        self._training_intervention_spaces['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
-        self.training_intervention_spaces['number_of_obstacles'] = \
+        self._training_intervention_spaces['number_of_obstacles'] = \
             np.array([1, 5])
 
         return
@@ -247,46 +237,46 @@ class ReachingTaskGenerator(BaseTask):
         """
         super(ReachingTaskGenerator,
               self)._set_testing_intervention_spaces()
-        lower_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        lower_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 3 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self.stage.floor_inner_bounding_box[1])
+        lower_bound = (self._stage._floor_inner_bounding_box[1] -
+                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self._stage._floor_inner_bounding_box[0]
+        lower_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 3 / 4 +
+                          self._stage._floor_inner_bounding_box[0])[1]
+        upper_bound = np.array(self._stage._floor_inner_bounding_box[1])
 
-        self.testing_intervention_spaces['goal_60']['position'] = \
+        self._testing_intervention_spaces['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
-        lower_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                       self.stage.floor_inner_bounding_box[0]
-        lower_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self.stage.floor_inner_bounding_box[1])
-        upper_bound[0] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        self.testing_intervention_spaces['goal_120']['position'] = \
+        lower_bound = (self._stage._floor_inner_bounding_box[1] -
+                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self._stage._floor_inner_bounding_box[0]
+        lower_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 +
+                          self._stage._floor_inner_bounding_box[0])[1]
+        upper_bound = np.array(self._stage._floor_inner_bounding_box[1])
+        upper_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 +
+                          self._stage._floor_inner_bounding_box[0])[1]
+        self._testing_intervention_spaces['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
-        lower_bound = (self.stage.floor_inner_bounding_box[1] -
-                       self.stage.floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self.stage.floor_inner_bounding_box[0]
-        lower_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 4 +
-                          self.stage.floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self.stage.floor_inner_bounding_box[1])
-        upper_bound[1] = ((self.stage.floor_inner_bounding_box[1] -
-                           self.stage.floor_inner_bounding_box[0]) * 1 / 2 +
-                          self.stage.floor_inner_bounding_box[0])[1]
+        lower_bound = (self._stage._floor_inner_bounding_box[1] -
+                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+                      self._stage._floor_inner_bounding_box[0]
+        lower_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 +
+                          self._stage._floor_inner_bounding_box[0])[1]
+        upper_bound = np.array(self._stage._floor_inner_bounding_box[1])
+        upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
+                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 +
+                          self._stage._floor_inner_bounding_box[0])[1]
 
-        self.testing_intervention_spaces['goal_300']['position'] = \
+        self._testing_intervention_spaces['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         #TODO:dicuss this!
-        self.testing_intervention_spaces['number_of_obstacles'] = \
+        self._testing_intervention_spaces['number_of_obstacles'] = \
             np.array([1, 5])
         return
 
@@ -314,20 +304,25 @@ class ReachingTaskGenerator(BaseTask):
             #if its more than what I have
             #TODO: maybe check feasibility of stage?
             if int(interventions_dict["number_of_obstacles"]) > self.current_number_of_obstacles:
+                reset_observation_space = True
                 for i in range(self.current_number_of_obstacles, int(interventions_dict["number_of_obstacles"])):
-                    self.stage.add_rigid_general_object(name="obstacle_"+str(i),
-                                                        shape="static_cube",
-                                                        size=
+                    self._stage.add_rigid_general_object(name="obstacle_" + str(i),
+                                                         shape="static_cube",
+                                                         size=
                                                         np.array([0.01, 0.01, 0.01]),
-                                                        color=np.array([0, 0, 0]),
-                                                        position=np.random.uniform(self.stage.floor_inner_bounding_box[0],
-                                                                                   self.stage.floor_inner_bounding_box[1]))
+                                                         color=np.array([0, 0, 0]),
+                                                         position=np.random.uniform(self._stage._floor_inner_bounding_box[0],
+                                                                                    self._stage._floor_inner_bounding_box[1]))
                     self.current_number_of_obstacles += 1
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_type")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_size")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_cartesian_position")
+                    self._task_stage_observation_keys.append("obstacle_" + str(i) + "_orientation")
             #TODO: if its less than what I have
         else:
             raise Exception("this task generator variable "
                             "is not yet defined")
         self._set_testing_intervention_spaces()
         self._set_training_intervention_spaces()
-        self.stage.finalize_stage()
+        self._stage.finalize_stage()
         return True, reset_observation_space

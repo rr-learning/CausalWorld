@@ -24,13 +24,13 @@ or used in a catkin workspace.
 
   ```bash
   conda activate causal_rl_bench
-  (causal_rl_bench) python -m pip install .
+  (causal_rl_bench) pip install -e .
   ```
 
 3. Make the docs.
 
   ```bash
-  (causal_rl_bench) cd ../counterfactual/docs
+  (causal_rl_bench) cd docs
   (causal_rl_bench) make html
   ```
 

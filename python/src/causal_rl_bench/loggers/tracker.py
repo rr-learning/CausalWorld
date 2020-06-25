@@ -3,7 +3,7 @@ import pickle
 
 class TaskStats:
     def __init__(self, task):
-        self.task_name = task.task_name
+        self.task_name = task._task_name
         self.task_params = task.get_task_params()
         self.time_steps = 0
         self.num_resets = 0

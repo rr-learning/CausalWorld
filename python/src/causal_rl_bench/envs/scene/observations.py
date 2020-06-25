@@ -5,7 +5,8 @@ from gym import spaces
 class StageObservations(object):
     def __init__(self, rigid_objects, visual_objects,
                  observation_mode="structured",
-                 normalize_observations=True):
+                 normalize_observations=True,
+                 cameras=None):
         self.normalized_observations = normalize_observations
         self.observation_mode = observation_mode
 
@@ -22,6 +23,7 @@ class StageObservations(object):
         self.upper_bounds["goal_image"] = \
             np.full(shape=(3, 54, 72, 3), fill_value=255,
                     dtype=np.float64)
+        self._goal_cameras = cameras
 
         self.rigid_objects = rigid_objects
         self.visual_objects = visual_objects
@@ -61,8 +63,6 @@ class StageObservations(object):
                 self.upper_bounds[rigid_object.get_name() + '_' + state_key] = \
                     object_upper_bounds[rigid_object.get_name() + '_' +
                                         state_key]
-                self.observations_keys.append(rigid_object.get_name() + '_' +
-                                              state_key)
         for visual_object in self.visual_objects.values():
             state_keys = visual_object.get_state().keys()
             object_lower_bounds, object_upper_bounds = \
@@ -74,13 +74,12 @@ class StageObservations(object):
                 self.upper_bounds[visual_object.get_name() + '_' + state_key] = \
                     object_upper_bounds[visual_object.get_name() + '_' +
                                                state_key]
-                self.observations_keys.append(visual_object.get_name() + '_' +
-                                              state_key)
         return
 
     def reset_observation_keys(self):
         self.observations_keys = []
-        self.set_observation_spaces()
+        self.low = np.array([])
+        self.high = np.array([])
 
     def is_observation_key_known(self, observation_key):
         if observation_key not in self.lower_bounds.keys():
@@ -114,11 +113,15 @@ class StageObservations(object):
     def normalize_observation_for_key(self, observation, key):
         lower_key = np.array(self.lower_bounds[key])
         higher_key = np.array(self.upper_bounds[key])
+        if np.array(lower_key == higher_key).all():
+            return observation
         return (self.high_norm - self.low_norm) * (observation - lower_key) / (higher_key - lower_key) + self.low_norm
 
     def denormalize_observation_for_key(self, observation, key):
         lower_key = np.array(self.lower_bounds[key])
         higher_key = np.array(self.upper_bounds[key])
+        if np.array(lower_key == higher_key).all():
+            return observation
         return lower_key + (observation - self.low_norm) / (self.high_norm - self.low_norm) * (higher_key - lower_key)
 
     def satisfy_constraints(self, observation):
@@ -152,7 +155,9 @@ class StageObservations(object):
         # now normalize everything here
         if self.normalized_observations:
             for key in observations_dict.keys():
-                observations_dict[key] = self.normalize_observation_for_key(observations_dict[key], key)
+                observations_dict[key] = \
+                    self.normalize_observation_for_key(
+                        observations_dict[key], key)
         return observations_dict
 
     def remove_observations(self, observations):
@@ -175,10 +180,10 @@ class StageObservations(object):
         self.observations_keys.append(observation_key)
         self.set_observation_spaces()
 
-    def get_current_goal_image(self, goal_instance_state):
-        camera_obs = np.stack((goal_instance_state.camera_60,
-                               goal_instance_state.camera_180,
-                               goal_instance_state.camera_300), axis=0)
+    def get_current_goal_image(self):
+        camera_obs = np.stack((self._goal_cameras[0].get_image(),
+                               self._goal_cameras[1].get_image(),
+                               self._goal_cameras[2].get_image()), axis=0)
         if self.normalized_observations:
             camera_obs = self.normalize_observation_for_key(camera_obs,
                                                             "goal_image")

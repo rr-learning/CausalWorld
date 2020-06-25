@@ -34,7 +34,7 @@ def example():
     episode = data.get_episode(14)
 
     # Initialize a new environment according a specific episode and replay it
-    task = task_generator(episode.task_name, **episode.task_params)
+    task = task_generator(episode._task_name, **episode._task_params)
     env = World(task,
                 **episode.world_params,
                 logging=False,
