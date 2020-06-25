@@ -1,30 +1,29 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.wrappers.planning_wrappers import ObjectSelectorWrapper
+from causal_rl_bench.wrappers.action_wrappers import MovingAverageActionEnvWrapper
+import numpy as np
 
 
-def example():
-    task = task_generator(task_generator_id='picking')
-    env = World(task=task, enable_visualization=True)
-    env = ObjectSelectorWrapper(env)
+def apply_delta_action():
+    task = task_generator(task_generator_id='reaching')
+    env = World(task=task, enable_visualization=True,
+                action_mode="joint_positions",
+                normalize_actions=True,
+                normalize_observations=True, skip_frame=1)
+    env = MovingAverageActionEnvWrapper(env)
     for _ in range(50):
         obs = env.reset()
-        #go up
-        for i in range(80):
-            obs, reward, done, info = env.step([0, 1, 0])
-        # rotate yaw
-        for i in range(20):
-            obs, reward, done, info = env.step([0, 0, 1])
-        for i in range(50):
-            obs, reward, done, info = env.step([0, 5, 0])
-        for i in range(20):
-            obs, reward, done, info = env.step([0, 0, 1])
-            # print(obs)
-        for i in range(50):
-            obs, reward, done, info = env.step([0, 2, 0])
-            # print(obs)
+        for _ in range(1000):
+            desired_action = np.zeros([9,])
+            current_obs = np.around(obs[:9], decimals=2)
+            print("what I wanted to reach", current_obs + desired_action)
+            obs, reward, done, info = env.step(desired_action)
+            print("what I actually reached", np.around(obs[:9], decimals=2))
+            print("diff is", current_obs + desired_action - np.around(obs[:9], decimals=2))
+                # desired_action = obs[:9]
     env.close()
 
 
 if __name__ == '__main__':
-    example()
+    apply_delta_action()
+

@@ -22,7 +22,6 @@ class PushingTaskGenerator(BaseTask):
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
-                                            "action_joint_positions",
                                             "end_effector_positions"]
         self._task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.08)

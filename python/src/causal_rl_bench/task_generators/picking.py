@@ -23,7 +23,6 @@ class PickingTaskGenerator(BaseTask):
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
-                                            "action_joint_positions",
                                             "end_effector_positions"]
         # TODO: check for nans when bounds are the same in normalization
         self._task_params["goal_height"] = \
