@@ -1,38 +1,30 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.wrappers.action_wrappers import DeltaAction
-import numpy as np
+from causal_rl_bench.wrappers.planning_wrappers import ObjectSelectorWrapper
 
 
-def apply_delta_action():
+def example():
     task = task_generator(task_generator_id='picking')
-    env = World(task=task, enable_visualization=True,
-                action_mode="end_effector_positions",
-                normalize_actions=False,
-                normalize_observations=False, skip_frame=1)
-    # env = DeltaAction(env)
+    env = World(task=task, enable_visualization=True)
+    env = ObjectSelectorWrapper(env)
     for _ in range(50):
         obs = env.reset()
-        desired = np.around(obs[18:18+9], decimals=2)
-        for _ in range(1000):
-            # desired_action = env.get_robot().get_rest_pose()[1]
-            # print("desired: ", desired_action)
-            # print("observed: ",obs[:9])
-            # print("what I wanted to reach", current_obs + desired_action)
-            obs, reward, done, info = env.step(desired)
-            # print("what I actually reached", np.around(obs[:9], decimals=2))
-            # print("diff is", current_obs + desired_action - np.around(obs[:9], decimals=2))
-            #     # desired_action = obs[:9]
-        # for _ in range(1000):
-        #     desired_action[:3] = [0, 0, 0.0825]
-        #     # print("desired: ", desired_action)
-        #     # print("observed: ",obs[:9])
-        #     # print("what I wanted to reach", current_obs + desired_action)
-        #     obs, reward, done, info = env.step(desired_action)
-        #     print("observed: ", obs[18:18+3])
+        #go up
+        for i in range(80):
+            obs, reward, done, info = env.step([0, 1, 0])
+        # rotate yaw
+        for i in range(20):
+            obs, reward, done, info = env.step([0, 0, 1])
+        for i in range(50):
+            obs, reward, done, info = env.step([0, 5, 0])
+        for i in range(20):
+            obs, reward, done, info = env.step([0, 0, 1])
+            # print(obs)
+        for i in range(50):
+            obs, reward, done, info = env.step([0, 2, 0])
+            # print(obs)
     env.close()
 
 
 if __name__ == '__main__':
-    apply_delta_action()
-
+    example()
