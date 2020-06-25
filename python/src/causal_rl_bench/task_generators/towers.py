@@ -22,7 +22,6 @@ class TowersGeneratorTask(BaseTask):
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
-                                            "action_joint_positions",
                                             "end_effector_positions"]
 
         #for this task the stage observation keys will be set with the

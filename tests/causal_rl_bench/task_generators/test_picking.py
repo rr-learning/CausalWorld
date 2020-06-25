@@ -48,7 +48,7 @@ class TestPicking(unittest.TestCase):
             assert rewards_1 == rewards_2
 
     def lift_last_finger_first(self, current_obs):
-        desired_action = current_obs[28:28 + 9]
+        desired_action = current_obs[19:19 + 9]
         desired_action[6:] = [-0, -0.08, 0.4]
         for _ in range(250):
             obs, reward, done, info = self.env.step(desired_action)

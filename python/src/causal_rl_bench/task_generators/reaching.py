@@ -21,8 +21,7 @@ class ReachingTaskGenerator(BaseTask):
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
-                                            "end_effector_positions",
-                                            "action_joint_positions"]
+                                            "end_effector_positions"]
         self._task_params['default_goal_60'] = \
             kwargs.get("default_goal_60", np.array([0, 0, 0.15]))
         self._task_params['default_goal_120'] = \
