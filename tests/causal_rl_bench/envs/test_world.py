@@ -119,7 +119,7 @@ class TestWorld(unittest.TestCase):
         causal_rl_env.step(causal_rl_env.action_space.sample())
         end = time.time()
         causal_rl_step_time = end - start
-        self.assertLess(causal_rl_step_time, kuka_step_time*7)
+        self.assertLess(causal_rl_step_time, kuka_step_time*10)
 
         start = time.time()
         kuka_env.render()

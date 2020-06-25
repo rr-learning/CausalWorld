@@ -89,14 +89,14 @@ class PushingTaskGenerator(BaseTask):
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
             #TODO: make it a function of size
-            self._training_intervention_spaces[rigid_object]['cartesian_position'][0][-1] \
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
                 = 0.0425
-            self._training_intervention_spaces[rigid_object]['cartesian_position'][1][-1] \
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._training_intervention_spaces[visual_object]['cartesian_position'][0][-1] \
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
                 = 0.0425
-            self._training_intervention_spaces[visual_object]['cartesian_position'][1][-1] \
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
                 = 0.0425
         return
 
@@ -107,14 +107,14 @@ class PushingTaskGenerator(BaseTask):
         """
         super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
-            self._testing_intervention_spaces[rigid_object]['cartesian_position'][0][-1] \
+            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
                 = 0.0425
-            self._testing_intervention_spaces[rigid_object]['cartesian_position'][1][-1] \
+            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._testing_intervention_spaces[visual_object]['cartesian_position'][0][-1] \
+            self._testing_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
                 = 0.0425
-            self._testing_intervention_spaces[visual_object]['cartesian_position'][1][-1] \
+            self._testing_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
                 = 0.0425
         return
 

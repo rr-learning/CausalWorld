@@ -90,17 +90,17 @@ class PickingTaskGenerator(BaseTask):
         """
         super(PickingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
-            self._training_intervention_spaces[rigid_object]['cartesian_position'][0][
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][
                 -1] \
                 = 0.0425
-            self._training_intervention_spaces[rigid_object]['cartesian_position'][1][
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][
                 -1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._training_intervention_spaces[visual_object]['cartesian_position'][
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][
                 0][-1] \
                 = 0.08
-            self._training_intervention_spaces[visual_object]['cartesian_position'][
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][
                 1][-1] \
                 = 0.20
         return
@@ -112,17 +112,17 @@ class PickingTaskGenerator(BaseTask):
         """
         super(PickingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
-            self._testing_intervention_spaces[rigid_object]['cartesian_position'][0][
+            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][0][
                 -1] \
                 = 0.0425
-            self._testing_intervention_spaces[rigid_object]['cartesian_position'][1][
+            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][1][
                 -1] \
                 = 0.0425
         for visual_object in self._stage.get_visual_objects():
-            self._testing_intervention_spaces[visual_object]['cartesian_position'][0][
+            self._testing_intervention_spaces[visual_object]['cylindrical_position'][0][
                 -1] \
                 = 0.20
-            self._testing_intervention_spaces[visual_object]['cartesian_position'][1][
+            self._testing_intervention_spaces[visual_object]['cylindrical_position'][1][
                 -1] \
                 = 0.25
         return
@@ -257,12 +257,12 @@ class PickingTaskGenerator(BaseTask):
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
-        intervention_dict['goal_block']['cartesian_position'] = \
+        intervention_dict['goal_block']['cylindrical_position'] = \
             np.array(self._stage.get_rigid_objects()
                      ['tool_block'].get_initial_position())
-        intervention_dict['goal_block']['cartesian_position'][-1] = \
-            np.random.uniform(intervention_space['goal_block']['cartesian_position']
+        intervention_dict['goal_block']['cylindrical_position'][-1] = \
+            np.random.uniform(intervention_space['goal_block']['cylindrical_position']
                               [0][-1],
-                              intervention_space['goal_block']['cartesian_position']
+                              intervention_space['goal_block']['cylindrical_position']
                               [1][-1])
         return intervention_dict

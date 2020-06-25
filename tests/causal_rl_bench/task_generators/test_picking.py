@@ -180,7 +180,8 @@ class TestPicking(unittest.TestCase):
                     #TODO: this shouldnt be the case when the benchmark is complete
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:
-                        assert np.array_equal(new_goal['goal_block']['cartesian_position'],
+                        assert np.array_equal(new_goal['goal_block']
+                                              ['cylindrical_position'],
                                               obs[-7:-4])
                 env.reset()
 

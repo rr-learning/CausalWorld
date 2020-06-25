@@ -39,12 +39,12 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
             if variable.startswith('tool'):
                 interventions_dict[variable] = dict()
                 if self.positions:
-                    interventions_dict[variable]['cartesian_position'] = \
+                    interventions_dict[variable]['cylindrical_position'] = \
                         np.random.uniform(
                             self.task_intervention_space
-                            [variable]['cartesian_position'][0],
+                            [variable]['cylindrical_position'][0],
                             self.task_intervention_space
-                            [variable]['cartesian_position'][1])
+                            [variable]['cylindrical_position'][1])
                 if self.orientations:
                     interventions_dict[variable]['orientation'] = \
                         np.random.uniform(

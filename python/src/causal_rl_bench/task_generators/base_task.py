@@ -244,13 +244,16 @@ class BaseTask(object):
             intervention_space = self._testing_intervention_spaces
         for visual_object in self._stage._visual_objects:
             if visual_object in intervention_space and \
-                    'cartesian_position' in intervention_space[visual_object]:
+                    'cylindrical_position' in intervention_space[visual_object]:
                 intervention_dict[visual_object] = dict()
-                intervention_dict[visual_object]['cartesian_position'] = \
-                    self._stage.random_position(
-                        height_limits=intervention_space[visual_object]['cartesian_position'][:, 2],
-                        radius_limits=intervention_space[visual_object]['cartesian_position'][:, 0],
-                        angle_limits=intervention_space[visual_object]['cartesian_position'][:, 1])
+                intervention_dict[visual_object]['cylindrical_position'] = \
+                    cart2cyl(self._stage.random_position(
+                        height_limits=intervention_space[visual_object]
+                                      ['cylindrical_position'][:, 2],
+                        radius_limits=intervention_space[visual_object]
+                                      ['cylindrical_position'][:, 0],
+                        angle_limits=intervention_space[visual_object]
+                                     ['cylindrical_position'][:, 1]))
         return intervention_dict
 
     # def reset_default_state(self):
@@ -284,11 +287,11 @@ class BaseTask(object):
         #and orientation modification
         for rigid_object in self._stage._rigid_objects:
             self._training_intervention_spaces[rigid_object] = dict()
-            self._training_intervention_spaces[rigid_object]['cartesian_position'] = \
-                np.array([self._stage._floor_inner_bounding_box[0],
-                          (self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self._stage._floor_inner_bounding_box[0]])
+            # self._training_intervention_spaces[rigid_object]['cartesian_position'] = \
+            #     np.array([self._stage._floor_inner_bounding_box[0],
+            #               (self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0]])
             self._training_intervention_spaces[rigid_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
             if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
@@ -300,11 +303,11 @@ class BaseTask(object):
                 np.array([0.05, 0.1])
         for visual_object in self._stage._visual_objects:
             self._training_intervention_spaces[visual_object] = dict()
-            self._training_intervention_spaces[visual_object]['cartesian_position'] = \
-                np.array([self._stage._floor_inner_bounding_box[0],
-                          (self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self._stage._floor_inner_bounding_box[0]])
+            # self._training_intervention_spaces[visual_object]['cartesian_position'] = \
+            #     np.array([self._stage._floor_inner_bounding_box[0],
+            #               (self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0]])
             self._training_intervention_spaces[visual_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
             if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
@@ -342,11 +345,11 @@ class BaseTask(object):
         # and orientation modification
         for rigid_object in self._stage._rigid_objects:
             self._testing_intervention_spaces[rigid_object] = dict()
-            self._testing_intervention_spaces[rigid_object]['cartesian_position'] = \
-                np.array([(self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self._stage._floor_inner_bounding_box[0],
-                          self._stage._floor_inner_bounding_box[1]])
+            # self._testing_intervention_spaces[rigid_object]['cartesian_position'] = \
+            #     np.array([(self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0],
+            #               self._stage._floor_inner_bounding_box[1]])
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
             if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
@@ -358,11 +361,11 @@ class BaseTask(object):
                 np.array([0.1, 0.2])
         for visual_object in self._stage._visual_objects:
             self._testing_intervention_spaces[visual_object] = dict()
-            self._testing_intervention_spaces[visual_object]['cartesian_position'] = \
-                np.array([(self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                          self._stage._floor_inner_bounding_box[0],
-                          self._stage._floor_inner_bounding_box[1]])
+            # self._testing_intervention_spaces[visual_object]['cartesian_position'] = \
+            #     np.array([(self._stage._floor_inner_bounding_box[1] -
+            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
+            #               self._stage._floor_inner_bounding_box[0],
+            #               self._stage._floor_inner_bounding_box[1]])
             self._testing_intervention_spaces[visual_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
             if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
