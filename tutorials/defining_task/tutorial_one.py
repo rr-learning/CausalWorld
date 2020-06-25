@@ -16,11 +16,11 @@ class MyOwnTask(BaseTask):
         creation_dict = {'name': "tool_block",
                          'filename': './assets/719.obj',
                          'initial_position': [0, 0, 0.1]}
-        self.stage.add_rigid_mesh_object(**creation_dict)
+        self._stage.add_rigid_mesh_object(**creation_dict)
         creation_dict = {'name': "goal_block",
                          'filename': './assets/719.obj',
                          'position': [0, 0, 0.1]}
-        self.stage.add_silhoutte_mesh_object(**creation_dict)
+        self._stage.add_silhoutte_mesh_object(**creation_dict)
 
 
 def example():

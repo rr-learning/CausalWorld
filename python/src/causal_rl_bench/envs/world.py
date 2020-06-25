@@ -139,8 +139,10 @@ class World(gym.Env):
             self._task = task_generator("reaching")
         else:
             self._task = task
-
-        self._task.init_task(self._robot, self._stage)
+        self._task.init_task(self._robot, self._stage, max_episode_length)
+        if max_episode_length is None:
+            max_episode_length = int(task.get_default_max_episode_length() / self.dt)
+        self._max_episode_length = max_episode_length
         self._reset_observations_space()
         self.action_space = self._robot.get_action_spaces()
 
@@ -149,14 +151,7 @@ class World(gym.Env):
         # TODO: verify spaces here
         #TODO: we postpone this function for now
         self._setup_viewing_camera()
-        if max_episode_length == np.inf:
-            self._enforce_episode_length = False
-        elif max_episode_length is None:
-            self._enforce_episode_length = True
-            max_episode_length = int(task.get_max_episode_length() / self.dt)
-        else:
-            self._enforce_episode_length = True
-        self._max_episode_length = max_episode_length
+
         self._episode_length = 0
         self._data_recorder = data_recorder
         self._wrappers_dict = dict()
@@ -202,8 +197,8 @@ class World(gym.Env):
         elif self._observation_mode == "cameras" and self.observation_space is not None:
             return
         else:
-            self._robot.select_observations(self._task.task_robot_observation_keys)
-            self._stage.select_observations(self._task.task_stage_observation_keys)
+            self._robot.select_observations(self._task._task_robot_observation_keys)
+            self._stage.select_observations(self._task._task_stage_observation_keys)
             self.observation_space = \
                 combine_spaces(self._robot.get_observation_spaces(),
                                self._stage.get_observation_spaces())
@@ -311,7 +306,7 @@ class World(gym.Env):
 
         if self._data_recorder:
             self._data_recorder.new_episode(self.get_full_state(),
-                                            task_name=self._task.task_name,
+                                            task_name=self._task._task_name,
                                             task_params=self._task.get_task_params(),
                                             world_params=self._get_world_params())
         if self._observation_mode == "cameras":
@@ -339,12 +334,10 @@ class World(gym.Env):
         :param episode_length:
         :return:
         """
-        self._enforce_episode_length = True
         self._max_episode_length = episode_length
 
     def _is_done(self):
-        if self._enforce_episode_length and \
-                self._episode_length > self._max_episode_length:
+        if self._episode_length > self._max_episode_length:
             return True
         else:
             return self._task.is_done()

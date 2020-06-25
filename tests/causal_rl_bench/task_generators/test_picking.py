@@ -54,8 +54,8 @@ class TestPicking(unittest.TestCase):
         return desired_action
 
     def grip_block(self):
-        grip_locations = get_suggested_grip_locations(self.env._task.stage.get_object('tool_block').get_size(),
-                                                      self.env._task.stage.get_object('tool_block').world_to_cube_r_matrix())
+        grip_locations = get_suggested_grip_locations(self.env._task._stage.get_object('tool_block').get_size(),
+                                                      self.env._task._stage.get_object('tool_block').world_to_cube_r_matrix())
         desired_action = np.zeros(9)
         desired_action[6:] = [-0, -0.08, 0.4]
         desired_action[:3] = grip_locations[0]

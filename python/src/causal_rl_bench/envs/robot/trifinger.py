@@ -43,6 +43,7 @@ class TriFingerRobot(object):
         self._robot_id = robot_id
         self._simulation_time = simulation_time
         self._dt = self._simulation_time * self._skip_frame
+        #TODO: for some reason this is needed
         self._control_index = -1
         self._position_gains = np.array(
             [10.0, 10.0, 10.0] * 3
@@ -103,6 +104,9 @@ class TriFingerRobot(object):
         #disable velocity control mode
         self._disable_velocity_control()
         return
+
+    def get_control_index(self):
+        return self._control_index
 
     def get_link_names(self):
         return self._link_ids

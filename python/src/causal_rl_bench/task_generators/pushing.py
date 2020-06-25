@@ -19,21 +19,22 @@ class PushingTaskGenerator(BaseTask):
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([750, 250, 100])))
-        self.task_robot_observation_keys = ["joint_positions",
+        self.task_robot_observation_keys = ["time_left_for_task",
+                                            "joint_positions",
                                             "joint_velocities",
                                             "action_joint_positions",
                                             "end_effector_positions"]
-        self.task_params["tool_block_mass"] = \
+        self._task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.08)
-        self.task_params["joint_positions"] = \
+        self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
-        self.task_params["tool_block_position"] = \
+        self._task_params["tool_block_position"] = \
             kwargs.get("tool_block_position", np.array([0, -0.08, 0.0425]))
-        self.task_params["tool_block_orientation"] = \
+        self._task_params["tool_block_orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
-        self.task_params["goal_block_position"] = \
+        self._task_params["goal_block_position"] = \
             kwargs.get("goal_block_position", np.array([0, 0.08, 0.0425]))
-        self.task_params["goal_block_orientation"] = \
+        self._task_params["goal_block_orientation"] = \
             kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_end_effector_positions = None
         self.previous_object_position = None
@@ -55,19 +56,19 @@ class PushingTaskGenerator(BaseTask):
         """
         creation_dict = {'name': "tool_block",
                          'shape': "cube",
-                         'initial_position': self.task_params
+                         'initial_position': self._task_params
                          ["tool_block_position"],
-                         'initial_orientation': self.task_params
+                         'initial_orientation': self._task_params
                          ["goal_block_position"],
-                         'mass': self.task_params["tool_block_mass"]}
-        self.stage.add_rigid_general_object(**creation_dict)
+                         'mass': self._task_params["tool_block_mass"]}
+        self._stage.add_rigid_general_object(**creation_dict)
         creation_dict = {'name': "goal_block",
                          'shape': "cube",
-                         'position': self.task_params
+                         'position': self._task_params
                          ["goal_block_position"],
-                         'orientation':  self.task_params
+                         'orientation':  self._task_params
                          ["goal_block_orientation"]}
-        self.stage.add_silhoutte_general_object(**creation_dict)
+        self._stage.add_silhoutte_general_object(**creation_dict)
         self.task_stage_observation_keys = ["tool_block_type",
                                             "tool_block_size",
                                             "tool_block_position",
@@ -86,16 +87,16 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
-        for rigid_object in self.stage.get_rigid_objects():
+        for rigid_object in self._stage.get_rigid_objects():
             #TODO: make it a function of size
-            self.training_intervention_spaces[rigid_object]['position'][0][-1] \
+            self._training_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
-            self.training_intervention_spaces[rigid_object]['position'][1][-1] \
+            self._training_intervention_spaces[rigid_object]['position'][1][-1] \
                 = 0.0425
-        for visual_object in self.stage.get_visual_objects():
-            self.training_intervention_spaces[visual_object]['position'][0][-1] \
+        for visual_object in self._stage.get_visual_objects():
+            self._training_intervention_spaces[visual_object]['position'][0][-1] \
                 = 0.0425
-            self.training_intervention_spaces[visual_object]['position'][1][-1] \
+            self._training_intervention_spaces[visual_object]['position'][1][-1] \
                 = 0.0425
         return
 
@@ -105,15 +106,15 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
-        for rigid_object in self.stage.get_rigid_objects():
-            self.testing_intervention_spaces[rigid_object]['position'][0][-1] \
+        for rigid_object in self._stage.get_rigid_objects():
+            self._testing_intervention_spaces[rigid_object]['position'][0][-1] \
                 = 0.0425
-            self.testing_intervention_spaces[rigid_object]['position'][1][-1] \
+            self._testing_intervention_spaces[rigid_object]['position'][1][-1] \
                 = 0.0425
-        for visual_object in self.stage.get_visual_objects():
-            self.testing_intervention_spaces[visual_object]['position'][0][-1] \
+        for visual_object in self._stage.get_visual_objects():
+            self._testing_intervention_spaces[visual_object]['position'][0][-1] \
                 = 0.0425
-            self.testing_intervention_spaces[visual_object]['position'][1][-1] \
+            self._testing_intervention_spaces[visual_object]['position'][1][-1] \
                 = 0.0425
         return
 
@@ -136,16 +137,16 @@ class PushingTaskGenerator(BaseTask):
         # 7) mean dist_of closest two fingers outside_bounding_ellipsoid
         # 8) delta in joint velocities
         rewards = list()
-        block_position = self.stage.get_object_state('tool_block',
+        block_position = self._stage.get_object_state('tool_block',
                                                      'position')
-        block_orientation = self.stage.get_object_state('tool_block',
+        block_orientation = self._stage.get_object_state('tool_block',
                                                         'orientation')
-        goal_position = self.stage.get_object_state('goal_block',
+        goal_position = self._stage.get_object_state('goal_block',
                                                     'position')
-        goal_orientation = self.stage.get_object_state('goal_block',
+        goal_orientation = self._stage.get_object_state('goal_block',
                                                        'orientation')
-        end_effector_positions = self.robot.compute_end_effector_positions(
-            self.robot.get_latest_full_state()['positions'])
+        end_effector_positions = self._robot.compute_end_effector_positions(
+            self._robot.get_latest_full_state()['positions'])
         end_effector_positions = end_effector_positions.reshape(-1, 3)
 
         # calculate first reward term
@@ -203,14 +204,14 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         self.previous_end_effector_positions = \
-            self.robot.compute_end_effector_positions(
-                self.robot.get_latest_full_state()['positions'])
+            self._robot.compute_end_effector_positions(
+                self._robot.get_latest_full_state()['positions'])
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
-            self.stage.get_object_state('tool_block', 'position')
+            self._stage.get_object_state('tool_block', 'position')
         self.previous_object_orientation = \
-            self.stage.get_object_state('tool_block', 'orientation')
+            self._stage.get_object_state('tool_block', 'orientation')
         return
 
     def _handle_contradictory_interventions(self, interventions_dict):

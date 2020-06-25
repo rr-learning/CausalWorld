@@ -8,8 +8,6 @@ def example():
     task = task_generator(task_generator_id='reaching')
     env = World(task=task, enable_visualization=True,
                 action_mode="joint_positions",
-                normalize_observations=False,
-                normalize_actions=False,
                 skip_frame=10)
     horizon = 100
     actions = [env.action_space.sample() for _ in range(horizon)]
@@ -22,13 +20,13 @@ def example():
     print("first")
     for i in range(100):
         obs, reward, done, info = env.step(actions[i])
-        print(reward)
         # plt.imshow(obs[0])
         # plt.show()
         # plt.imshow(obs[3])
         # plt.show()
         #
         # print(obs[-20:-20 + 7])
+    env.reset(interventions_dict={'number_of_obstacles': 2})
     print("second")
     obs = env.reset()
     # print(obs[-20:-20 + 7])

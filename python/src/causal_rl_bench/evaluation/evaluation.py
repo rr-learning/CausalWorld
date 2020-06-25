@@ -28,10 +28,10 @@ class EvaluationPipeline(object):
             self.tracker = Tracker(
                 file_path=os.path.join(tracker_path, 'tracker'))
             task_stats = self.tracker.task_stats_log[0]
-            del task_stats.task_params['intervention_split']
-            del task_stats.task_params['training']
-            self.task = task_generator(task_generator_id=task_stats.task_name,
-                                       **task_stats.task_params,
+            del task_stats._task_params['intervention_split']
+            del task_stats._task_params['training']
+            self.task = task_generator(task_generator_id=task_stats._task_name,
+                                       **task_stats._task_params,
                                        intervention_split=intervention_split,
                                        training=training)
         else:
@@ -64,7 +64,7 @@ class EvaluationPipeline(object):
                                  seed=self.initial_seed,
                                  data_recorder=self.data_recorder,
                                  enable_visualization=visualize_evaluation)
-        evaluation_episode_length_in_secs = self.task.get_max_episode_length()
+        evaluation_episode_length_in_secs = self.task.get_default_max_episode_length()
         self.time_steps_for_evaluation = \
             int(evaluation_episode_length_in_secs / self.env.dt)
 

@@ -21,8 +21,8 @@ def get_world(task_generator_id, task_params, world_params,
 def view_episode(episode, env_wrappers=np.array([]),
                  env_wrappers_args=np.array([])):
     actual_skip_frame = episode.world_params["skip_frame"]
-    env = get_world(episode.task_name,
-                    episode.task_params,
+    env = get_world(episode._task_name,
+                    episode._task_params,
                     episode.world_params,
                     enable_visualization=True,
                     env_wrappers=env_wrappers,
@@ -42,7 +42,7 @@ def view_policy(task, world_params, policy_fn, max_time_steps,
                 number_of_resets, env_wrappers=np.array([]),
                 env_wrappers_args=np.array([])):
     actual_skip_frame = world_params["skip_frame"]
-    env = get_world(task.task_name,
+    env = get_world(task._task_name,
                     task.get_task_params(),
                     world_params,
                     enable_visualization=True,
@@ -64,7 +64,7 @@ def record_video_of_policy(task, world_params, policy_fn, file_name,
                            env_wrappers_args=np.array([])):
     #TODO: discuss the speed of the current render method since it takes a long time to render a frame
     actual_skip_frame = world_params["skip_frame"]
-    env = get_world(task.task_name,
+    env = get_world(task._task_name,
                     task.get_task_params(),
                     world_params,
                     enable_visualization=False,
@@ -89,7 +89,7 @@ def record_video_of_random_policy(task, world_params, file_name,
     #TODO: discuss the speed of the current render method since it takes a
     # long time to render a frame
     actual_skip_frame = world_params["skip_frame"]
-    env = get_world(task.task_name,
+    env = get_world(task._task_name,
                     task.get_task_params(),
                     world_params,
                     enable_visualization=False,
@@ -110,8 +110,8 @@ def record_video_of_random_policy(task, world_params, file_name,
 def record_video_of_episode(episode, file_name, env_wrappers=np.array([]),
                             env_wrappers_args=np.array([])):
     actual_skip_frame = episode.world_params["skip_frame"]
-    env = get_world(episode.task_name,
-                    episode.task_params,
+    env = get_world(episode._task_name,
+                    episode._task_params,
                     episode.world_params,
                     enable_visualization=False,
                     env_wrappers=env_wrappers,

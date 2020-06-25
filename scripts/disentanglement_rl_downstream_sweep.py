@@ -61,7 +61,7 @@ class CameraObservationWrapper(gym.ObservationWrapper):
         height_multiplier = 3
         if self.single_camera:
             height_multiplier = 1
-        if self.env.robot.normalize_observations:
+        if self.env._robot.normalize_observations:
             self.observation_space = spaces.Box(low=np.zeros(shape=(height * height_multiplier, width, 3)),
                                                 high=np.ones(shape=(height * height_multiplier, width, 3)),
                                                 dtype=np.float64)

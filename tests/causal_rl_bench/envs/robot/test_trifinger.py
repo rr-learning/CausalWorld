@@ -1,16 +1,20 @@
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
-
+from causal_rl_bench.envs.world import World
+from causal_rl_bench.task_generators.task import task_generator
+import numpy as np
 import pytest
 
 
 @pytest.fixture(scope="module")
 def robot_jp_structured():
-    return TriFingerRobot(action_mode="joint_positions", observation_mode="structured", enable_visualization=False)
+    task = task_generator(task_generator_id='pushing')
+    return World(task=task, enable_visualization=False, observation_mode="structured")
 
 
 @pytest.fixture(scope="module")
 def robot_jp_camera():
-    return TriFingerRobot(action_mode="joint_positions", observation_mode="cameras", enable_visualization=False)
+    task = task_generator(task_generator_id='pushing')
+    return World(task=task, enable_visualization=False, observation_mode="cameras")
 
 
 def test_action_mode_switching(robot_jp_structured):
@@ -18,20 +22,6 @@ def test_action_mode_switching(robot_jp_structured):
     assert robot_jp_structured.get_action_mode() == "joint_torques"
     robot_jp_structured.set_action_mode("joint_positions")
     assert robot_jp_structured.get_action_mode() == "joint_positions"
-
-
-def test_observation_mode_switch(robot_jp_structured):
-    robot_jp_structured.set_observation_mode("cameras")
-    assert robot_jp_structured.get_observation_mode() == "cameras"
-    robot_jp_structured.set_observation_mode("structured")
-    assert robot_jp_structured.get_observation_mode() == "structured"
-
-
-def test_skip_frame(robot_jp_structured):
-    assert robot_jp_structured.get_skip_frame() == 20
-    robot_jp_structured.set_skip_frame(30)
-    assert robot_jp_structured.get_skip_frame() == 30
-    robot_jp_structured.set_skip_frame(20)
 
 
 @pytest.mark.skip
@@ -96,9 +86,6 @@ def test_get_action_spaces():
 
 def test_pd_gains():
     #control the robot using pd controller
-    from causal_rl_bench.envs.world import World
-    from causal_rl_bench.task_generators.task import task_generator
-    import numpy as np
     np.random.seed(0)
     task = task_generator(task_generator_id='pushing')
     skip_frame = 1
