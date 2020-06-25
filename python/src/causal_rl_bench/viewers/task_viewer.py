@@ -12,7 +12,12 @@ def get_world(task_generator_id, task_params, world_params,
         task = task_generator(task_generator_id)
     else:
         task = task_generator(task_generator_id, **task_params)
-    env = World(task, **world_params, enable_visualization=enable_visualization)
+    if "enable_visualization" in world_params.keys():
+        world_params_temp = dict(world_params)
+        del world_params_temp["enable_visualization"]
+        env = World(task, **world_params_temp, enable_visualization=enable_visualization)
+    else:
+        env = World(task, **world_params, enable_visualization=enable_visualization)
     for i in range(len(env_wrappers)):
         env = env_wrappers[i](env, **env_wrappers_args[i])
     return env

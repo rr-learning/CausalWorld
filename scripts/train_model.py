@@ -48,7 +48,6 @@ def baseline_model(model_num):
                                       'enable_visualization': False,
                                       'observation_mode': 'structured',
                                       'normalize_observations': True,
-                                      'enable_goal_image': False,
                                       'action_mode': 'joint_positions'}}]
 
     random_seeds = sweep('seed', list(range(NUM_RANDOM_SEEDS)))

@@ -26,7 +26,7 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
 from stable_baselines.ddpg.noise import NormalActionNoise
 
 world_seed = 0
-num_of_envs = 20
+num_of_envs = 4
 
 NUM_RANDOM_SEEDS = 5
 NET_LAYERS = [256, 256]
@@ -51,7 +51,6 @@ def baseline_model(model_num):
                                       'enable_visualization': False,
                                       'observation_mode': 'structured',
                                       'normalize_observations': True,
-                                      'enable_goal_image': False,
                                       'action_mode': 'joint_positions'}}]
 
     random_seeds = sweep('seed', list(range(NUM_RANDOM_SEEDS)))
@@ -206,8 +205,8 @@ def train_model_num(model_settings, output_path):
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-        total_time_steps = 40000000
-        validate_every_timesteps = 2000000
+        total_time_steps = 40000000 / 1e3
+        validate_every_timesteps = 2000000 / 1e3
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
         num_of_active_envs = 1

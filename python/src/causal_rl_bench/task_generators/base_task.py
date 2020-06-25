@@ -767,8 +767,9 @@ class BaseTask(object):
                         intervention_space[variable_name], dict):
                     task_params_dict[variable_name] = dict()
                     for subvariable_name in intervention_space[variable_name]:
-                        task_params_dict[variable_name][subvariable_name] = \
-                            current_variables_values[variable_name][subvariable_name]
+                        if subvariable_name != 'cylindrical_position': #TODO: this is a dirty hack for now that cylindrical position are not part of the objects variables
+                            task_params_dict[variable_name][subvariable_name] = \
+                                current_variables_values[variable_name][subvariable_name]
                 else:
                     task_params_dict[variable_name] = current_variables_values[variable_name]
         else:

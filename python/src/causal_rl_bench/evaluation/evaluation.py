@@ -28,10 +28,10 @@ class EvaluationPipeline(object):
             self.tracker = Tracker(
                 file_path=os.path.join(tracker_path, 'tracker'))
             task_stats = self.tracker.task_stats_log[0]
-            del task_stats._task_params['intervention_split']
-            del task_stats._task_params['training']
-            self.task = task_generator(task_generator_id=task_stats._task_name,
-                                       **task_stats._task_params,
+            del task_stats.task_params['intervention_split']
+            del task_stats.task_params['training']
+            self.task = task_generator(task_generator_id=task_stats.task_name,
+                                       **task_stats.task_params,
                                        intervention_split=intervention_split,
                                        training=training)
         else:
@@ -42,9 +42,12 @@ class EvaluationPipeline(object):
                                        intervention_split=intervention_split,
                                        training=training)
         if tracker_path:
-            if world_params is not None:
-                if 'seed' in self.tracker.world_params:
-                    del self.tracker.world_params['seed']
+            if 'seed' in self.tracker.world_params:
+                del self.tracker.world_params['seed']
+            if 'simulation_time' in self.tracker.world_params:
+                del self.tracker.world_params['simulation_time']
+            if 'wrappers' in self.tracker.world_params:
+                del self.tracker.world_params['wrappers']
             self.env = World(self.task,
                              **self.tracker.world_params,
                              seed=self.initial_seed,
@@ -102,7 +105,7 @@ class EvaluationPipeline(object):
         pipeline_scores = dict()
         for evaluation_protocol in self.evaluation_protocols:
             self.evaluation_env = ProtocolWrapper(self.env, evaluation_protocol)
-            evaluation_protocol.init_protocol(env=self.evaluation_env,
+            evaluation_protocol.init_protocol(env=self.env,
                                               tracker=self.env.get_tracker())
             episodes_in_protocol = evaluation_protocol.get_num_episodes()
             for _ in range(episodes_in_protocol):

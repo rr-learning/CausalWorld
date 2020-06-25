@@ -15,7 +15,7 @@ class MeanLastFractionalSuccess(BaseMetric):
         :return:
         """
         self.total_number_of_episodes += 1
-        self.accumulated_success += episode_obj.infos[-1]['fractional_reward']
+        self.accumulated_success += episode_obj.infos[-1]['fractional_success']
 
     def get_metric_score(self):
         """

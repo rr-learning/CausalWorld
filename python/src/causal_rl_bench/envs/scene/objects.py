@@ -323,7 +323,7 @@ class RigidObject(object):
                 elif name == 'color':
                     state.extend(self._color)
                 elif name == 'friction':
-                    state.extend(self._lateral_friction)
+                    state.append(self._lateral_friction)
         return state
 
     def set_full_state(self, new_state):

@@ -105,7 +105,6 @@ def baseline_model(model_num):
                                       'enable_visualization': False,
                                       'observation_mode': 'cameras',
                                       'normalize_observations': True,
-                                      'enable_goal_image': False,
                                       'action_mode': 'joint_positions'}}]
 
     representations = sweep('module_path', get_list_of_tfhub_paths())
