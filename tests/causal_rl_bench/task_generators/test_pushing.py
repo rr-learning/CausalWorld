@@ -1,5 +1,5 @@
-from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
+from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.utils.rotation_utils import cyl2cart
 import numpy as np
 import unittest

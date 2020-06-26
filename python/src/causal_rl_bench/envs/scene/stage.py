@@ -5,7 +5,7 @@ from causal_rl_bench.utils.state_utils import get_intersection
 import math
 import numpy as np
 import pybullet
-from causal_rl_bench.envs.world_constants import WorldConstants
+from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class Stage(object):

@@ -2,7 +2,7 @@ import pybullet
 import numpy as np
 import copy
 from causal_rl_bench.utils.rotation_utils import rotate_points, cyl2cart
-from causal_rl_bench.envs.world_constants import WorldConstants
+from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class SilhouetteObject(object):

@@ -1,6 +1,7 @@
 import numpy as np
 
 import pinocchio
+from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class PinocchioUtils:
@@ -37,8 +38,12 @@ class PinocchioUtils:
         pinocchio.framesForwardKinematics(
             self.robot_model, self.data, joint_positions,
         )
-
-        return [
+        result = [
             np.asarray(self.data.oMf[link_id].translation).reshape(-1).tolist()
             for link_id in self.tip_link_ids
         ]
+        result = np.concatenate(result)
+        result[2] -= WorldConstants.FLOOR_HEIGHT
+        result[5] -= WorldConstants.FLOOR_HEIGHT
+        result[8] -= WorldConstants.FLOOR_HEIGHT
+        return result

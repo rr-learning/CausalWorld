@@ -3,7 +3,7 @@ import numpy as np
 from causal_rl_bench.utils.rotation_utils import rotate_points, \
     get_transformation_matrix, get_rotation_matrix, cyl2cart
 import copy
-from causal_rl_bench.envs.world_constants import WorldConstants
+from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class RigidObject(object):

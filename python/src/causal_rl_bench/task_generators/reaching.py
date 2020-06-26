@@ -1,6 +1,6 @@
 from causal_rl_bench.task_generators.base_task import BaseTask
 import numpy as np
-from causal_rl_bench.envs.world_constants import WorldConstants
+from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class ReachingTaskGenerator(BaseTask):

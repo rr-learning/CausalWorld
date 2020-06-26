@@ -2,7 +2,7 @@ from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
 import numpy as np
 import pybullet
-from causal_rl_bench.envs.world_constants import WorldConstants
+from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class TriFingerRobot(object):
@@ -316,6 +316,10 @@ class TriFingerRobot(object):
         :param rest_pose:
         :return:
         """
+        desired = np.array(desired_tip_positions)
+        desired[2] += WorldConstants.FLOOR_HEIGHT
+        desired[5] += WorldConstants.FLOOR_HEIGHT
+        desired[8] += WorldConstants.FLOOR_HEIGHT
         if self._pybullet_client_w_o_goal_id is not None:
             client = self._pybullet_client_w_o_goal_id
         else:
@@ -325,8 +329,9 @@ class TriFingerRobot(object):
         final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
                                                                [finger_tip_ids[0], finger_tip_ids[1],
                                                                 finger_tip_ids[2]],
-                                                               [desired_tip_positions[0:3], desired_tip_positions[3:6],
-                                                                desired_tip_positions[6:]],
+                                                               [desired[0:3],
+                                                                desired[3:6],
+                                                                desired[6:]],
                                                                 solver=pybullet.IK_DLS,
                                                                 currentPositions=rest_pose,
                                                                 physicsClientId=client)
@@ -334,8 +339,9 @@ class TriFingerRobot(object):
         final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
                                                                [finger_tip_ids[1], finger_tip_ids[0],
                                                                 finger_tip_ids[2]],
-                                                               [desired_tip_positions[3:6], desired_tip_positions[0:3],
-                                                                desired_tip_positions[6:]],
+                                                               [desired[3:6],
+                                                                desired[0:3],
+                                                                desired[6:]],
                                                                 solver=pybullet.IK_DLS,
                                                                 currentPositions=rest_pose,
                                                                 physicsClientId=client)
@@ -343,8 +349,9 @@ class TriFingerRobot(object):
         final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
                                                                [finger_tip_ids[2], finger_tip_ids[0],
                                                                 finger_tip_ids[1]],
-                                                               [desired_tip_positions[6:], desired_tip_positions[0:3],
-                                                                desired_tip_positions[3:6]],
+                                                               [desired[6:],
+                                                                desired[0:3],
+                                                                desired[3:6]],
                                                                 solver=pybullet.IK_DLS,
                                                                 currentPositions=rest_pose,
                                                                 physicsClientId=client)
@@ -355,6 +362,9 @@ class TriFingerRobot(object):
 
     def get_joint_positions_from_tip_positions(self, tip_positions,
                                                default_pose=None):
+        tip_positions[2] += WorldConstants.FLOOR_HEIGHT
+        tip_positions[5] += WorldConstants.FLOOR_HEIGHT
+        tip_positions[8] += WorldConstants.FLOOR_HEIGHT
         if default_pose is None:
             positions = self.inverse_kinematics(
                 tip_positions, list(self.get_rest_pose()[0]))
@@ -409,15 +419,13 @@ class TriFingerRobot(object):
         tip_positions = self._pinocchio_utils.forward_kinematics(
             joint_positions
         )
-        end_effector_position = np.concatenate(tip_positions)
-        return end_effector_position
+        return tip_positions
 
     def _compute_end_effector_positions(self, robot_state):
         tip_positions = self._pinocchio_utils.forward_kinematics(
             robot_state['positions']
         )
-        end_effector_position = np.concatenate(tip_positions)
-        return end_effector_position
+        return tip_positions
 
     def _process_action_joint_positions(self, robot_state):
         #This returns the absolute joint positions command sent in position control mode

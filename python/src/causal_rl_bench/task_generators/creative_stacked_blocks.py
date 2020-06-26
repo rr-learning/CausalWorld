@@ -320,7 +320,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                                  'size': block_sizes[level_num][i]}
                 self._stage.add_rigid_general_object(**creation_dict)
                 block_position = self._stage.random_position(
-                    height_limits=0.0425)
+                    height_limits=0.0325)
                 block_orientation = euler_to_quaternion(
                     [0, 0, np.random.uniform(-np.pi, np.pi)])
                 self._stage.set_objects_pose(names=[
@@ -332,7 +332,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                 while not self._stage.check_feasiblity_of_stage() and \
                         trial_index < 10:
                     block_position = self._stage.random_position(
-                        height_limits=[0.0425, 0.15])
+                        height_limits=[0.0325, 0.15])
                     block_orientation = euler_to_quaternion(
                         [0, 0, np.random.uniform(-np.pi, np.pi)])
                     self._stage.set_objects_pose(names=[
