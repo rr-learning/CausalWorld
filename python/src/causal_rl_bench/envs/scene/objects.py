@@ -3,6 +3,7 @@ import numpy as np
 from causal_rl_bench.utils.rotation_utils import rotate_points, \
     get_transformation_matrix, get_rotation_matrix, cyl2cart
 import copy
+from causal_rl_bench.envs.world_constants import WorldConstants
 
 
 class RigidObject(object):
@@ -159,6 +160,8 @@ class RigidObject(object):
             position, orientation = pybullet.getBasePositionAndOrientation(
                 self._block_ids[0], physicsClientId=self._pybullet_client_ids[0]
             )
+            position = np.array(position)
+            position[-1] -= WorldConstants.FLOOR_HEIGHT
             return position
 
         elif variable_name == 'orientation':
@@ -166,6 +169,8 @@ class RigidObject(object):
                 self._block_ids[0],
                 physicsClientId=self._pybullet_client_ids[0]
             )
+            position = np.array(position)
+            position[-1] -= WorldConstants.FLOOR_HEIGHT
             return orientation
         elif variable_name == 'linear_velocity':
             linear_velocity, angular_velocity = pybullet.getBaseVelocity(
@@ -257,6 +262,7 @@ class RigidObject(object):
         :return:
         """
         for i in range(0, len(self._pybullet_client_ids)):
+            position[-1] += WorldConstants.FLOOR_HEIGHT
             pybullet.resetBasePositionAndOrientation(
                 self._block_ids[i], position, orientation,
                 physicsClientId=self._pybullet_client_ids[i]
@@ -276,6 +282,8 @@ class RigidObject(object):
                 self._block_ids[0],
                 physicsClientId =
                 self._pybullet_client_ids[0])
+            position = np.array(position)
+            position[-1] -= WorldConstants.FLOOR_HEIGHT
             state["type"] = self._type_id
             state["cartesian_position"] = np.array(position)
             state["orientation"] = np.array(orientation)
@@ -299,6 +307,8 @@ class RigidObject(object):
                 self._block_ids[0],
                 physicsClientId=
                 self._pybullet_client_ids[0])
+            position = np.array(position)
+            position[-1] -= WorldConstants.FLOOR_HEIGHT
             if self.is_not_fixed():
                 linear_velocity, angular_velocity = pybullet.\
                     getBaseVelocity(
@@ -365,6 +375,8 @@ class RigidObject(object):
                 getBasePositionAndOrientation(self._block_ids[0],
                                               physicsClientId=
                                               self._pybullet_client_ids[0])
+            position = np.array(position)
+            position[-1] -= WorldConstants.FLOOR_HEIGHT
         if 'cartesian_position' in interventions_dict:
             position = interventions_dict['cartesian_position']
         if 'orientation' in interventions_dict:
@@ -380,6 +392,7 @@ class RigidObject(object):
         elif 'cartesian_position' in interventions_dict or 'orientation' in \
                 interventions_dict:
             for i in range(0, len(self._pybullet_client_ids)):
+                position[-1] += WorldConstants.FLOOR_HEIGHT
                 pybullet.resetBasePositionAndOrientation(
                     self._block_ids[i], position, orientation,
                     physicsClientId=
@@ -452,10 +465,14 @@ class RigidObject(object):
         :return:
         """
         #should be the same in both
-        return pybullet.getAABB(self._block_ids[0],
+        bb = pybullet.getAABB(self._block_ids[0],
                                 physicsClientId=
                                 self._pybullet_client_ids[0]
                                 )
+        bb = np.array(bb)
+        bb[0][-1] -= WorldConstants.FLOOR_HEIGHT
+        bb[1][-1] -= WorldConstants.FLOOR_HEIGHT
+        return bb
 
     def get_vertices(self):
         """
@@ -468,6 +485,8 @@ class RigidObject(object):
             physicsClientId=
             self._pybullet_client_ids[0]
         )
+        position = np.array(position)
+        position[-1] -= WorldConstants.FLOOR_HEIGHT
         vertices = [[1, 1, -1],
                     [1, -1, -1],
                     [-1, 1, -1],
@@ -491,6 +510,8 @@ class RigidObject(object):
             physicsClientId=
             self._pybullet_client_ids[0]
         )
+        position = np.array(position)
+        position[-1] -= WorldConstants.FLOOR_HEIGHT
         #TODO: double check if its not the inverse
         return get_transformation_matrix(position, orientation)
 
@@ -505,6 +526,8 @@ class RigidObject(object):
             physicsClientId=
             self._pybullet_client_ids[0]
         )
+        position = np.array(position)
+        position[-1] -= WorldConstants.FLOOR_HEIGHT
         #TODO: double check if its not the inverse
         return get_rotation_matrix(orientation)
 
@@ -583,9 +606,11 @@ class Cuboid(RigidObject):
             shapeType=pybullet.GEOM_BOX,
             halfExtents=np.array(self._size) / 2,
             physicsClientId=pybullet_client_id)
+        position = np.array(self._initial_position)
+        position[-1] += WorldConstants.FLOOR_HEIGHT
         block_id = pybullet.createMultiBody(
             baseCollisionShapeIndex=shape_id,
-            basePosition=self._initial_position,
+            basePosition=position,
             baseOrientation=self._initial_orientation,
             baseMass=self._mass,
             physicsClientId=pybullet_client_id
@@ -609,6 +634,8 @@ class Cuboid(RigidObject):
             getBasePositionAndOrientation(self._block_ids[0],
                                           physicsClientId=
                                           self._pybullet_client_ids[0])
+        position = np.array(position)
+        position[-1] -= WorldConstants.FLOOR_HEIGHT
         recreation_params['initial_position'] = position
         recreation_params['initial_orientation'] = orientation
         recreation_params['mass'] = self._mass
@@ -661,13 +688,15 @@ class StaticCuboid(RigidObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        position = np.array(self._initial_position)
+        position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_BOX,
             halfExtents=np.array(self._size) / 2,
             physicsClientId=pybullet_client_id)
         block_id = pybullet.createMultiBody(
             baseCollisionShapeIndex=shape_id,
-            basePosition=self._initial_position,
+            basePosition=position,
             baseOrientation=self._initial_orientation,
             baseMass=self._mass,
             physicsClientId=pybullet_client_id
@@ -686,6 +715,8 @@ class StaticCuboid(RigidObject):
             getBasePositionAndOrientation(self._block_ids[0],
                                           physicsClientId=
                                           self._pybullet_client_ids[0])
+        position = np.array(position)
+        position[-1] -= WorldConstants.FLOOR_HEIGHT
         recreation_params['position'] = position
         recreation_params['orientation'] = orientation
         recreation_params['color'] = self._color
@@ -742,6 +773,8 @@ class MeshObject(RigidObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        position = np.array(self._initial_position)
+        position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_MESH,
             meshScale=self._scale,
@@ -749,7 +782,7 @@ class MeshObject(RigidObject):
             physicsClientId=pybullet_client_id)
         block_id = pybullet.createMultiBody(
             baseCollisionShapeIndex=shape_id,
-            basePosition=self._initial_position,
+            basePosition=position,
             baseOrientation=self._initial_orientation,
             baseMass=self._mass,
             physicsClientId=pybullet_client_id)
@@ -773,6 +806,8 @@ class MeshObject(RigidObject):
                 self._block_ids[0],
                 physicsClientId=
                 self._pybullet_client_ids[0])
+        position = np.array(position)
+        position[-1] -= WorldConstants.FLOOR_HEIGHT
         recreation_params['initial_position'] = position
         recreation_params['initial_orientation'] = orientation
         recreation_params['mass'] = self._mass

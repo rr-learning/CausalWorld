@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import copy
-from causal_rl_bench.utils.state_utils import get_bounding_box_area
+from causal_rl_bench.utils.state_utils import get_bounding_box_volume
 from causal_rl_bench.utils.state_utils import get_intersection
 from causal_rl_bench.utils.rotation_utils import cart2cyl
 import pybullet
@@ -423,7 +423,7 @@ class BaseTask(object):
         #TODO: deal with structured data for silhouettes
         union_area = 0
         for desired_subgoal_bb in desired_goal:
-            union_area += get_bounding_box_area(desired_subgoal_bb)
+            union_area += get_bounding_box_volume(desired_subgoal_bb)
             for rigid_object_bb in achieved_goal:
                 intersection_area += get_intersection(
                     desired_subgoal_bb, rigid_object_bb)
