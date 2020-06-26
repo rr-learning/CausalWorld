@@ -1,7 +1,7 @@
 import pybullet
 import numpy as np
 from causal_rl_bench.utils.rotation_utils import rotate_points, \
-    get_transformation_matrix, get_rotation_matrix, cyl2cart
+    get_transformation_matrix, get_rotation_matrix, cyl2cart, cart2cyl
 import copy
 from causal_rl_bench.configs.world_constants import WorldConstants
 
@@ -48,6 +48,8 @@ class RigidObject(object):
             np.array([self._type_id])
         self._lower_bounds[self._name + "_cartesian_position"] = \
             np.array([-0.5, -0.5, 0])
+        self._lower_bounds[self._name + "_cylindrical_position"] = \
+            np.array([0, 0, 0])
         self._lower_bounds[self._name + "_orientation"] = \
             np.array([-10] * 4)
         self._lower_bounds[self._name + "_friction"] = \
@@ -72,6 +74,8 @@ class RigidObject(object):
             np.array([10])
         self._upper_bounds[self._name + "_cartesian_position"] = \
             np.array([0.5] * 3)
+        self._upper_bounds[self._name + "_cylindrical_position"] = \
+            np.array([0.20, np.pi, 0.5])
         self._upper_bounds[self._name + "_orientation"] = \
             np.array([10] * 4)
         self._upper_bounds[self._name + "_size"] = \
@@ -91,11 +95,13 @@ class RigidObject(object):
 
         if self.is_not_fixed():
             self._state_variable_names = ['type', 'cartesian_position',
+                                          'cylindrical_position',
                                            'orientation', 'linear_velocity',
                                            'angular_velocity', 'mass',
                                            'size', 'color', 'friction', 'type']
         else:
             self._state_variable_names = ['type', 'cartesian_position',
+                                          'cylindrical_position',
                                            'orientation',
                                            'size', 'color', 'friction', 'type']
 
@@ -286,6 +292,7 @@ class RigidObject(object):
             position[-1] -= WorldConstants.FLOOR_HEIGHT
             state["type"] = self._type_id
             state["cartesian_position"] = np.array(position)
+            state["cylindrical_position"] = cart2cyl(np.array(position))
             state["orientation"] = np.array(orientation)
             state["size"] = self._size
             state["color"] = self._color

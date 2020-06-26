@@ -1,7 +1,8 @@
 import pybullet
 import numpy as np
 import copy
-from causal_rl_bench.utils.rotation_utils import rotate_points, cyl2cart
+from causal_rl_bench.utils.rotation_utils import rotate_points, cyl2cart, \
+    cart2cyl
 from causal_rl_bench.configs.world_constants import WorldConstants
 
 
@@ -36,6 +37,8 @@ class SilhouetteObject(object):
             np.array([self._type_id])
         self._lower_bounds[self._name + "_cartesian_position"] = \
             np.array([-0.5, -0.5, 0])
+        self._lower_bounds[self._name + "_cylindrical_position"] = \
+            np.array([0, 0, 0])
         self._lower_bounds[self._name + "_orientation"] = \
             np.array([-10] * 4)
         self._lower_bounds[self._name + "_size"] = \
@@ -48,6 +51,8 @@ class SilhouetteObject(object):
             np.array([self._type_id])
         self._upper_bounds[self._name + "_cartesian_position"] = \
             np.array([0.5] * 3)
+        self._upper_bounds[self._name + "_cylindrical_position"] = \
+            np.array([0.20, np.pi, 0.5])
         self._upper_bounds[self._name + "_orientation"] = \
             np.array([10] * 4)
         self._upper_bounds[self._name + "_size"] = \
@@ -56,6 +61,7 @@ class SilhouetteObject(object):
             np.array([1] * 3)
         self._state_variable_names = []
         self._state_variable_names = ['type', 'cartesian_position',
+                                      'cylindrical_position',
                                        'orientation',
                                        'size', 'color']
         self._state_variable_sizes = []
@@ -155,6 +161,7 @@ class SilhouetteObject(object):
             position[-1] -= WorldConstants.FLOOR_HEIGHT
             state["type"] = self._type_id
             state["cartesian_position"] = np.array(position)
+            state["cylindrical_position"] = cart2cyl(np.array(position))
             state["orientation"] = np.array(orientation)
             state["size"] = self._size
             state["color"] = self._color
