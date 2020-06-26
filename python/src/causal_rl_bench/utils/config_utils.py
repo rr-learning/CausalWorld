@@ -3,7 +3,7 @@ import os
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
-from causal_rl_bench.wrappers import ObjectSelectorWrapper, DeltaAction, MovingAverageActionEnvWrapper, \
+from causal_rl_bench.wrappers import ObjectSelectorWrapper, DeltaActionEnvWrapper, MovingAverageActionEnvWrapper, \
     HERGoalEnvWrapper, CurriculumWrapper
 from causal_rl_bench.utils.intervention_agent_utils import initialize_intervention_agents
 from causal_rl_bench.curriculum.curriculum import Curriculum
@@ -46,7 +46,7 @@ def load_world(tracker_relative_path, enable_visualization=False):
         if wrapper == 'object_selector':
             env = ObjectSelectorWrapper(env, **tracker.world_params['wrappers'][wrapper])
         elif wrapper == 'delta_action':
-            env = DeltaAction(env, **tracker.world_params['wrappers'][wrapper])
+            env = DeltaActionEnvWrapper(env, **tracker.world_params['wrappers'][wrapper])
         elif wrapper == 'moving_average_action':
             env = MovingAverageActionEnvWrapper(env, **tracker.world_params['wrappers'][wrapper])
         elif wrapper == 'her_environment':

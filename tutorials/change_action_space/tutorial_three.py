@@ -1,6 +1,6 @@
 from causal_rl_bench.envs.world import World
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.wrappers.action_wrappers import DeltaActionEnvWrapper
+from causal_rl_bench.wrappers.action_wrappers import MovingAverageActionEnvWrapper
 import numpy as np
 
 
@@ -10,7 +10,7 @@ def apply_delta_action():
                 action_mode="joint_positions",
                 normalize_actions=True,
                 normalize_observations=True, skip_frame=1)
-    env = DeltaActionEnvWrapper(env)
+    env = MovingAverageActionEnvWrapper(env)
     for _ in range(50):
         obs = env.reset()
         for _ in range(1000):
@@ -19,8 +19,7 @@ def apply_delta_action():
             print("what I wanted to reach", current_obs + desired_action)
             obs, reward, done, info = env.step(desired_action)
             print("what I actually reached", np.around(obs[:9], decimals=2))
-            print("diff is", current_obs + desired_action - np.around(obs[:9],
-                                                                      decimals=2))
+            print("diff is", current_obs + desired_action - np.around(obs[:9], decimals=2))
                 # desired_action = obs[:9]
     env.close()
 

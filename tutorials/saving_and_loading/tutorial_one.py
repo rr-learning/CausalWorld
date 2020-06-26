@@ -4,7 +4,7 @@ from causal_rl_bench.envs.world import World
 from causal_rl_bench.intervention_agents import VisualInterventionActorPolicy
 from causal_rl_bench.curriculum import Curriculum
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.wrappers import DeltaAction
+from causal_rl_bench.wrappers import DeltaActionEnvWrapper
 import numpy as np
 
 
@@ -13,7 +13,7 @@ def example():
     task_gen = task_generator(task_generator_id='pushing')
     env = World(task_gen, skip_frame=1,
                 enable_visualization=True)
-    env = DeltaAction(env)
+    env = DeltaActionEnvWrapper(env)
     env = CurriculumWrapper(env,
                             intervention_actors=[
                                 VisualInterventionActorPolicy()],
