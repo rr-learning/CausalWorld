@@ -21,7 +21,7 @@ def get_iou(bb1, bb2, area1, area2):
     return intersection_area / float(area1 + area2 - intersection_area)
 
 
-def get_bounding_box_area(bb):
+def get_bounding_box_volume(bb):
     width = bb[1][0] - bb[0][0]
     depth = bb[1][1] - bb[0][1]
     height = bb[1][2] - bb[0][2]

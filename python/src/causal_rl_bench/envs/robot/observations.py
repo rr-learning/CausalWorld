@@ -60,9 +60,9 @@ class TriFingerObservations(object):
 
         if observation_mode == "cameras":
             self._observations_keys = ["cameras"]
-            self.low = np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
-            self.high = np.full(shape=(3, 54, 72, 3), fill_value=255,
-                                dtype=np.float64)
+            self._low = np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
+            self._high = np.full(shape=(3, 54, 72, 3), fill_value=255,
+                                 dtype=np.float64)
             self._low_norm = 0
             self._high_norm = 1
             self._cameras = cameras
@@ -76,36 +76,61 @@ class TriFingerObservations(object):
             else:
                 raise ValueError("One of the provided observation_"
                                  "keys is unknown")
-
-            self.low = np.array([])
-            self.high = np.array([])
+            self._observation_is_not_normalized = np.array([], dtype=np.bool)
+            self._low = np.array([])
+            self._high = np.array([])
             self.set_observation_spaces()
 
     def get_observation_spaces(self):
         if self._normalized_observations:
-            return spaces.Box(low=np.full(shape=self.low.shape,
-                                          fill_value=self._low_norm,
-                                          dtype=np.float64),
-                              high=np.full(shape=self.low.shape,
-                                           fill_value=self._high_norm,
-                                           dtype=np.float64),
+            observations_low_values = np.full(shape=self._low.shape,
+                                              fill_value=self._low_norm,
+                                              dtype=np.float64)
+            observations_high_values = np.full(shape=self._low.shape,
+                                               fill_value=self._high_norm,
+                                               dtype=np.float64)
+            observations_low_values[self._observation_is_not_normalized] = \
+                self._low[self._observation_is_not_normalized]
+            observations_high_values[self._observation_is_not_normalized] = \
+                self._high[self._observation_is_not_normalized]
+            return spaces.Box(low=observations_low_values,
+                              high=observations_high_values,
                               dtype=np.float64)
         else:
             if self._observation_mode == "structured":
-                return spaces.Box(low=self.low,
-                                  high=self.high,
+                return spaces.Box(low=self._low,
+                                  high=self._high,
                                   dtype=np.float64)
             else:
-                return spaces.Box(low=self.low,
-                                  high=self.high,
+                return spaces.Box(low=self._low,
+                                  high=self._high,
                                   dtype=np.uint8)
 
     def set_observation_spaces(self):
-        self.low = np.array([])
-        self.high = np.array([])
+        self._low = np.array([])
+        self._high = np.array([])
+        self._observation_is_not_normalized = np.array([], dtype=np.bool)
         for key in self._observations_keys:
-            self.low = np.append(self.low, np.array(self._lower_bounds[key]))
-            self.high = np.append(self.high, np.array(self._upper_bounds[key]))
+            self._low = np.append(self._low, np.array(self._lower_bounds[key]))
+            self._high = np.append(self._high, np.array(self._upper_bounds[key]))
+            if np.array_equal(self._lower_bounds[key],
+                              self._upper_bounds[key]):
+                self._observation_is_not_normalized = \
+                    np.append(self._observation_is_not_normalized,
+                              np.full(shape=
+                                      np.array(
+                                          self._upper_bounds[key]).shape,
+                                      fill_value=True,
+                                      dtype=np.bool))
+            else:
+                self._observation_is_not_normalized = \
+                    np.append(self._observation_is_not_normalized,
+                              np.full(shape=
+                                      np.array(
+                                          self._upper_bounds[key]).shape,
+                                      fill_value=False,
+                                      dtype=np.bool))
+        return
 
     def is_normalized(self):
         return self._normalized_observations
@@ -115,8 +140,8 @@ class TriFingerObservations(object):
         self.set_observation_spaces()
 
     def normalize_observation(self, observation):
-        return (self._high_norm - self._low_norm) * (observation - self.low) / \
-               (self.high - self.low) \
+        return (self._high_norm - self._low_norm) * (observation - self._low) / \
+               (self._high - self._low) \
                + self._low_norm
 
     def normalize_observation_for_key(self, observation, key):
@@ -126,8 +151,8 @@ class TriFingerObservations(object):
                (higher_key - lower_key) + self._low_norm
 
     def denormalize_observation(self, observation):
-        return self.low + (observation - self._low_norm) / \
-               (self._high_norm - self._low_norm) * (self.high - self.low)
+        return self._low + (observation - self._low_norm) / \
+               (self._high_norm - self._low_norm) * (self._high - self._low)
 
     def denormalize_observation_for_key(self, observation, key):
         lower_key = np.array(self._lower_bounds[key])
@@ -140,14 +165,14 @@ class TriFingerObservations(object):
             return (observation > self._low_norm).all() and \
                    (observation < self._high_norm).all()
         else:
-            return (observation > self.low).all() and \
-                   (observation < self.high).all()
+            return (observation > self._low).all() and \
+                   (observation < self._high).all()
 
     def clip_observation(self, observation):
         if self._normalized_observations:
             return np.clip(observation, self._low_norm, self._high_norm)
         else:
-            return np.clip(observation, self.low, self.high)
+            return np.clip(observation, self._low, self._high)
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):

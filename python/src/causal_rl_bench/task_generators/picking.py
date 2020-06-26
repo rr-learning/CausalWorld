@@ -32,7 +32,7 @@ class PickingTaskGenerator(BaseTask):
         self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self._task_params["tool_block_position"] = \
-            kwargs.get("tool_block_position", np.array([0, 0, 0.0425]))
+            kwargs.get("tool_block_position", np.array([0, 0, 0.0325]))
         self._task_params["tool_block_orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_object_position = None
@@ -91,10 +91,10 @@ class PickingTaskGenerator(BaseTask):
         for rigid_object in self._stage.get_rigid_objects():
             self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][
                 -1] \
-                = 0.0425
+                = 0.0325
             self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][
                 -1] \
-                = 0.0425
+                = 0.0325
         for visual_object in self._stage.get_visual_objects():
             self._training_intervention_spaces[visual_object]['cylindrical_position'][
                 0][-1] \
@@ -113,10 +113,10 @@ class PickingTaskGenerator(BaseTask):
         for rigid_object in self._stage.get_rigid_objects():
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'][0][
                 -1] \
-                = 0.0425
+                = 0.0325
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'][1][
                 -1] \
-                = 0.0425
+                = 0.0325
         for visual_object in self._stage.get_visual_objects():
             self._testing_intervention_spaces[visual_object]['cylindrical_position'][0][
                 -1] \

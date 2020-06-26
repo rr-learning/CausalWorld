@@ -10,6 +10,7 @@ from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.robot.camera import Camera
+from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
 
 
@@ -44,29 +45,10 @@ class World(gym.Env):
         self._simulation_time = 1. / 250
         self._skip_frame = skip_frame
         self.dt = self._simulation_time * self._skip_frame
-        self._joint_names = [
-            "finger_upper_link_0",
-            "finger_middle_link_0",
-            "finger_lower_link_0",
-            "finger_upper_link_120",
-            "finger_middle_link_120",
-            "finger_lower_link_120",
-            "finger_upper_link_240",
-            "finger_middle_link_240",
-            "finger_lower_link_240",
-        ]
-        self._tip_link_names = [
-            "finger_tip_link_0",
-            "finger_tip_link_120",
-            "finger_tip_link_240",
-        ]
         self._pybullet_client_w_o_goal_id = None
         self._pybullet_client_w_goal_id = None
         self._pybullet_client_full_id = None
         self._revolute_joint_ids = None
-        self._stage_id = 3
-        self._floor_id = 2
-        self._robot_id = None
         self.pinocchio_utils = None
         self._instantiate_pybullet()
         self.link_name_to_index = None
@@ -109,7 +91,6 @@ class World(gym.Env):
         self._robot = TriFingerRobot(action_mode=action_mode,
                                      observation_mode=observation_mode,
                                      skip_frame=skip_frame,
-                                     robot_id=self._robot_id,
                                      normalize_actions=normalize_actions,
                                      normalize_observations=
                                      normalize_observations,
@@ -141,7 +122,8 @@ class World(gym.Env):
             self._task = task
         self._task.init_task(self._robot, self._stage, max_episode_length)
         if max_episode_length is None:
-            max_episode_length = int(task.get_default_max_episode_length() / self.dt)
+            max_episode_length = int(task.get_default_max_episode_length() /
+                                     self.dt)
         self._max_episode_length = max_episode_length
         self._reset_observations_space()
         self.action_space = self._robot.get_action_spaces()
@@ -151,7 +133,8 @@ class World(gym.Env):
         # TODO: verify spaces here
         #TODO: we postpone this function for now
         self._setup_viewing_camera()
-
+        self._normalize_actions = normalize_actions
+        self._normalize_observations = normalize_observations
         self._episode_length = 0
         self._data_recorder = data_recorder
         self._wrappers_dict = dict()
@@ -163,26 +146,11 @@ class World(gym.Env):
         # self.reset()
         return
 
-    def get_stage_id(self):
-        """
-        This fuction returns the stage body id in pybullet.
-        :return:
-        """
-        return self._stage_id
+    def are_actions_normalized(self):
+        return self._normalize_actions
 
-    def get_floor_id(self):
-        """
-        This fuction returns the floor body id in pybullet.
-        :return:
-        """
-        return self._floor_id
-
-    def get_robot_id(self):
-        """
-        This fuction returns the robot body id in pybullet.
-        :return:
-        """
-        return self._robot_id
+    def are_observations_normalized(self):
+        return self._normalize_observations
 
     def _reset_observations_space(self):
         """
@@ -528,10 +496,9 @@ class World(gym.Env):
         This function loads the urdfs of the robot in all the pybullet clients
         :return:
         """
-
-
         robot_properties_path = os.path.join(
-            os.path.dirname(__file__), "robot_properties_fingers"
+            os.path.
+                dirname(__file__), "../../../assets/robot_properties_fingers"
         )
         finger_urdf_path = os.path.join(
             robot_properties_path, "urdf", "trifinger.urdf"
@@ -550,7 +517,7 @@ class World(gym.Env):
                                      physicsClientId=client)
                 pybullet.loadURDF("plane_transparent.urdf", [0, 0, 0],
                                 physicsClientId=client)
-                self._robot_id = pybullet.loadURDF(
+                pybullet.loadURDF(
                     fileName=finger_urdf_path,
                     basePosition=finger_base_position,
                     baseOrientation=finger_base_orientation,
@@ -563,25 +530,27 @@ class World(gym.Env):
                 )
                 if self.link_name_to_index is None:
                     self.link_name_to_index = {
-                        pybullet.getBodyInfo(self._robot_id,
+                        pybullet.getBodyInfo(WorldConstants.ROBOT_ID,
                                              physicsClientId=client)[0].decode(
                             "UTF-8"): -1,
                     }
                     for joint_idx in range(
-                            pybullet.getNumJoints(self._robot_id,
+                            pybullet.getNumJoints(WorldConstants.ROBOT_ID,
                                                   physicsClientId=client)):
                         link_name = pybullet.getJointInfo(
-                            self._robot_id, joint_idx,
+                            WorldConstants.ROBOT_ID, joint_idx,
                             physicsClientId=client)[
                             12
                         ].decode("UTF-8")
                         self.link_name_to_index[link_name] = joint_idx
 
                     self._revolute_joint_ids = [
-                        self.link_name_to_index[name] for name in self._joint_names
+                        self.link_name_to_index[name] for name in
+                        WorldConstants.JOINT_NAMES
                     ]
                     self.finger_tip_ids = [
-                        self.link_name_to_index[name] for name in self._tip_link_names
+                        self.link_name_to_index[name] for name in
+                        WorldConstants.TIP_LINK_NAMES
                     ]
                     # joint and link indices are the same in pybullet
                     # TODO do we even need this variable?
@@ -589,7 +558,7 @@ class World(gym.Env):
                     self.last_joint_position = [0] * len(self._revolute_joint_ids)
                 for link_id in self.finger_link_ids:
                     pybullet.changeDynamics(
-                                    bodyUniqueId=self._robot_id,
+                                    bodyUniqueId=WorldConstants.ROBOT_ID,
                                     linkIndex=link_id,
                                     maxJointVelocity=1e3,
                                     restitution=0.8,
@@ -605,7 +574,7 @@ class World(gym.Env):
                                 )
                 self.create_stage(robot_properties_path, client)
         self.pinocchio_utils = PinocchioUtils(
-            finger_urdf_path, self._tip_link_names
+            finger_urdf_path, WorldConstants.TIP_LINK_NAMES
         )
         return
 
@@ -623,7 +592,8 @@ class World(gym.Env):
         table_colour = (0.31, 0.27, 0.25, 1.0)
         high_border_colour = (0.95, 0.95, 0.95, 1.0)
         floor_id = pybullet.createCollisionShape(
-            shapeType=pybullet.GEOM_MESH, fileName=mesh_path("trifinger_table_without_border.stl"),
+            shapeType=pybullet.GEOM_MESH,
+            fileName=mesh_path("trifinger_table_without_border.stl"),
             flags=0,
             physicsClientId=pybullet_client
         )
@@ -641,7 +611,8 @@ class World(gym.Env):
                                    physicsClientId=pybullet_client)
 
         stage_id = pybullet.createCollisionShape(
-            shapeType=pybullet.GEOM_MESH, fileName=mesh_path("high_table_boundary.stl"),
+            shapeType=pybullet.GEOM_MESH,
+            fileName=mesh_path("high_table_boundary.stl"),
             flags=pybullet.GEOM_FORCE_CONCAVE_TRIMESH,
             physicsClientId=pybullet_client
         )

@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import copy
-from causal_rl_bench.utils.state_utils import get_bounding_box_area
+from causal_rl_bench.utils.state_utils import get_bounding_box_volume
 from causal_rl_bench.utils.state_utils import get_intersection
 from causal_rl_bench.utils.rotation_utils import cart2cyl
 import pybullet
@@ -201,7 +201,7 @@ class BaseTask(object):
         for rigid_object in self._stage._rigid_objects:
             #check if there is an equivilant visual object corresponding
             possible_corresponding_goal = rigid_object.replace('tool', 'goal')
-            if possible_corresponding_goal in self._stage._visual_objects:
+            if possible_corresponding_goal in self._stage.get_visual_objects():
                 info['possible_solution_intervention'][rigid_object] = dict()
                 info['possible_solution_intervention'][rigid_object]['cartesian_position'] = \
                     self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
@@ -242,7 +242,7 @@ class BaseTask(object):
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
-        for visual_object in self._stage._visual_objects:
+        for visual_object in self._stage.get_visual_objects():
             if visual_object in intervention_space and \
                     'cylindrical_position' in intervention_space[visual_object]:
                 intervention_dict[visual_object] = dict()
@@ -285,15 +285,15 @@ class BaseTask(object):
                        -math.radians(30)] * 3])
         #any goal or object in arena put the position
         #and orientation modification
-        for rigid_object in self._stage._rigid_objects:
+        for rigid_object in self._stage.get_rigid_objects():
             self._training_intervention_spaces[rigid_object] = dict()
             # self._training_intervention_spaces[rigid_object]['cartesian_position'] = \
-            #     np.array([self._stage._floor_inner_bounding_box[0],
-            #               (self._stage._floor_inner_bounding_box[1] -
-            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-            #               self._stage._floor_inner_bounding_box[0]])
+            #     np.array([WorldConstants.ARENA_BB[0],
+            #               (WorldConstants.ARENA_BB[1] -
+            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+            #               WorldConstants.ARENA_BB[0]])
             self._training_intervention_spaces[rigid_object]['cylindrical_position'] = \
-                np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
+                np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
             if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
                 self._training_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
@@ -304,12 +304,12 @@ class BaseTask(object):
         for visual_object in self._stage._visual_objects:
             self._training_intervention_spaces[visual_object] = dict()
             # self._training_intervention_spaces[visual_object]['cartesian_position'] = \
-            #     np.array([self._stage._floor_inner_bounding_box[0],
-            #               (self._stage._floor_inner_bounding_box[1] -
-            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-            #               self._stage._floor_inner_bounding_box[0]])
+            #     np.array([WorldConstants.ARENA_BB[0],
+            #               (WorldConstants.ARENA_BB[1] -
+            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+            #               WorldConstants.ARENA_BB[0]])
             self._training_intervention_spaces[visual_object]['cylindrical_position'] = \
-                np.array([[0.0, - math.pi, self._stage.get_floor_height()], [0.09, math.pi, 0.15]])
+                np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
             if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
                 self._training_intervention_spaces[visual_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
@@ -343,15 +343,15 @@ class BaseTask(object):
                        math.radians(-2)] * 3])
         # any goal or object in arena put the position
         # and orientation modification
-        for rigid_object in self._stage._rigid_objects:
+        for rigid_object in self._stage.get_rigid_objects():
             self._testing_intervention_spaces[rigid_object] = dict()
             # self._testing_intervention_spaces[rigid_object]['cartesian_position'] = \
-            #     np.array([(self._stage._floor_inner_bounding_box[1] -
-            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-            #               self._stage._floor_inner_bounding_box[0],
-            #               self._stage._floor_inner_bounding_box[1]])
+            #     np.array([(WorldConstants.ARENA_BB[1] -
+            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+            #               WorldConstants.ARENA_BB[0],
+            #               WorldConstants.ARENA_BB[1]])
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'] = \
-                np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
+                np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
             if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
                 self._testing_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
@@ -359,15 +359,15 @@ class BaseTask(object):
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
             self._testing_intervention_spaces[rigid_object]['mass'] = \
                 np.array([0.1, 0.2])
-        for visual_object in self._stage._visual_objects:
+        for visual_object in self._stage.get_visual_objects():
             self._testing_intervention_spaces[visual_object] = dict()
             # self._testing_intervention_spaces[visual_object]['cartesian_position'] = \
-            #     np.array([(self._stage._floor_inner_bounding_box[1] -
-            #                self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-            #               self._stage._floor_inner_bounding_box[0],
-            #               self._stage._floor_inner_bounding_box[1]])
+            #     np.array([(WorldConstants.ARENA_BB[1] -
+            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+            #               WorldConstants.ARENA_BB[0],
+            #               WorldConstants.ARENA_BB[1]])
             self._testing_intervention_spaces[visual_object]['cylindrical_position'] = \
-                np.array([[0.09, - math.pi, self._stage.get_floor_height()], [0.15, math.pi, 0.3]])
+                np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
             if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
                 self._testing_intervention_spaces[visual_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
@@ -393,8 +393,8 @@ class BaseTask(object):
         :return:
         """
         desired_goal = []
-        for visual_goal in self._stage._visual_objects:
-            desired_goal.append(self._stage._visual_objects[visual_goal]
+        for visual_goal in self._stage.get_visual_objects():
+            desired_goal.append(self._stage.get_visual_objects()[visual_goal]
                                 .get_bounding_box())
         return np.array(desired_goal)
 
@@ -404,9 +404,9 @@ class BaseTask(object):
         :return:
         """
         achieved_goal = []
-        for rigid_object in self._stage._rigid_objects:
-            if self._stage._rigid_objects[rigid_object].is_not_fixed:
-                achieved_goal.append(self._stage._rigid_objects
+        for rigid_object in self._stage.get_rigid_objects():
+            if self._stage.get_rigid_objects()[rigid_object].is_not_fixed:
+                achieved_goal.append(self._stage.get_rigid_objects()
                                      [rigid_object].get_bounding_box())
         return np.array(achieved_goal)
 
@@ -423,7 +423,7 @@ class BaseTask(object):
         #TODO: deal with structured data for silhouettes
         union_area = 0
         for desired_subgoal_bb in desired_goal:
-            union_area += get_bounding_box_area(desired_subgoal_bb)
+            union_area += get_bounding_box_volume(desired_subgoal_bb)
             for rigid_object_bb in achieved_goal:
                 intersection_area += get_intersection(
                     desired_subgoal_bb, rigid_object_bb)
@@ -705,7 +705,7 @@ class BaseTask(object):
             sub_variable_name = np.random.choice(list(variable_space.keys()))
             variable_space = variable_space[sub_variable_name]
         chosen_intervention = np.random.uniform(variable_space[0],
-                                               variable_space[1])
+                                                variable_space[1])
         if sub_variable_name is None:
             interventions_dict[variable_name] = \
                 chosen_intervention
@@ -770,9 +770,8 @@ class BaseTask(object):
                         intervention_space[variable_name], dict):
                     task_params_dict[variable_name] = dict()
                     for subvariable_name in intervention_space[variable_name]:
-                        if subvariable_name != 'cylindrical_position': #TODO: this is a dirty hack for now that cylindrical position are not part of the objects variables
-                            task_params_dict[variable_name][subvariable_name] = \
-                                current_variables_values[variable_name][subvariable_name]
+                        task_params_dict[variable_name][subvariable_name] = \
+                            current_variables_values[variable_name][subvariable_name]
                 else:
                     task_params_dict[variable_name] = current_variables_values[variable_name]
         else:

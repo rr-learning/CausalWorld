@@ -14,31 +14,31 @@ class DeltaAction(gym.ActionWrapper):
         if self.env.get_action_mode() == "joint_positions":
             #The delta is wrt the last applied
             # joint positions that were sent to the pd controller
-            offset = self.env.get_robot().last_applied_joint_positions
+            offset = self.env.get_robot().get_last_applied_joint_positions()
         elif self.env.get_action_mode() == "joint_torques":
-            offset = self.env.get_robot().latest_full_state.torques
+            offset = self.env.get_robot().get_latest_full_state()['torques']
         elif self.env.get_action_mode() == "end_effector_positions":
             # applied joint positions that were sent to the pd controller
             offset = self.env.get_robot().compute_end_effector_positions(
-                self.env.get_robot().last_applied_joint_positions)
+                self.env.get_robot().get_last_applied_joint_positions())
         else:
             raise Exception("action mode is not known")
-        if self.env.get_robot().normalize_actions:
+        if self.env.are_actions_normalized():
             offset = self.env.get_robot().normalize_observation_for_key(
                     observation=offset, key=self.env.get_action_mode())
         return action + offset
 
     def reverse_action(self, action):
         if self.env.get_action_mode() == "joint_positions":
-            offset = self.env.get_robot().last_applied_joint_positions
+            offset = self.env.get_robot().get_last_applied_joint_positions()
         elif self.env.get_action_mode() == "joint_torques":
-            offset = self.env.get_robot().latest_full_state.torques
+            offset = self.env.get_robot().get_latest_full_state()['torques']
         elif self.env.get_action_mode() == "end_effector_positions":
             offset = self.env.get_robot().compute_end_effector_positions(
-                         self.env.get_robot().last_applied_joint_positions)
+                         self.env.get_robot().get_last_applied_joint_positions())
         else:
             raise Exception("action mode is not known")
-        if self.env.get_robot().normalize_actions:
+        if self.env.are_actions_normalized():
             offset = self.env.get_robot().normalize_observation_for_key(
                     observation=offset, key=self.env.action_mode)
         return action - offset
@@ -50,17 +50,17 @@ class DeltaAction(gym.ActionWrapper):
 class MovingAverageActionEnvWrapper(gym.ActionWrapper):
     def __init__(self, env, widow_size=8, initial_value=0):
         super(MovingAverageActionEnvWrapper, self).__init__(env)
-        self.__policy = DummyActorPolicy()
-        self.__policy = MovingAverageActionWrapperActorPolicy(self.__policy,
-                                                              widow_size=widow_size,
-                                                              initial_value=initial_value)
+        self._policy = DummyActorPolicy()
+        self._policy = MovingAverageActionWrapperActorPolicy(self._policy,
+                                                             widow_size=widow_size,
+                                                             initial_value=initial_value)
         self.env._add_wrapper_info({'moving_average_action': {'widow_size': widow_size,
                                                              'initial_value': initial_value}})
         return
 
     def action(self, action):
-        self.__policy.policy.add_action(action) #hack now
-        return self.__policy.act(observation=None)
+        self._policy.policy.add_action(action) #hack now
+        return self._policy.act(observation=None)
 
     def reverse_action(self, action):
         raise Exception("not implemented yet")

@@ -2,10 +2,11 @@ from causal_rl_bench.envs.robot.action import TriFingerAction
 from causal_rl_bench.envs.robot.observations import TriFingerObservations
 import numpy as np
 import pybullet
+from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class TriFingerRobot(object):
-    def __init__(self, action_mode, robot_id,
+    def __init__(self, action_mode,
                  observation_mode,
                  skip_frame, normalize_actions,
                  normalize_observations,
@@ -14,8 +15,8 @@ class TriFingerRobot(object):
                  pybullet_client_w_goal_id,
                  pybullet_client_w_o_goal_id,
                  revolute_joint_ids,
-                 finger_tip_ids,
                  pinocchio_utils,
+                 finger_tip_ids,
                  cameras=None):
         """
 
@@ -33,14 +34,13 @@ class TriFingerRobot(object):
         self._pybullet_client_w_goal_id = pybullet_client_w_goal_id
         self._pybullet_client_w_o_goal_id = pybullet_client_w_o_goal_id
         self._revolute_joint_ids = revolute_joint_ids
-        self._finger_tip_ids = finger_tip_ids
         self._pinocchio_utils = pinocchio_utils
+        self._finger_tip_ids = finger_tip_ids
         self._normalize_actions = normalize_actions
         self._normalize_observations = normalize_observations
         self._action_mode = action_mode
         self._observation_mode = observation_mode
         self._skip_frame = skip_frame
-        self._robot_id = robot_id
         self._simulation_time = simulation_time
         self._dt = self._simulation_time * self._skip_frame
         #TODO: for some reason this is needed
@@ -73,43 +73,17 @@ class TriFingerRobot(object):
         self._latest_full_state = None
         self._latest_camera_observations = None
         #TODO: repeated
-        self._stage_id = 3
-        self._floor_id = 2
         self._state_size = 18
         #TODO: move this to pybullet_fingers repo maybe?
-        self._link_ids = {'robot_finger_60_link_0': 1,
-                          'robot_finger_60_link_1': 2,
-                          'robot_finger_60_link_2': 3,
-                          'robot_finger_60_link_3': 4,
-                          'robot_finger_120_link_0': 6,
-                          'robot_finger_120_link_1': 7,
-                          'robot_finger_120_link_2': 8,
-                          'robot_finger_120_link_3': 9,
-                          'robot_finger_300_link_0': 11,
-                          'robot_finger_300_link_1': 12,
-                          'robot_finger_300_link_2': 13,
-                          'robot_finger_300_link_3': 14}
-        self._visual_shape_ids = {'robot_finger_60_link_0': 0,
-                                  'robot_finger_60_link_1': 1,
-                                  'robot_finger_60_link_2': 2,
-                                  'robot_finger_60_link_3': 3,
-                                  'robot_finger_120_link_0': 4,
-                                  'robot_finger_120_link_1': 5,
-                                  'robot_finger_120_link_2': 6,
-                                  'robot_finger_120_link_3': 7,
-                                  'robot_finger_300_link_0': 8,
-                                  'robot_finger_300_link_1': 9,
-                                  'robot_finger_300_link_2': 10,
-                                  'robot_finger_300_link_3': 11}
         #disable velocity control mode
         self._disable_velocity_control()
         return
 
+    def get_link_names(self):
+        return WorldConstants.LINK_IDS
+
     def get_control_index(self):
         return self._control_index
-
-    def get_link_names(self):
-        return self._link_ids
 
     def get_full_env_state(self):
         return self.get_current_scm_values()
@@ -122,13 +96,13 @@ class TriFingerRobot(object):
         if self._pybullet_client_full_id is not None:
             current_joint_states = pybullet.\
                 getJointStates(
-                 self._robot_id, self._revolute_joint_ids,
+                WorldConstants.ROBOT_ID, self._revolute_joint_ids,
                  physicsClientId=self._pybullet_client_full_id
             )
         else:
             current_joint_states = pybullet.\
                 getJointStates(
-                 self._robot_id, self._revolute_joint_ids,
+                WorldConstants.ROBOT_ID, self._revolute_joint_ids,
                  physicsClientId=self._pybullet_client_w_o_goal_id
             )
         current_position = np.array(
@@ -169,6 +143,7 @@ class TriFingerRobot(object):
         velocity_feedback = np.asarray(self._velocity_gains) * \
                             self._latest_full_state['velocities']
         joint_torques = position_feedback - velocity_feedback
+        self.update_latest_full_state()
         return joint_torques
 
     def set_action_mode(self, action_mode):
@@ -273,8 +248,6 @@ class TriFingerRobot(object):
         else:
             raise Exception("The action mode {} is not supported".
                             format(self._action_mode))
-
-        self.update_latest_full_state()
         #now we get the observations
         if self._observation_mode == "cameras":
             self.update_images()
@@ -297,7 +270,7 @@ class TriFingerRobot(object):
         torque_commands = self._safety_torque_check(desired_torque_commands)
         if self._pybullet_client_w_o_goal_id is not None:
             pybullet.setJointMotorControlArray(
-                bodyUniqueId=self._robot_id,
+                bodyUniqueId=WorldConstants.ROBOT_ID,
                 jointIndices=self._revolute_joint_ids,
                 controlMode=pybullet.TORQUE_CONTROL,
                 forces=torque_commands,
@@ -305,7 +278,7 @@ class TriFingerRobot(object):
             )
         if self._pybullet_client_full_id is not None:
             pybullet.setJointMotorControlArray(
-                bodyUniqueId=self._robot_id,
+                bodyUniqueId=WorldConstants.ROBOT_ID,
                 jointIndices=self._revolute_joint_ids,
                 controlMode=pybullet.TORQUE_CONTROL,
                 forces=torque_commands,
@@ -343,35 +316,42 @@ class TriFingerRobot(object):
         :param rest_pose:
         :return:
         """
+        desired = np.array(desired_tip_positions)
+        desired[2] += WorldConstants.FLOOR_HEIGHT
+        desired[5] += WorldConstants.FLOOR_HEIGHT
+        desired[8] += WorldConstants.FLOOR_HEIGHT
         if self._pybullet_client_w_o_goal_id is not None:
             client = self._pybullet_client_w_o_goal_id
         else:
             client = self._pybullet_client_full_id
         joint_pos = np.zeros([9])
         finger_tip_ids = self._finger_tip_ids
-        final_joint_pose = pybullet.calculateInverseKinematics2(self._robot_id,
+        final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
                                                                [finger_tip_ids[0], finger_tip_ids[1],
                                                                 finger_tip_ids[2]],
-                                                               [desired_tip_positions[0:3], desired_tip_positions[3:6],
-                                                                desired_tip_positions[6:]],
+                                                               [desired[0:3],
+                                                                desired[3:6],
+                                                                desired[6:]],
                                                                 solver=pybullet.IK_DLS,
                                                                 currentPositions=rest_pose,
                                                                 physicsClientId=client)
         joint_pos[:3] = final_joint_pose[:3]
-        final_joint_pose = pybullet.calculateInverseKinematics2(self._robot_id,
+        final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
                                                                [finger_tip_ids[1], finger_tip_ids[0],
                                                                 finger_tip_ids[2]],
-                                                               [desired_tip_positions[3:6], desired_tip_positions[0:3],
-                                                                desired_tip_positions[6:]],
+                                                               [desired[3:6],
+                                                                desired[0:3],
+                                                                desired[6:]],
                                                                 solver=pybullet.IK_DLS,
                                                                 currentPositions=rest_pose,
                                                                 physicsClientId=client)
         joint_pos[3:6] = final_joint_pose[3:6]
-        final_joint_pose = pybullet.calculateInverseKinematics2(self._robot_id,
+        final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
                                                                [finger_tip_ids[2], finger_tip_ids[0],
                                                                 finger_tip_ids[1]],
-                                                               [desired_tip_positions[6:], desired_tip_positions[0:3],
-                                                                desired_tip_positions[3:6]],
+                                                               [desired[6:],
+                                                                desired[0:3],
+                                                                desired[3:6]],
                                                                 solver=pybullet.IK_DLS,
                                                                 currentPositions=rest_pose,
                                                                 physicsClientId=client)
@@ -382,6 +362,9 @@ class TriFingerRobot(object):
 
     def get_joint_positions_from_tip_positions(self, tip_positions,
                                                default_pose=None):
+        tip_positions[2] += WorldConstants.FLOOR_HEIGHT
+        tip_positions[5] += WorldConstants.FLOOR_HEIGHT
+        tip_positions[8] += WorldConstants.FLOOR_HEIGHT
         if default_pose is None:
             positions = self.inverse_kinematics(
                 tip_positions, list(self.get_rest_pose()[0]))
@@ -416,16 +399,16 @@ class TriFingerRobot(object):
             client = self._pybullet_client_w_o_goal_id
         else:
             client = self._pybullet_client_full_id
-        for robot_finger_link in self._link_ids:
+        for robot_finger_link in WorldConstants.LINK_IDS:
             variable_params[robot_finger_link] = dict()
             variable_params[robot_finger_link]['color'] = \
-                pybullet.getVisualShapeData(self._robot_id,
-                                          physicsClientId=client)\
-                       [self._visual_shape_ids[robot_finger_link]][7][:3]
+                pybullet.getVisualShapeData(WorldConstants.ROBOT_ID,
+                                            physicsClientId=client)\
+                       [WorldConstants.VISUAL_SHAPE_IDS[robot_finger_link]][7][:3]
             variable_params[robot_finger_link]['mass'] = \
-                pybullet.getDynamicsInfo(self._robot_id,
-                                       self._link_ids[robot_finger_link],
-                                       physicsClientId=client)[0]
+                pybullet.getDynamicsInfo(WorldConstants.ROBOT_ID,
+                                         WorldConstants.LINK_IDS[robot_finger_link],
+                                         physicsClientId=client)[0]
         return variable_params
 
     def get_current_observations(self, helper_keys):
@@ -436,15 +419,13 @@ class TriFingerRobot(object):
         tip_positions = self._pinocchio_utils.forward_kinematics(
             joint_positions
         )
-        end_effector_position = np.concatenate(tip_positions)
-        return end_effector_position
+        return tip_positions
 
     def _compute_end_effector_positions(self, robot_state):
         tip_positions = self._pinocchio_utils.forward_kinematics(
             robot_state['positions']
         )
-        end_effector_position = np.concatenate(tip_positions)
-        return end_effector_position
+        return tip_positions
 
     def _process_action_joint_positions(self, robot_state):
         #This returns the absolute joint positions command sent in position control mode
@@ -462,7 +443,8 @@ class TriFingerRobot(object):
         self._last_action = np.zeros(9, )
         self._last_clipped_action = np.zeros(9, )
         self.update_latest_full_state()
-        self._last_applied_joint_positions = self._latest_full_state['positions']
+        self._last_applied_joint_positions = \
+            self._latest_full_state['positions']
         self._control_index = -1
         return
 
@@ -639,24 +621,24 @@ class TriFingerRobot(object):
                     if sub_intervention_variable == 'color':
                         if self._pybullet_client_w_goal_id is not None:
                             pybullet.changeVisualShape(
-                                self._robot_id,
-                                self._link_ids[intervention],
+                                WorldConstants.ROBOT_ID,
+                                WorldConstants.LINK_IDS[intervention],
                                 rgbaColor=np.append(
                                     interventions_dict[intervention]
                                     [sub_intervention_variable], 1),
                                 physicsClientId=self._pybullet_client_w_goal_id)
                         if self._pybullet_client_w_o_goal_id is not None:
                             pybullet.changeVisualShape(
-                                self._robot_id,
-                                self._link_ids[intervention],
+                                WorldConstants.ROBOT_ID,
+                                WorldConstants.LINK_IDS[intervention],
                                 rgbaColor=np.append(
                                     interventions_dict[intervention]
                                     [sub_intervention_variable], 1),
                                 physicsClientId=self._pybullet_client_w_o_goal_id)
                         if self._pybullet_client_full_id is not None:
                             pybullet.changeVisualShape(
-                                self._robot_id,
-                                self._link_ids[intervention],
+                                WorldConstants.ROBOT_ID,
+                                WorldConstants.LINK_IDS[intervention],
                                 rgbaColor=np.append(
                                     interventions_dict[intervention]
                                     [sub_intervention_variable], 1),
@@ -664,15 +646,15 @@ class TriFingerRobot(object):
                     elif sub_intervention_variable == 'mass':
                         if self._pybullet_client_w_o_goal_id is not None:
                             pybullet.changeDynamics \
-                                (self._robot_id,
-                                 self._link_ids[intervention], mass=
+                                (WorldConstants.ROBOT_ID,
+                                 WorldConstants.LINK_IDS[intervention], mass=
                                  interventions_dict[intervention]
                                  [sub_intervention_variable],
                                  physicsClientId=self._pybullet_client_w_o_goal_id)
                         if self._pybullet_client_full_id is not None:
                             pybullet.changeDynamics \
-                                (self._robot_id,
-                                 self._link_ids[intervention], mass=
+                                (WorldConstants.ROBOT_ID,
+                                 WorldConstants.LINK_IDS[intervention], mass=
                                  interventions_dict[intervention]
                                  [sub_intervention_variable],
                                  physicsClientId=self._pybullet_client_full_id)
@@ -700,13 +682,13 @@ class TriFingerRobot(object):
                 A boolean indicating whether the stage is in a collision state
                 or not.
         """
-        if self._pybullet_client_w_o_goal_id is not None:
-            client = self._pybullet_client_w_o_goal_id
-        else:
+        if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
+        else:
+            client = self._pybullet_client_w_o_goal_id
         for contact in pybullet.getContactPoints(physicsClientId=client):
-            if (contact[1] == self._robot_id or
-                contact[2] == self._robot_id) and \
+            if (contact[1] == WorldConstants.ROBOT_ID or
+                contact[2] == WorldConstants.ROBOT_ID) and \
                     contact[8] < -0.005:
                 return False
         return True
@@ -718,70 +700,70 @@ class TriFingerRobot(object):
             return True
 
     def is_self_colliding(self):
-        if self._pybullet_client_w_o_goal_id is not None:
-            client = self._pybullet_client_w_o_goal_id
-        else:
+        if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
+        else:
+            client = self._pybullet_client_w_o_goal_id
         for contact in pybullet.getContactPoints(physicsClientId=client):
-            if contact[1] == self._robot_id and \
-                    contact[2] == self._robot_id:
+            if contact[1] == WorldConstants.ROBOT_ID and \
+                    contact[2] == WorldConstants.ROBOT_ID:
                 return True
         return False
 
     def is_colliding_with_stage(self):
-        if self._pybullet_client_w_o_goal_id is not None:
-            client = self._pybullet_client_w_o_goal_id
-        else:
+        if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
+        else:
+            client = self._pybullet_client_w_o_goal_id
         for contact in pybullet.getContactPoints(physicsClientId=client):
-            if (contact[1] == self._robot_id and contact[2]
-                == self._stage_id) or \
-                    (contact[2] == self._robot_id and contact[1]
-                     == self._stage_id):
+            if (contact[1] == WorldConstants.ROBOT_ID and contact[2]
+                == WorldConstants.STAGE_ID) or \
+                    (contact[2] == WorldConstants.ROBOT_ID and contact[1]
+                     == WorldConstants.STAGE_ID):
                 return True
         return False
 
     def is_in_contact_with_block(self, block):
-        if self._pybullet_client_w_o_goal_id is not None:
-            client = self._pybullet_client_w_o_goal_id
-        else:
+        if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
+        else:
+            client = self._pybullet_client_w_o_goal_id
         for contact in pybullet.getContactPoints(physicsClientId=client):
-            if (contact[1] == self._robot_id and
-                contact[2] == block.block_id) or \
-                    (contact[2] == self._robot_id and
-                     contact[1] == block.block_id):
+            if (contact[1] == WorldConstants.ROBOT_ID and
+                contact[2] == block._block_ids[0]) or \
+                    (contact[2] == WorldConstants.ROBOT_ID and
+                     contact[1] == block._block_ids[0]):
                 return True
         return False
 
     def get_normal_interaction_force_with_block(self, block,
                                                 finger_tip_number):
         # TODO: doesnt account for several contacts per body
-        if self._pybullet_client_w_o_goal_id is not None:
-            client = self._pybullet_client_w_o_goal_id
-        else:
+        if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
+        else:
+            client = self._pybullet_client_w_o_goal_id
         if finger_tip_number == 60:
-            idx = self._link_ids['robot_finger_60_link_3']
+            idx = WorldConstants.LINK_IDS['robot_finger_60_link_3']
         elif finger_tip_number == 120:
-            idx = self._link_ids['robot_finger_120_link_3']
+            idx = WorldConstants.LINK_IDS['robot_finger_120_link_3']
         elif finger_tip_number == 300:
-            idx = self._link_ids['robot_finger_300_link_3']
+            idx = WorldConstants.LINK_IDS['robot_finger_300_link_3']
         else:
             raise Exception("finger tip number doesnt exist")
 
         for contact in pybullet.getContactPoints(physicsClientId=client):
-            if (contact[1] == self._robot_id and
-                contact[2] == block.block_id) or \
-                    (contact[2] == self._robot_id
-                     and contact[1] == block.block_id):
+            if (contact[1] == WorldConstants.ROBOT_ID and
+                contact[2] == block._block_ids[0]) or \
+                    (contact[2] == WorldConstants.ROBOT_ID
+                     and contact[1] == block._block_ids[0]):
                 return contact[9]*np.array(contact[7])
             for contact in pybullet.getContactPoints(physicsClientId=client):
-                if (contact[1] == self._robot_id
-                    and contact[2] == block.block_id
+                if (contact[1] == WorldConstants.ROBOT_ID
+                    and contact[2] == block._block_ids[0]
                     and contact[3] == idx) or  \
-                        (contact[2] == self._robot_id
-                         and contact[1] == block.block_id
+                        (contact[2] == WorldConstants.ROBOT_ID
+                         and contact[1] == block._block_ids[0]
                      and contact[4] == idx):
                     return contact[9] * np.array(contact[7])
         return None
@@ -794,19 +776,19 @@ class TriFingerRobot(object):
             client = self._pybullet_client_full_id
         contact_tips = [0, 0, 0] #all are open
         for contact in pybullet.getContactPoints(physicsClientId=client):
-            if contact[1] == self._robot_id:
-                if contact[3] == self._link_ids['robot_finger_60_link_3']:
+            if contact[1] == WorldConstants.ROBOT_ID:
+                if contact[3] == WorldConstants.LINK_IDS['robot_finger_60_link_3']:
                     contact_tips[0] = 1
-                elif contact[3] == self._link_ids['robot_finger_120_link_3']:
+                elif contact[3] == WorldConstants.LINK_IDS['robot_finger_120_link_3']:
                     contact_tips[1] = 1
-                elif contact[3] == self._link_ids['robot_finger_300_link_3']:
+                elif contact[3] == WorldConstants.LINK_IDS['robot_finger_300_link_3']:
                     contact_tips[2] = 1
-            elif contact[2] == self._robot_id:
-                if contact[4] == self._link_ids['robot_finger_60_link_3']:
+            elif contact[2] == WorldConstants.ROBOT_ID:
+                if contact[4] == WorldConstants.LINK_IDS['robot_finger_60_link_3']:
                     contact_tips[0] = 1
-                elif contact[4] == self._link_ids['robot_finger_180_link_3']:
+                elif contact[4] == WorldConstants.LINK_IDS['robot_finger_180_link_3']:
                     contact_tips[1] = 1
-                elif contact[4] == self._link_ids['robot_finger_300_link_3']:
+                elif contact[4] == WorldConstants.LINK_IDS['robot_finger_300_link_3']:
                     contact_tips[2] = 1
         return contact_tips
 
@@ -818,7 +800,7 @@ class TriFingerRobot(object):
         """
         if self._pybullet_client_full_id is not None:
             pybullet.setJointMotorControlArray(
-                bodyUniqueId=self._robot_id,
+                bodyUniqueId=WorldConstants.ROBOT_ID,
                 jointIndices=self._revolute_joint_ids,
                 controlMode=pybullet.VELOCITY_CONTROL,
                 targetVelocities=[0] * len(self._revolute_joint_ids),
@@ -826,7 +808,7 @@ class TriFingerRobot(object):
                 physicsClientId=self._pybullet_client_full_id)
         if self._pybullet_client_w_o_goal_id is not None:
             pybullet.setJointMotorControlArray(
-                bodyUniqueId=self._robot_id,
+                bodyUniqueId=WorldConstants.ROBOT_ID,
                 jointIndices=self._revolute_joint_ids,
                 controlMode=pybullet.VELOCITY_CONTROL,
                 targetVelocities=[0] * len(self._revolute_joint_ids),
@@ -841,13 +823,13 @@ class TriFingerRobot(object):
             if joint_velocities is None:
                 for i, joint_id in enumerate(self._revolute_joint_ids):
                     pybullet.resetJointState(
-                        self._robot_id, joint_id, joint_positions[i],
+                        WorldConstants.ROBOT_ID, joint_id, joint_positions[i],
                         physicsClientId =self._pybullet_client_full_id
                     )
             else:
                 for i, joint_id in enumerate(self._revolute_joint_ids):
                     pybullet.resetJointState(
-                        self._robot_id, joint_id, joint_positions[i],
+                        WorldConstants.ROBOT_ID, joint_id, joint_positions[i],
                         joint_velocities[i],
                         physicsClientId=self._pybullet_client_full_id
                     )
@@ -856,13 +838,13 @@ class TriFingerRobot(object):
             if joint_velocities is None:
                 for i, joint_id in enumerate(self._revolute_joint_ids):
                     pybullet.resetJointState(
-                        self._robot_id, joint_id, joint_positions[i],
+                        WorldConstants.ROBOT_ID, joint_id, joint_positions[i],
                         physicsClientId=self._pybullet_client_w_o_goal_id
                     )
             else:
                 for i, joint_id in enumerate(self._revolute_joint_ids):
                     pybullet.resetJointState(
-                        self._robot_id, joint_id, joint_positions[i],
+                        WorldConstants.ROBOT_ID, joint_id, joint_positions[i],
                         joint_velocities[i],
                         physicsClientId=self._pybullet_client_w_o_goal_id
                     )
@@ -874,7 +856,7 @@ class TriFingerRobot(object):
             self._robot_actions.joint_positions_lower_bounds
         for i, joint_id in enumerate(self._revolute_joint_ids):
             pybullet.resetJointState(
-                self._robot_id, joint_id, joint_positions[i],
+                WorldConstants.ROBOT_ID, joint_id, joint_positions[i],
                 physicsClientId=self._pybullet_client_w_goal_id
             )
         return

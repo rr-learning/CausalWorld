@@ -4,7 +4,7 @@ import numpy as np
 
 
 def example():
-    task = task_generator(task_generator_id='pushing')
+    task = task_generator(task_generator_id='general')
     env = World(task=task, enable_visualization=True)
     for _ in range(10):
         env.reset()
