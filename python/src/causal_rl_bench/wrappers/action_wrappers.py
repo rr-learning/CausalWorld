@@ -3,9 +3,9 @@ from causal_rl_bench.agents.dummy_policy import DummyActorPolicy
 import gym
 
 
-class DeltaAction(gym.ActionWrapper):
+class DeltaActionEnvWrapper(gym.ActionWrapper):
     def __init__(self, env):
-        super(DeltaAction, self).__init__(env)
+        super(DeltaActionEnvWrapper, self).__init__(env)
         #TODO: discuss the action space of a delta action
         self.env._add_wrapper_info({'delta_action': dict()})
 

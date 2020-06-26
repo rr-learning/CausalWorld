@@ -75,26 +75,23 @@ class ObjectSelectorWrapper(gym.Wrapper):
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
         self.env._disable_actions()
-        #TODO: observation space is wrong for type id..etc
-        self.observation_space = gym.spaces.Box(-self.observation_high, self.observation_high)
-        self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(len(self.observations_order)),
+        self.observation_space = gym.spaces.Box(self.env.observation_space.low[28:],
+                                                self.env.observation_space.high[28:],
+                                                dtype=np.float64)
+        self.objects_order = list(self.env.get_stage().get_rigid_objects().keys())
+        self.objects_order.sort()
+        number_of_objects = len(self.objects_order)
+        self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(number_of_objects),
                                               gym.spaces.Discrete(7),
                                               gym.spaces.Discrete(7)))
-        self.observations_order.sort()
         self.env._add_wrapper_info({'object_selector': dict()})
 
     def step(self, action):
         #buffer action to the intervention actor
-        self.intervention_actor.add_action(action, self.observations_order[action[0]])
+        self.intervention_actor.add_action(action, self.objects_order[action[0]])
         intervention_dict = self.intervention_actor.act(
             self.env.get_current_task_parameters())
         self.env.do_intervention(intervention_dict)
         obs, reward, done, info = self.env.step(self.env.action_space.low)
-        #we will keep done, reward and info and change the observation space
-        curr_variables = self.env.get_current_task_parameters()
-        new_observations = []
-        for observation_var in self.observations_order:
-            new_observations.append(curr_variables[observation_var]['cartesian_position'])
-            new_observations.append(quaternion_to_euler(curr_variables[observation_var]['orientation']))
-            new_observations.append(curr_variables[observation_var]['size'])
-        return np.array(new_observations).flatten(), reward, done, info
+        obs = obs[28:]
+        return obs, reward, done, info
