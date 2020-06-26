@@ -28,11 +28,11 @@ class PushingTaskGenerator(BaseTask):
         self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self._task_params["tool_block_position"] = \
-            kwargs.get("tool_block_position", np.array([0, -0.08, 0.0425]))
+            kwargs.get("tool_block_position", np.array([0, -0.08, 0.0325]))
         self._task_params["tool_block_orientation"] = \
             kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
         self._task_params["goal_block_position"] = \
-            kwargs.get("goal_block_position", np.array([0, 0.08, 0.0425]))
+            kwargs.get("goal_block_position", np.array([0, 0.08, 0.0325]))
         self._task_params["goal_block_orientation"] = \
             kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
         self.previous_end_effector_positions = None
@@ -89,14 +89,14 @@ class PushingTaskGenerator(BaseTask):
         for rigid_object in self._stage.get_rigid_objects():
             #TODO: make it a function of size
             self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
-                = 0.0425
+                = 0.0325
             self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
-                = 0.0425
+                = 0.0325
         for visual_object in self._stage.get_visual_objects():
             self._training_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
-                = 0.0425
+                = 0.0325
             self._training_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
-                = 0.0425
+                = 0.0325
         return
 
     def _set_testing_intervention_spaces(self):
@@ -107,14 +107,14 @@ class PushingTaskGenerator(BaseTask):
         super(PushingTaskGenerator, self)._set_testing_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
-                = 0.0425
+                = 0.0325
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
-                = 0.0425
+                = 0.0325
         for visual_object in self._stage.get_visual_objects():
             self._testing_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
-                = 0.0425
+                = 0.0325
             self._testing_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
-                = 0.0425
+                = 0.0325
         return
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):

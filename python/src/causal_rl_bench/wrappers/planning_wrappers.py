@@ -69,22 +69,13 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
 
 
 class ObjectSelectorWrapper(gym.Wrapper):
-    #TODO: we dont support changing observation space size for this wrapper now
-    #TODO: we dont support normalized observation space for now
     def __init__(self, env):
         super(ObjectSelectorWrapper, self).__init__(env)
         self.env = env
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
         self.env._disable_actions()
-        self.observations_order = []
-        self.observation_high = []
-        curr_variables = self.env.get_current_task_parameters()
-        for intervention_variable in curr_variables:
-            if intervention_variable.startswith("tool"):
-                self.observations_order.append(intervention_variable)
-                self.observation_high.append(np.repeat(np.finfo(np.float64).max, 9))
-        self.observation_high = np.array(self.observation_high)
+        #TODO: observation space is wrong for type id..etc
         self.observation_space = gym.spaces.Box(-self.observation_high, self.observation_high)
         self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(len(self.observations_order)),
                                               gym.spaces.Discrete(7),

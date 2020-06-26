@@ -1,5 +1,6 @@
 from causal_rl_bench.task_generators.base_task import BaseTask
 import numpy as np
+from causal_rl_bench.envs.world_constants import WorldConstants
 
 
 class ReachingTaskGenerator(BaseTask):
@@ -19,9 +20,9 @@ class ReachingTaskGenerator(BaseTask):
                                     np.array([100000,
                                               0, 0, 0])))
         self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+                                             "joint_positions",
+                                             "joint_velocities",
+                                             "end_effector_positions"]
         self._task_params['default_goal_60'] = \
             kwargs.get("default_goal_60", np.array([0, 0, 0.15]))
         self._task_params['default_goal_120'] = \
@@ -57,8 +58,8 @@ class ReachingTaskGenerator(BaseTask):
                          'position': self._task_params['default_goal_300']}
         self._stage.add_silhoutte_general_object(**creation_dict)
         self._task_stage_observation_keys = ["goal_60_cartesian_position",
-                                            "goal_120_cartesian_position",
-                                            "goal_300_cartesian_position"]
+                                             "goal_120_cartesian_position",
+                                             "goal_300_cartesian_position"]
         self.current_number_of_obstacles = 0
         return
 
@@ -194,34 +195,34 @@ class ReachingTaskGenerator(BaseTask):
         # you can override these easily
         super(ReachingTaskGenerator,
               self)._set_training_intervention_spaces()
-        lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
-        upper_bound = (self._stage._floor_inner_bounding_box[1] -
-                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self._stage._floor_inner_bounding_box[0]
+        lower_bound = np.array(WorldConstants.ARENA_BB[0])
+        upper_bound = (WorldConstants.ARENA_BB[1] -
+                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+                      WorldConstants.ARENA_BB[0]
         lower_bound[1] = float(upper_bound[1])
-        upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 3 / 4 + \
-                          self._stage._floor_inner_bounding_box[0])[1]
+        upper_bound[1] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 3 / 4 + \
+                          WorldConstants.ARENA_BB[0])[1]
         self._training_intervention_spaces['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound]) #blue is finger 0, green 240
-        lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
-        upper_bound = (self._stage._floor_inner_bounding_box[1] -
-                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self._stage._floor_inner_bounding_box[0]
-        upper_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 + \
-                          self._stage._floor_inner_bounding_box[0])[1]
+        lower_bound = np.array(WorldConstants.ARENA_BB[0])
+        upper_bound = (WorldConstants.ARENA_BB[1] -
+                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+                      WorldConstants.ARENA_BB[0]
+        upper_bound[0] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 1 / 4 + \
+                          WorldConstants.ARENA_BB[0])[1]
         self._training_intervention_spaces['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])  # blue is finger 0, green 240
-        lower_bound = np.array(self._stage._floor_inner_bounding_box[0])
-        upper_bound = (self._stage._floor_inner_bounding_box[1] -
-                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self._stage._floor_inner_bounding_box[0]
-        upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 +
-                          self._stage._floor_inner_bounding_box[0])[1]
+        lower_bound = np.array(WorldConstants.ARENA_BB[0])
+        upper_bound = (WorldConstants.ARENA_BB[1] -
+                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+                      WorldConstants.ARENA_BB[0]
+        upper_bound[1] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 1 / 4 +
+                          WorldConstants.ARENA_BB[0])[1]
         self._training_intervention_spaces['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
@@ -237,40 +238,40 @@ class ReachingTaskGenerator(BaseTask):
         """
         super(ReachingTaskGenerator,
               self)._set_testing_intervention_spaces()
-        lower_bound = (self._stage._floor_inner_bounding_box[1] -
-                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self._stage._floor_inner_bounding_box[0]
-        lower_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 3 / 4 +
-                          self._stage._floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self._stage._floor_inner_bounding_box[1])
+        lower_bound = (WorldConstants.ARENA_BB[1] -
+                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+                      WorldConstants.ARENA_BB[0]
+        lower_bound[0] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 3 / 4 +
+                          WorldConstants.ARENA_BB[0])[1]
+        upper_bound = np.array(WorldConstants.ARENA_BB[1])
 
         self._testing_intervention_spaces['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
-        lower_bound = (self._stage._floor_inner_bounding_box[1] -
-                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self._stage._floor_inner_bounding_box[0]
-        lower_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 +
-                          self._stage._floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self._stage._floor_inner_bounding_box[1])
-        upper_bound[0] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 +
-                          self._stage._floor_inner_bounding_box[0])[1]
+        lower_bound = (WorldConstants.ARENA_BB[1] -
+                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+                      WorldConstants.ARENA_BB[0]
+        lower_bound[0] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 1 / 4 +
+                          WorldConstants.ARENA_BB[0])[1]
+        upper_bound = np.array(WorldConstants.ARENA_BB[1])
+        upper_bound[0] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 1 / 2 +
+                          WorldConstants.ARENA_BB[0])[1]
         self._testing_intervention_spaces['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
-        lower_bound = (self._stage._floor_inner_bounding_box[1] -
-                       self._stage._floor_inner_bounding_box[0]) * 1 / 2 + \
-                      self._stage._floor_inner_bounding_box[0]
-        lower_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 4 +
-                          self._stage._floor_inner_bounding_box[0])[1]
-        upper_bound = np.array(self._stage._floor_inner_bounding_box[1])
-        upper_bound[1] = ((self._stage._floor_inner_bounding_box[1] -
-                           self._stage._floor_inner_bounding_box[0]) * 1 / 2 +
-                          self._stage._floor_inner_bounding_box[0])[1]
+        lower_bound = (WorldConstants.ARENA_BB[1] -
+                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
+                      WorldConstants.ARENA_BB[0]
+        lower_bound[1] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 1 / 4 +
+                          WorldConstants.ARENA_BB[0])[1]
+        upper_bound = np.array(WorldConstants.ARENA_BB[1])
+        upper_bound[1] = ((WorldConstants.ARENA_BB[1] -
+                           WorldConstants.ARENA_BB[0]) * 1 / 2 +
+                          WorldConstants.ARENA_BB[0])[1]
 
         self._testing_intervention_spaces['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
@@ -311,8 +312,8 @@ class ReachingTaskGenerator(BaseTask):
                                                          size=
                                                         np.array([0.01, 0.01, 0.01]),
                                                          color=np.array([0, 0, 0]),
-                                                         position=np.random.uniform(self._stage._floor_inner_bounding_box[0],
-                                                                                    self._stage._floor_inner_bounding_box[1]))
+                                                         position=np.random.uniform(WorldConstants.ARENA_BB[0],
+                                                                                    WorldConstants.ARENA_BB[1]))
                     self.current_number_of_obstacles += 1
                     self._task_stage_observation_keys.append("obstacle_" + str(i) + "_type")
                     self._task_stage_observation_keys.append("obstacle_" + str(i) + "_size")

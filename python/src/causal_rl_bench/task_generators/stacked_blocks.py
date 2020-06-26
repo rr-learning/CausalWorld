@@ -60,7 +60,7 @@ class StackedBlocksGeneratorTask(BaseTask):
         default_start_position = -(number_of_blocks_per_level *
                                    self._task_params["blocks_min_size"]) / 2
         default_start_position += self._task_params["blocks_min_size"] / 2
-        curr_height = self._stage.get_floor_height() \
+        curr_height = 0 \
                       - self._task_params["blocks_min_size"] / 2
         change_per_level = 0.005
         rigid_block_side = 0.1
@@ -317,7 +317,7 @@ class StackedBlocksGeneratorTask(BaseTask):
                                        (level_num+1) *
                                        blocks_min_size
                                        + (-blocks_min_size
-                                          / 2 + self._stage.get_floor_height())]
+                                          / 2 + 0)]
                 self._task_stage_observation_keys.append("tool_" + "level_" +
                                                         str(level_num) + "_num_" +
                                                         str(i) + '_type')
@@ -411,8 +411,7 @@ class StackedBlocksGeneratorTask(BaseTask):
                                        [:2],
                                        self._stage.get_arena_bb()[1][
                                        :2]])
-        start_z = self._stage.get_floor_height()
-        level_index = 0
+        start_z = 0
         size, position = self._generate_random_block(
             allowed_boundaries=current_boundaries, start_z=start_z,
             min_size=min_size,
