@@ -48,9 +48,9 @@ class TriFingerObservations(object):
             [50] * 3 * num_fingers
 
         self._lower_bounds["cameras"] = \
-            np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
+            np.zeros(shape=(3, 128, 128, 3), dtype=np.float64)
         self._upper_bounds["cameras"] = \
-            np.full(shape=(3, 54, 72, 3), fill_value=255,
+            np.full(shape=(3, 128, 128, 3), fill_value=255,
                     dtype=np.float64)
 
         self._observation_functions = dict()
@@ -60,8 +60,8 @@ class TriFingerObservations(object):
 
         if observation_mode == "cameras":
             self._observations_keys = ["cameras"]
-            self._low = np.zeros(shape=(3, 54, 72, 3), dtype=np.float64)
-            self._high = np.full(shape=(3, 54, 72, 3), fill_value=255,
+            self._low = np.zeros(shape=(3, 128, 128, 3), dtype=np.float64)
+            self._high = np.full(shape=(3, 128, 128, 3), fill_value=255,
                                  dtype=np.float64)
             self._low_norm = 0
             self._high_norm = 1
@@ -76,7 +76,8 @@ class TriFingerObservations(object):
             else:
                 raise ValueError("One of the provided observation_"
                                  "keys is unknown")
-            self._observation_is_not_normalized = np.array([], dtype=np.bool)
+            if self._observation_mode == "structured":
+                self._observation_is_not_normalized = np.array([], dtype=np.bool)
             self._low = np.array([])
             self._high = np.array([])
             self.set_observation_spaces()
@@ -89,10 +90,11 @@ class TriFingerObservations(object):
             observations_high_values = np.full(shape=self._low.shape,
                                                fill_value=self._high_norm,
                                                dtype=np.float64)
-            observations_low_values[self._observation_is_not_normalized] = \
-                self._low[self._observation_is_not_normalized]
-            observations_high_values[self._observation_is_not_normalized] = \
-                self._high[self._observation_is_not_normalized]
+            if self._observation_mode == "structured":
+                observations_low_values[self._observation_is_not_normalized] = \
+                    self._low[self._observation_is_not_normalized]
+                observations_high_values[self._observation_is_not_normalized] = \
+                    self._high[self._observation_is_not_normalized]
             return spaces.Box(low=observations_low_values,
                               high=observations_high_values,
                               dtype=np.float64)
@@ -110,26 +112,30 @@ class TriFingerObservations(object):
         self._low = np.array([])
         self._high = np.array([])
         self._observation_is_not_normalized = np.array([], dtype=np.bool)
-        for key in self._observations_keys:
-            self._low = np.append(self._low, np.array(self._lower_bounds[key]))
-            self._high = np.append(self._high, np.array(self._upper_bounds[key]))
-            if np.array_equal(self._lower_bounds[key],
-                              self._upper_bounds[key]):
-                self._observation_is_not_normalized = \
-                    np.append(self._observation_is_not_normalized,
-                              np.full(shape=
-                                      np.array(
-                                          self._upper_bounds[key]).shape,
-                                      fill_value=True,
-                                      dtype=np.bool))
-            else:
-                self._observation_is_not_normalized = \
-                    np.append(self._observation_is_not_normalized,
-                              np.full(shape=
-                                      np.array(
-                                          self._upper_bounds[key]).shape,
-                                      fill_value=False,
-                                      dtype=np.bool))
+        if self._observation_mode == "cameras":
+            self._low = np.array(self._lower_bounds['cameras'])
+            self._high = np.array(self._lower_bounds['cameras'])
+        else:
+            for key in self._observations_keys:
+                self._low = np.append(self._low, np.array(self._lower_bounds[key]))
+                self._high = np.append(self._high, np.array(self._upper_bounds[key]))
+                if np.array_equal(self._lower_bounds[key],
+                                  self._upper_bounds[key]):
+                    self._observation_is_not_normalized = \
+                        np.append(self._observation_is_not_normalized,
+                                  np.full(shape=
+                                          np.array(
+                                              self._upper_bounds[key]).shape,
+                                          fill_value=True,
+                                          dtype=np.bool))
+                else:
+                    self._observation_is_not_normalized = \
+                        np.append(self._observation_is_not_normalized,
+                                  np.full(shape=
+                                          np.array(
+                                              self._upper_bounds[key]).shape,
+                                          fill_value=False,
+                                          dtype=np.bool))
         return
 
     def is_normalized(self):

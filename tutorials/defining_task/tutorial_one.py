@@ -10,6 +10,10 @@ class MyOwnTask(BaseTask):
                          training=True,
                          sparse_reward_weight=1,
                          dense_reward_weights=np.array([]))
+        self._task_robot_observation_keys = ["time_left_for_task",
+                                             "joint_positions",
+                                             "joint_velocities",
+                                             "end_effector_positions"]
 
     #This is not even needed, it will just be an empty stage
     def _set_up_stage_arena(self):
@@ -21,6 +25,17 @@ class MyOwnTask(BaseTask):
                          'filename': './assets/719.obj',
                          'position': [0, 0, 0.1]}
         self._stage.add_silhoutte_mesh_object(**creation_dict)
+        self._task_stage_observation_keys = ["tool_block_type",
+                                             "tool_block_size",
+                                             "tool_block_cartesian_position",
+                                             "tool_block_orientation",
+                                             "tool_block_linear_velocity",
+                                             "tool_block_angular_velocity",
+                                             "goal_block_type",
+                                             "goal_block_size",
+                                             "goal_block_cylindrical_position",
+                                             "goal_block_orientation"]
+        return
 
 
 def example():

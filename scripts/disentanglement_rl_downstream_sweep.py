@@ -54,8 +54,8 @@ class CameraObservationWrapper(gym.ObservationWrapper):
         # TODO: This wrapper needs to work with the correct camera settings from the representations
         #  Need to adjust this
         gym.ObservationWrapper.__init__(self, env)
-        height = int(54)
-        width = int(72)
+        height = int(128)
+        width = int(128)
         self.camera_no = camera_no
         self.observation_as_dict = observation_as_dict
         height_multiplier = 3
