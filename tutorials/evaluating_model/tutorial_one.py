@@ -1,106 +1,80 @@
-from causal_rl_bench.agents.reacher_policy import ReacherActorPolicy
-from causal_rl_bench.intervention_agents import GoalInterventionActorPolicy, ReacherInterventionActorPolicy
-from causal_rl_bench.curriculum import Curriculum
+from causal_rl_bench.task_generators.task import task_generator
+from causal_rl_bench.envs.world import World
+from stable_baselines import PPO2
+from stable_baselines.common.policies import MlpPolicy
+import tensorflow as tf
+tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+import os
+from stable_baselines.common import set_global_seeds
+from stable_baselines.common.vec_env import SubprocVecEnv
 from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
+import causal_rl_bench.evaluation.protocols as protocols
 
 
-def evaluate_1():
-    world_params = dict()
-    world_params["skip_frame"] = 1
-    world_params["seed"] = 0
-    task_params = dict()
-    task_params["task_generator_id"] = "reaching"
-    evaluator = EvaluationPipeline(intervention_actors=
-                                   [ReacherInterventionActorPolicy()],
-                                   episodes_hold=[2],
-                                   timesteps_hold=[None],
-                                   world_params=world_params,
-                                   task_params=task_params,
-                                   intervention_split=False,
-                                   visualize_evaluation=True,
-                                   initial_seed=0)
-    # get policy/controller
-    reacher_policy = ReacherActorPolicy()
+log_relative_path = './pushing_policy_tutorial_1'
+
+
+def _make_env(rank):
+    def _init():
+        task = task_generator(task_generator_id="pushing")
+        env = World(task=task, enable_visualization=False,
+                    seed=rank)
+        return env
+    set_global_seeds(0)
+    return _init
+
+
+def train_policy():
+    ppo_config = {"gamma": 0.9988,
+                  "n_steps": 200,
+                  "ent_coef": 0,
+                  "learning_rate": 0.001,
+                  "vf_coef": 0.99,
+                  "max_grad_norm": 0.1,
+                  "lam": 0.95,
+                  "nminibatches": 5,
+                  "noptepochs": 100,
+                  "cliprange": 0.2,
+                  "tensorboard_log": log_relative_path}
+    os.makedirs(log_relative_path)
+    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
+    env = SubprocVecEnv([_make_env(rank=i) for i in range(5)])
+    model = PPO2(MlpPolicy, env, _init_setup_model=True,
+                 policy_kwargs=policy_kwargs,
+                 verbose=1, **ppo_config)
+    model.learn(total_timesteps=1000,
+                tb_log_name="ppo2",
+                reset_num_timesteps=False)
+    model.save(os.path.join(log_relative_path, 'model'))
+    env.env_method("save_world", log_relative_path)
+    env.close()
+    return
+
+
+def evaluate_trained_policy():
+    # Load the PPO2 policy trained on the pushing task
+    model = PPO2.load(os.path.join(log_relative_path, 'model.zip'))
+
+    # define a method for the policy fn of your trained model
 
     def policy_fn(obs):
-        return reacher_policy.act(obs)
+        return model.predict(obs)[0]
 
-    scores = evaluator.evaluate_policy(policy_fn, num_seeds=1,
-                                       episodes_per_seed=10)
-    print(scores)
-
-
-def evaluate_2():
-    #define a curriculum for running and testing it
-    world_params = dict()
-    world_params["skip_frame"] = 1
-    world_params["seed"] = 0
-    task_params = dict()
-    task_params["task_generator_id"] = "reaching"
-    evaluator = EvaluationPipeline(intervention_actors=
-                                   [GoalInterventionActorPolicy()],
-                                   episodes_hold=[2],
-                                   timesteps_hold=[None],
-                                   world_params=world_params,
-                                   task_params=task_params,
-                                   intervention_split=False,
-                                   visualize_evaluation=True,
-                                   initial_seed=0)
-
-    # get policy/controller
-    reacher_policy = ReacherActorPolicy()
-
-    def policy_fn(obs):
-        return reacher_policy.act(obs)
-    #TODO: reset with initial configuration
-    scores = evaluator.evaluate_policy(policy_fn,
-                                       num_seeds=1,
-                                       episodes_per_seed=10)
-    print(scores)
-
-
-def evaluate_3():
-    world_params = dict()
-    world_params["skip_frame"] = 1
-    world_params["normalize_actions"] = False
-    world_params["normalize_observations"] = False
-    world_params["skip_frame"] = 1
-    world_params["seed"] = 0
-    task_params = dict()
-    task_params["task_generator_id"] = "reaching"
-    evaluator = EvaluationPipeline(intervention_actors=
-                                   [GoalInterventionActorPolicy()],
-                                   episodes_hold=[2],
-                                   timesteps_hold=[None],
-                                   world_params=world_params,
-                                   task_params=task_params,
-                                   intervention_split=False,
+    # pass the different protocols you'd like to evaluate in the following
+    evaluator = EvaluationPipeline(evaluation_protocols=[protocols.GoalPosesOOD(),
+                                                         protocols.InitialPosesOOD(),
+                                                         protocols.InEpisodePosesChange()],
+                                   tracker_path=log_relative_path,
+                                   intervention_split=True,
                                    visualize_evaluation=True,
                                    initial_seed=0)
 
-    # get policy/controller
-    # reacher_policy = ReacherActorPolicy()
-    from causal_rl_bench.envs.world import World
-    from causal_rl_bench.task_generators.task import task_generator
-    import numpy as np
-    task = task_generator(task_generator_id='reaching')
-    env = World(task=task, skip_frame=1,
-                enable_visualization=False)
-
-    def policy_fn(obs):
-        desired_tip_positions = np.array(obs[-9:])
-        current_joint_positions = np.array(obs[:9])
-        return env.get_robot().\
-            get_joint_positions_from_tip_positions(
-            desired_tip_positions, current_joint_positions)
-    #TODO: reset with initial configuration
-    scores = evaluator.evaluate_policy(policy_fn,
-                                       num_seeds=5,
-                                       episodes_per_seed=10)
+    # For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol
+    scores = evaluator.evaluate_policy(policy_fn, fraction=0.1)
+    evaluator.save_scores(log_relative_path)
     print(scores)
 
 
 if __name__ == '__main__':
-    # evaluate_1()
-    # evaluate_2()
-    evaluate_3()
+    train_policy()
+    evaluate_trained_policy()

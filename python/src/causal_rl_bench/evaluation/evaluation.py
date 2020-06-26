@@ -101,12 +101,13 @@ class EvaluationPipeline(object):
         for metric in self.metrics_list:
             metric.reset()
 
-    def evaluate_policy(self, policy):
+    def evaluate_policy(self, policy, fraction=1):
         pipeline_scores = dict()
         for evaluation_protocol in self.evaluation_protocols:
             self.evaluation_env = ProtocolWrapper(self.env, evaluation_protocol)
             evaluation_protocol.init_protocol(env=self.env,
-                                              tracker=self.env.get_tracker())
+                                              tracker=self.env.get_tracker(),
+                                              fraction=fraction)
             episodes_in_protocol = evaluation_protocol.get_num_episodes()
             for _ in range(episodes_in_protocol):
                 current_episode = self.run_episode(policy)

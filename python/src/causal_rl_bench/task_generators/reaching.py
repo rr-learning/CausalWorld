@@ -184,6 +184,7 @@ class ReachingTaskGenerator(BaseTask):
                                                                list(
                                                                   self._robot.
                                                                       get_latest_full_state()['positions']))
+        info['fractional_success'] = self._current_goal_distance
         return info
 
     def _set_training_intervention_spaces(self):

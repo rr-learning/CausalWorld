@@ -1,10 +1,9 @@
 from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-from causal_rl_bench.curriculum.curriculum import \
-    Curriculum
-from causal_rl_bench.intervention_agents.random import \
-    RandomInterventionActorPolicy
+from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.world import World
+import causal_rl_bench.evaluation.visualization.visualiser as vis
+
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
 import tensorflow as tf
@@ -13,14 +12,14 @@ import os
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
 
-log_relative_path = './dummy_policy'
+log_relative_path = './pushing_policy_tutorial_2'
 
 
 def _make_env(rank):
     def _init():
         task = task_generator(task_generator_id="reaching")
         env = World(task=task, enable_visualization=False,
-                    seed=rank, max_episode_length=960)
+                    seed=rank)
         return env
     set_global_seeds(0)
     return _init
@@ -54,23 +53,28 @@ def train_policy():
 
 
 def evaluate_model():
-    # Load the PPO2 policy trained on the cuboid_silhouette task
+    # Load the PPO2 policy trained on the reaching task
     model = PPO2.load(os.path.join(log_relative_path, 'model.zip'))
     # define a method for the policy fn of your trained model
 
     def policy_fn(obs):
         return model.predict(obs)[0]
-    evaluator = EvaluationPipeline(intervention_actors=
-                                   [RandomInterventionActorPolicy()],
-                                   episodes_hold=[3],
-                                   timesteps_hold=[None],
+
+    # Let's evaluate the policy on some default evaluation protocols for reaching task
+    evaluation_protocols = REACHING_BENCHMARK['evaluation_protocols']
+
+    evaluator = EvaluationPipeline(evaluation_protocols=
+                                   evaluation_protocols,
                                    tracker_path=log_relative_path,
-                                   intervention_split=False,
+                                   intervention_split=True,
                                    visualize_evaluation=True,
                                    initial_seed=0)
 
-    scores = evaluator.evaluate_policy(policy_fn)
-    print(scores)
+    # For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol
+    scores = evaluator.evaluate_policy(policy_fn, fraction=0.1)
+    evaluator.save_scores(log_relative_path)
+    experiments = {'reaching_model': scores}
+    vis.generate_visual_analysis(log_relative_path, experiments=experiments)
 
 
 if __name__ == '__main__':
