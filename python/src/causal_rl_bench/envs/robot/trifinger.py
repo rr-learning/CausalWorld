@@ -137,6 +137,7 @@ class TriFingerRobot(object):
             List of torques to be sent to the joints of the finger in order to
             reach the specified joint_positions.
         """
+        self.update_latest_full_state()
         position_error = joint_positions - self._latest_full_state['positions']
         position_feedback = np.asarray(self._position_gains) * \
                             position_error
@@ -247,7 +248,6 @@ class TriFingerRobot(object):
         else:
             raise Exception("The action mode {} is not supported".
                             format(self._action_mode))
-
         self.update_latest_full_state()
         #now we get the observations
         if self._observation_mode == "cameras":
