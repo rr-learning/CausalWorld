@@ -501,7 +501,7 @@ class CausalWorld(gym.Env):
                 dirname(__file__), "../../../assets/robot_properties_fingers"
         )
         finger_urdf_path = os.path.join(
-            robot_properties_path, "urdf", "trifinger.urdf"
+            robot_properties_path, "urdf", "trifinger_realistic_colors.urdf"
         )
         finger_base_position = [0, 0, 0.0]
         finger_base_orientation = pybullet.getQuaternionFromEuler([0, 0, 0])
@@ -589,8 +589,8 @@ class CausalWorld(gym.Env):
                 robot_properties_path, "meshes", "stl", filename
             )
 
-        table_colour = (0.31, 0.27, 0.25, 1.0)
-        high_border_colour = (0.95, 0.95, 0.95, 1.0)
+        table_colour = (0.35, 0.35, 0.35, 1.0)
+        high_border_colour = (1.0, 1.0, 1.0, 1.0)
         floor_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_MESH,
             fileName=mesh_path("trifinger_table_without_border.stl"),

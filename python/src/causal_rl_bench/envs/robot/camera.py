@@ -24,8 +24,8 @@ class Camera(object):
             physicsClientId=self._pybullet_client_id)
 
         self._proj_matrix = pybullet.computeProjectionMatrixFOV(
-                            fov=52, aspect=float(self._width) / self._height,
-                            nearVal=0.001, farVal=100.0,
+                            fov=51, aspect=float(self._width) / self._height,
+                            nearVal=0.002, farVal=1,
                             physicsClientId=self._pybullet_client_id)
 
     def get_image(self):
