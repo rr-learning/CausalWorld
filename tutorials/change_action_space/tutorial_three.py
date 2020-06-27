@@ -1,4 +1,4 @@
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.wrappers.action_wrappers import MovingAverageActionEnvWrapper
 import numpy as np
@@ -6,10 +6,10 @@ import numpy as np
 
 def apply_delta_action():
     task = task_generator(task_generator_id='reaching')
-    env = World(task=task, enable_visualization=True,
-                action_mode="joint_positions",
-                normalize_actions=True,
-                normalize_observations=True, skip_frame=1)
+    env = CausalWorld(task=task, enable_visualization=True,
+                      action_mode="joint_positions",
+                      normalize_actions=True,
+                      normalize_observations=True, skip_frame=1)
     env = MovingAverageActionEnvWrapper(env)
     for _ in range(50):
         obs = env.reset()

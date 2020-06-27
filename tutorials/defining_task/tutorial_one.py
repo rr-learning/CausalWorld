@@ -1,4 +1,4 @@
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.base_task import BaseTask
 import numpy as np
 
@@ -40,7 +40,7 @@ class MyOwnTask(BaseTask):
 
 def example():
     task = MyOwnTask()
-    env = World(task=task, enable_visualization=True)
+    env = CausalWorld(task=task, enable_visualization=True)
     env.reset()
     for _ in range(2000):
         for _ in range(10):

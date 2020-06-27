@@ -2,7 +2,7 @@ from configparser import ConfigParser
 import os
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.wrappers import ObjectSelectorWrapper, DeltaActionEnvWrapper, MovingAverageActionEnvWrapper, \
     HERGoalEnvWrapper, CurriculumWrapper
 from causal_rl_bench.utils.intervention_agent_utils import initialize_intervention_agents
@@ -40,8 +40,8 @@ def load_world(tracker_relative_path, enable_visualization=False):
     task_stats = tracker.task_stats_log[0]
     task = task_generator(task_generator_id=task_stats._task_name,
                           **task_stats._task_params)
-    env = World(task, **tracker.world_params,
-                enable_visualization=enable_visualization)
+    env = CausalWorld(task, **tracker.world_params,
+                      enable_visualization=enable_visualization)
     for wrapper in tracker.world_params['wrappers']:
         if wrapper == 'object_selector':
             env = ObjectSelectorWrapper(env, **tracker.world_params['wrappers'][wrapper])

@@ -1,6 +1,6 @@
 from causal_rl_bench.utils.task_utils import get_suggested_grip_locations
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.utils.rotation_utils import cyl2cart
 import numpy as np
 import unittest
@@ -9,12 +9,12 @@ import unittest
 class TestPicking(unittest.TestCase):
     def setUp(self):
         self.task = task_generator(task_generator_id="picking")
-        self.env = World(task=self.task,
-                         enable_visualization=False,
-                         skip_frame=1,
-                         action_mode="end_effector_positions",
-                         normalize_actions=False,
-                         normalize_observations=False)
+        self.env = CausalWorld(task=self.task,
+                               enable_visualization=False,
+                               skip_frame=1,
+                               action_mode="end_effector_positions",
+                               normalize_actions=False,
+                               normalize_observations=False)
         return
 
     def tearDown(self):
@@ -169,7 +169,7 @@ class TestPicking(unittest.TestCase):
 
     def test_goal_intervention(self):
         task = task_generator(task_generator_id='picking')
-        env = World(task=task, enable_visualization=False, normalize_observations=False)
+        env = CausalWorld(task=task, enable_visualization=False, normalize_observations=False)
         for _ in range(10):
             invalid_interventions_before = env.get_tracker().invalid_intervention_steps
             new_goal = env.sample_new_goal()

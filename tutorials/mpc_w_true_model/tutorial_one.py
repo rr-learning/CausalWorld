@@ -1,5 +1,5 @@
 from stable_baselines.common import set_global_seeds
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.baselines.model_based.true_model import TrueModel
 from causal_rl_bench.baselines.model_based.optimizers.cem import \
     CrossEntropyMethod
@@ -25,9 +25,9 @@ def _make_env():
                               randomize_joint_positions=randomize_joint_positions,
                               randomize_block_pose=randomize_block_pose,
                               randomize_goal_block_pose=randomize_goal_block_pose)
-        env = World(task=task, skip_frame=skip_frame,
-                    enable_visualization=False,
-                    seed=seed)
+        env = CausalWorld(task=task, skip_frame=skip_frame,
+                          enable_visualization=False,
+                          seed=seed)
         return env
     set_global_seeds(seed)
     return _init
@@ -37,8 +37,8 @@ def run_mpc():
     task = task_generator(task_generator_id='pushing', randomize_joint_positions=randomize_joint_positions,
                           randomize_block_pose=randomize_block_pose,
                           randomize_goal_block_pose=randomize_goal_block_pose)
-    env = World(task=task, skip_frame=1, enable_visualization=False,
-                seed=seed)
+    env = CausalWorld(task=task, skip_frame=1, enable_visualization=False,
+                      seed=seed)
     true_model = TrueModel(_make_env, parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(planning_horizon=horizon_length,
                                    max_iterations=max_iterations,

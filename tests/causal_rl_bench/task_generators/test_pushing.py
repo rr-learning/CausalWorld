@@ -1,4 +1,4 @@
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.utils.rotation_utils import cyl2cart
 import numpy as np
@@ -8,8 +8,8 @@ import unittest
 class TestPushing(unittest.TestCase):
     def setUp(self):
         self.task = task_generator(task_generator_id="pushing")
-        self.env = World(task=self.task,
-                         enable_visualization=False)
+        self.env = CausalWorld(task=self.task,
+                               enable_visualization=False)
         return
 
     def tearDown(self):
@@ -127,7 +127,7 @@ class TestPushing(unittest.TestCase):
 
     def test_goal_intervention(self):
         task = task_generator(task_generator_id='pushing')
-        env = World(task=task, enable_visualization=False, normalize_observations=False)
+        env = CausalWorld(task=task, enable_visualization=False, normalize_observations=False)
         for _ in range(10):
             invalid_interventions_before = env.get_tracker().invalid_intervention_steps
             new_goal = env.sample_new_goal()

@@ -1,4 +1,4 @@
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 from causal_rl_bench.task_generators.task import task_generator
 import numpy as np
@@ -15,9 +15,9 @@ def get_world(task_generator_id, task_params, world_params,
     if "enable_visualization" in world_params.keys():
         world_params_temp = dict(world_params)
         del world_params_temp["enable_visualization"]
-        env = World(task, **world_params_temp, enable_visualization=enable_visualization)
+        env = CausalWorld(task, **world_params_temp, enable_visualization=enable_visualization)
     else:
-        env = World(task, **world_params, enable_visualization=enable_visualization)
+        env = CausalWorld(task, **world_params, enable_visualization=enable_visualization)
     for i in range(len(env_wrappers)):
         env = env_wrappers[i](env, **env_wrappers_args[i])
     return env

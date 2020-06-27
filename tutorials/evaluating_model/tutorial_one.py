@@ -1,5 +1,5 @@
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
 import tensorflow as tf
@@ -17,8 +17,8 @@ log_relative_path = './pushing_policy_tutorial_1'
 def _make_env(rank):
     def _init():
         task = task_generator(task_generator_id="pushing")
-        env = World(task=task, enable_visualization=False,
-                    seed=rank)
+        env = CausalWorld(task=task, enable_visualization=False,
+                          seed=rank)
         return env
     set_global_seeds(0)
     return _init

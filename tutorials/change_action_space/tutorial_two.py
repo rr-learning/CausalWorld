@@ -1,11 +1,11 @@
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.wrappers.planning_wrappers import ObjectSelectorWrapper
 
 
 def example():
     task = task_generator(task_generator_id='picking')
-    env = World(task=task, enable_visualization=True)
+    env = CausalWorld(task=task, enable_visualization=True)
     env = ObjectSelectorWrapper(env)
     for _ in range(50):
         obs = env.reset()

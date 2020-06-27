@@ -6,7 +6,7 @@ from stable_baselines import TD3, PPO2, SAC, HER
 from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
 from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.common.policies import MlpPolicy, CnnPolicy
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 import causal_rl_bench.viewers.task_viewer as viewer
 import argparse
@@ -152,9 +152,9 @@ def outer_product(list_of_settings):
 
 def get_single_process_env(model_settings):
     task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
-    env = World(task=task,
-                **model_settings['world_params'],
-                seed=world_seed)
+    env = CausalWorld(task=task,
+                      **model_settings['world_params'],
+                      seed=world_seed)
     env = CurriculumWrapper(env,
                             intervention_actors=model_settings["intervention_actors"],
                             actives=model_settings["actives"])
@@ -168,9 +168,9 @@ def get_multi_process_env(model_settings):
     def _make_env(rank):
         def _init():
             task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
-            env = World(task=task,
-                        **model_settings['world_params'],
-                        seed=world_seed + rank)
+            env = CausalWorld(task=task,
+                              **model_settings['world_params'],
+                              seed=world_seed + rank)
             env = CurriculumWrapper(env,
                                     intervention_actors=model_settings["intervention_actors"],
                                     actives=model_settings["actives"])

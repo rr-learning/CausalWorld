@@ -1,5 +1,5 @@
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from stable_baselines import HER, SAC
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -17,9 +17,9 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
     def _make_env(rank):
         def _init():
             task = task_generator(task_generator_id=task_name)
-            env = World(task=task, skip_frame=skip_frame,
-                        enable_visualization=False,
-                        seed=seed_num + rank, max_episode_length=
+            env = CausalWorld(task=task, skip_frame=skip_frame,
+                              enable_visualization=False,
+                              seed=seed_num + rank, max_episode_length=
                         maximum_episode_length)
             env = HERGoalEnvWrapper(env)
             return env

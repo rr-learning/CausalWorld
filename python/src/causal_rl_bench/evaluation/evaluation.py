@@ -2,7 +2,7 @@ import os
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.metrics.mean_complete_success_rate import \
     MeanCompleteSuccessRate
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 
 from causal_rl_bench.metrics.mean_last_fractional_success import \
     MeanLastFractionalSuccess
@@ -48,25 +48,25 @@ class EvaluationPipeline(object):
                 del self.tracker.world_params['simulation_time']
             if 'wrappers' in self.tracker.world_params:
                 del self.tracker.world_params['wrappers']
-            self.env = World(self.task,
-                             **self.tracker.world_params,
-                             seed=self.initial_seed,
-                             data_recorder=self.data_recorder,
-                             enable_visualization=visualize_evaluation)
+            self.env = CausalWorld(self.task,
+                                   **self.tracker.world_params,
+                                   seed=self.initial_seed,
+                                   data_recorder=self.data_recorder,
+                                   enable_visualization=visualize_evaluation)
         else:
             if world_params is not None:
                 if 'seed' in world_params:
                     del world_params['seed']
-                self.env = World(self.task,
-                                 **world_params,
-                                 seed=self.initial_seed,
-                                 data_recorder=self.data_recorder,
-                                 enable_visualization=visualize_evaluation)
+                self.env = CausalWorld(self.task,
+                                       **world_params,
+                                       seed=self.initial_seed,
+                                       data_recorder=self.data_recorder,
+                                       enable_visualization=visualize_evaluation)
             else:
-                self.env = World(self.task,
-                                 seed=self.initial_seed,
-                                 data_recorder=self.data_recorder,
-                                 enable_visualization=visualize_evaluation)
+                self.env = CausalWorld(self.task,
+                                       seed=self.initial_seed,
+                                       data_recorder=self.data_recorder,
+                                       enable_visualization=visualize_evaluation)
         evaluation_episode_length_in_secs = self.task.get_default_max_episode_length()
         self.time_steps_for_evaluation = \
             int(evaluation_episode_length_in_secs / self.env.dt)

@@ -1,5 +1,5 @@
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 import numpy as np
 import unittest
 
@@ -21,9 +21,9 @@ class TestWorld(unittest.TestCase):
         rewards_v3 = []
         horizon = 30
 
-        env_v1 = World(task=task,
-                       enable_visualization=False,
-                       seed=27)
+        env_v1 = CausalWorld(task=task,
+                             enable_visualization=False,
+                             seed=27)
 
         obs = env_v1.reset()
         observations_v1.append(obs)
@@ -34,9 +34,9 @@ class TestWorld(unittest.TestCase):
         env_v1.close()
 
         task = task_generator(task_generator_id="stacked_blocks")
-        env_v2 = World(task=task,
-                       enable_visualization=False,
-                       seed=27)
+        env_v2 = CausalWorld(task=task,
+                             enable_visualization=False,
+                             seed=27)
 
         obs = env_v2.reset()
         observations_v2.append(obs)
@@ -47,9 +47,9 @@ class TestWorld(unittest.TestCase):
         env_v2.close()
 
         task = task_generator(task_generator_id="stacked_blocks")
-        env_v3 = World(task=task,
-                       enable_visualization=False,
-                       seed=54)
+        env_v3 = CausalWorld(task=task,
+                             enable_visualization=False,
+                             seed=54)
 
         obs = env_v3.reset()
         observations_v3.append(obs)
@@ -68,14 +68,14 @@ class TestWorld(unittest.TestCase):
 
     def test_parallelism(self):
         task = task_generator(task_generator_id="stacked_blocks")
-        env1 = World(task=task,
-                     enable_visualization=False,
-                     seed=0)
+        env1 = CausalWorld(task=task,
+                           enable_visualization=False,
+                           seed=0)
         env1.reset()
         task2 = task_generator(task_generator_id="stacked_blocks")
-        env2 = World(task=task2,
-                     enable_visualization=False,
-                     seed=0)
+        env2 = CausalWorld(task=task2,
+                           enable_visualization=False,
+                           seed=0)
         observations_env1_v1, rewards_env1_v1, _, _ = env1.step(
             env1.action_space.low)
         env2.reset()
@@ -93,12 +93,12 @@ class TestWorld(unittest.TestCase):
         kuka_env = KukaGymEnv(renders=False,
                               isDiscrete=False)  # operates at 240 HZ
         task = task_generator(task_generator_id="pushing")
-        causal_rl_env = World(task=task,
-                              enable_visualization=False,
-                              seed=0,
-                              skip_frame=10,
-                              normalize_actions=False,
-                              normalize_observations=False)  # operates at 250 HZ
+        causal_rl_env = CausalWorld(task=task,
+                                    enable_visualization=False,
+                                    seed=0,
+                                    skip_frame=10,
+                                    normalize_actions=False,
+                                    normalize_observations=False)  # operates at 250 HZ
         start = time.time()
         kuka_env.reset()
         end = time.time()
@@ -143,12 +143,12 @@ class TestWorld(unittest.TestCase):
         kuka_env = KukaCamGymEnv(renders=False,
                                  isDiscrete=False)  # operates at 240 HZ
         task = task_generator(task_generator_id="pushing")
-        causal_rl_env = World(task=task,
-                              enable_visualization=False,
-                              seed=0,
-                              skip_frame=10,
-                              normalize_actions=False,
-                              normalize_observations=False)  # operates at 250 HZ
+        causal_rl_env = CausalWorld(task=task,
+                                    enable_visualization=False,
+                                    seed=0,
+                                    skip_frame=10,
+                                    normalize_actions=False,
+                                    normalize_observations=False)  # operates at 250 HZ
         start = time.time()
         kuka_env.reset()
         end = time.time()

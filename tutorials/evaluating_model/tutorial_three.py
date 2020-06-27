@@ -1,7 +1,7 @@
 from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 from causal_rl_bench.benchmark.benchmarks import PUSHING_BENCHMARK
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 import causal_rl_bench.evaluation.visualization.visualiser as vis
 
 from stable_baselines import PPO2
@@ -18,8 +18,8 @@ log_relative_path = './pushing_policy_tutorial_3'
 def _make_env(rank):
     def _init():
         task = task_generator(task_generator_id="pushing")
-        env = World(task=task, enable_visualization=False,
-                    seed=rank)
+        env = CausalWorld(task=task, enable_visualization=False,
+                          seed=rank)
         return env
     set_global_seeds(0)
     return _init

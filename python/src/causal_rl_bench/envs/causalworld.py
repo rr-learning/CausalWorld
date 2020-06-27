@@ -14,7 +14,7 @@ from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
 
 
-class World(gym.Env):
+class CausalWorld(gym.Env):
     metadata = {'render.modes': ['human', 'rgb_array'],
                 'video.frames_per_second': 50}
 
@@ -597,7 +597,6 @@ class World(gym.Env):
             flags=0,
             physicsClientId=pybullet_client
         )
-        # pybullet.GEOM_FORCE_CONCAVE_TRIMESH
         obj = pybullet.createMultiBody(
             baseCollisionShapeIndex=floor_id,
             baseVisualShapeIndex=-1,
@@ -605,8 +604,6 @@ class World(gym.Env):
             baseOrientation=[0, 0, 0, 1],
             physicsClientId=pybullet_client
         )
-
-        # set colour
         pybullet.changeVisualShape(obj, -1, rgbaColor=table_colour,
                                    physicsClientId=pybullet_client)
 
@@ -616,7 +613,6 @@ class World(gym.Env):
             flags=pybullet.GEOM_FORCE_CONCAVE_TRIMESH,
             physicsClientId=pybullet_client
         )
-        # pybullet.GEOM_FORCE_CONCAVE_TRIMESH
         obj = pybullet.createMultiBody(
             baseCollisionShapeIndex=stage_id,
             baseVisualShapeIndex=-1,
@@ -624,7 +620,6 @@ class World(gym.Env):
             baseOrientation=[0, 0, 0, 1],
             physicsClientId=pybullet_client
         )
-        # set colour
         pybullet.changeVisualShape(obj, -1, rgbaColor=high_border_colour,
                                    physicsClientId=pybullet_client)
         return

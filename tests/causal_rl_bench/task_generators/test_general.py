@@ -1,5 +1,5 @@
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 import numpy as np
 import unittest
 
@@ -7,8 +7,8 @@ import unittest
 class TestGeneral(unittest.TestCase):
     def setUp(self):
         self.task = task_generator(task_generator_id="general")
-        self.env = World(task=self.task,
-                         enable_visualization=False)
+        self.env = CausalWorld(task=self.task,
+                               enable_visualization=False)
         return
 
     def tearDown(self):

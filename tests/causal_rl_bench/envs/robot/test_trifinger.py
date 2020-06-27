@@ -1,5 +1,5 @@
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 import numpy as np
 import pytest
@@ -8,13 +8,13 @@ import pytest
 @pytest.fixture(scope="module")
 def robot_jp_structured():
     task = task_generator(task_generator_id='pushing')
-    return World(task=task, enable_visualization=False, observation_mode="structured")
+    return CausalWorld(task=task, enable_visualization=False, observation_mode="structured")
 
 
 @pytest.fixture(scope="module")
 def robot_jp_camera():
     task = task_generator(task_generator_id='pushing')
-    return World(task=task, enable_visualization=False, observation_mode="cameras")
+    return CausalWorld(task=task, enable_visualization=False, observation_mode="cameras")
 
 
 def test_action_mode_switching(robot_jp_structured):
@@ -28,8 +28,8 @@ def test_pd_gains():
     np.random.seed(0)
     task = task_generator(task_generator_id='pushing')
     skip_frame = 1
-    env = World(task=task, enable_visualization=False, skip_frame=skip_frame, normalize_observations=False,
-                normalize_actions=False, seed=0)
+    env = CausalWorld(task=task, enable_visualization=False, skip_frame=skip_frame, normalize_observations=False,
+                      normalize_actions=False, seed=0)
     zero_hold = int(5000 / skip_frame) #reach desired position in 4 secs?
     obs = env.reset()
     #test bounds first

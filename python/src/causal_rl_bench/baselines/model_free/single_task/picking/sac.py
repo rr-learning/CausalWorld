@@ -1,5 +1,5 @@
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.world import World
+from causal_rl_bench.envs.causalworld import CausalWorld
 from stable_baselines import SAC
 from stable_baselines.sac.policies import MlpPolicy
 import tensorflow as tf
@@ -19,9 +19,9 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                           sparse_reward_weight=0,
                           goal_height=0.15,
                           tool_block_mass=0.02)
-    env = World(task=task, skip_frame=skip_frame,
-                enable_visualization=False,
-                seed=seed_num, max_episode_length=
+    env = CausalWorld(task=task, skip_frame=skip_frame,
+                      enable_visualization=False,
+                      seed=seed_num, max_episode_length=
                 maximum_episode_length)
     set_global_seeds(seed_num)
     policy_kwargs = dict(layers=[256, 128])
