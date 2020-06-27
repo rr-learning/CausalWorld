@@ -12,7 +12,7 @@ class TestWorld(unittest.TestCase):
         return
 
     def test_determinism(self):
-        task = task_generator(task_generator_id="reaching")
+        task = task_generator(task_generator_id="stacked_blocks")
         observations_v1 = []
         observations_v2 = []
         observations_v3 = []
@@ -33,7 +33,7 @@ class TestWorld(unittest.TestCase):
             rewards_v1.append(reward)
         env_v1.close()
 
-        task = task_generator(task_generator_id="reaching")
+        task = task_generator(task_generator_id="stacked_blocks")
         env_v2 = World(task=task,
                        enable_visualization=False,
                        seed=27)
@@ -46,7 +46,7 @@ class TestWorld(unittest.TestCase):
             rewards_v2.append(reward)
         env_v2.close()
 
-        task = task_generator(task_generator_id="reaching")
+        task = task_generator(task_generator_id="stacked_blocks")
         env_v3 = World(task=task,
                        enable_visualization=False,
                        seed=54)
@@ -67,12 +67,12 @@ class TestWorld(unittest.TestCase):
         assert rewards_v1 == rewards_v3
 
     def test_parallelism(self):
-        task = task_generator(task_generator_id="pushing")
+        task = task_generator(task_generator_id="stacked_blocks")
         env1 = World(task=task,
                      enable_visualization=False,
                      seed=0)
         env1.reset()
-        task2 = task_generator(task_generator_id="pushing")
+        task2 = task_generator(task_generator_id="stacked_blocks")
         env2 = World(task=task2,
                      enable_visualization=False,
                      seed=0)
