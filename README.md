@@ -15,8 +15,8 @@ or used in a catkin workspace.
 1. Clone this repo and then create it's conda environment to install all dependencies.
 
   ```bash
-  git clone git@gitlab.is.tue.mpg.de:robotics/counterfactual.git
-  cd counterfactual
+  git clone https://github.com/rr-learning/CausalRLBench
+  cd CausalRLBench
   conda env create -f environment.yml
   ```
 
