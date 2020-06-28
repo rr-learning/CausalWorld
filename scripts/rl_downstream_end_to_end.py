@@ -180,16 +180,14 @@ def get_PPO_model(model_settings, model_path):
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = int(3000000 / 3e2)
-    validate_every_timesteps = int(500000 / 5e2)
+    total_time_steps = int(1000000)
+    validate_every_timesteps = int(20000)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
     set_global_seeds(model_settings['seed'])
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-        total_time_steps = 40000000
-        validate_every_timesteps = 2000000
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
         num_of_active_envs = 1
