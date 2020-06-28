@@ -1,4 +1,4 @@
-name: causal_rl_bench
+name: causal_rl_bench_disentanglement
 channels:
 - conda-forge
 dependencies:
