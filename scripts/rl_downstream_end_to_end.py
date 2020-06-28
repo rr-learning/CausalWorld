@@ -51,8 +51,8 @@ class CameraObservationWrapper(gym.ObservationWrapper):
                                                 dtype=np.uint8)
 
     def observation(self, observation):
-        goal_image = observation[1, ::, ::, :]
-        real_image = observation[0, ::, ::, :]
+        goal_image = observation[1, ::-1, ::, :]
+        real_image = observation[0, ::-1, ::, :]
         return np.concatenate((real_image, goal_image))
 
 
@@ -231,8 +231,8 @@ if __name__ == '__main__':
 
     # define a method for the policy fn of your trained model
     def policy_fn(observation):
-        goal_image = observation[3 + CAMERA_NUMBER, ::, ::, :]
-        real_image = observation[CAMERA_NUMBER, ::, ::, :]
+        goal_image = observation[1, ::-1, ::, :]
+        real_image = observation[0, ::-1, ::, :]
         obs_new = np.concatenate((real_image, goal_image))
         action = model.predict(obs_new, deterministic=True)[0]
         action[0:3] = [-1.542, -1.28, -2.81]

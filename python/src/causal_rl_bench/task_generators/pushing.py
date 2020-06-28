@@ -65,6 +65,7 @@ class PushingTaskGenerator(BaseTask):
                          'shape': "cube",
                          'position': self._task_params
                          ["goal_block_position"],
+                         'color': np.array([1, 0, 0]),
                          'orientation':  self._task_params
                          ["goal_block_orientation"]}
         self._stage.add_silhoutte_general_object(**creation_dict)
@@ -149,13 +150,12 @@ class PushingTaskGenerator(BaseTask):
         end_effector_positions = end_effector_positions.reshape(-1, 3)
 
         # calculate first reward term
-        current_distance_from_block = np.linalg.norm(end_effector_positions -
+        current_distance_from_block = np.linalg.norm(end_effector_positions[1] -
                                                      block_position)
         previous_distance_from_block = np.linalg.norm(
-            self.previous_end_effector_positions -
+            self.previous_end_effector_positions[1] -
             self.previous_object_position)
-        rewards.append(previous_distance_from_block -
-                       current_distance_from_block)
+        rewards.append(previous_distance_from_block - current_distance_from_block)
 
         # calculate second reward term
         previous_dist_to_goal = np.linalg.norm(goal_position -

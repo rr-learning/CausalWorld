@@ -53,8 +53,8 @@ class EncoderObservationWrapper(gym.ObservationWrapper):
                                             dtype=np.float64)
 
     def observation(self, observation):
-        goal_image = observation[1, ::, ::, :]
-        real_image = observation[0, ::, ::, :]
+        goal_image = observation[1, ::-1, ::, :]
+        real_image = observation[0, ::-1, ::, :]
         image_latents = self.representation_function(real_image, goal_image)
         return np.concatenate(image_latents, axis=None)
 
@@ -186,16 +186,14 @@ def get_PPO_model(model_settings, model_path, _representation_function):
 
 
 def train_model_num(model_settings, output_path, _representation_function):
-    total_time_steps = int(3000000 / 3e2)
-    validate_every_timesteps = int(500000 / 5e2)
+    total_time_steps = int(1000000)
+    validate_every_timesteps = int(200000)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
     set_global_seeds(model_settings['seed'])
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path, _representation_function)
         num_of_active_envs = num_of_envs
-        total_time_steps = 40000000
-        validate_every_timesteps = 2000000
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path, _representation_function)
         num_of_active_envs = 1
@@ -246,8 +244,8 @@ if __name__ == '__main__':
 
         # define a method for the policy fn of your trained model
         def policy_fn(observation):
-            goal_image = observation[3 + CAMERA_NUMBER, ::, ::, :]
-            real_image = observation[CAMERA_NUMBER, ::, ::, :]
+            goal_image = observation[1, ::-1, ::, :]
+            real_image = observation[0, ::-1, ::, :]
             image_latents = _representation_function(real_image, goal_image)
             obs_new = np.concatenate(image_latents, axis=None)
             action = model.predict(obs_new, deterministic=True)[0]
