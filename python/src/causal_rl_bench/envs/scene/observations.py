@@ -19,9 +19,9 @@ class StageObservations(object):
         self._lower_bounds = dict()
         self._upper_bounds = dict()
         self._lower_bounds["goal_image"] = \
-            np.zeros(shape=(3, 128, 128, 3), dtype=np.float64)
+            np.zeros(shape=(1, 128, 128, 3), dtype=np.float64)
         self._upper_bounds["goal_image"] = \
-            np.full(shape=(3, 128, 128, 3), fill_value=255,
+            np.full(shape=(1, 128, 128, 3), fill_value=255,
                     dtype=np.float64)
         self._goal_cameras = cameras
 
@@ -211,9 +211,7 @@ class StageObservations(object):
         self.set_observation_spaces()
 
     def get_current_goal_image(self):
-        camera_obs = np.stack((self._goal_cameras[0].get_image(),
-                               self._goal_cameras[1].get_image(),
-                               self._goal_cameras[2].get_image()), axis=0)
+        camera_obs = np.stack((self._goal_cameras[0].get_image()), axis=0)
         if self._normalized_observations:
             camera_obs = self.normalize_observation_for_key(camera_obs,
                                                             "goal_image")

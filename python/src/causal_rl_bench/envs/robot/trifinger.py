@@ -380,6 +380,8 @@ class TriFingerRobot(object):
         deg45 = np.pi / 4
         positions = [0, -deg45, -deg45]
         joint_positions = positions * 3
+        joint_positions[0:3] = [-1.542, -1.28, -2.81]
+        joint_positions[6:9] = [-1.542, -1.28, -2.81]
         end_effector_positions = [0.05142966, 0.03035857, 0.32112874,
                                   0.00057646, -0.05971867, 0.32112874,
                                   -0.05200612, 0.02936011, 0.32112874]
@@ -852,8 +854,7 @@ class TriFingerRobot(object):
         return
 
     def _set_finger_state_in_goal_image(self):
-        joint_positions = \
-            self._robot_actions.joint_positions_lower_bounds
+        joint_positions = np.array([-1.542, -1.28, -2.81] * 3)
         for i, joint_id in enumerate(self._revolute_joint_ids):
             pybullet.resetJointState(
                 WorldConstants.ROBOT_ID, joint_id, joint_positions[i],

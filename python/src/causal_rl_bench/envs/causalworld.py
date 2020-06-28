@@ -58,35 +58,15 @@ class CausalWorld(gym.Env):
         if observation_mode == 'cameras':
             self._tool_cameras = []
             self._tool_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4190],
+                Camera(camera_position=[0.2496, 0.2458, 0.4390],
                        camera_orientation=[0.3760, 0.8690,
                                            -0.2918, -0.1354],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
-            self._tool_cameras.append(
-                Camera(camera_position=[0.0047, -0.2834, 0.4558],
-                       camera_orientation=[0.9655, -0.0098,
-                                           -0.0065, -0.2603],
-                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
-            self._tool_cameras.append(
-                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
-                       camera_orientation=[-0.3633, 0.8686,
-                                           -0.3141, 0.1220],
                        pybullet_client_id=self._pybullet_client_w_o_goal_id))
             self._goal_cameras = []
             self._goal_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4190],
+                Camera(camera_position=[0.2496, 0.2458, 0.4390],
                        camera_orientation=[0.3760, 0.8690,
                                            -0.2918, -0.1354],
-                       pybullet_client_id=self._pybullet_client_w_goal_id))
-            self._goal_cameras.append(
-                Camera(camera_position=[0.0047, -0.2834, 0.4558],
-                       camera_orientation=[0.9655, -0.0098,
-                                           -0.0065, -0.2603],
-                       pybullet_client_id=self._pybullet_client_w_goal_id))
-            self._goal_cameras.append(
-                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
-                       camera_orientation=[-0.3633, 0.8686,
-                                           -0.3141, 0.1220],
                        pybullet_client_id=self._pybullet_client_w_goal_id))
         self._robot = TriFingerRobot(action_mode=action_mode,
                                      observation_mode=observation_mode,
@@ -503,7 +483,7 @@ class CausalWorld(gym.Env):
         finger_urdf_path = os.path.join(
             robot_properties_path, "urdf", "trifinger_realistic_colors.urdf"
         )
-        finger_base_position = [0, 0, 0.0]
+        finger_base_position = [0, 0, 0.015]
         finger_base_orientation = pybullet.getQuaternionFromEuler([0, 0, 0])
         for client in [self._pybullet_client_w_o_goal_id,
                        self._pybullet_client_w_goal_id,

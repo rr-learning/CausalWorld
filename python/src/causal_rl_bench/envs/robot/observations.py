@@ -48,9 +48,9 @@ class TriFingerObservations(object):
             [50] * 3 * num_fingers
 
         self._lower_bounds["cameras"] = \
-            np.zeros(shape=(3, 128, 128, 3), dtype=np.float64)
+            np.zeros(shape=(1, 128, 128, 3), dtype=np.float64)
         self._upper_bounds["cameras"] = \
-            np.full(shape=(3, 128, 128, 3), fill_value=255,
+            np.full(shape=(1, 128, 128, 3), fill_value=255,
                     dtype=np.float64)
 
         self._observation_functions = dict()
@@ -60,8 +60,8 @@ class TriFingerObservations(object):
 
         if observation_mode == "cameras":
             self._observations_keys = ["cameras"]
-            self._low = np.zeros(shape=(3, 128, 128, 3), dtype=np.float64)
-            self._high = np.full(shape=(3, 128, 128, 3), fill_value=255,
+            self._low = np.zeros(shape=(1, 128, 128, 3), dtype=np.float64)
+            self._high = np.full(shape=(1, 128, 128, 3), fill_value=255,
                                  dtype=np.float64)
             self._low_norm = 0
             self._high_norm = 1
@@ -222,9 +222,7 @@ class TriFingerObservations(object):
                 observations_dict["joint_velocities"] = \
                     robot_state['velocities']
             elif observation == "cameras":
-                camera_obs = np.stack((self._cameras[0].get_image(),
-                                       self._cameras[1].get_image(),
-                                       self._cameras[2].get_image()), axis=0)
+                camera_obs = np.stack((self._cameras[0].get_image()), axis=0)
                 observations_dict["cameras"] = camera_obs
             elif observation in self._observation_functions:
                 observations_dict[observation] = \
@@ -243,9 +241,7 @@ class TriFingerObservations(object):
                 observations_dict["joint_velocities"] = \
                     robot_state['velocities']
             elif observation == "cameras":
-                camera_obs = np.stack((self._cameras[0].get_image(),
-                                       self._cameras[1].get_image(),
-                                       self._cameras[2].get_image()), axis=0)
+                camera_obs = np.stack((self._cameras[0].get_image()), axis=0)
                 observations_dict["cameras"] = camera_obs
             elif observation in self._observation_functions:
                 observations_dict[observation] = \
@@ -263,9 +259,7 @@ class TriFingerObservations(object):
         return observations_dict
 
     def get_current_camera_observations(self):
-        camera_obs = np.stack((self._cameras[0].get_image(),
-                               self._cameras[1].get_image(),
-                               self._cameras[2].get_image()), axis=0)
+        camera_obs = np.stack((self._cameras[0].get_image()), axis=0)
         if self._normalized_observations:
             camera_obs = self.normalize_observation_for_key(camera_obs,
                                                             "cameras")

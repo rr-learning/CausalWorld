@@ -15,12 +15,8 @@ class Camera(object):
         w = self._camera_orientation[3]
         self._view_matrix = pybullet.computeViewMatrix(
             cameraEyePosition=self._translation,
-            cameraTargetPosition=[2 * (x * z + w * y),
-                                  2 * (y * z - w * x),
-                                  1 - 2 * (x * x + y * y)],
-            cameraUpVector=[2 * (x * y - w * z),
-                            1 - 2 * (x * x + z * z),
-                            2 * (y * z + w * x)],
+            cameraTargetPosition=[0, 0, 0.01],
+            cameraUpVector=[0, 0, 1],
             physicsClientId=self._pybullet_client_id)
 
         self._proj_matrix = pybullet.computeProjectionMatrixFOV(
