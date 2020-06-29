@@ -85,6 +85,21 @@ class BaseTask(object):
                              physicsClientId=self._stage._pybullet_client_w_o_goal_id)
         return
 
+    def _remove_pybullet_state(self, pybullet_state):
+        if self._stage._pybullet_client_full_id is not None:
+                pybullet. \
+                    removeState(pybullet_state['full'],
+                                 physicsClientId=self._stage._pybullet_client_full_id)
+        if self._stage._pybullet_client_w_goal_id is not None:
+                pybullet. \
+                    removeState(pybullet_state['w_goal'],
+                                 physicsClientId=self._stage._pybullet_client_w_goal_id)
+        if self._stage._pybullet_client_w_o_goal_id is not None:
+            pybullet. \
+                removeState(pybullet_state['w_o_goal'],
+                             physicsClientId=self._stage._pybullet_client_w_o_goal_id)
+        return
+
     def save_state(self):
         state = dict()
         state['pybullet_states'] = \
@@ -119,6 +134,11 @@ class BaseTask(object):
         self._task_stage_observation_keys = state_dict['task_observations']
         self._restore_pybullet_state(state_dict['pybullet_states'])
         return reset_observation_space
+
+    def remove_state(self, state_dict):
+        self._remove_pybullet_state(state_dict['pybullet_states'])
+        del state_dict
+        return
 
     def is_in_training_mode(self):
         """
@@ -605,6 +625,7 @@ class BaseTask(object):
                                          check_bounds=
                                          self._task_params['intervention_split'])
             if success_signal:
+                self.remove_state(self._current_starting_state)
                 self._current_starting_state = self.save_state()
         self._set_task_state()
         return success_signal, interventions_info, reset_observation_space_signal
@@ -898,6 +919,8 @@ class BaseTask(object):
                 self.restore_state(current_state)
             else:
                 self._restore_pybullet_state(pre_contact_check_state)
+            self._remove_pybullet_state(pre_contact_check_state)
+        self.remove_state(current_state)
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \

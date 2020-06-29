@@ -12,6 +12,6 @@ dependencies:
   - pandas
   - catkin_pkg
   - sphinx_rtd_theme
-  - tensorflow==1.14.0
+  - tensorflow_gpu==1.14.0
   - stable-baselines==2.10.0
   - pytest
