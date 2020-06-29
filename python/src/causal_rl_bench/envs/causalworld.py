@@ -271,9 +271,11 @@ class CausalWorld(gym.Env):
             if not success_signal:
                 self._tracker.add_invalid_intervention(interventions_info)
         # TODO: make sure that stage observations returned are up to date
-
+        for rigid_object in self._stage.get_rigid_objects():
+            print(rigid_object)
+            print(self._stage.get_rigid_objects()[rigid_object]._block_ids)
         if self._data_recorder:
-            self._data_recorder.new_episode(self.get_full_state(),
+            self._data_recorder.new_episode(self.get_state(),
                                             task_name=self._task._task_name,
                                             task_params=self._task.get_task_params(),
                                             world_params=self._get_world_params())
@@ -345,25 +347,25 @@ class CausalWorld(gym.Env):
                 self._tracker.add_invalid_intervention(interventions_info)
         return success_signal
 
-    def get_full_state(self):
+    def get_state(self):
         """
-
+        Note: Setting state and getting state doesnt work when there is an intermediate intervention
         :return:
         """
-        full_state = []
-        full_state.extend(self._robot.get_full_state())
-        full_state.extend(self._stage.get_full_state())
-        return np.array(full_state)
+        state = dict()
+        state['pybullet_state'] = self._task._save_pybullet_state()
+        state['control_index'] = self._robot._control_index
+        return state
 
-    def set_full_state(self, new_full_state):
+    def set_state(self, new_full_state):
         """
 
         :param new_full_state:
         :return:
         """
-        robot_state_size = self._robot.get_state_size()
-        self._robot.set_full_state(new_full_state[0:robot_state_size])
-        self._stage.set_full_state(new_full_state[robot_state_size:])
+        self._task._restore_pybullet_state(new_full_state['pybullet_state'])
+        self._robot._control_index = new_full_state['control_index']
+        self._robot.update_latest_full_state()
         return
 
     def render(self, mode="human"):

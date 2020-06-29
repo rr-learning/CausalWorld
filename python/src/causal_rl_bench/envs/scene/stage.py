@@ -6,6 +6,7 @@ import math
 import numpy as np
 import pybullet
 from causal_rl_bench.configs.world_constants import WorldConstants
+from collections import OrderedDict
 
 
 class Stage(object):
@@ -23,8 +24,8 @@ class Stage(object):
         :param pybullet_client_w_goal:
         :param pybullet_client_w_o_goal:
         """
-        self._rigid_objects = dict()
-        self._visual_objects = dict()
+        self._rigid_objects = OrderedDict()
+        self._visual_objects = OrderedDict()
         self._observation_mode = observation_mode
         self._pybullet_client_full_id = pybullet_client_full_id
         self._pybullet_client_w_goal_id = pybullet_client_w_goal_id

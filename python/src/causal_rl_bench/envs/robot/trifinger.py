@@ -394,6 +394,7 @@ class TriFingerRobot(object):
         variable_params = dict()
         self.update_latest_full_state()
         variable_params['joint_positions'] = self._latest_full_state['positions']
+        variable_params['control_index'] = self._control_index
         variable_params['joint_velocities'] = self._latest_full_state['velocities']
         if self._pybullet_client_w_o_goal_id is not None:
             client = self._pybullet_client_w_o_goal_id
@@ -591,10 +592,7 @@ class TriFingerRobot(object):
 
     def apply_interventions(self, interventions_dict):
         #TODO: add friction of each link
-        if self.is_initialized():
-            old_state = self.get_full_state()
-        else:
-            old_state = self.get_default_state()
+        old_state = self.get_full_state()
         if "joint_positions" in interventions_dict:
             new_joint_positions = interventions_dict["joint_positions"]
         else:
@@ -662,7 +660,8 @@ class TriFingerRobot(object):
                         raise Exception(
                             "The intervention state variable specified is "
                             "not allowed")
-
+            elif intervention == "control_index":
+                self._control_index = interventions_dict["control_index"]
             else:
                 raise Exception("The intervention state variable specified is "
                                 "not allowed")
@@ -692,12 +691,6 @@ class TriFingerRobot(object):
                     contact[8] < -0.005:
                 return False
         return True
-
-    def is_initialized(self):
-        if self._latest_full_state is None:
-            return False
-        else:
-            return True
 
     def is_self_colliding(self):
         if self._pybullet_client_full_id is not None:
