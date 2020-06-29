@@ -103,13 +103,13 @@ class BaseTask(object):
         old_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         old_number_of_visual_objects = len(self._stage.get_visual_objects())
         reset_observation_space = False
+        #only empty the stage
         self._stage.remove_everything()
         # self._restore_pybullet_state(self._empty_stage)
-        self._robot.set_full_env_state(state_dict
-                                      ['robot_object_state'])
         self._stage.set_full_env_state(
             state_dict['stage_object_state'])
-        self._restore_pybullet_state(state_dict['pybullet_states'])
+        self._robot.set_full_env_state(state_dict
+                                      ['robot_object_state'])
         new_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         new_number_of_visual_objects = len(self._stage.get_visual_objects())
         if old_number_of_rigid_objects != new_number_of_rigid_objects:
@@ -117,6 +117,7 @@ class BaseTask(object):
         if old_number_of_visual_objects != new_number_of_visual_objects:
             reset_observation_space = True
         self._task_stage_observation_keys = state_dict['task_observations']
+        self._restore_pybullet_state(state_dict['pybullet_states'])
         return reset_observation_space
 
     def is_in_training_mode(self):

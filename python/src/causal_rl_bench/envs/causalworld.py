@@ -12,6 +12,7 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.robot.camera import Camera
 from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
+import gc
 
 
 class CausalWorld(gym.Env):
@@ -271,14 +272,15 @@ class CausalWorld(gym.Env):
             if not success_signal:
                 self._tracker.add_invalid_intervention(interventions_info)
         # TODO: make sure that stage observations returned are up to date
-        for rigid_object in self._stage.get_rigid_objects():
-            print(rigid_object)
-            print(self._stage.get_rigid_objects()[rigid_object]._block_ids)
         if self._data_recorder:
             self._data_recorder.new_episode(self.get_state(),
-                                            task_name=self._task._task_name,
-                                            task_params=self._task.get_task_params(),
-                                            world_params=self._get_world_params())
+                                            task_name=
+                                            self._task._task_name,
+                                            task_params=
+                                            self._task.get_task_params(),
+                                            world_params=
+                                            self._get_world_params())
+        gc.collect()
         if self._observation_mode == "cameras":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
@@ -356,6 +358,7 @@ class CausalWorld(gym.Env):
         state['pybullet_state'] = self._task._save_pybullet_state()
         state['control_index'] = self._robot._control_index
         return state
+        # return self._task.save_state()
 
     def set_state(self, new_full_state):
         """
@@ -366,6 +369,7 @@ class CausalWorld(gym.Env):
         self._task._restore_pybullet_state(new_full_state['pybullet_state'])
         self._robot._control_index = new_full_state['control_index']
         self._robot.update_latest_full_state()
+        # self._task.restore_state(new_full_state)
         return
 
     def render(self, mode="human"):

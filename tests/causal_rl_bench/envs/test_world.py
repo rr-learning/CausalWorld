@@ -195,6 +195,9 @@ class TestWorld(unittest.TestCase):
         for i in range(101, 200):
             observations, rewards, _, _ = env.step(
                 actions[i])
+            if not np.array_equal(observations_1[i], observations):
+                print("step", i)
+                print(observations_1[i] - observations)
             assert np.array_equal(observations_1[i], observations)
         env.close()
         return
