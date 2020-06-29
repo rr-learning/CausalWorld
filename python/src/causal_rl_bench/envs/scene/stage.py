@@ -162,6 +162,7 @@ class Stage(object):
             self._name_keys.remove(name)
         if name in self._rigid_objects.keys():
             self._rigid_objects[name].remove()
+            
             del self._rigid_objects[name]
         elif name in self._visual_objects.keys():
             self._visual_objects[name].remove()

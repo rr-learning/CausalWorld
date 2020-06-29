@@ -3,7 +3,6 @@ channels:
 - conda-forge
 dependencies:
 - python=3.7.4
-- pinocchio==2.2.2
 - sphinx
 - jupyter
 - pip:
@@ -12,6 +11,7 @@ dependencies:
   - pandas
   - catkin_pkg
   - sphinx_rtd_theme
-  - tensorflow_gpu==1.14.0
+  - tensorflow==1.14.0
   - stable-baselines==2.10.0
   - pytest
+  - mpi4py

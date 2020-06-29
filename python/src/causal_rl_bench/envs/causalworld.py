@@ -4,7 +4,6 @@ import pybullet
 import pybullet_data
 import os
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
-from causal_rl_bench.envs.robot.pinocchio_utils import PinocchioUtils
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
@@ -12,7 +11,7 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.robot.camera import Camera
 from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
-import gc
+import pkgutil
 
 
 class CausalWorld(gym.Env):
@@ -50,7 +49,6 @@ class CausalWorld(gym.Env):
         self._pybullet_client_w_goal_id = None
         self._pybullet_client_full_id = None
         self._revolute_joint_ids = None
-        self.pinocchio_utils = None
         self._instantiate_pybullet()
         self.link_name_to_index = None
         self._create_world()
@@ -105,7 +103,6 @@ class CausalWorld(gym.Env):
                                      revolute_joint_ids=
                                      self._revolute_joint_ids,
                                      finger_tip_ids=self.finger_tip_ids,
-                                     pinocchio_utils=self.pinocchio_utils,
                                      cameras=self._tool_cameras)
         self._stage = Stage(observation_mode=observation_mode,
                             normalize_observations=normalize_observations,
@@ -259,6 +256,19 @@ class CausalWorld(gym.Env):
         #                 self._p.loadPlugin("eglRendererPlugin")
         # except:
         #     pass
+        #TODO: there is a memory leak here caused by pybullet when
+        #adding and removing bodies
+        # if self._tracker.total_resets + \
+        #         self._tracker._curr_task_stat.num_resets % 2 == 0:
+        #     print(self._tracker.total_resets)
+        #     self._create_world()
+        #     self._stage._name_keys = []
+        #     self._stage._rigid_objects = {}
+        #     self._stage._visual_objects = {}
+        #     self._task.init_task(self._robot, self._stage,
+        #                          self._max_episode_length)
+        #     self._reset_observations_space()
+        #     self._robot._disable_velocity_control()
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
         if interventions_dict is not None:
@@ -280,7 +290,6 @@ class CausalWorld(gym.Env):
                                             self._task.get_task_params(),
                                             world_params=
                                             self._get_world_params())
-        gc.collect()
         if self._observation_mode == "cameras":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
@@ -502,6 +511,7 @@ class CausalWorld(gym.Env):
         This function loads the urdfs of the robot in all the pybullet clients
         :return:
         """
+        # self._reset_world()
         robot_properties_path = os.path.join(
             os.path.
                 dirname(__file__), "../../../assets/robot_properties_fingers"
@@ -579,9 +589,18 @@ class CausalWorld(gym.Env):
                                     physicsClientId=client
                                 )
                 self.create_stage(robot_properties_path, client)
-        self.pinocchio_utils = PinocchioUtils(
-            finger_urdf_path, WorldConstants.TIP_LINK_NAMES
-        )
+        return
+
+    def _reset_world(self):
+        if self._pybullet_client_full_id is not None:
+            pybullet.resetSimulation(
+                physicsClientId=self._pybullet_client_full_id)
+        if self._pybullet_client_w_goal_id is not None:
+            pybullet.resetSimulation(
+                physicsClientId=self._pybullet_client_w_goal_id)
+        if self._pybullet_client_w_o_goal_id is not None:
+            pybullet.resetSimulation(
+                physicsClientId=self._pybullet_client_w_o_goal_id)
         return
 
     def create_stage(self, robot_properties_path, pybullet_client):

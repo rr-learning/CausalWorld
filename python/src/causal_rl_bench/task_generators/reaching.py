@@ -118,8 +118,7 @@ class ReachingTaskGenerator(BaseTask):
         """
         self.current_number_of_obstacles = 0
         self.previous_end_effector_positions = \
-            self._robot.compute_end_effector_positions(
-                self._robot.get_latest_full_state()['positions'])
+            self._robot.get_latest_full_state()['end_effector_positions']
         self.previous_joint_velocities = np.copy(
             self._robot.get_latest_full_state()['velocities'])
         return
@@ -143,9 +142,7 @@ class ReachingTaskGenerator(BaseTask):
 
         :return:
         """
-        achieved_goal = \
-            self._robot.compute_end_effector_positions(
-                self._robot.get_latest_full_state()['positions'])
+        achieved_goal = self._robot.get_latest_full_state()['end_effector_positions']
         return np.array(achieved_goal)
 
     def _goal_distance(self, achieved_goal, desired_goal):

@@ -221,6 +221,9 @@ class TriFingerObservations(object):
             elif observation == "joint_velocities":
                 observations_dict["joint_velocities"] = \
                     robot_state['velocities']
+            elif observation == "end_effector_positions":
+                observations_dict["end_effector_positions"] = \
+                    robot_state['end_effector_positions']
             elif observation == "cameras":
                 camera_obs = np.stack((self._cameras[0].get_image(),
                                        self._cameras[1].get_image(),
@@ -242,6 +245,9 @@ class TriFingerObservations(object):
             elif observation == "joint_velocities":
                 observations_dict["joint_velocities"] = \
                     robot_state['velocities']
+            elif observation == "end_effector_positions":
+                observations_dict["end_effector_positions"] = \
+                    robot_state['end_effector_positions']
             elif observation == "cameras":
                 camera_obs = np.stack((self._cameras[0].get_image(),
                                        self._cameras[1].get_image(),

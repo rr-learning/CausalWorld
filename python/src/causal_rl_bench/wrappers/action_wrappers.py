@@ -19,8 +19,7 @@ class DeltaActionEnvWrapper(gym.ActionWrapper):
             offset = self.env.get_robot().get_latest_full_state()['torques']
         elif self.env.get_action_mode() == "end_effector_positions":
             # applied joint positions that were sent to the pd controller
-            offset = self.env.get_robot().compute_end_effector_positions(
-                self.env.get_robot().get_last_applied_joint_positions())
+            offset = self.env.get_robot().get_latest_full_state()['end_effector_positions']
         else:
             raise Exception("action mode is not known")
         if self.env.are_actions_normalized():
@@ -34,8 +33,7 @@ class DeltaActionEnvWrapper(gym.ActionWrapper):
         elif self.env.get_action_mode() == "joint_torques":
             offset = self.env.get_robot().get_latest_full_state()['torques']
         elif self.env.get_action_mode() == "end_effector_positions":
-            offset = self.env.get_robot().compute_end_effector_positions(
-                         self.env.get_robot().get_last_applied_joint_positions())
+            offset = self.env.get_robot().get_latest_full_state()['end_effector_positions']
         else:
             raise Exception("action mode is not known")
         if self.env.are_actions_normalized():
