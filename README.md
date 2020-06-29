@@ -33,4 +33,10 @@ or used in a catkin workspace.
   (causal_rl_bench) cd docs
   (causal_rl_bench) make html
   ```
+4. Run the tests.
+
+  ```bash
+  (causal_rl_bench) python -m unittest discover tests/causal_rl_bench/
+  ```
+  
 
