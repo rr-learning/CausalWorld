@@ -10,12 +10,11 @@ class PickAndPlaceTaskGenerator(BaseTask):
         :param kwargs:
         """
         super().__init__(task_name="pick_and_place",
-                         intervention_split=kwargs.get(
-                             "intervention_split",
+                         use_train_space_only=kwargs.get(
+                             "use_train_space_only",
                              False),
-                         training=kwargs.get("training", True),
-                         sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 0),
+                         fractional_reward_weight=
+                         kwargs.get("fractional_reward_weight", 0),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([1, 1, 1])))

@@ -179,7 +179,7 @@ class TestWorld(unittest.TestCase):
         return
 
     def test_save_state(self):
-        task = task_generator(task_generator_id="pushing")
+        task = task_generator(task_generator_id="creative_stacked_blocks")
         env = CausalWorld(task=task,
                            enable_visualization=False,
                            seed=0)
@@ -201,6 +201,32 @@ class TestWorld(unittest.TestCase):
             if not np.array_equal(observations_1[i], observations):
                 print("step", i)
                 print(observations_1[i] - observations)
+            assert np.array_equal(observations_1[i], observations)
+        env.close()
+        return
+
+    def test_reset_default_state(self):
+        task = task_generator(task_generator_id="picking")
+        env = CausalWorld(task=task,
+                           enable_visualization=False,
+                           seed=0)
+        actions = [env.action_space.sample() for _ in range(200)]
+        observations_1 = []
+        rewards_1 = []
+        env.reset()
+        for i in range(200):
+            observations, rewards, _, _ = env.step(
+                actions[i])
+            observations_1.append(observations)
+            rewards_1.append(rewards)
+        env.reset({'goal_block': {'cartesian_position': [0.1, 0.1, 0.1]}})
+        for i in range(200):
+            observations, rewards, _, _ = env.step(
+                actions[i])
+        env.reset_default_state()
+        for i in range(200):
+            observations, rewards, _, _ = env.step(
+                actions[i])
             assert np.array_equal(observations_1[i], observations)
         env.close()
         return

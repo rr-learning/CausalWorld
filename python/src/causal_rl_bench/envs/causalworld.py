@@ -138,7 +138,7 @@ class CausalWorld(gym.Env):
         self._data_recorder = data_recorder
         self._wrappers_dict = dict()
         self._tracker = Tracker(task=self._task,
-                                world_params=self._get_world_params())
+                                world_params=self.get_world_params())
         self._scale_reward_by_dt = True
         self._disabled_actions = False
         #TODO: I am not sure if this reset is necassary, TO BE CONFIRMED
@@ -204,7 +204,7 @@ class CausalWorld(gym.Env):
 
         return observation, reward, done, info
 
-    def reset_default_goal(self):
+    def reset_default_state(self):
         """
 
         :return:
@@ -243,34 +243,6 @@ class CausalWorld(gym.Env):
         :param interventions_dict:
         :return:
         """
-        # self.__pybullet_client.resetSimulation()
-        # optionally enable EGL for faster headless rendering
-        # try:
-        #     if os.environ["PYBULLET_EGL"]:
-        #         con_mode = self._p.getConnectionInfo()['connectionMethod']
-        #         if con_mode == self._p.DIRECT:
-        #             egl = pkgutil.get_loader('eglRenderer')
-        #             if (egl):
-        #                 self._p.loadPlugin(egl.get_filename(),
-        #                                    "_eglRendererPlugin")
-        #             else:
-        #                 self._p.loadPlugin("eglRendererPlugin")
-        # except:
-        #     pass
-        #TODO: there is a memory leak here caused by pybullet when
-        #adding and removing bodies
-        # if self._tracker.total_resets + \
-        #         self._tracker._curr_task_stat.num_resets % 2 == 0:
-        #     print(self._tracker.total_resets)
-        # self._create_world()
-        # self._stage._name_keys = []
-        # self._stage._rigid_objects = {}
-        # self._stage._visual_objects = {}
-        # self._robot._disable_velocity_control()
-        # self._task.init_task(self._robot, self._stage,
-        #                      self._max_episode_length)
-        # self._reset_observations_space()
-        #TODO: end of hack
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
         if interventions_dict is not None:
@@ -291,7 +263,7 @@ class CausalWorld(gym.Env):
                                             task_params=
                                             self._task.get_task_params(),
                                             world_params=
-                                            self._get_world_params())
+                                            self.get_world_params())
         if self._observation_mode == "cameras":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
@@ -310,14 +282,6 @@ class CausalWorld(gym.Env):
 
     def _get_tracker(self):
         return self._tracker
-
-    def enforce_max_episode_length(self, episode_length=2000):
-        """
-
-        :param episode_length:
-        :return:
-        """
-        self._max_episode_length = episode_length
 
     def _is_done(self):
         if self._episode_length > self._max_episode_length:
@@ -434,14 +398,14 @@ class CausalWorld(gym.Env):
             physicsClientId=client
         )
 
-    def get_current_task_parameters(self):
+    def get_current_state_variables(self):
         """
 
         :return:
         """
-        return self._task.get_current_task_parameters()
+        return self._task.get_current_state_variables()
 
-    def _get_world_params(self):
+    def get_world_params(self):
         """
 
         :return:
@@ -501,6 +465,9 @@ class CausalWorld(gym.Env):
 
     def get_robot(self):
         return self._robot
+
+    def get_task(self):
+        return self._task
 
     def get_stage(self):
         return self._stage
@@ -590,7 +557,7 @@ class CausalWorld(gym.Env):
                                     contactDamping=0.05,
                                     physicsClientId=client
                                 )
-                self.create_stage(robot_properties_path, client)
+                self._create_stage(robot_properties_path, client)
         return
 
     def _reset_world(self):
@@ -614,7 +581,7 @@ class CausalWorld(gym.Env):
                 physicsClientId=self._pybullet_client_full_id)
         return
 
-    def create_stage(self, robot_properties_path, pybullet_client):
+    def _create_stage(self, robot_properties_path, pybullet_client):
         """Create the stage (table and boundary).
 
         Args:
