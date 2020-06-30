@@ -63,6 +63,8 @@ class TestTowers(unittest.TestCase):
                 obs, reward, done, info = self.env.step(actions[i])
                 observations_2.append(obs)
                 rewards_2.append(reward)
+                if not np.array_equal(observations_1[i], observations_2[i]):
+                    print(observations_1[i] - observations_2[i])
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 

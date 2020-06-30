@@ -17,6 +17,7 @@ class MyOwnTask(BaseTask):
 
     #This is not even needed, it will just be an empty stage
     def _set_up_stage_arena(self):
+        #NOTE: you need to add rigid objects before silhouettes for determinism (pybullet limitation)
         creation_dict = {'name': "tool_block",
                          'filename': './assets/719.obj',
                          'initial_position': [0, 0, 0.1]}
