@@ -1,0 +1,443 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>causal_rl_bench.task_generators.pushing &mdash; causal_rl_bench 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/task_setups.html">Task distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/evaluating_policy.html">Evaluation Protocols</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/causal_rl_bench.html">CausalRLBench</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">causal_rl_bench</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>causal_rl_bench.task_generators.pushing</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for causal_rl_bench.task_generators.pushing</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.utils.rotation_utils</span> <span class="kn">import</span> <span class="n">quaternion_conjugate</span><span class="p">,</span> \
+    <span class="n">quaternion_mul</span><span class="p">,</span> <span class="n">euler_to_quaternion</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<div class="viewcode-block" id="PushingTaskGenerator"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PushingTaskGenerator">[docs]</a><span class="k">class</span> <span class="nc">PushingTaskGenerator</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_name</span><span class="o">=</span><span class="s2">&quot;pushing&quot;</span><span class="p">,</span>
+                         <span class="n">intervention_split</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;intervention_split&quot;</span><span class="p">,</span>
+                                                       <span class="kc">False</span><span class="p">),</span>
+                         <span class="n">training</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
+                         <span class="n">sparse_reward_weight</span><span class="o">=</span>
+                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                         <span class="n">dense_reward_weights</span><span class="o">=</span>
+                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">,</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">750</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">100</span><span class="p">])))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_robot_observation_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;time_left_for_task&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;joint_velocities&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;end_effector_positions&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;tool_block_mass&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tool_block_mass&quot;</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;tool_block_position&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tool_block_position&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.0325</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;tool_block_orientation&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tool_block_orientation&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;goal_block_position&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;goal_block_position&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.0325</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;goal_block_orientation&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;goal_block_orientation&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_position</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_orientation</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="PushingTaskGenerator.get_description"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PushingTaskGenerator.get_description">[docs]</a>    <span class="k">def</span> <span class="nf">get_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> \
+            <span class="s2">&quot;Task where the goal is to push &quot;</span> \
+            <span class="s2">&quot;an object towards a goal position&quot;</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_up_stage_arena</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;tool_block&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="s2">&quot;cube&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;initial_position&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span>
+                         <span class="p">[</span><span class="s2">&quot;tool_block_position&quot;</span><span class="p">],</span>
+                         <span class="s1">&#39;initial_orientation&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span>
+                         <span class="p">[</span><span class="s2">&quot;goal_block_position&quot;</span><span class="p">],</span>
+                         <span class="s1">&#39;mass&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;tool_block_mass&quot;</span><span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_rigid_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+        <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;goal_block&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="s2">&quot;cube&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span>
+                         <span class="p">[</span><span class="s2">&quot;goal_block_position&quot;</span><span class="p">],</span>
+                         <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                         <span class="s1">&#39;orientation&#39;</span><span class="p">:</span>  <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span>
+                         <span class="p">[</span><span class="s2">&quot;goal_block_orientation&quot;</span><span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tool_block_type&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;tool_block_size&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;tool_block_cartesian_position&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;tool_block_orientation&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;tool_block_linear_velocity&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;tool_block_angular_velocity&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;goal_block_type&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;goal_block_size&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;goal_block_cartesian_position&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;goal_block_orientation&quot;</span><span class="p">]</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_set_training_intervention_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PushingTaskGenerator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_set_training_intervention_spaces</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rigid_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">():</span>
+            <span class="c1">#TODO: make it a function of size</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+        <span class="k">for</span> <span class="n">visual_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="n">visual_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="n">visual_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_set_testing_intervention_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">PushingTaskGenerator</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_set_testing_intervention_spaces</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rigid_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+        <span class="k">for</span> <span class="n">visual_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="n">visual_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="n">visual_object</span><span class="p">][</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> \
+                <span class="o">=</span> <span class="mf">0.0325</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_calculate_dense_rewards</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_goal</span><span class="p">,</span> <span class="n">achieved_goal</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param desired_goal:</span>
+<span class="sd">        :param achieved_goal:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># rewards order</span>
+        <span class="c1"># 1) delta how much the fingers are close to block</span>
+        <span class="c1"># 2) delta how much are you getting the block close to the goal</span>
+        <span class="c1"># 2) delta how much the object orientation is close to goal orientation</span>
+        <span class="c1"># 1) delta how much are you getting the block close to the goal</span>
+        <span class="c1"># 2) absolute how much the block is close to the goal</span>
+        <span class="c1"># 3) delta how much are you getting the block close to the center</span>
+        <span class="c1"># 4) absolute how much is the the block is close to the center</span>
+        <span class="c1"># 6) absolute how much fingers are close to block</span>
+        <span class="c1"># 7) mean dist_of closest two fingers outside_bounding_ellipsoid</span>
+        <span class="c1"># 8) delta in joint velocities</span>
+        <span class="n">rewards</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="n">block_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="s1">&#39;tool_block&#39;</span><span class="p">,</span>
+                                                     <span class="s1">&#39;cartesian_position&#39;</span><span class="p">)</span>
+        <span class="n">block_orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="s1">&#39;tool_block&#39;</span><span class="p">,</span>
+                                                        <span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
+        <span class="n">goal_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="s1">&#39;goal_block&#39;</span><span class="p">,</span>
+                                                    <span class="s1">&#39;cartesian_position&#39;</span><span class="p">)</span>
+        <span class="n">goal_orientation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="s1">&#39;goal_block&#39;</span><span class="p">,</span>
+                                                       <span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
+        <span class="n">end_effector_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">compute_end_effector_positions</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_latest_full_state</span><span class="p">()[</span><span class="s1">&#39;positions&#39;</span><span class="p">])</span>
+        <span class="n">end_effector_positions</span> <span class="o">=</span> <span class="n">end_effector_positions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+        <span class="c1"># calculate first reward term</span>
+        <span class="n">current_distance_from_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">end_effector_positions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span>
+                                                     <span class="n">block_position</span><span class="p">)</span>
+        <span class="n">previous_distance_from_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_position</span><span class="p">)</span>
+        <span class="n">rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">previous_distance_from_block</span> <span class="o">-</span> <span class="n">current_distance_from_block</span><span class="p">)</span>
+
+        <span class="c1"># calculate second reward term</span>
+        <span class="n">previous_dist_to_goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">goal_position</span> <span class="o">-</span>
+                                               <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_position</span><span class="p">)</span>
+        <span class="n">current_dist_to_goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">goal_position</span> <span class="o">-</span> <span class="n">block_position</span><span class="p">)</span>
+        <span class="n">rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">previous_dist_to_goal</span> <span class="o">-</span> <span class="n">current_dist_to_goal</span><span class="p">)</span>
+
+        <span class="c1"># calculate third reward term</span>
+        <span class="n">quat_diff_old</span> <span class="o">=</span> <span class="n">quaternion_mul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">goal_orientation</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                                       <span class="n">quaternion_conjugate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
+                                           <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_orientation</span><span class="p">,</span>
+                                           <span class="mi">0</span><span class="p">)))</span>
+        <span class="n">angle_diff_old</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">quat_diff_old</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
+
+        <span class="n">quat_diff</span> <span class="o">=</span> <span class="n">quaternion_mul</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">goal_orientation</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                                   <span class="n">quaternion_conjugate</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span>
+                                       <span class="n">block_orientation</span><span class="p">,</span>
+                                       <span class="mi">0</span><span class="p">)))</span>
+        <span class="n">current_angle_diff</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">arccos</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="n">quat_diff</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">],</span> <span class="o">-</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">))</span>
+
+        <span class="n">rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">angle_diff_old</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span>
+                       <span class="n">current_angle_diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">update_task_info</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;current_end_effector_positions&#39;</span><span class="p">:</span> <span class="n">end_effector_positions</span><span class="p">,</span>
+                            <span class="s1">&#39;current_tool_block_position&#39;</span><span class="p">:</span> <span class="n">block_position</span><span class="p">,</span>
+                            <span class="s1">&#39;current_tool_block_orientation&#39;</span><span class="p">:</span> <span class="n">block_orientation</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">rewards</span><span class="p">,</span> <span class="n">update_task_info</span>
+
+    <span class="k">def</span> <span class="nf">_update_task_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_task_info</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param update_task_info:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">=</span> \
+            <span class="n">update_task_info</span><span class="p">[</span><span class="s1">&#39;current_end_effector_positions&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_position</span> <span class="o">=</span> \
+            <span class="n">update_task_info</span><span class="p">[</span><span class="s1">&#39;current_tool_block_position&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_orientation</span> <span class="o">=</span> \
+            <span class="n">update_task_info</span><span class="p">[</span><span class="s1">&#39;current_tool_block_orientation&#39;</span><span class="p">]</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_set_task_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">compute_end_effector_positions</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_latest_full_state</span><span class="p">()[</span><span class="s1">&#39;positions&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_position</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="s1">&#39;tool_block&#39;</span><span class="p">,</span> <span class="s1">&#39;cartesian_position&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_orientation</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="s1">&#39;tool_block&#39;</span><span class="p">,</span> <span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_handle_contradictory_interventions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param interventions_dict:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#for example size on goal_or tool should be propagated to the other</span>
+        <span class="c1">#TODO:if a goal block intervention would lead to change of sides then</span>
+        <span class="c1">#change the other side as well?</span>
+        <span class="k">if</span> <span class="s1">&#39;goal_block&#39;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;size&#39;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;goal_block&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;tool_block&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+                    <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;tool_block&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;tool_block&#39;</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;goal_block&#39;</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="s1">&#39;tool_block&#39;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;size&#39;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;tool_block&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="s1">&#39;goal_block&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+                    <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;goal_block&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;goal_block&#39;</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                    <span class="n">interventions_dict</span><span class="p">[</span><span class="s1">&#39;tool_block&#39;</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">interventions_dict</span></div>
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

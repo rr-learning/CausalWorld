@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<html class="writer-html5" lang="python" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,18 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="#" />
     <link rel="search" title="Search" href="search.html" /> 
 </head>
@@ -48,7 +49,7 @@
           
 
           
-            <a href="index.html" class="icon icon-home"> causal_rl_bench
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
           
 
           
@@ -71,6 +72,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -82,7 +84,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="guide/install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="guide/tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/task_setups.html">Task distributions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="guide/evaluating_policy.html">Evaluation Protocols</a></li>
 </ul>
@@ -94,6 +95,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -132,7 +134,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Index</li>
     
@@ -155,8 +157,375 @@
 <h1 id="index">Index</h1>
 
 <div class="genindex-jumpbox">
+ <a href="#A"><strong>A</strong></a>
+ | <a href="#B"><strong>B</strong></a>
+ | <a href="#C"><strong>C</strong></a>
+ | <a href="#D"><strong>D</strong></a>
+ | <a href="#F"><strong>F</strong></a>
+ | <a href="#G"><strong>G</strong></a>
+ | <a href="#I"><strong>I</strong></a>
+ | <a href="#J"><strong>J</strong></a>
+ | <a href="#M"><strong>M</strong></a>
+ | <a href="#P"><strong>P</strong></a>
+ | <a href="#R"><strong>R</strong></a>
+ | <a href="#S"><strong>S</strong></a>
+ | <a href="#T"><strong>T</strong></a>
+ | <a href="#V"><strong>V</strong></a>
  
 </div>
+<h2 id="A">A</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/agents/agents.html#causal_rl_bench.agents.BaseActorPolicy.act">act() (causal_rl_bench.agents.BaseActorPolicy method)</a>
+
+      <ul>
+        <li><a href="modules/agents/agents.html#causal_rl_bench.agents.DummyActorPolicy.act">(causal_rl_bench.agents.DummyActorPolicy method)</a>
+</li>
+        <li><a href="modules/agents/agents.html#causal_rl_bench.agents.ReacherActorPolicy.act">(causal_rl_bench.agents.ReacherActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.act">(causal_rl_bench.intervention_agents.BaseInterventionActorPolicy method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/agents/agents.html#causal_rl_bench.agents.DummyActorPolicy.add_action">add_action() (causal_rl_bench.agents.DummyActorPolicy method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.apply_interventions">apply_interventions() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.apply_task_generator_interventions">apply_task_generator_interventions() (causal_rl_bench.task_generators.BaseTask method)</a>
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.apply_task_generator_interventions">(causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.GeneralGeneratorTask.apply_task_generator_interventions">(causal_rl_bench.task_generators.GeneralGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator.apply_task_generator_interventions">(causal_rl_bench.task_generators.ReachingTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.TowersGeneratorTask.apply_task_generator_interventions">(causal_rl_bench.task_generators.TowersGeneratorTask method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="B">B</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/agents/agents.html#causal_rl_bench.agents.BaseActorPolicy">BaseActorPolicy (class in causal_rl_bench.agents)</a>
+</li>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy">BaseInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/metrics/metrics.html#causal_rl_bench.metrics.BaseMetric">BaseMetric (class in causal_rl_bench.metrics)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask">BaseTask (class in causal_rl_bench.task_generators)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="C">C</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    causal_rl_bench.agents
+
+      <ul>
+        <li><a href="modules/agents/agents.html#module-causal_rl_bench.agents">module</a>
+</li>
+      </ul></li>
+      <li>
+    causal_rl_bench.intervention_agents
+
+      <ul>
+        <li><a href="modules/intervention_agents/intervention_agents.html#module-causal_rl_bench.intervention_agents">module</a>
+</li>
+      </ul></li>
+      <li>
+    causal_rl_bench.metrics
+
+      <ul>
+        <li><a href="modules/metrics/metrics.html#module-causal_rl_bench.metrics">module</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    causal_rl_bench.task_generators
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#module-causal_rl_bench.task_generators">module</a>
+</li>
+      </ul></li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.compute_reward">compute_reward() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask">CreativeStackedBlocksGeneratorTask (class in causal_rl_bench.task_generators)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="D">D</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.divide_intervention_dict">divide_intervention_dict() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.do_intervention">do_intervention() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.do_single_random_intervention">do_single_random_intervention() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/agents/agents.html#causal_rl_bench.agents.DummyActorPolicy">DummyActorPolicy (class in causal_rl_bench.agents)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="F">F</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.filter_structured_observations">filter_structured_observations() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="G">G</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.GeneralGeneratorTask">GeneralGeneratorTask (class in causal_rl_bench.task_generators)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.GeneralGeneratorTask.generate_goal_configuration_with_objects">generate_goal_configuration_with_objects() (causal_rl_bench.task_generators.GeneralGeneratorTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_achieved_goal">get_achieved_goal() (causal_rl_bench.task_generators.BaseTask method)</a>
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator.get_achieved_goal">(causal_rl_bench.task_generators.ReachingTaskGenerator method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_current_scm_values">get_current_scm_values() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_current_task_parameters">get_current_task_parameters() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_description">get_description() (causal_rl_bench.task_generators.BaseTask method)</a>
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.get_description">(causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.GeneralGeneratorTask.get_description">(causal_rl_bench.task_generators.GeneralGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PickAndPlaceTaskGenerator.get_description">(causal_rl_bench.task_generators.PickAndPlaceTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PickingTaskGenerator.get_description">(causal_rl_bench.task_generators.PickingTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PushingTaskGenerator.get_description">(causal_rl_bench.task_generators.PushingTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator.get_description">(causal_rl_bench.task_generators.ReachingTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.TowersGeneratorTask.get_description">(causal_rl_bench.task_generators.TowersGeneratorTask method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_desired_goal">get_desired_goal() (causal_rl_bench.task_generators.BaseTask method)</a>
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator.get_desired_goal">(causal_rl_bench.task_generators.ReachingTaskGenerator method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/agents/agents.html#causal_rl_bench.agents.BaseActorPolicy.get_identifier">get_identifier() (causal_rl_bench.agents.BaseActorPolicy method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_info">get_info() (causal_rl_bench.task_generators.BaseTask method)</a>
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator.get_info">(causal_rl_bench.task_generators.ReachingTaskGenerator method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/metrics/metrics.html#causal_rl_bench.metrics.BaseMetric.get_metric_score">get_metric_score() (causal_rl_bench.metrics.BaseMetric method)</a>
+</li>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.get_params">get_params() (causal_rl_bench.intervention_agents.BaseInterventionActorPolicy method)</a>
+
+      <ul>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.GoalInterventionActorPolicy.get_params">(causal_rl_bench.intervention_agents.GoalInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.JointsInterventionActorPolicy.get_params">(causal_rl_bench.intervention_agents.JointsInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy.get_params">(causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.RandomInterventionActorPolicy.get_params">(causal_rl_bench.intervention_agents.RandomInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy.get_params">(causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy.get_params">(causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.VisualInterventionActorPolicy.get_params">(causal_rl_bench.intervention_agents.VisualInterventionActorPolicy method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_reward">get_reward() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_task_generator_variables_values">get_task_generator_variables_values() (causal_rl_bench.task_generators.BaseTask method)</a>
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.get_task_generator_variables_values">(causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.GeneralGeneratorTask.get_task_generator_variables_values">(causal_rl_bench.task_generators.GeneralGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator.get_task_generator_variables_values">(causal_rl_bench.task_generators.ReachingTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.TowersGeneratorTask.get_task_generator_variables_values">(causal_rl_bench.task_generators.TowersGeneratorTask method)</a>
+</li>
+      </ul></li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_task_params">get_task_params() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_testing_intervention_spaces">get_testing_intervention_spaces() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_training_intervention_spaces">get_training_intervention_spaces() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.GoalInterventionActorPolicy">GoalInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="I">I</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.init_task">init_task() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.initialize">initialize() (causal_rl_bench.intervention_agents.BaseInterventionActorPolicy method)</a>
+
+      <ul>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.GoalInterventionActorPolicy.initialize">(causal_rl_bench.intervention_agents.GoalInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.JointsInterventionActorPolicy.initialize">(causal_rl_bench.intervention_agents.JointsInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy.initialize">(causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.RandomInterventionActorPolicy.initialize">(causal_rl_bench.intervention_agents.RandomInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy.initialize">(causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy.initialize">(causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy method)</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.VisualInterventionActorPolicy.initialize">(causal_rl_bench.intervention_agents.VisualInterventionActorPolicy method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.is_done">is_done() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.is_in_training_mode">is_in_training_mode() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.is_intervention_in_bounds">is_intervention_in_bounds() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="J">J</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.JointsInterventionActorPolicy">JointsInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="M">M</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li>
+    module
+
+      <ul>
+        <li><a href="modules/agents/agents.html#module-causal_rl_bench.agents">causal_rl_bench.agents</a>
+</li>
+        <li><a href="modules/intervention_agents/intervention_agents.html#module-causal_rl_bench.intervention_agents">causal_rl_bench.intervention_agents</a>
+</li>
+        <li><a href="modules/metrics/metrics.html#module-causal_rl_bench.metrics">causal_rl_bench.metrics</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#module-causal_rl_bench.task_generators">causal_rl_bench.task_generators</a>
+</li>
+      </ul></li>
+  </ul></td>
+</tr></table>
+
+<h2 id="P">P</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy">PhysicalPropertiesInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PickAndPlaceTaskGenerator">PickAndPlaceTaskGenerator (class in causal_rl_bench.task_generators)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PickingTaskGenerator">PickingTaskGenerator (class in causal_rl_bench.task_generators)</a>
+</li>
+      <li><a href="modules/metrics/metrics.html#causal_rl_bench.metrics.BaseMetric.process_episode">process_episode() (causal_rl_bench.metrics.BaseMetric method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PushingTaskGenerator">PushingTaskGenerator (class in causal_rl_bench.task_generators)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="R">R</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.RandomInterventionActorPolicy">RandomInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+      <li><a href="modules/agents/agents.html#causal_rl_bench.agents.ReacherActorPolicy">ReacherActorPolicy (class in causal_rl_bench.agents)</a>
+</li>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy">ReacherInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator">ReachingTaskGenerator (class in causal_rl_bench.task_generators)</a>
+</li>
+      <li><a href="modules/metrics/metrics.html#causal_rl_bench.metrics.BaseMetric.reset">reset() (causal_rl_bench.metrics.BaseMetric method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.reset_task">reset_task() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy">RigidPoseInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="S">S</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.sample_new_goal">sample_new_goal() (causal_rl_bench.task_generators.BaseTask method)</a>
+
+      <ul>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.sample_new_goal">(causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.GeneralGeneratorTask.sample_new_goal">(causal_rl_bench.task_generators.GeneralGeneratorTask method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PickAndPlaceTaskGenerator.sample_new_goal">(causal_rl_bench.task_generators.PickAndPlaceTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.PickingTaskGenerator.sample_new_goal">(causal_rl_bench.task_generators.PickingTaskGenerator method)</a>
+</li>
+        <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.TowersGeneratorTask.sample_new_goal">(causal_rl_bench.task_generators.TowersGeneratorTask method)</a>
+</li>
+      </ul></li>
+  </ul></td>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.set_sparse_reward">set_sparse_reward() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.set_super_sparse_reward">set_super_sparse_reward() (causal_rl_bench.task_generators.BaseTask method)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="T">T</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/task_generators/task_generators.html#causal_rl_bench.task_generators.TowersGeneratorTask">TowersGeneratorTask (class in causal_rl_bench.task_generators)</a>
+</li>
+  </ul></td>
+</tr></table>
+
+<h2 id="V">V</h2>
+<table style="width: 100%" class="indextable genindextable"><tr>
+  <td style="width: 33%; vertical-align: top;"><ul>
+      <li><a href="modules/intervention_agents/intervention_agents.html#causal_rl_bench.intervention_agents.VisualInterventionActorPolicy">VisualInterventionActorPolicy (class in causal_rl_bench.intervention_agents)</a>
+</li>
+  </ul></td>
+</tr></table>
+
 
 
            </div>
@@ -169,11 +538,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -184,7 +561,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

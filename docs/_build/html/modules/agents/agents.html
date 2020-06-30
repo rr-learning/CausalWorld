@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<html class="writer-html5" lang="python" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,18 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Intervention Agents" href="../intervention_agents/intervention_agents.html" />
@@ -50,7 +51,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> causal_rl_bench
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
           
 
           
@@ -73,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -84,7 +86,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../guide/tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/task_setups.html">Task distributions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/evaluating_policy.html">Evaluation Protocols</a></li>
 </ul>
@@ -108,6 +109,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -146,7 +148,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../causal_rl_bench.html">CausalRLBench</a> &raquo;</li>
         
@@ -169,16 +171,96 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="agents">
-<h1>Agents<a class="headerlink" href="#agents" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-causal_rl_bench.agents">
+<span id="agents"></span><h1>Agents<a class="headerlink" href="#module-causal_rl_bench.agents" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="reacheractorpolicy">
 <h2>ReacherActorPolicy<a class="headerlink" href="#reacheractorpolicy" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="causal_rl_bench.agents.ReacherActorPolicy">
+<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.agents.</code><code class="sig-name descname">ReacherActorPolicy</code><a class="reference internal" href="../../_modules/causal_rl_bench/agents/reacher_policy.html#ReacherActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.ReacherActorPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="causal_rl_bench.agents.ReacherActorPolicy.act">
+<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/agents/reacher_policy.html#ReacherActorPolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.ReacherActorPolicy.act" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obs</strong> -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="dummyactorpolicy">
 <h2>DummyActorPolicy<a class="headerlink" href="#dummyactorpolicy" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="causal_rl_bench.agents.DummyActorPolicy">
+<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.agents.</code><code class="sig-name descname">DummyActorPolicy</code><a class="reference internal" href="../../_modules/causal_rl_bench/agents/dummy_policy.html#DummyActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.DummyActorPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="causal_rl_bench.agents.DummyActorPolicy.act">
+<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/agents/dummy_policy.html#DummyActorPolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.DummyActorPolicy.act" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obs</strong> -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="causal_rl_bench.agents.DummyActorPolicy.add_action">
+<code class="sig-name descname">add_action</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">action</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/agents/dummy_policy.html#DummyActorPolicy.add_action"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.DummyActorPolicy.add_action" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>action</strong> -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="baseactorpolicy">
 <h2>BaseActorPolicy<a class="headerlink" href="#baseactorpolicy" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="causal_rl_bench.agents.BaseActorPolicy">
+<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.agents.</code><code class="sig-name descname">BaseActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">identifier</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/agents/base_policy.html#BaseActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.BaseActorPolicy" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a policy wrapper template class whose methods needs to
+be implemented to record and view a trained policy using the
+TaskViewer class</p>
+<dl class="py method">
+<dt id="causal_rl_bench.agents.BaseActorPolicy.act">
+<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/agents/base_policy.html#BaseActorPolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.BaseActorPolicy.act" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obs</strong> -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="causal_rl_bench.agents.BaseActorPolicy.get_identifier">
+<code class="sig-name descname">get_identifier</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/agents/base_policy.html#BaseActorPolicy.get_identifier"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.agents.BaseActorPolicy.get_identifier" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 </div>
 
@@ -202,11 +284,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -217,7 +307,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
