@@ -118,7 +118,8 @@ class CausalWorld(gym.Env):
             self._task = task_generator("reaching")
         else:
             self._task = task
-        self._task.init_task(self._robot, self._stage, max_episode_length)
+        self._task.init_task(self._robot, self._stage, max_episode_length,
+                             self._create_world)
         if max_episode_length is None:
             max_episode_length = int(task.get_default_max_episode_length() /
                                      self.dt)
@@ -261,14 +262,15 @@ class CausalWorld(gym.Env):
         # if self._tracker.total_resets + \
         #         self._tracker._curr_task_stat.num_resets % 2 == 0:
         #     print(self._tracker.total_resets)
-        #     self._create_world()
-        #     self._stage._name_keys = []
-        #     self._stage._rigid_objects = {}
-        #     self._stage._visual_objects = {}
-        #     self._robot._disable_velocity_control()
-        #     self._task.init_task(self._robot, self._stage,
-        #                          self._max_episode_length)
-        #     self._reset_observations_space()
+        # self._create_world()
+        # self._stage._name_keys = []
+        # self._stage._rigid_objects = {}
+        # self._stage._visual_objects = {}
+        # self._robot._disable_velocity_control()
+        # self._task.init_task(self._robot, self._stage,
+        #                      self._max_episode_length)
+        # self._reset_observations_space()
+        #TODO: end of hack
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
         if interventions_dict is not None:

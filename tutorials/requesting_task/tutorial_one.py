@@ -4,7 +4,7 @@ import numpy as np
 
 
 def example():
-    task = task_generator(task_generator_id='general')
+    task = task_generator(task_generator_id='creative_stacked_blocks')
     env = CausalWorld(task=task, enable_visualization=True)
     for _ in range(10):
         env.reset()
