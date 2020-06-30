@@ -55,6 +55,7 @@ class BaseTask(object):
         self._current_achieved_goal = None
         self._current_goal_distance = None
         self._max_episode_length = None
+        self._create_world_func = None
         return
 
     def _save_pybullet_state(self):
@@ -85,8 +86,25 @@ class BaseTask(object):
                              physicsClientId=self._stage._pybullet_client_w_o_goal_id)
         return
 
-    def _save_state(self):
+    def _remove_pybullet_state(self, pybullet_state):
+        if self._stage._pybullet_client_full_id is not None:
+                pybullet. \
+                    removeState(pybullet_state['full'],
+                                 physicsClientId=self._stage._pybullet_client_full_id)
+        if self._stage._pybullet_client_w_goal_id is not None:
+                pybullet. \
+                    removeState(pybullet_state['w_goal'],
+                                 physicsClientId=self._stage._pybullet_client_w_goal_id)
+        if self._stage._pybullet_client_w_o_goal_id is not None:
+            pybullet. \
+                removeState(pybullet_state['w_o_goal'],
+                             physicsClientId=self._stage._pybullet_client_w_o_goal_id)
+        return
+
+    def save_state(self):
         state = dict()
+        # state['pybullet_states'] = \
+        #     self._save_pybullet_state()
         state['stage_object_state'] = \
             self._stage.get_full_env_state()
         state['robot_object_state'] = \
@@ -95,16 +113,18 @@ class BaseTask(object):
             copy.deepcopy(self._task_stage_observation_keys)
         return state
 
-    def _restore_state(self, state_dict):
+    def restore_state(self, state_dict):
         #remove everything in the arena
         #old number of rigid objects and number of visual objects
         old_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         old_number_of_visual_objects = len(self._stage.get_visual_objects())
         reset_observation_space = False
+        #only empty the stage
         self._stage.remove_everything()
-        self._restore_pybullet_state(self._empty_stage)
+        self._create_world_func()
+        self._robot._disable_velocity_control()
         self._robot.set_full_env_state(state_dict
-                                      ['robot_object_state'])
+                                       ['robot_object_state'])
         self._stage.set_full_env_state(
             state_dict['stage_object_state'])
         new_number_of_rigid_objects = len(self._stage.get_rigid_objects())
@@ -114,7 +134,13 @@ class BaseTask(object):
         if old_number_of_visual_objects != new_number_of_visual_objects:
             reset_observation_space = True
         self._task_stage_observation_keys = state_dict['task_observations']
+        # self._restore_pybullet_state(state_dict['pybullet_states'])
         return reset_observation_space
+
+    # def remove_state(self, state_dict):
+    #     self._remove_pybullet_state(state_dict['pybullet_states'])
+    #     del state_dict
+    #     return
 
     def is_in_training_mode(self):
         """
@@ -505,13 +531,14 @@ class BaseTask(object):
         reward = goal_distance * self._task_params["sparse_reward_weight"]
         return reward
 
-    def init_task(self, robot, stage, max_episode_length):
+    def init_task(self, robot, stage, max_episode_length, create_world_func):
         """
 
         :param robot:
         :param stage:
         :return:
         """
+        self._create_world_func = create_world_func
         self._robot = robot
         self._stage = stage
         if self._task_params["joint_positions"] is not None:
@@ -526,9 +553,9 @@ class BaseTask(object):
         self._empty_stage = self._save_pybullet_state()
         self._set_up_stage_arena()
         self._default_starting_state = \
-            self._save_state()
+            self.save_state()
         self._current_starting_state = \
-            self._save_state()
+            self.save_state()
         self._stage.finalize_stage()
         if max_episode_length is None:
             self._max_episode_length = self.get_default_max_episode_length()
@@ -586,12 +613,14 @@ class BaseTask(object):
 
     def reset_task(self, interventions_dict=None):
         """
-
+        TODO: NOTE: With the current implementation, no contact points are saved
+        when resetting task
         :param interventions_dict:
         :return:
         """
         self._robot.clear()
-        reset_observation_space_signal = self._restore_state(self._current_starting_state)
+        reset_observation_space_signal = \
+            self.restore_state(self._current_starting_state)
         self._task_solved = False
         success_signal = None
         interventions_info = None
@@ -601,7 +630,7 @@ class BaseTask(object):
                                          check_bounds=
                                          self._task_params['intervention_split'])
             if success_signal:
-                self._current_starting_state = self._save_state()
+                self._current_starting_state = self.save_state()
         self._set_task_state()
         return success_signal, interventions_info, reset_observation_space_signal
 
@@ -873,7 +902,7 @@ class BaseTask(object):
         #     current_robot_state = self.robot.get_full_state()
         # else:
         #     current_robot_state = self.robot.get_default_state()
-        current_state = self._save_state()
+        current_state = self.save_state()
         self._robot.apply_interventions(robot_interventions_dict)
         self._stage.apply_interventions(stage_interventions_dict)
         task_generator_intervention_success_signal, reset_observation_space_signal = \
@@ -891,9 +920,10 @@ class BaseTask(object):
             if not self._robot.check_feasibility_of_robot_state():
                 robot_infeasible = True
             if stage_infeasible or robot_infeasible:
-                self._restore_state(current_state)
+                self.restore_state(current_state)
             else:
                 self._restore_pybullet_state(pre_contact_check_state)
+            self._remove_pybullet_state(pre_contact_check_state)
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \

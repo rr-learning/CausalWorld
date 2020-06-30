@@ -161,8 +161,8 @@ class PickingTaskGenerator(BaseTask):
         rewards.append(previous_block_to_center - current_block_to_center)
         rewards.append(- current_block_to_center)
 
-        end_effector_positions = self._robot.compute_end_effector_positions(
-            self._robot.get_latest_full_state()['positions'])
+        end_effector_positions = \
+            self._robot.get_latest_full_state()['end_effector_positions']
         end_effector_positions = end_effector_positions.reshape(-1, 3)
         current_distance_from_block = np.linalg.norm(end_effector_positions -
                                                      block_position)
@@ -211,8 +211,7 @@ class PickingTaskGenerator(BaseTask):
         :return:
         """
         self.previous_end_effector_positions = \
-            self._robot.compute_end_effector_positions(
-                self._robot.get_latest_full_state()['positions'])
+            self._robot.get_latest_full_state()['end_effector_positions']
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \

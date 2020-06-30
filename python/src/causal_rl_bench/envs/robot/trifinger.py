@@ -15,7 +15,6 @@ class TriFingerRobot(object):
                  pybullet_client_w_goal_id,
                  pybullet_client_w_o_goal_id,
                  revolute_joint_ids,
-                 pinocchio_utils,
                  finger_tip_ids,
                  cameras=None):
         """
@@ -34,7 +33,6 @@ class TriFingerRobot(object):
         self._pybullet_client_w_goal_id = pybullet_client_w_goal_id
         self._pybullet_client_w_o_goal_id = pybullet_client_w_o_goal_id
         self._revolute_joint_ids = revolute_joint_ids
-        self._pinocchio_utils = pinocchio_utils
         self._finger_tip_ids = finger_tip_ids
         self._normalize_actions = normalize_actions
         self._normalize_observations = normalize_observations
@@ -116,7 +114,9 @@ class TriFingerRobot(object):
         )
         self._latest_full_state = {'positions': current_position,
                                    'velocities': current_velocity,
-                                   'torques': current_torques}
+                                   'torques': current_torques,
+                                   'end_effector_positions': self._compute_end_effector_positions()}
+
         return
 
     def update_images(self):
@@ -394,6 +394,7 @@ class TriFingerRobot(object):
         variable_params = dict()
         self.update_latest_full_state()
         variable_params['joint_positions'] = self._latest_full_state['positions']
+        variable_params['control_index'] = self._control_index
         variable_params['joint_velocities'] = self._latest_full_state['velocities']
         if self._pybullet_client_w_o_goal_id is not None:
             client = self._pybullet_client_w_o_goal_id
@@ -415,17 +416,30 @@ class TriFingerRobot(object):
         return self._robot_observations.get_current_observations(
             self._latest_full_state, helper_keys)
 
-    def compute_end_effector_positions(self, joint_positions):
-        tip_positions = self._pinocchio_utils.forward_kinematics(
-            joint_positions
+    def _compute_end_effector_positions(self):
+        result = np.array([])
+        position_1 = pybullet.getLinkState(
+            WorldConstants.ROBOT_ID, linkIndex=5,
+            computeForwardKinematics=True,
+            physicsClientId=self._pybullet_client_full_id
         )
-        return tip_positions
-
-    def _compute_end_effector_positions(self, robot_state):
-        tip_positions = self._pinocchio_utils.forward_kinematics(
-            robot_state['positions']
+        position_2 = pybullet.getLinkState(
+            WorldConstants.ROBOT_ID, linkIndex=10,
+            computeForwardKinematics=True,
+            physicsClientId=self._pybullet_client_full_id
         )
-        return tip_positions
+        position_3 = pybullet.getLinkState(
+            WorldConstants.ROBOT_ID, linkIndex=15,
+            computeForwardKinematics=True,
+            physicsClientId=self._pybullet_client_full_id
+        )
+        result = np.append(result, position_1[0])
+        result = np.append(result, position_2[0])
+        result = np.append(result, position_3[0])
+        result[2] -= WorldConstants.FLOOR_HEIGHT
+        result[5] -= WorldConstants.FLOOR_HEIGHT
+        result[-1] -= WorldConstants.FLOOR_HEIGHT
+        return result
 
     def _process_action_joint_positions(self, robot_state):
         #This returns the absolute joint positions command sent in position control mode
@@ -475,41 +489,6 @@ class TriFingerRobot(object):
                                           joint_positions_lower_bounds,
                                           self._robot_actions.
                                           joint_positions_upper_bounds)
-        elif sampling_strategy == "separated":
-            #TODO: double check this function
-            def sample_point_in_angle_limits():
-                while True:
-                    joint_pos = np.random.uniform(
-                        low=[-np.pi / 2, np.deg2rad(-77.5), np.deg2rad(-172)],
-                        high=[np.pi / 2, np.deg2rad(257.5), np.deg2rad(-2)],
-                    )
-                    tip_pos = self.compute_end_effector_positions(
-                        np.concatenate(
-                            [joint_pos for i in
-                             range(3)]
-                        ),
-                    )[0]
-                    dist_to_center = np.linalg.norm(tip_pos[:2])
-                    angle = np.arccos(tip_pos[0] / dist_to_center)
-                    if (
-                            (np.pi / 6 < angle < 5 / 6 * np.pi)
-                            and (tip_pos[1] > 0)
-                            and (0.02 < dist_to_center < 0.2)
-                            and np.all(self._robot_actions.
-                                               joint_positions_lower_bounds
-                                       [0:3] < joint_pos)
-                            and np.all(self._robot_actions.
-                                               joint_positions_upper_bounds
-                                       [0:3] > joint_pos)
-                    ):
-                        return joint_pos
-
-            positions = np.concatenate(
-                [
-                    sample_point_in_angle_limits()
-                    for i in range(3)
-                ]
-            )
         else:
             raise Exception("not yet implemented")
         return positions
@@ -521,10 +500,6 @@ class TriFingerRobot(object):
                 [0.15, 0.15, 0.15, 0.15, -0.1, 0.15, -0.1, -0.1, 0.15])
             # TODO:add heuristics if the points are in the reachabe sets or not.
             #red is 300, green is 60, blue is 180
-        elif sampling_strategy == "from_joints":
-            joints_goal = self.sample_joint_positions()
-            tip_positions = self.\
-                compute_end_effector_positions(joints_goal)
         else:
             raise Exception("not yet implemented")
             #perform inverse kinemetics
@@ -548,11 +523,7 @@ class TriFingerRobot(object):
     def select_observations(self, observation_keys):
         self._robot_observations.reset_observation_keys()
         for key in observation_keys:
-            if key == "end_effector_positions":
-                self._robot_observations.add_observation(
-                    "end_effector_positions",
-                    observation_fn=self._compute_end_effector_positions)
-            elif key == "action_joint_positions":
+            if key == "action_joint_positions":
                 self._robot_observations.add_observation(
                     "action_joint_positions",
                     observation_fn=self._process_action_joint_positions)
@@ -591,10 +562,7 @@ class TriFingerRobot(object):
 
     def apply_interventions(self, interventions_dict):
         #TODO: add friction of each link
-        if self.is_initialized():
-            old_state = self.get_full_state()
-        else:
-            old_state = self.get_default_state()
+        old_state = self.get_full_state()
         if "joint_positions" in interventions_dict:
             new_joint_positions = interventions_dict["joint_positions"]
         else:
@@ -662,7 +630,8 @@ class TriFingerRobot(object):
                         raise Exception(
                             "The intervention state variable specified is "
                             "not allowed")
-
+            elif intervention == "control_index":
+                self._control_index = interventions_dict["control_index"]
             else:
                 raise Exception("The intervention state variable specified is "
                                 "not allowed")
@@ -692,12 +661,6 @@ class TriFingerRobot(object):
                     contact[8] < -0.005:
                 return False
         return True
-
-    def is_initialized(self):
-        if self._latest_full_state is None:
-            return False
-        else:
-            return True
 
     def is_self_colliding(self):
         if self._pybullet_client_full_id is not None:
