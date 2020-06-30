@@ -572,13 +572,13 @@ class CausalWorld(gym.Env):
                 physicsClientId=self._pybullet_client_w_goal_id)
             pybullet.setPhysicsEngineParameter(
                 deterministicOverlappingPairs=1,
-                physicsClientId=self._pybullet_client_full_id)
+                physicsClientId=self._pybullet_client_w_goal_id)
         if self._pybullet_client_w_o_goal_id is not None:
             pybullet.resetSimulation(
                 physicsClientId=self._pybullet_client_w_o_goal_id)
             pybullet.setPhysicsEngineParameter(
                 deterministicOverlappingPairs=1,
-                physicsClientId=self._pybullet_client_full_id)
+                physicsClientId=self._pybullet_client_w_o_goal_id)
         return
 
     def _create_stage(self, robot_properties_path, pybullet_client):
