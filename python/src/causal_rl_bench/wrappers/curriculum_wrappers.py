@@ -22,7 +22,7 @@ class CurriculumWrapper(gym.Wrapper):
         self._elapsed_timesteps += 1
         interventions_dict = \
             self.interventions_curriculum.get_interventions(
-                current_task_params=self.env.get_current_task_parameters(),
+                current_task_params=self.env.get_current_state_variables(),
                 episode=self._elapsed_episodes,
                 time_step=self._elapsed_timesteps)
         # perform intervention
@@ -38,7 +38,7 @@ class CurriculumWrapper(gym.Wrapper):
         self._elapsed_episodes += 1
         interventions_dict = \
             self.interventions_curriculum.get_interventions(
-                current_task_params=self.env.get_current_task_parameters(),
+                current_task_params=self.env.get_current_state_variables(),
                 episode=self._elapsed_episodes,
                 time_step=0)
         return self.env.reset(interventions_dict)

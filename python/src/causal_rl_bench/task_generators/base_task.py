@@ -8,17 +8,15 @@ import pybullet
 
 
 class BaseTask(object):
-    def __init__(self, task_name, intervention_split,
-                 training, sparse_reward_weight=1,
-                 dense_reward_weights=np.array([]),
-                 is_goal_distance_dense=True,
-                 calculate_additional_dense_rewards=True):
+    def __init__(self, task_name, use_train_space_only,
+                 fractional_reward_weight=1,
+                 dense_reward_weights=np.array([])):
         """
 
         :param task_name:
-        :param intervention_split:
+        :param use_train_space_only:
         :param training:
-        :param sparse_reward_weight:
+        :param fractional_reward_weight:
         :param dense_reward_weights:
         :param is_goal_distance_dense:
         :param calculate_additional_dense_rewards:
@@ -38,16 +36,13 @@ class BaseTask(object):
         self._current_full_observations_dict = dict()
         self._task_params = dict()
         self._task_params["task_name"] = self._task_name
-        self._task_params["sparse_reward_weight"] = sparse_reward_weight
+        self._task_params["fractional_reward_weight"] = fractional_reward_weight
         self._task_params["dense_reward_weights"] = dense_reward_weights
+        self._task_params['activate_sparse_reward'] = False
         self._training_intervention_spaces = dict()
         self._testing_intervention_spaces = dict()
-        self._task_params['intervention_split'] = intervention_split
-        self._task_params['training'] = training
+        self._task_params['use_train_space_only'] = use_train_space_only
         self._task_params["joint_positions"] = None
-        self._task_params['is_goal_distance_dense'] = is_goal_distance_dense
-        self._task_params['calculate_additional_dense_rewards'] = \
-            calculate_additional_dense_rewards
         self._current_starting_state = dict()
         self._default_starting_state = dict()
         self._empty_stage = None
@@ -114,12 +109,9 @@ class BaseTask(object):
         return state
 
     def restore_state(self, state_dict):
-        #remove everything in the arena
-        #old number of rigid objects and number of visual objects
         old_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         old_number_of_visual_objects = len(self._stage.get_visual_objects())
         reset_observation_space = False
-        #only empty the stage
         self._stage.remove_everything()
         self._create_world_func()
         self._robot._disable_velocity_control()
@@ -147,18 +139,14 @@ class BaseTask(object):
 
         :return:
         """
-        if self._task_params['intervention_split'] and \
-                self._task_params['training']:
-            return True
-        else:
-            return False
+        return self._task_params['use_train_space_only']
 
-    def set_super_sparse_reward(self):
+    def activate_sparse_reward(self):
         """
 
         :return:
         """
-        self._task_params['is_goal_distance_dense'] = True
+        self._task_params['activate_sparse_reward'] = True
 
     def get_description(self):
         """
@@ -233,7 +221,8 @@ class BaseTask(object):
                     self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
                 info['possible_solution_intervention'][rigid_object]['orientation'] = \
                     self._stage.get_object_state(possible_corresponding_goal, 'orientation')
-        info['ground_truth_scm_variables_values'] = self.get_current_scm_values()
+        info['ground_truth_current_state_varibales'] = \
+            self.get_current_scm_values()
         info['fractional_success'] = self._current_goal_distance
         return info
 
@@ -282,20 +271,17 @@ class BaseTask(object):
                                      ['cylindrical_position'][:, 1]))
         return intervention_dict
 
-    # def reset_default_state(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     self.stage.remove_everything()
-    #     self._task_stage_observation_keys = []
-    #     self.robot.tri_finger.reset_world()
-    #     self._task_stage_observation_keys = []
-    #     self.initial_state = dict(self.default_state)
-    #     self._set_up_stage_arena()
-    #     self._set_testing_intervention_spaces()
-    #     self._set_training_intervention_spaces()
-    #     self.stage.finalize_stage()
+    def reset_default_state(self):
+        """
+
+        :return:
+        """
+        self.restore_state(self._default_starting_state)
+        self._task_solved = False
+        self._set_task_state()
+        self._current_starting_state = copy.deepcopy\
+            (self._default_starting_state)
+        return
 
     def _set_training_intervention_spaces(self):
         """
@@ -494,23 +480,22 @@ class BaseTask(object):
                                                           achieved_goal=self._current_achieved_goal)
         goal_distance = self._current_goal_distance
         self._update_success(self._current_goal_distance)
-        if not self._task_params['is_goal_distance_dense']:
+        if self._task_params['activate_sparse_reward']:
             if self._task_solved:
                 goal_distance = 1
             else:
-                goal_distance = -1
-        if self._task_params['calculate_additional_dense_rewards']:
+                goal_distance = 0
+            return goal_distance
+        else:
             dense_rewards, update_task_state_dict = \
                 self._calculate_dense_rewards(achieved_goal=self._current_achieved_goal,
                                               desired_goal=self._current_desired_goal)
             reward = np.sum(np.array(dense_rewards) *
                             self._task_params["dense_reward_weights"]) \
                         + goal_distance * \
-                        self._task_params["sparse_reward_weight"]
+                        self._task_params["fractional_reward_weight"]
             self._update_task_state(update_task_state_dict)
-        else:
-            reward = goal_distance * self._task_params["sparse_reward_weight"]
-        return reward
+            return reward
 
     def compute_reward(self, achieved_goal, desired_goal, info):
         """
@@ -522,14 +507,16 @@ class BaseTask(object):
         """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
-        if not self._task_params['is_goal_distance_dense']:
+        if self._task_params['activate_sparse_reward']:
             #TODO: not exactly right, but its a limitation of HER
             if self._check_preliminary_success(goal_distance):
                 goal_distance = 1
             else:
-                goal_distance = -1
-        reward = goal_distance * self._task_params["sparse_reward_weight"]
-        return reward
+                goal_distance = 0
+            return goal_distance
+        else:
+            reward = goal_distance * self._task_params["fractional_reward_weight"]
+            return reward
 
     def init_task(self, robot, stage, max_episode_length, create_world_func):
         """
@@ -628,7 +615,7 @@ class BaseTask(object):
             success_signal, interventions_info, reset_observation_space_signal = \
                 self.apply_interventions(interventions_dict,
                                          check_bounds=
-                                         self._task_params['intervention_split'])
+                                         self._task_params['use_train_space_only'])
             if success_signal:
                 self._current_starting_state = self.save_state()
         self._set_task_state()
@@ -703,23 +690,13 @@ class BaseTask(object):
         #the goal position
         return False
 
-    def set_sparse_reward(self, sparse_reward_weight):
-        """
-
-        :param sparse_reward_weight:
-        :return:
-        """
-        self._task_params["sparse_reward_weight"] = \
-            sparse_reward_weight
-        return
-
     def do_single_random_intervention(self):
         """
 
         :return:
         """
         interventions_dict = dict()
-        if self._task_params['training']:
+        if self._task_params['use_train_space_only']:
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
@@ -779,34 +756,29 @@ class BaseTask(object):
             update(self.get_task_generator_variables_values())
         return variable_params
 
-    def get_current_task_parameters(self):
+    def get_current_state_variables(self):
         """
 
         :return:
         """
-        #this is all the variables that are available and exposed
+        #this is all the variables that are availaavailableble and exposed
         current_variables_values = self.get_current_scm_values()
-        #filter them only if intervention spaces split is enforced
-        if self._task_params['intervention_split']:
-            #choose intervention space
-            if self._task_params['training']:
-                intervention_space = self._training_intervention_spaces
-            else:
-                intervention_space = self._testing_intervention_spaces
-            task_params_dict = dict()
+        if self._task_params['use_train_space_only']:
+            intervention_space = self._training_intervention_spaces
+            state_variables_dict = dict()
             for variable_name in intervention_space:
                 if isinstance(
                         intervention_space[variable_name], dict):
-                    task_params_dict[variable_name] = dict()
+                    state_variables_dict[variable_name] = dict()
                     for subvariable_name in intervention_space[variable_name]:
-                        task_params_dict[variable_name][subvariable_name] = \
+                        state_variables_dict[variable_name][subvariable_name] = \
                             current_variables_values[variable_name][subvariable_name]
                 else:
-                    task_params_dict[variable_name] = current_variables_values[variable_name]
+                    state_variables_dict[variable_name] = current_variables_values[variable_name]
         else:
-            task_params_dict = dict(current_variables_values)
+            state_variables_dict = dict(current_variables_values)
         # you can add task specific ones after that
-        return task_params_dict
+        return state_variables_dict
 
     def is_intervention_in_bounds(self, interventions_dict):
         """
@@ -814,7 +786,7 @@ class BaseTask(object):
         :param interventions_dict:
         :return:
         """
-        if self._task_params['training']:
+        if self._task_params['use_train_space_only']:
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
@@ -943,7 +915,7 @@ class BaseTask(object):
         :return:
         """
         if check_bounds is None:
-            check_bounds = self._task_params['intervention_split']
+            check_bounds = self._task_params['use_train_space_only']
         success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)
