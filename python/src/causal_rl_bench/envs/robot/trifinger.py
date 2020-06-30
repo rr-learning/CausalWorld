@@ -327,7 +327,8 @@ class TriFingerRobot(object):
         joint_pos = np.zeros([9])
         finger_tip_ids = self._finger_tip_ids
         final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
-                                                               [finger_tip_ids[0], finger_tip_ids[1],
+                                                               [finger_tip_ids[0],
+                                                                finger_tip_ids[1],
                                                                 finger_tip_ids[2]],
                                                                [desired[0:3],
                                                                 desired[3:6],
