@@ -39,4 +39,17 @@ or used in a catkin workspace.
   (causal_rl_bench) python -m unittest discover tests/causal_rl_bench/
   ```
   
+4. Try out the package.
 
+  ```python
+    from causal_rl_bench.envs.causalworld import CausalWorld
+    from causal_rl_bench.task_generators.task import task_generator
+    task = task_generator(task_generator_id='general')
+    env = CausalWorld(task=task, enable_visualization=True)
+    for _ in range(10):
+        env.reset()
+        for _ in range(100):
+            obs, reward, done, info = env.step(env.action_space.sample())
+    env.close()
+  ```
+  

@@ -265,10 +265,10 @@ class CausalWorld(gym.Env):
         #     self._stage._name_keys = []
         #     self._stage._rigid_objects = {}
         #     self._stage._visual_objects = {}
+        #     self._robot._disable_velocity_control()
         #     self._task.init_task(self._robot, self._stage,
         #                          self._max_episode_length)
         #     self._reset_observations_space()
-        #     self._robot._disable_velocity_control()
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
         if interventions_dict is not None:
@@ -511,7 +511,7 @@ class CausalWorld(gym.Env):
         This function loads the urdfs of the robot in all the pybullet clients
         :return:
         """
-        # self._reset_world()
+        self._reset_world()
         robot_properties_path = os.path.join(
             os.path.
                 dirname(__file__), "../../../assets/robot_properties_fingers"
@@ -595,12 +595,21 @@ class CausalWorld(gym.Env):
         if self._pybullet_client_full_id is not None:
             pybullet.resetSimulation(
                 physicsClientId=self._pybullet_client_full_id)
+            pybullet.setPhysicsEngineParameter(
+                deterministicOverlappingPairs=1,
+                physicsClientId=self._pybullet_client_full_id)
         if self._pybullet_client_w_goal_id is not None:
             pybullet.resetSimulation(
                 physicsClientId=self._pybullet_client_w_goal_id)
+            pybullet.setPhysicsEngineParameter(
+                deterministicOverlappingPairs=1,
+                physicsClientId=self._pybullet_client_full_id)
         if self._pybullet_client_w_o_goal_id is not None:
             pybullet.resetSimulation(
                 physicsClientId=self._pybullet_client_w_o_goal_id)
+            pybullet.setPhysicsEngineParameter(
+                deterministicOverlappingPairs=1,
+                physicsClientId=self._pybullet_client_full_id)
         return
 
     def create_stage(self, robot_properties_path, pybullet_client):
