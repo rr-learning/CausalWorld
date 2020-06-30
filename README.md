@@ -38,8 +38,8 @@ or used in a catkin workspace.
   ```bash
   (causal_rl_bench) python -m unittest discover tests/causal_rl_bench/
   ```
-  
-4. Try out the package.
+
+## Try out the package
 
   ```python
     from causal_rl_bench.envs.causalworld import CausalWorld
