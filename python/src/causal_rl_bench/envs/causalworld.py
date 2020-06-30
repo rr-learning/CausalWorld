@@ -51,7 +51,7 @@ class CausalWorld(gym.Env):
         self._revolute_joint_ids = None
         self._instantiate_pybullet()
         self.link_name_to_index = None
-        self._create_world()
+        self._create_world(initialize_goal_image=True)
         self._tool_cameras = None
         self._goal_cameras = None
         if observation_mode == 'cameras':
@@ -475,7 +475,7 @@ class CausalWorld(gym.Env):
     def get_tracker(self):
         return self._tracker
 
-    def _create_world(self):
+    def _create_world(self, initialize_goal_image=False):
         """
         This function loads the urdfs of the robot in all the pybullet clients
         :return:
@@ -490,9 +490,15 @@ class CausalWorld(gym.Env):
         )
         finger_base_position = [0, 0, 0.0]
         finger_base_orientation = pybullet.getQuaternionFromEuler([0, 0, 0])
-        for client in [self._pybullet_client_w_o_goal_id,
-                       self._pybullet_client_w_goal_id,
-                       self._pybullet_client_full_id]:
+        if initialize_goal_image:
+            client_list = [self._pybullet_client_w_o_goal_id,
+                           self._pybullet_client_w_goal_id,
+                           self._pybullet_client_full_id]
+        else:
+            client_list = [self._pybullet_client_w_o_goal_id,
+                           self._pybullet_client_full_id]
+
+        for client in client_list:
             if client is not None:
                 pybullet.setAdditionalSearchPath(pybullet_data.getDataPath(),
                                                  physicsClientId=client)
@@ -567,12 +573,6 @@ class CausalWorld(gym.Env):
             pybullet.setPhysicsEngineParameter(
                 deterministicOverlappingPairs=1,
                 physicsClientId=self._pybullet_client_full_id)
-        if self._pybullet_client_w_goal_id is not None:
-            pybullet.resetSimulation(
-                physicsClientId=self._pybullet_client_w_goal_id)
-            pybullet.setPhysicsEngineParameter(
-                deterministicOverlappingPairs=1,
-                physicsClientId=self._pybullet_client_w_goal_id)
         if self._pybullet_client_w_o_goal_id is not None:
             pybullet.resetSimulation(
                 physicsClientId=self._pybullet_client_w_o_goal_id)
