@@ -138,7 +138,7 @@ class CausalWorld(gym.Env):
         self._data_recorder = data_recorder
         self._wrappers_dict = dict()
         self._tracker = Tracker(task=self._task,
-                                world_params=self._get_world_params())
+                                world_params=self.get_world_params())
         self._scale_reward_by_dt = True
         self._disabled_actions = False
         #TODO: I am not sure if this reset is necassary, TO BE CONFIRMED
@@ -263,7 +263,7 @@ class CausalWorld(gym.Env):
                                             task_params=
                                             self._task.get_task_params(),
                                             world_params=
-                                            self._get_world_params())
+                                            self.get_world_params())
         if self._observation_mode == "cameras":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
@@ -405,7 +405,7 @@ class CausalWorld(gym.Env):
         """
         return self._task.get_current_state_variables()
 
-    def _get_world_params(self):
+    def get_world_params(self):
         """
 
         :return:
@@ -465,6 +465,9 @@ class CausalWorld(gym.Env):
 
     def get_robot(self):
         return self._robot
+
+    def get_task(self):
+        return self._task
 
     def get_stage(self):
         return self._stage
