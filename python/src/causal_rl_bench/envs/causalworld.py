@@ -11,7 +11,6 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.robot.camera import Camera
 from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
-import pkgutil
 from causal_rl_bench.envs.robot.pinocchio_utils import PinocchioUtils
 
 
@@ -257,6 +256,8 @@ class CausalWorld(gym.Env):
         self._episode_length = 0
         success_signal, interventions_info, reset_observation_space_signal = \
             self._task.reset_task()
+        if reset_observation_space_signal:
+            self._reset_observations_space()
         # TODO: make sure that stage observations returned are up to date
         if self._data_recorder:
             self._data_recorder.new_episode(self.get_state(),
@@ -283,20 +284,7 @@ class CausalWorld(gym.Env):
         if success_signal is not None:
             if not success_signal:
                 self._tracker.add_invalid_intervention(interventions_info)
-        if self._data_recorder:
-            self._data_recorder.new_episode(self.get_state(),
-                                            task_name=
-                                            self._task._task_name,
-                                            task_params=
-                                            self._task.get_task_params(),
-                                            world_params=
-                                            self.get_world_params())
-        if self._observation_mode == "cameras":
-            current_images = self._robot.get_current_camera_observations()
-            goal_images = self._stage.get_current_goal_image()
-            return success_signal, np.concatenate((current_images, goal_images), axis=0)
-        else:
-            return success_signal, self._task.filter_structured_observations()
+        return success_signal
 
     def close(self):
         """
@@ -527,7 +515,7 @@ class CausalWorld(gym.Env):
                 pybullet.setTimeStep(self._simulation_time,
                                      physicsClientId=client)
                 pybullet.loadURDF("plane_transparent.urdf", [0, 0, 0],
-                                physicsClientId=client)
+                                  physicsClientId=client)
                 pybullet.loadURDF(
                     fileName=self._finger_urdf_path,
                     basePosition=finger_base_position,

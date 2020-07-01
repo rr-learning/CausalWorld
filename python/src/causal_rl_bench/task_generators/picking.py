@@ -10,7 +10,7 @@ class PickingTaskGenerator(BaseTask):
         """
         super().__init__(task_name="picking",
                          use_train_space_only=kwargs.get("use_train_space_only",
-                                                         True),
+                                                         False),
                          fractional_reward_weight=
                          kwargs.get("fractional_reward_weight", 1),
                          dense_reward_weights=

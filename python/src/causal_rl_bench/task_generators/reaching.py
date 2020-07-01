@@ -180,11 +180,12 @@ class ReachingTaskGenerator(BaseTask):
         info['desired_goal'] = self._current_desired_goal
         info['achieved_goal'] = self._current_achieved_goal
         info['success'] = self._task_solved
-        info['possible_solution_intervention'] = dict()
-        info['possible_solution_intervention']['joint_positions'] = \
-            self._robot.get_joint_positions_from_tip_positions(self._current_desired_goal,
-                                                               self._robot.
-                                                                      get_latest_full_state()['positions'])
+        #TODO: below has a memory leak for now
+        # info['possible_solution_intervention'] = dict()
+        # info['possible_solution_intervention']['joint_positions'] = \
+        #     self._robot.get_joint_positions_from_tip_positions(self._current_desired_goal,
+        #                                                        self._robot.
+        #                                                               get_latest_full_state()['positions'])
         info['fractional_success'] = self._current_goal_distance
         info['ground_truth_current_state_varibales'] = \
             self.get_current_scm_values()
