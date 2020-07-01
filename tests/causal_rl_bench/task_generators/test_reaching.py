@@ -8,12 +8,24 @@ class TestReaching(unittest.TestCase):
     def setUp(self):
         self.task = task_generator(task_generator_id="reaching")
         self.env = CausalWorld(task=self.task,
-                               enable_visualization=False)
+                               enable_visualization=True,
+                               action_mode='end_effector_positions',
+                               normalize_observations=False,
+                               normalize_actions=False)
         return
 
     def tearDown(self):
         self.env.close()
         return
+
+    def test_forward_kinemetics(self):
+        horizon = 100
+        obs = self.env.reset()
+        desired_goal = obs[-9:]
+        for i in range(horizon):
+            obs, reward, done, info = self.env.step(desired_goal)
+
+            # print(obs[19:28])
 
     def test_determinism(self):
         observations_1 = []

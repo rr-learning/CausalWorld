@@ -16,6 +16,7 @@ class TriFingerRobot(object):
                  pybullet_client_w_o_goal_id,
                  revolute_joint_ids,
                  finger_tip_ids,
+                 pinocchio_utils,
                  cameras=None):
         """
 
@@ -41,6 +42,7 @@ class TriFingerRobot(object):
         self._skip_frame = skip_frame
         self._simulation_time = simulation_time
         self._dt = self._simulation_time * self._skip_frame
+        self._pinocchio_utils = pinocchio_utils
         #TODO: for some reason this is needed
         self._control_index = -1
         self._position_gains = np.array(
@@ -115,7 +117,9 @@ class TriFingerRobot(object):
         self._latest_full_state = {'positions': current_position,
                                    'velocities': current_velocity,
                                    'torques': current_torques,
-                                   'end_effector_positions': self._compute_end_effector_positions()}
+                                   'end_effector_positions':
+                                       self._compute_end_effector_positions(
+                                           current_position)}
 
         return
 
@@ -417,7 +421,7 @@ class TriFingerRobot(object):
         return self._robot_observations.get_current_observations(
             self._latest_full_state, helper_keys)
 
-    def _compute_end_effector_positions(self):
+    def _compute_end_effector_positions(self, joint_positions):
         result = np.array([])
         if self._pybullet_client_full_id is not None:
             position_1 = pybullet.getLinkState(
@@ -457,6 +461,13 @@ class TriFingerRobot(object):
         result[2] -= WorldConstants.FLOOR_HEIGHT
         result[5] -= WorldConstants.FLOOR_HEIGHT
         result[-1] -= WorldConstants.FLOOR_HEIGHT
+        # tip_positions = self._pinocchio_utils.forward_kinematics(
+        #     joint_positions
+        # )
+        # result_2 = np.concatenate(tip_positions)
+        # result_2[2] -= WorldConstants.FLOOR_HEIGHT
+        # result_2[5] -= WorldConstants.FLOOR_HEIGHT
+        # result_2[-1] -= WorldConstants.FLOOR_HEIGHT
         return result
 
     def _process_action_joint_positions(self, robot_state):

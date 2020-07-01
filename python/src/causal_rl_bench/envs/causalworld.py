@@ -12,6 +12,7 @@ from causal_rl_bench.envs.robot.camera import Camera
 from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
 import pkgutil
+from causal_rl_bench.envs.robot.pinocchio_utils import PinocchioUtils
 
 
 class CausalWorld(gym.Env):
@@ -51,7 +52,15 @@ class CausalWorld(gym.Env):
         self._revolute_joint_ids = None
         self._instantiate_pybullet()
         self.link_name_to_index = None
+        self._robot_properties_path = os.path.join(
+            os.path.
+                dirname(__file__), "../../../assets/robot_properties_fingers"
+        )
+        self._finger_urdf_path = os.path.join(
+            self._robot_properties_path, "urdf", "trifinger.urdf"
+        )
         self._create_world(initialize_goal_image=True)
+        self._pinocchio_utils = PinocchioUtils(self._finger_urdf_path)
         self._tool_cameras = None
         self._goal_cameras = None
         if observation_mode == 'cameras':
@@ -103,7 +112,8 @@ class CausalWorld(gym.Env):
                                      revolute_joint_ids=
                                      self._revolute_joint_ids,
                                      finger_tip_ids=self.finger_tip_ids,
-                                     cameras=self._tool_cameras)
+                                     cameras=self._tool_cameras,
+                                     pinocchio_utils=self._pinocchio_utils)
         self._stage = Stage(observation_mode=observation_mode,
                             normalize_observations=normalize_observations,
                             pybullet_client_full_id=
@@ -481,13 +491,6 @@ class CausalWorld(gym.Env):
         :return:
         """
         self._reset_world()
-        robot_properties_path = os.path.join(
-            os.path.
-                dirname(__file__), "../../../assets/robot_properties_fingers"
-        )
-        finger_urdf_path = os.path.join(
-            robot_properties_path, "urdf", "trifinger.urdf"
-        )
         finger_base_position = [0, 0, 0.0]
         finger_base_orientation = pybullet.getQuaternionFromEuler([0, 0, 0])
         if initialize_goal_image:
@@ -509,7 +512,7 @@ class CausalWorld(gym.Env):
                 pybullet.loadURDF("plane_transparent.urdf", [0, 0, 0],
                                 physicsClientId=client)
                 pybullet.loadURDF(
-                    fileName=finger_urdf_path,
+                    fileName=self._finger_urdf_path,
                     basePosition=finger_base_position,
                     baseOrientation=finger_base_orientation,
                     useFixedBase=1,
@@ -563,7 +566,7 @@ class CausalWorld(gym.Env):
                                     contactDamping=0.05,
                                     physicsClientId=client
                                 )
-                self._create_stage(robot_properties_path, client)
+                self._create_stage(client)
         return
 
     def _reset_world(self):
@@ -581,7 +584,7 @@ class CausalWorld(gym.Env):
                 physicsClientId=self._pybullet_client_w_o_goal_id)
         return
 
-    def _create_stage(self, robot_properties_path, pybullet_client):
+    def _create_stage(self, pybullet_client):
         """Create the stage (table and boundary).
 
         Args:
@@ -589,7 +592,7 @@ class CausalWorld(gym.Env):
 
         def mesh_path(filename):
             return os.path.join(
-                robot_properties_path, "meshes", "stl", filename
+                self._robot_properties_path, "meshes", "stl", filename
             )
 
         table_colour = (0.31, 0.27, 0.25, 1.0)

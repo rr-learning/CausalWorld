@@ -28,7 +28,8 @@ def test_pd_gains():
     np.random.seed(0)
     task = task_generator(task_generator_id='pushing')
     skip_frame = 1
-    env = CausalWorld(task=task, enable_visualization=False, skip_frame=skip_frame, normalize_observations=False,
+    env = CausalWorld(task=task, enable_visualization=False,
+                      skip_frame=skip_frame, normalize_observations=False,
                       normalize_actions=False, seed=0)
     zero_hold = int(5000 / skip_frame) #reach desired position in 4 secs?
     obs = env.reset()

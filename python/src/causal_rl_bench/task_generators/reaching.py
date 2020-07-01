@@ -23,11 +23,11 @@ class ReachingTaskGenerator(BaseTask):
                                              "joint_velocities",
                                              "end_effector_positions"]
         self._task_params['default_goal_60'] = \
-            kwargs.get("default_goal_60", np.array([0, 0, 0.15]))
+            kwargs.get("default_goal_60", np.array([0, 0, 0.10]))
         self._task_params['default_goal_120'] = \
-            kwargs.get("default_goal_120", np.array([0, 0, 0.2]))
+            kwargs.get("default_goal_120", np.array([0, 0, 0.13]))
         self._task_params['default_goal_300'] = \
-            kwargs.get("default_goal_300", np.array([0, 0, 0.25]))
+            kwargs.get("default_goal_300", np.array([0, 0, 0.16]))
         self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self._task_params["joint_positions"] = \
