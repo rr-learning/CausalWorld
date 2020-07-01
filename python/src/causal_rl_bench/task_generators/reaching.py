@@ -10,11 +10,10 @@ class ReachingTaskGenerator(BaseTask):
         :param kwargs:
         """
         super().__init__(task_name="reaching",
-                         intervention_split=kwargs.get("intervention_split",
-                                                       False),
-                         training=kwargs.get("training", True),
-                         sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 0),
+                         use_train_space_only=kwargs.get("use_train_space_only",
+                                                         False),
+                         fractional_reward_weight=
+                         kwargs.get("fractional_reward_weight", 0),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([100000,
@@ -95,8 +94,8 @@ class ReachingTaskGenerator(BaseTask):
             self.previous_joint_velocities), ord=2))
         update_task_info = {'current_end_effector_positions':
                                 current_end_effector_positions,
-                            'current_velocity': np.copy(
-                                self._robot.get_latest_full_state()['velocities'])}
+                            'current_velocity':
+                                self._robot.get_latest_full_state()['velocities']}
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
@@ -106,9 +105,9 @@ class ReachingTaskGenerator(BaseTask):
         :return:
         """
         self.previous_end_effector_positions = \
-            np.array(update_task_info['current_end_effector_positions'])
+            update_task_info['current_end_effector_positions']
         self.previous_joint_velocities = \
-            np.array(update_task_info['current_velocity'])
+            update_task_info['current_velocity']
         return
 
     def _set_task_state(self):
@@ -119,8 +118,8 @@ class ReachingTaskGenerator(BaseTask):
         self.current_number_of_obstacles = 0
         self.previous_end_effector_positions = \
             self._robot.get_latest_full_state()['end_effector_positions']
-        self.previous_joint_velocities = np.copy(
-            self._robot.get_latest_full_state()['velocities'])
+        self.previous_joint_velocities = \
+            self._robot.get_latest_full_state()['velocities']
         return
 
     def get_desired_goal(self):
@@ -130,11 +129,14 @@ class ReachingTaskGenerator(BaseTask):
         """
         desired_goal = np.array([])
         desired_goal = np.append(desired_goal,
-                                 self._stage.get_object_state('goal_60', 'cartesian_position'))
+                                 self._stage.get_object_state('goal_60',
+                                                              'cartesian_position'))
         desired_goal = np.append(desired_goal,
-                                 self._stage.get_object_state('goal_120', 'cartesian_position'))
+                                 self._stage.get_object_state('goal_120',
+                                                              'cartesian_position'))
         desired_goal = np.append(desired_goal,
-                                 self._stage.get_object_state('goal_300', 'cartesian_position'))
+                                 self._stage.get_object_state('goal_300',
+                                                              'cartesian_position'))
         return desired_goal
 
     def get_achieved_goal(self):
@@ -175,14 +177,17 @@ class ReachingTaskGenerator(BaseTask):
         :return:
         """
         info = dict()
+        info['desired_goal'] = self._current_desired_goal
+        info['achieved_goal'] = self._current_achieved_goal
+        info['success'] = self._task_solved
         info['possible_solution_intervention'] = dict()
-        desired_goal = self.get_desired_goal()
         info['possible_solution_intervention']['joint_positions'] = \
-            self._robot.get_joint_positions_from_tip_positions(desired_goal,
-                                                               list(
-                                                                  self._robot.
-                                                                      get_latest_full_state()['positions']))
+            self._robot.get_joint_positions_from_tip_positions(self._current_desired_goal,
+                                                               self._robot.
+                                                                      get_latest_full_state()['positions'])
         info['fractional_success'] = self._current_goal_distance
+        info['ground_truth_current_state_varibales'] = \
+            self.get_current_scm_values()
         return info
 
     def _set_training_intervention_spaces(self):

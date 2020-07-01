@@ -90,7 +90,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
         #buffer action to the intervention actor
         self.intervention_actor.add_action(action, self.objects_order[action[0]])
         intervention_dict = self.intervention_actor.act(
-            self.env.get_current_task_parameters())
+            self.env.get_current_state_variables())
         self.env.do_intervention(intervention_dict)
         obs, reward, done, info = self.env.step(self.env.action_space.low)
         obs = obs[28:]

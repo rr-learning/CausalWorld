@@ -9,7 +9,7 @@ class TrueModel(object):
                                   range(self.parallel_agents)])
         return
 
-    def evaluate_trajectories(self, initial_state, action_sequences):
+    def evaluate_trajectories(self, action_sequences):
         #initial_state [0state_dim]
         #action_sequences number_of_[num_of_particles, horizon_length, action_dim]
         horizon_length = action_sequences.shape[1]
@@ -18,7 +18,7 @@ class TrueModel(object):
         assert ((float(num_of_particles) /
                  self.parallel_agents).is_integer())
         for j in range(0, num_of_particles, self.parallel_agents):
-            self.envs.env_method("set_full_state", initial_state)
+            self.envs.reset()
             total_reward = np.zeros([self.parallel_agents])
             for k in range(horizon_length):
                 actions = action_sequences[j:j+self.parallel_agents, k]

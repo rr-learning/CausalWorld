@@ -327,7 +327,8 @@ class TriFingerRobot(object):
         joint_pos = np.zeros([9])
         finger_tip_ids = self._finger_tip_ids
         final_joint_pose = pybullet.calculateInverseKinematics2(WorldConstants.ROBOT_ID,
-                                                               [finger_tip_ids[0], finger_tip_ids[1],
+                                                               [finger_tip_ids[0],
+                                                                finger_tip_ids[1],
                                                                 finger_tip_ids[2]],
                                                                [desired[0:3],
                                                                 desired[3:6],
@@ -418,21 +419,38 @@ class TriFingerRobot(object):
 
     def _compute_end_effector_positions(self):
         result = np.array([])
-        position_1 = pybullet.getLinkState(
-            WorldConstants.ROBOT_ID, linkIndex=5,
-            computeForwardKinematics=True,
-            physicsClientId=self._pybullet_client_full_id
-        )
-        position_2 = pybullet.getLinkState(
-            WorldConstants.ROBOT_ID, linkIndex=10,
-            computeForwardKinematics=True,
-            physicsClientId=self._pybullet_client_full_id
-        )
-        position_3 = pybullet.getLinkState(
-            WorldConstants.ROBOT_ID, linkIndex=15,
-            computeForwardKinematics=True,
-            physicsClientId=self._pybullet_client_full_id
-        )
+        if self._pybullet_client_full_id is not None:
+            position_1 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID, linkIndex=5,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_full_id
+            )
+            position_2 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID, linkIndex=10,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_full_id
+            )
+            position_3 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID, linkIndex=15,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_full_id
+            )
+        else:
+            position_1 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID, linkIndex=5,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_w_o_goal_id
+            )
+            position_2 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID, linkIndex=10,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_w_o_goal_id
+            )
+            position_3 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID, linkIndex=15,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_w_o_goal_id
+            )
         result = np.append(result, position_1[0])
         result = np.append(result, position_2[0])
         result = np.append(result, position_3[0])

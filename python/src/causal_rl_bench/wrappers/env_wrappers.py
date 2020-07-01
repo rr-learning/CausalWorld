@@ -5,23 +5,17 @@ import gym
 
 class HERGoalEnvWrapper(gym.GoalEnv):
     def __init__(self, env,
-                 is_goal_distance_dense=False,
-                 sparse_reward_weight=1):
+                 activate_sparse_reward=False):
         super(HERGoalEnvWrapper, self).__init__()
         self.env = env
         self.metadata = self.env.metadata
         self.action_space = env.action_space
-        current_goal = self.env._task.get_achieved_goal()
+        current_goal = self.env.get_task().get_achieved_goal()
         goal_space_shape = current_goal.shape
         #TODO: get the actual bonds here for proper normalization maybe?
         self.action_space = self.env.action_space
-        self.env._task._task_params['time_threshold_in_goal_state_secs'] = self.env.dt
-        if not is_goal_distance_dense:
-            self.env.scale_reward_by_dt = False
-        self.env._task._task_params['calculate_additional_dense_rewards'] = False
-        self.env._task.set_sparse_reward(sparse_reward_weight)
-        if not is_goal_distance_dense:
-            self.env._task.set_super_sparse_reward()
+        if activate_sparse_reward:
+            self.env.get_task().activate_sparse_reward()
         self.observation_space = spaces.Dict(dict(desired_goal=spaces.Box(-np.inf,
                                                                           np.inf,
                                                                           shape=goal_space_shape,
@@ -33,8 +27,8 @@ class HERGoalEnvWrapper(gym.GoalEnv):
                                                   observation=self.env.observation_space))
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata
-        self.env._add_wrapper_info({'her_environment': {'is_goal_distance_dense': is_goal_distance_dense,
-                                                        'sparse_reward_weight': sparse_reward_weight}})
+        self.env._add_wrapper_info(
+            {'her_environment': {'activate_sparse_reward': activate_sparse_reward}})
 
     def __getattr__(self, name):
         if name.startswith('_'):
@@ -53,16 +47,16 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         obs_dict = dict()
         normal_obs, reward, done, info = self.env.step(action)
         obs_dict['observation'] = normal_obs
-        obs_dict['achieved_goal'] = self.env._task.get_achieved_goal()
-        obs_dict['desired_goal'] = self.env._task.get_desired_goal()
+        obs_dict['achieved_goal'] = info['achieved_goal']
+        obs_dict['desired_goal'] = info['desired_goal']
         return obs_dict, reward, done, info
 
     def reset(self, **kwargs):
         obs_dict = dict()
         normal_obs = self.env.reset(**kwargs)
         obs_dict['observation'] = normal_obs
-        obs_dict['achieved_goal'] = self.env._task.get_achieved_goal()
-        obs_dict['desired_goal'] = self.env._task.get_desired_goal()
+        obs_dict['achieved_goal'] = self.env.get_task().get_achieved_goal()
+        obs_dict['desired_goal'] = self.env.get_task().get_desired_goal()
         return obs_dict
 
     def render(self, mode='human', **kwargs):
@@ -75,9 +69,9 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         return self.env.seed(seed)
 
     def compute_reward(self, achieved_goal, desired_goal, info):
-        return self.env._task.compute_reward(achieved_goal,
-                                             desired_goal,
-                                             info)
+        return self.env.get_task().compute_reward(achieved_goal,
+                                                  desired_goal,
+                                                  info)
 
     def __str__(self):
         return '<{}{}>'.format(type(self).__name__, self.env)

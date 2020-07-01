@@ -46,7 +46,7 @@ def save_config_file(ppo_config, env, file_path):
     for task_param in task_config:
         if not isinstance(task_config[task_param], str):
             task_config[task_param] = str(task_config[task_param])
-    env_config = env._get_world_params()
+    env_config = env.get_world_params()
     env.close()
     configs_to_save = [task_config, env_config, ppo_config]
     with open(file_path, 'w') as fout:
