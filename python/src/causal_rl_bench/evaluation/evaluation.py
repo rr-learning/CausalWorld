@@ -18,29 +18,22 @@ import json
 class EvaluationPipeline(object):
     def __init__(self, evaluation_protocols, tracker_path=None,
                  world_params=None, task_params=None,
-                 intervention_split=True, training=False,
                  visualize_evaluation=False, initial_seed=0):
-        self.intervention_split = intervention_split
-        self.training = training
         self.initial_seed = initial_seed
         self.data_recorder = DataRecorder(output_directory=None)
         if tracker_path is not None:
             self.tracker = Tracker(
                 file_path=os.path.join(tracker_path, 'tracker'))
             task_stats = self.tracker.task_stats_log[0]
-            del task_stats.task_params['intervention_split']
-            del task_stats.task_params['training']
+            del task_stats.task_params['use_train_space_only']
             self.task = task_generator(task_generator_id=task_stats.task_name,
                                        **task_stats.task_params,
-                                       intervention_split=intervention_split,
-                                       training=training)
+                                       use_train_space_only=False)
         else:
-            if 'intervention_split' in task_params or 'training' in task_params:
-                del task_params['intervention_split']
-                del task_params['training']
+            if 'use_train_space_only' in task_params:
+                del task_params['use_train_space_only']
             self.task = task_generator(**task_params,
-                                       intervention_split=intervention_split,
-                                       training=training)
+                                       use_train_space_only=False)
         if tracker_path:
             if 'seed' in self.tracker.world_params:
                 del self.tracker.world_params['seed']
