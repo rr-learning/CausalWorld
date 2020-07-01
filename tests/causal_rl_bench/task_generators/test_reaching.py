@@ -8,7 +8,7 @@ class TestReaching(unittest.TestCase):
     def setUp(self):
         self.task = task_generator(task_generator_id="reaching")
         self.env = CausalWorld(task=self.task,
-                               enable_visualization=True,
+                               enable_visualization=False,
                                action_mode='end_effector_positions',
                                normalize_observations=False,
                                normalize_actions=False)

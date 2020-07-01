@@ -4,6 +4,7 @@ channels:
 dependencies:
 - python=3.7.4
 - sphinx
+- pinocchio==2.4.2
 - jupyter
 - pip:
   - pybullet
@@ -11,7 +12,6 @@ dependencies:
   - pandas
   - catkin_pkg
   - sphinx_rtd_theme
-  - tensorflow==1.14.0
   - stable-baselines==2.10.0
   - pytest
   - mpi4py

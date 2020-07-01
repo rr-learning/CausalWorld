@@ -26,7 +26,7 @@ class CrossEntropyMethod(object):
             [self.planning_horizon, 1])
 
     def get_actions(self):
-        best_cost = -np.float('inf')
+        best_reward = -np.float('inf')
         best_action = None
         iteration_index = 0
         current_actions_mean = np.array(self.actions_mean)
@@ -40,11 +40,11 @@ class CrossEntropyMethod(object):
                                                     *self.actions_mean.shape])
             rewards = self.model.evaluate_trajectories(action_samples)
             elites_indicies = rewards.argsort(axis=0)[-self.num_elite:][::-1]
-            best_current_cost = np.max(rewards)
-            if best_current_cost > best_cost:
-                best_cost = best_current_cost
+            best_current_reward = np.max(rewards)
+            if best_current_reward > best_reward:
+                best_reward = best_current_reward
                 best_action = action_samples[np.argmax(rewards)]
-            print("iteration's best reward is ", best_current_cost)
+            print("iteration's best reward is ", best_current_reward)
             elites = action_samples[elites_indicies]
             new_mean = np.mean(elites, axis=0)
             new_variance = np.var(elites, axis=0)
@@ -53,4 +53,4 @@ class CrossEntropyMethod(object):
             current_actions_var = (self.alpha * current_actions_var) + (
                     (1 - self.alpha) * new_variance)
             iteration_index += 1
-        return new_mean
+        return best_action

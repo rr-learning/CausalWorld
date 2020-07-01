@@ -247,7 +247,7 @@ class CausalWorld(gym.Env):
         np.random.seed(seed)
         return [seed]
 
-    def reset(self, interventions_dict=None):
+    def reset(self):
         """
 
         :param interventions_dict:
@@ -255,16 +255,8 @@ class CausalWorld(gym.Env):
         """
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
-        if interventions_dict is not None:
-            interventions_dict = copy.deepcopy(interventions_dict)
-            self._tracker.do_intervention(self._task, interventions_dict)
         success_signal, interventions_info, reset_observation_space_signal = \
-            self._task.reset_task(interventions_dict)
-        if reset_observation_space_signal:
-            self._reset_observations_space()
-        if success_signal is not None:
-            if not success_signal:
-                self._tracker.add_invalid_intervention(interventions_info)
+            self._task.reset_task()
         # TODO: make sure that stage observations returned are up to date
         if self._data_recorder:
             self._data_recorder.new_episode(self.get_state(),
@@ -280,6 +272,31 @@ class CausalWorld(gym.Env):
             return np.concatenate((current_images, goal_images), axis=0)
         else:
             return self._task.filter_structured_observations()
+
+    def set_starting_state(self, interventions_dict=None):
+        interventions_dict = copy.deepcopy(interventions_dict)
+        self._tracker.do_intervention(self._task, interventions_dict)
+        success_signal, interventions_info, reset_observation_space_signal = \
+            self._task.reset_task(interventions_dict)
+        if reset_observation_space_signal:
+            self._reset_observations_space()
+        if success_signal is not None:
+            if not success_signal:
+                self._tracker.add_invalid_intervention(interventions_info)
+        if self._data_recorder:
+            self._data_recorder.new_episode(self.get_state(),
+                                            task_name=
+                                            self._task._task_name,
+                                            task_params=
+                                            self._task.get_task_params(),
+                                            world_params=
+                                            self.get_world_params())
+        if self._observation_mode == "cameras":
+            current_images = self._robot.get_current_camera_observations()
+            goal_images = self._stage.get_current_goal_image()
+            return success_signal, np.concatenate((current_images, goal_images), axis=0)
+        else:
+            return success_signal, self._task.filter_structured_observations()
 
     def close(self):
         """
