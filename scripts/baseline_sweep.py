@@ -43,8 +43,7 @@ def baseline_model(model_num):
                                       PICKING_BENCHMARK,
                                       PICK_AND_PLACE_BENCHMARK,
                                       TOWER_2_BENCHMARK])
-    task_configs = [{'task_configs': {'intervention_split': True,
-                                      'training': True,
+    task_configs = [{'task_configs': {'use_train_space_only': True,
                                       'sparse_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
@@ -276,8 +275,6 @@ if __name__ == '__main__':
     evaluator = EvaluationPipeline(evaluation_protocols=
                                    evaluation_protocols,
                                    tracker_path=output_path,
-                                   intervention_split=False,
-                                   visualize_evaluation=False,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)
     evaluator.save_scores(evaluation_path)
