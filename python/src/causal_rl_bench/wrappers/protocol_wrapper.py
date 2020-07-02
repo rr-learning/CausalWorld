@@ -1,12 +1,12 @@
 import gym
-
+import numpy as np
 
 class ProtocolWrapper(gym.Wrapper):
     def __init__(self, env, protocol):
         super(ProtocolWrapper, self).__init__(env)
         self.protocol = protocol
-        self.env._add_wrapper_info({'evaluation_environment':
-                                    self.protocol.get_name()})
+        self.env.add_wrapper_info({'evaluation_environment':
+                                       self.protocol.get_name()})
         self._elapsed_episodes = 0
         self._elapsed_timesteps = 0
         return
@@ -28,5 +28,10 @@ class ProtocolWrapper(gym.Wrapper):
         observation = self.env.reset()
         if interventions_dict is not None:
             self.env.do_intervention(interventions_dict)
-            observation = self.env._task.filter_structured_observations()
+            if self.env._observation_mode == "structured":
+                observation = self.env._task.filter_structured_observations()
+            elif self.env._observation_mode == "cameras":
+                current_images = self.env._robot.get_current_camera_observations()
+                goal_images = self.env._stage.get_current_goal_image()
+                observation = np.concatenate((current_images, goal_images), axis=0)
         return observation

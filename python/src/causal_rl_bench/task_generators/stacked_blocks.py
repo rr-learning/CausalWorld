@@ -13,11 +13,10 @@ class StackedBlocksGeneratorTask(BaseTask):
         :param kwargs:
         """
         super().__init__(task_name="stacked_blocks",
-                         intervention_split=kwargs.get("intervention_split",
-                                                       False),
-                         training=kwargs.get("training", True),
-                         sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 1),
+                         use_train_space_only=kwargs.get("use_train_space_only",
+                                                         False),
+                         fractional_reward_weight=
+                         kwargs.get("fractional_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([])))
@@ -55,6 +54,7 @@ class StackedBlocksGeneratorTask(BaseTask):
 
         :return:
         """
+        silhouettes_creation_dicts = []
         number_of_blocks_per_level = int(self._task_params["max_level_width"] \
                                          / self._task_params["blocks_min_size"])
         default_start_position = -(number_of_blocks_per_level *
@@ -109,7 +109,7 @@ class StackedBlocksGeneratorTask(BaseTask):
                                  'orientation': [0, 0, 0, 1],
                                  'size': np.repeat(self._task_params
                                                    ["blocks_min_size"], 3)}
-                self._stage.add_silhoutte_general_object(**creation_dict)
+                silhouettes_creation_dicts.append(copy.deepcopy(creation_dict))
                 self._task_stage_observation_keys.append("goal_" + "level_" +
                                                         str(level) + "_num_" +
                                                         str(i) + '_type')
@@ -123,6 +123,8 @@ class StackedBlocksGeneratorTask(BaseTask):
                                                         str(level) + "_num_" +
                                                         str(i) + '_orientation')
                 start_position += self._task_params["blocks_min_size"]
+        for i in range(len(silhouettes_creation_dicts)):
+            self._stage.add_silhoutte_general_object(**silhouettes_creation_dicts[i])
         return
 
     def sample_new_goal(self, training=True, level=None):
@@ -274,6 +276,7 @@ class StackedBlocksGeneratorTask(BaseTask):
         :param max_level_width:
         :return:
         """
+        silhouettes_creation_dicts = []
         self._stage.remove_everything()
         self._task_stage_observation_keys = []
         block_sizes, positions, chosen_y = self._generate_random_target(
@@ -352,11 +355,13 @@ class StackedBlocksGeneratorTask(BaseTask):
                                  'shape': "cube",
                                  'position': np.array(silhouette_position),
                                  'size': np.array(block_sizes[level_num][i])}
-                self._stage.add_silhoutte_general_object(**creation_dict)
+                silhouettes_creation_dicts.append(copy.deepcopy(creation_dict))
         self.current_stack_levels = num_of_levels
         self.current_blocks_mass = blocks_mass
         self.current_blocks_min_size = blocks_min_size
         self.current_max_level_width = max_level_width
+        for i in range(len(silhouettes_creation_dicts)):
+            self._stage.add_silhoutte_general_object(**silhouettes_creation_dicts[i])
         return
 
     def _generate_random_block(self, allowed_boundaries,

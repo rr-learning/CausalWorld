@@ -11,11 +11,10 @@ class PushingTaskGenerator(BaseTask):
         :param kwargs:
         """
         super().__init__(task_name="pushing",
-                         intervention_split=kwargs.get("intervention_split",
-                                                       False),
-                         training=kwargs.get("training", True),
-                         sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 1),
+                         use_train_space_only=kwargs.get("use_train_space_only",
+                                                        False),
+                         fractional_reward_weight=
+                         kwargs.get("fractional_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([750, 250, 100])))
@@ -145,8 +144,8 @@ class PushingTaskGenerator(BaseTask):
                                                     'cartesian_position')
         goal_orientation = self._stage.get_object_state('goal_block',
                                                        'orientation')
-        end_effector_positions = self._robot.compute_end_effector_positions(
-            self._robot.get_latest_full_state()['positions'])
+        end_effector_positions = \
+            self._robot.get_latest_full_state()['end_effector_positions']
         end_effector_positions = end_effector_positions.reshape(-1, 3)
 
         # calculate first reward term
@@ -203,8 +202,7 @@ class PushingTaskGenerator(BaseTask):
         :return:
         """
         self.previous_end_effector_positions = \
-            self._robot.compute_end_effector_positions(
-                self._robot.get_latest_full_state()['positions'])
+            self._robot.get_latest_full_state()['end_effector_positions']
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \

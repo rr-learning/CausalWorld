@@ -49,7 +49,7 @@ class TestGeneral(unittest.TestCase):
         actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
-        self.env.do_intervention(new_goal)
+        self.env.set_starting_state(interventions_dict=new_goal)
         self.env.reset()
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])

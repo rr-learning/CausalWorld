@@ -42,11 +42,11 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
 
 
 def save_config_file(sac_config, env, file_path):
-    task_config = env._task.get_task_params()
+    task_config = env.get_task().get_task_params()
     for task_param in task_config:
         if not isinstance(task_config[task_param], str):
             task_config[task_param] = str(task_config[task_param])
-    env_config = env._get_world_params()
+    env_config = env.get_world_params()
     env.close()
     configs_to_save = [task_config, env_config, sac_config]
     with open(file_path, 'w') as fout:
@@ -64,15 +64,13 @@ if __name__ == '__main__':
                     help="maximum episode length")
     ap.add_argument("--total_time_steps_per_update", required=False,
                     default=150000, help="total time steps per update")
-    ap.add_argument("--num_of_envs", required=False,
-                    default=30, help="number of parallel environments")
     ap.add_argument("--task_name", required=False,
                     default="reaching", help="the task nam for training")
     ap.add_argument("--log_relative_path", required=True,
                     help="log folder")
     args = vars(ap.parse_args())
     total_time_steps_per_update = int(args['total_time_steps_per_update'])
-    num_of_envs = int(args['num_of_envs'])
+    num_of_envs = 1
     log_relative_path = str(args['log_relative_path'])
     maximum_episode_length = int(args['max_episode_length'])
     skip_frame = int(args['skip_frame'])

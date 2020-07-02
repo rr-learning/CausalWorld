@@ -4,7 +4,6 @@ import pybullet
 import pybullet_data
 import os
 from causal_rl_bench.envs.robot.trifinger import TriFingerRobot
-from causal_rl_bench.envs.robot.pinocchio_utils import PinocchioUtils
 from causal_rl_bench.envs.scene.stage import Stage
 from causal_rl_bench.loggers.tracker import Tracker
 from causal_rl_bench.utils.env_utils import combine_spaces
@@ -12,6 +11,7 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.robot.camera import Camera
 from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
+from causal_rl_bench.envs.robot.pinocchio_utils import PinocchioUtils
 
 
 class CausalWorld(gym.Env):
@@ -49,24 +49,51 @@ class CausalWorld(gym.Env):
         self._pybullet_client_w_goal_id = None
         self._pybullet_client_full_id = None
         self._revolute_joint_ids = None
-        self.pinocchio_utils = None
         self._instantiate_pybullet()
         self.link_name_to_index = None
-        self._create_world()
+        self._robot_properties_path = os.path.join(
+            os.path.
+                dirname(__file__), "../../../assets/robot_properties_fingers"
+        )
+        self._finger_urdf_path = os.path.join(
+            self._robot_properties_path, "urdf", "trifinger.urdf"
+        )
+        self._create_world(initialize_goal_image=True)
+        self._pinocchio_utils = PinocchioUtils(self._finger_urdf_path)
         self._tool_cameras = None
         self._goal_cameras = None
         if observation_mode == 'cameras':
             self._tool_cameras = []
             self._tool_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4390],
+                Camera(camera_position=[0.2496, 0.2458, 0.4190],
                        camera_orientation=[0.3760, 0.8690,
                                            -0.2918, -0.1354],
                        pybullet_client_id=self._pybullet_client_w_o_goal_id))
+            self._tool_cameras.append(
+                Camera(camera_position=[0.0047, -0.2834, 0.4558],
+                       camera_orientation=[0.9655, -0.0098,
+                                           -0.0065, -0.2603],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
+            self._tool_cameras.append(
+                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
+                       camera_orientation=[-0.3633, 0.8686,
+                                           -0.3141, 0.1220],
+                       pybullet_client_id=self._pybullet_client_w_o_goal_id))
             self._goal_cameras = []
             self._goal_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4390],
+                Camera(camera_position=[0.2496, 0.2458, 0.4190],
                        camera_orientation=[0.3760, 0.8690,
                                            -0.2918, -0.1354],
+                       pybullet_client_id=self._pybullet_client_w_goal_id))
+            self._goal_cameras.append(
+                Camera(camera_position=[0.0047, -0.2834, 0.4558],
+                       camera_orientation=[0.9655, -0.0098,
+                                           -0.0065, -0.2603],
+                       pybullet_client_id=self._pybullet_client_w_goal_id))
+            self._goal_cameras.append(
+                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
+                       camera_orientation=[-0.3633, 0.8686,
+                                           -0.3141, 0.1220],
                        pybullet_client_id=self._pybullet_client_w_goal_id))
         self._robot = TriFingerRobot(action_mode=action_mode,
                                      observation_mode=observation_mode,
@@ -84,8 +111,8 @@ class CausalWorld(gym.Env):
                                      revolute_joint_ids=
                                      self._revolute_joint_ids,
                                      finger_tip_ids=self.finger_tip_ids,
-                                     pinocchio_utils=self.pinocchio_utils,
-                                     cameras=self._tool_cameras)
+                                     cameras=self._tool_cameras,
+                                     pinocchio_utils=self._pinocchio_utils)
         self._stage = Stage(observation_mode=observation_mode,
                             normalize_observations=normalize_observations,
                             pybullet_client_full_id=
@@ -100,7 +127,8 @@ class CausalWorld(gym.Env):
             self._task = task_generator("reaching")
         else:
             self._task = task
-        self._task.init_task(self._robot, self._stage, max_episode_length)
+        self._task.init_task(self._robot, self._stage, max_episode_length,
+                             self._create_world)
         if max_episode_length is None:
             max_episode_length = int(task.get_default_max_episode_length() /
                                      self.dt)
@@ -119,7 +147,7 @@ class CausalWorld(gym.Env):
         self._data_recorder = data_recorder
         self._wrappers_dict = dict()
         self._tracker = Tracker(task=self._task,
-                                world_params=self._get_world_params())
+                                world_params=self.get_world_params())
         self._scale_reward_by_dt = True
         self._disabled_actions = False
         #TODO: I am not sure if this reset is necassary, TO BE CONFIRMED
@@ -185,7 +213,7 @@ class CausalWorld(gym.Env):
 
         return observation, reward, done, info
 
-    def reset_default_goal(self):
+    def reset_default_state(self):
         """
 
         :return:
@@ -218,31 +246,37 @@ class CausalWorld(gym.Env):
         np.random.seed(seed)
         return [seed]
 
-    def reset(self, interventions_dict=None):
+    def reset(self):
         """
 
         :param interventions_dict:
         :return:
         """
-        # self.__pybullet_client.resetSimulation()
-        # optionally enable EGL for faster headless rendering
-        # try:
-        #     if os.environ["PYBULLET_EGL"]:
-        #         con_mode = self._p.getConnectionInfo()['connectionMethod']
-        #         if con_mode == self._p.DIRECT:
-        #             egl = pkgutil.get_loader('eglRenderer')
-        #             if (egl):
-        #                 self._p.loadPlugin(egl.get_filename(),
-        #                                    "_eglRendererPlugin")
-        #             else:
-        #                 self._p.loadPlugin("eglRendererPlugin")
-        # except:
-        #     pass
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
-        if interventions_dict is not None:
-            interventions_dict = copy.deepcopy(interventions_dict)
-            self._tracker.do_intervention(self._task, interventions_dict)
+        success_signal, interventions_info, reset_observation_space_signal = \
+            self._task.reset_task()
+        if reset_observation_space_signal:
+            self._reset_observations_space()
+        # TODO: make sure that stage observations returned are up to date
+        if self._data_recorder:
+            self._data_recorder.new_episode(self.get_state(),
+                                            task_name=
+                                            self._task._task_name,
+                                            task_params=
+                                            self._task.get_task_params(),
+                                            world_params=
+                                            self.get_world_params())
+        if self._observation_mode == "cameras":
+            current_images = self._robot.get_current_camera_observations()
+            goal_images = self._stage.get_current_goal_image()
+            return np.concatenate((current_images, goal_images), axis=0)
+        else:
+            return self._task.filter_structured_observations()
+
+    def set_starting_state(self, interventions_dict=None):
+        interventions_dict = copy.deepcopy(interventions_dict)
+        self._tracker.do_intervention(self._task, interventions_dict)
         success_signal, interventions_info, reset_observation_space_signal = \
             self._task.reset_task(interventions_dict)
         if reset_observation_space_signal:
@@ -250,19 +284,7 @@ class CausalWorld(gym.Env):
         if success_signal is not None:
             if not success_signal:
                 self._tracker.add_invalid_intervention(interventions_info)
-        # TODO: make sure that stage observations returned are up to date
-
-        if self._data_recorder:
-            self._data_recorder.new_episode(self.get_full_state(),
-                                            task_name=self._task._task_name,
-                                            task_params=self._task.get_task_params(),
-                                            world_params=self._get_world_params())
-        if self._observation_mode == "cameras":
-            current_images = self._robot.get_current_camera_observations()
-            goal_images = self._stage.get_current_goal_image()
-            return np.concatenate((current_images, goal_images), axis=0)
-        else:
-            return self._task.filter_structured_observations()
+        return success_signal
 
     def close(self):
         """
@@ -275,14 +297,6 @@ class CausalWorld(gym.Env):
 
     def _get_tracker(self):
         return self._tracker
-
-    def enforce_max_episode_length(self, episode_length=2000):
-        """
-
-        :param episode_length:
-        :return:
-        """
-        self._max_episode_length = episode_length
 
     def _is_done(self):
         if self._episode_length > self._max_episode_length:
@@ -325,25 +339,26 @@ class CausalWorld(gym.Env):
                 self._tracker.add_invalid_intervention(interventions_info)
         return success_signal
 
-    def get_full_state(self):
+    def get_state(self):
         """
-
+        Note: Setting state and getting state doesnt work when there is an intermediate intervention
         :return:
         """
-        full_state = []
-        full_state.extend(self._robot.get_full_state())
-        full_state.extend(self._stage.get_full_state())
-        return np.array(full_state)
+        state = dict()
+        state['pybullet_state'] = self._task._save_pybullet_state()
+        state['control_index'] = self._robot._control_index
+        return state
+        # return self._task.save_state()
 
-    def set_full_state(self, new_full_state):
+    def set_state(self, new_full_state):
         """
 
         :param new_full_state:
         :return:
         """
-        robot_state_size = self._robot.get_state_size()
-        self._robot.set_full_state(new_full_state[0:robot_state_size])
-        self._stage.set_full_state(new_full_state[robot_state_size:])
+        self._task._restore_pybullet_state(new_full_state['pybullet_state'])
+        self._robot._control_index = new_full_state['control_index']
+        self._robot.update_latest_full_state()
         return
 
     def render(self, mode="human"):
@@ -397,14 +412,14 @@ class CausalWorld(gym.Env):
             physicsClientId=client
         )
 
-    def get_current_task_parameters(self):
+    def get_current_state_variables(self):
         """
 
         :return:
         """
-        return self._task.get_current_task_parameters()
+        return self._task.get_current_state_variables()
 
-    def _get_world_params(self):
+    def get_world_params(self):
         """
 
         :return:
@@ -418,11 +433,10 @@ class CausalWorld(gym.Env):
         world_params["normalize_observations"] = \
             self._robot._robot_observations.is_normalized()
         world_params["max_episode_length"] = self._max_episode_length
-        world_params["simulation_time"] = self._simulation_time
         world_params["wrappers"] = self._wrappers_dict
         return world_params
 
-    def _add_wrapper_info(self, wrapper_dict):
+    def add_wrapper_info(self, wrapper_dict):
         """
 
         :param wrapper_dict:
@@ -465,29 +479,32 @@ class CausalWorld(gym.Env):
     def get_robot(self):
         return self._robot
 
+    def get_task(self):
+        return self._task
+
     def get_stage(self):
         return self._stage
 
     def get_tracker(self):
         return self._tracker
 
-    def _create_world(self):
+    def _create_world(self, initialize_goal_image=False):
         """
         This function loads the urdfs of the robot in all the pybullet clients
         :return:
         """
-        robot_properties_path = os.path.join(
-            os.path.
-                dirname(__file__), "../../../assets/robot_properties_fingers"
-        )
-        finger_urdf_path = os.path.join(
-            robot_properties_path, "urdf", "trifinger_realistic_colors.urdf"
-        )
-        finger_base_position = [0, 0, 0.015]
-        finger_base_orientation = pybullet.getQuaternionFromEuler([0, 0, 0])
-        for client in [self._pybullet_client_w_o_goal_id,
-                       self._pybullet_client_w_goal_id,
-                       self._pybullet_client_full_id]:
+        self._reset_world()
+        finger_base_position = [0, 0, 0.0]
+        finger_base_orientation = [0, 0,  0, 1]
+        if initialize_goal_image:
+            client_list = [self._pybullet_client_w_o_goal_id,
+                           self._pybullet_client_w_goal_id,
+                           self._pybullet_client_full_id]
+        else:
+            client_list = [self._pybullet_client_w_o_goal_id,
+                           self._pybullet_client_full_id]
+
+        for client in client_list:
             if client is not None:
                 pybullet.setAdditionalSearchPath(pybullet_data.getDataPath(),
                                                  physicsClientId=client)
@@ -496,9 +513,9 @@ class CausalWorld(gym.Env):
                 pybullet.setTimeStep(self._simulation_time,
                                      physicsClientId=client)
                 pybullet.loadURDF("plane_transparent.urdf", [0, 0, 0],
-                                physicsClientId=client)
+                                  physicsClientId=client)
                 pybullet.loadURDF(
-                    fileName=finger_urdf_path,
+                    fileName=self._finger_urdf_path,
                     basePosition=finger_base_position,
                     baseOrientation=finger_base_orientation,
                     useFixedBase=1,
@@ -552,13 +569,25 @@ class CausalWorld(gym.Env):
                                     contactDamping=0.05,
                                     physicsClientId=client
                                 )
-                self.create_stage(robot_properties_path, client)
-        self.pinocchio_utils = PinocchioUtils(
-            finger_urdf_path, WorldConstants.TIP_LINK_NAMES
-        )
+                self._create_stage(client)
         return
 
-    def create_stage(self, robot_properties_path, pybullet_client):
+    def _reset_world(self):
+        if self._pybullet_client_full_id is not None:
+            pybullet.resetSimulation(
+                physicsClientId=self._pybullet_client_full_id)
+            pybullet.setPhysicsEngineParameter(
+                deterministicOverlappingPairs=1,
+                physicsClientId=self._pybullet_client_full_id)
+        if self._pybullet_client_w_o_goal_id is not None:
+            pybullet.resetSimulation(
+                physicsClientId=self._pybullet_client_w_o_goal_id)
+            pybullet.setPhysicsEngineParameter(
+                deterministicOverlappingPairs=1,
+                physicsClientId=self._pybullet_client_w_o_goal_id)
+        return
+
+    def _create_stage(self, pybullet_client):
         """Create the stage (table and boundary).
 
         Args:
@@ -566,11 +595,11 @@ class CausalWorld(gym.Env):
 
         def mesh_path(filename):
             return os.path.join(
-                robot_properties_path, "meshes", "stl", filename
+                self._robot_properties_path, "meshes", "stl", filename
             )
 
-        table_colour = (0.35, 0.35, 0.35, 1.0)
-        high_border_colour = (1.0, 1.0, 1.0, 1.0)
+        table_colour = (0.31, 0.27, 0.25, 1.0)
+        high_border_colour = (0.95, 0.95, 0.95, 1.0)
         floor_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_MESH,
             fileName=mesh_path("trifinger_table_without_border.stl"),

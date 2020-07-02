@@ -5,8 +5,8 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.wrappers import ObjectSelectorWrapper, DeltaActionEnvWrapper, MovingAverageActionEnvWrapper, \
     HERGoalEnvWrapper, CurriculumWrapper
-from causal_rl_bench.utils.intervention_agent_utils import initialize_intervention_agents
-from causal_rl_bench.curriculum.curriculum import Curriculum
+from causal_rl_bench.utils.intervention_actor_utils import initialize_intervention_actors
+import copy
 
 
 def save_config_file(section_names, config_dicts, file_path):
@@ -38,33 +38,31 @@ def load_world(tracker_relative_path, enable_visualization=False):
     tracker = Tracker(file_path=os.path.join(tracker_relative_path,
                                              'tracker'))
     task_stats = tracker.task_stats_log[0]
-    task = task_generator(task_generator_id=task_stats._task_name,
-                          **task_stats._task_params)
+    wrapper_dict = copy.deepcopy(tracker.world_params['wrappers'])
+    del tracker.world_params['wrappers']
+    task = task_generator(task_generator_id=task_stats.task_name,
+                          **task_stats.task_params)
     env = CausalWorld(task, **tracker.world_params,
                       enable_visualization=enable_visualization)
-    for wrapper in tracker.world_params['wrappers']:
+    for wrapper in wrapper_dict:
         if wrapper == 'object_selector':
-            env = ObjectSelectorWrapper(env, **tracker.world_params['wrappers'][wrapper])
+            env = ObjectSelectorWrapper(env, **wrapper_dict[wrapper])
         elif wrapper == 'delta_action':
-            env = DeltaActionEnvWrapper(env, **tracker.world_params['wrappers'][wrapper])
+            env = DeltaActionEnvWrapper(env, **wrapper_dict[wrapper])
         elif wrapper == 'moving_average_action':
-            env = MovingAverageActionEnvWrapper(env, **tracker.world_params['wrappers'][wrapper])
+            env = MovingAverageActionEnvWrapper(env, **wrapper_dict[wrapper])
         elif wrapper == 'her_environment':
-            env = HERGoalEnvWrapper(env, **tracker.world_params['wrappers'][wrapper])
+            env = HERGoalEnvWrapper(env, **wrapper_dict[wrapper])
         elif wrapper == 'curriculum_environment':
             #first initialize actors
             intervention_actors = \
-                initialize_intervention_agents(tracker.world_params['wrappers'][wrapper]['agent_params'])
+                initialize_intervention_actors(wrapper_dict[wrapper]['actor_params'])
             #initialize intervention curriculum
             env = CurriculumWrapper(env,
                                     intervention_actors=intervention_actors,
-                                    episodes_hold=
-                                    tracker.world_params['wrappers'][wrapper][
-                                        'episodes_hold'],
-                                    timesteps_hold=
-                                    tracker.world_params['wrappers'][wrapper][
-                                        'timesteps_hold']
-                                    )
+                                    actives=
+                                    wrapper_dict[wrapper][
+                                        'actives'])
         else:
             raise Exception("wrapper is not known to be loaded")
     return env

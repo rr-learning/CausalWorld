@@ -1,4 +1,4 @@
-from causal_rl_bench.intervention_agents.base_policy import \
+from causal_rl_bench.intervention_actors.base_actor import \
     BaseInterventionActorPolicy
 from causal_rl_bench.utils.rotation_utils import quaternion_to_euler, \
     euler_to_quaternion
@@ -84,13 +84,13 @@ class ObjectSelectorWrapper(gym.Wrapper):
         self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(number_of_objects),
                                               gym.spaces.Discrete(7),
                                               gym.spaces.Discrete(7)))
-        self.env._add_wrapper_info({'object_selector': dict()})
+        self.env.add_wrapper_info({'object_selector': dict()})
 
     def step(self, action):
         #buffer action to the intervention actor
         self.intervention_actor.add_action(action, self.objects_order[action[0]])
         intervention_dict = self.intervention_actor.act(
-            self.env.get_current_task_parameters())
+            self.env.get_current_state_variables())
         self.env.do_intervention(intervention_dict)
         obs, reward, done, info = self.env.step(self.env.action_space.low)
         obs = obs[28:]

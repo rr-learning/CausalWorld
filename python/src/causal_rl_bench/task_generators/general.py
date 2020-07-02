@@ -13,11 +13,10 @@ class GeneralGeneratorTask(BaseTask):
         :param kwargs:
         """
         super().__init__(task_name="general",
-                         intervention_split=kwargs.get("intervention_split",
-                                                       False),
-                         training=kwargs.get("training", True),
-                         sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 1),
+                         use_train_space_only=kwargs.get("use_train_space_only",
+                                                         False),
+                         fractional_reward_weight=
+                         kwargs.get("fractional_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([])))
@@ -176,6 +175,7 @@ class GeneralGeneratorTask(BaseTask):
         #raise the fingers
         self._stage.remove_everything()
         self._task_stage_observation_keys = []
+        silhouettes_creation_dicts = []
         joint_positions = self._robot.get_upper_joint_positions()
         self._robot.reset_state(joint_positions=joint_positions,
                                 joint_velocities=np.zeros(9))

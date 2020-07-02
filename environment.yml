@@ -3,11 +3,11 @@ channels:
 - conda-forge
 dependencies:
 - python=3.7.4
-- pinocchio==2.2.2
 - sphinx
+- pinocchio==2.2.2
 - jupyter
 - pip:
-  - pybullet
+  - pybullet==2.8.2
   - gym
   - pandas
   - catkin_pkg
@@ -15,3 +15,5 @@ dependencies:
   - tensorflow==1.14.0
   - stable-baselines==2.10.0
   - pytest
+  - mpi4py
+  - psutil

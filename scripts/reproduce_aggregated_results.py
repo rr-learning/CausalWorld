@@ -6,7 +6,7 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
     PICK_AND_PLACE_BENCHMARK, \
     TOWER_2_BENCHMARK
 import causal_rl_bench.evaluation.visualization.visualiser as vis
-from causal_rl_bench.intervention_agents import RandomInterventionActorPolicy, GoalInterventionActorPolicy
+from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 import argparse
 import os
 import json
@@ -25,8 +25,7 @@ def baseline_model(model_num):
                                       PICKING_BENCHMARK,
                                       PICK_AND_PLACE_BENCHMARK,
                                       TOWER_2_BENCHMARK])
-    task_configs = [{'task_configs': {'intervention_split': True,
-                                      'training': True,
+    task_configs = [{'task_configs': {'use_train_space_only': True,
                                       'sparse_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,

@@ -8,17 +8,15 @@ import pybullet
 
 
 class BaseTask(object):
-    def __init__(self, task_name, intervention_split,
-                 training, sparse_reward_weight=1,
-                 dense_reward_weights=np.array([]),
-                 is_goal_distance_dense=True,
-                 calculate_additional_dense_rewards=True):
+    def __init__(self, task_name, use_train_space_only,
+                 fractional_reward_weight=1,
+                 dense_reward_weights=np.array([])):
         """
 
         :param task_name:
-        :param intervention_split:
+        :param use_train_space_only:
         :param training:
-        :param sparse_reward_weight:
+        :param fractional_reward_weight:
         :param dense_reward_weights:
         :param is_goal_distance_dense:
         :param calculate_additional_dense_rewards:
@@ -38,23 +36,23 @@ class BaseTask(object):
         self._current_full_observations_dict = dict()
         self._task_params = dict()
         self._task_params["task_name"] = self._task_name
-        self._task_params["sparse_reward_weight"] = sparse_reward_weight
+        self._task_params["fractional_reward_weight"] = fractional_reward_weight
         self._task_params["dense_reward_weights"] = dense_reward_weights
+        self._task_params['activate_sparse_reward'] = False
         self._training_intervention_spaces = dict()
         self._testing_intervention_spaces = dict()
-        self._task_params['intervention_split'] = intervention_split
-        self._task_params['training'] = training
+        self._task_params['use_train_space_only'] = use_train_space_only
         self._task_params["joint_positions"] = None
-        self._task_params['is_goal_distance_dense'] = is_goal_distance_dense
-        self._task_params['calculate_additional_dense_rewards'] = \
-            calculate_additional_dense_rewards
         self._current_starting_state = dict()
         self._default_starting_state = dict()
         self._empty_stage = None
+        self._recreation_time = 0
+        self._period_to_clear_memory = 50
         self._current_desired_goal = None
         self._current_achieved_goal = None
         self._current_goal_distance = None
         self._max_episode_length = None
+        self._create_world_func = None
         return
 
     def _save_pybullet_state(self):
@@ -85,8 +83,25 @@ class BaseTask(object):
                              physicsClientId=self._stage._pybullet_client_w_o_goal_id)
         return
 
-    def _save_state(self):
+    def _remove_pybullet_state(self, pybullet_state):
+        if self._stage._pybullet_client_full_id is not None:
+                pybullet. \
+                    removeState(pybullet_state['full'],
+                                 physicsClientId=self._stage._pybullet_client_full_id)
+        if self._stage._pybullet_client_w_goal_id is not None:
+                pybullet. \
+                    removeState(pybullet_state['w_goal'],
+                                 physicsClientId=self._stage._pybullet_client_w_goal_id)
+        if self._stage._pybullet_client_w_o_goal_id is not None:
+            pybullet. \
+                removeState(pybullet_state['w_o_goal'],
+                             physicsClientId=self._stage._pybullet_client_w_o_goal_id)
+        return
+
+    def save_state(self):
         state = dict()
+        # state['pybullet_states'] = \
+        #     self._save_pybullet_state()
         state['stage_object_state'] = \
             self._stage.get_full_env_state()
         state['robot_object_state'] = \
@@ -95,18 +110,25 @@ class BaseTask(object):
             copy.deepcopy(self._task_stage_observation_keys)
         return state
 
-    def _restore_state(self, state_dict):
-        #remove everything in the arena
-        #old number of rigid objects and number of visual objects
+    def restore_state(self, state_dict):
         old_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         old_number_of_visual_objects = len(self._stage.get_visual_objects())
         reset_observation_space = False
         self._stage.remove_everything()
-        self._restore_pybullet_state(self._empty_stage)
-        self._robot.set_full_env_state(state_dict
-                                      ['robot_object_state'])
+        if self._recreation_time != 0 and self._recreation_time % self._period_to_clear_memory == 0:
+            self._create_world_func()
+            self._robot._disable_velocity_control()
+            self._robot.set_full_env_state(state_dict
+                                           ['robot_object_state'])
+            self._remove_pybullet_state(self._empty_stage)
+            self._empty_stage = self._save_pybullet_state()
+        else:
+            self._restore_pybullet_state(self._empty_stage)
+            self._robot.set_full_env_state(state_dict
+                                           ['robot_object_state'])
         self._stage.set_full_env_state(
             state_dict['stage_object_state'])
+        self._recreation_time += 1
         new_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         new_number_of_visual_objects = len(self._stage.get_visual_objects())
         if old_number_of_rigid_objects != new_number_of_rigid_objects:
@@ -114,25 +136,27 @@ class BaseTask(object):
         if old_number_of_visual_objects != new_number_of_visual_objects:
             reset_observation_space = True
         self._task_stage_observation_keys = state_dict['task_observations']
+        # self._restore_pybullet_state(state_dict['pybullet_states'])
         return reset_observation_space
+
+    # def remove_state(self, state_dict):
+    #     self._remove_pybullet_state(state_dict['pybullet_states'])
+    #     del state_dict
+    #     return
 
     def is_in_training_mode(self):
         """
 
         :return:
         """
-        if self._task_params['intervention_split'] and \
-                self._task_params['training']:
-            return True
-        else:
-            return False
+        return self._task_params['use_train_space_only']
 
-    def set_super_sparse_reward(self):
+    def activate_sparse_reward(self):
         """
 
         :return:
         """
-        self._task_params['is_goal_distance_dense'] = True
+        self._task_params['activate_sparse_reward'] = True
 
     def get_description(self):
         """
@@ -207,7 +231,8 @@ class BaseTask(object):
                     self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
                 info['possible_solution_intervention'][rigid_object]['orientation'] = \
                     self._stage.get_object_state(possible_corresponding_goal, 'orientation')
-        info['ground_truth_scm_variables_values'] = self.get_current_scm_values()
+        info['ground_truth_current_state_varibales'] = \
+            self.get_current_scm_values()
         info['fractional_success'] = self._current_goal_distance
         return info
 
@@ -256,20 +281,17 @@ class BaseTask(object):
                                      ['cylindrical_position'][:, 1]))
         return intervention_dict
 
-    # def reset_default_state(self):
-    #     """
-    #
-    #     :return:
-    #     """
-    #     self.stage.remove_everything()
-    #     self._task_stage_observation_keys = []
-    #     self.robot.tri_finger.reset_world()
-    #     self._task_stage_observation_keys = []
-    #     self.initial_state = dict(self.default_state)
-    #     self._set_up_stage_arena()
-    #     self._set_testing_intervention_spaces()
-    #     self._set_training_intervention_spaces()
-    #     self.stage.finalize_stage()
+    def reset_default_state(self):
+        """
+
+        :return:
+        """
+        self.restore_state(self._default_starting_state)
+        self._task_solved = False
+        self._set_task_state()
+        self._current_starting_state = copy.deepcopy\
+            (self._default_starting_state)
+        return
 
     def _set_training_intervention_spaces(self):
         """
@@ -468,23 +490,22 @@ class BaseTask(object):
                                                           achieved_goal=self._current_achieved_goal)
         goal_distance = self._current_goal_distance
         self._update_success(self._current_goal_distance)
-        if not self._task_params['is_goal_distance_dense']:
+        if self._task_params['activate_sparse_reward']:
             if self._task_solved:
                 goal_distance = 1
             else:
-                goal_distance = -1
-        if self._task_params['calculate_additional_dense_rewards']:
+                goal_distance = 0
+            return goal_distance
+        else:
             dense_rewards, update_task_state_dict = \
                 self._calculate_dense_rewards(achieved_goal=self._current_achieved_goal,
                                               desired_goal=self._current_desired_goal)
             reward = np.sum(np.array(dense_rewards) *
                             self._task_params["dense_reward_weights"]) \
                         + goal_distance * \
-                        self._task_params["sparse_reward_weight"]
+                        self._task_params["fractional_reward_weight"]
             self._update_task_state(update_task_state_dict)
-        else:
-            reward = goal_distance * self._task_params["sparse_reward_weight"]
-        return reward
+            return reward
 
     def compute_reward(self, achieved_goal, desired_goal, info):
         """
@@ -496,22 +517,25 @@ class BaseTask(object):
         """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
-        if not self._task_params['is_goal_distance_dense']:
+        if self._task_params['activate_sparse_reward']:
             #TODO: not exactly right, but its a limitation of HER
             if self._check_preliminary_success(goal_distance):
                 goal_distance = 1
             else:
-                goal_distance = -1
-        reward = goal_distance * self._task_params["sparse_reward_weight"]
-        return reward
+                goal_distance = 0
+            return goal_distance
+        else:
+            reward = goal_distance * self._task_params["fractional_reward_weight"]
+            return reward
 
-    def init_task(self, robot, stage, max_episode_length):
+    def init_task(self, robot, stage, max_episode_length, create_world_func):
         """
 
         :param robot:
         :param stage:
         :return:
         """
+        self._create_world_func = create_world_func
         self._robot = robot
         self._stage = stage
         if self._task_params["joint_positions"] is not None:
@@ -526,9 +550,9 @@ class BaseTask(object):
         self._empty_stage = self._save_pybullet_state()
         self._set_up_stage_arena()
         self._default_starting_state = \
-            self._save_state()
+            self.save_state()
         self._current_starting_state = \
-            self._save_state()
+            self.save_state()
         self._stage.finalize_stage()
         if max_episode_length is None:
             self._max_episode_length = self.get_default_max_episode_length()
@@ -586,12 +610,14 @@ class BaseTask(object):
 
     def reset_task(self, interventions_dict=None):
         """
-
+        TODO: NOTE: With the current implementation, no contact points are saved
+        when resetting task
         :param interventions_dict:
         :return:
         """
         self._robot.clear()
-        reset_observation_space_signal = self._restore_state(self._current_starting_state)
+        reset_observation_space_signal = \
+            self.restore_state(self._current_starting_state)
         self._task_solved = False
         success_signal = None
         interventions_info = None
@@ -599,9 +625,9 @@ class BaseTask(object):
             success_signal, interventions_info, reset_observation_space_signal = \
                 self.apply_interventions(interventions_dict,
                                          check_bounds=
-                                         self._task_params['intervention_split'])
+                                         self._task_params['use_train_space_only'])
             if success_signal:
-                self._current_starting_state = self._save_state()
+                self._current_starting_state = self.save_state()
         self._set_task_state()
         return success_signal, interventions_info, reset_observation_space_signal
 
@@ -674,23 +700,13 @@ class BaseTask(object):
         #the goal position
         return False
 
-    def set_sparse_reward(self, sparse_reward_weight):
-        """
-
-        :param sparse_reward_weight:
-        :return:
-        """
-        self._task_params["sparse_reward_weight"] = \
-            sparse_reward_weight
-        return
-
     def do_single_random_intervention(self):
         """
 
         :return:
         """
         interventions_dict = dict()
-        if self._task_params['training']:
+        if self._task_params['use_train_space_only']:
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
@@ -750,34 +766,29 @@ class BaseTask(object):
             update(self.get_task_generator_variables_values())
         return variable_params
 
-    def get_current_task_parameters(self):
+    def get_current_state_variables(self):
         """
 
         :return:
         """
-        #this is all the variables that are available and exposed
+        #this is all the variables that are availaavailableble and exposed
         current_variables_values = self.get_current_scm_values()
-        #filter them only if intervention spaces split is enforced
-        if self._task_params['intervention_split']:
-            #choose intervention space
-            if self._task_params['training']:
-                intervention_space = self._training_intervention_spaces
-            else:
-                intervention_space = self._testing_intervention_spaces
-            task_params_dict = dict()
+        if self._task_params['use_train_space_only']:
+            intervention_space = self._training_intervention_spaces
+            state_variables_dict = dict()
             for variable_name in intervention_space:
                 if isinstance(
                         intervention_space[variable_name], dict):
-                    task_params_dict[variable_name] = dict()
+                    state_variables_dict[variable_name] = dict()
                     for subvariable_name in intervention_space[variable_name]:
-                        task_params_dict[variable_name][subvariable_name] = \
+                        state_variables_dict[variable_name][subvariable_name] = \
                             current_variables_values[variable_name][subvariable_name]
                 else:
-                    task_params_dict[variable_name] = current_variables_values[variable_name]
+                    state_variables_dict[variable_name] = current_variables_values[variable_name]
         else:
-            task_params_dict = dict(current_variables_values)
+            state_variables_dict = dict(current_variables_values)
         # you can add task specific ones after that
-        return task_params_dict
+        return state_variables_dict
 
     def is_intervention_in_bounds(self, interventions_dict):
         """
@@ -785,7 +796,7 @@ class BaseTask(object):
         :param interventions_dict:
         :return:
         """
-        if self._task_params['training']:
+        if self._task_params['use_train_space_only']:
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
@@ -873,7 +884,7 @@ class BaseTask(object):
         #     current_robot_state = self.robot.get_full_state()
         # else:
         #     current_robot_state = self.robot.get_default_state()
-        current_state = self._save_state()
+        current_state = self.save_state()
         self._robot.apply_interventions(robot_interventions_dict)
         self._stage.apply_interventions(stage_interventions_dict)
         task_generator_intervention_success_signal, reset_observation_space_signal = \
@@ -891,9 +902,10 @@ class BaseTask(object):
             if not self._robot.check_feasibility_of_robot_state():
                 robot_infeasible = True
             if stage_infeasible or robot_infeasible:
-                self._restore_state(current_state)
+                self.restore_state(current_state)
             else:
                 self._restore_pybullet_state(pre_contact_check_state)
+            self._remove_pybullet_state(pre_contact_check_state)
         interventions_info['robot_infeasible'] = \
             robot_infeasible
         interventions_info['stage_infeasible'] = \
@@ -913,7 +925,7 @@ class BaseTask(object):
         :return:
         """
         if check_bounds is None:
-            check_bounds = self._task_params['intervention_split']
+            check_bounds = self._task_params['use_train_space_only']
         success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)

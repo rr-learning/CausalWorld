@@ -28,7 +28,8 @@ def test_pd_gains():
     np.random.seed(0)
     task = task_generator(task_generator_id='pushing')
     skip_frame = 1
-    env = CausalWorld(task=task, enable_visualization=False, skip_frame=skip_frame, normalize_observations=False,
+    env = CausalWorld(task=task, enable_visualization=False,
+                      skip_frame=skip_frame, normalize_observations=False,
                       normalize_actions=False, seed=0)
     zero_hold = int(5000 / skip_frame) #reach desired position in 4 secs?
     obs = env.reset()
@@ -37,7 +38,7 @@ def test_pd_gains():
     for _ in range(zero_hold):
         chosen_action = env.action_space.high
         obs, reward, done, info = env.step(chosen_action)
-    current_joint_positions = obs[:9]
+    current_joint_positions = obs[1:10]
     if (((current_joint_positions - chosen_action) > 0.1).any()):
         raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
                              format(chosen_action, current_joint_positions))
@@ -45,7 +46,7 @@ def test_pd_gains():
     for _ in range(zero_hold):
         chosen_action = env.action_space.low
         obs, reward, done, info = env.step(chosen_action)
-    current_joint_positions = obs[:9]
+    current_joint_positions = obs[1:10]
     if (((current_joint_positions - chosen_action) > 0.1).any()):
         raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
                              format(chosen_action, current_joint_positions))

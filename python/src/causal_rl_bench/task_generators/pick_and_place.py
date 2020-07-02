@@ -10,12 +10,11 @@ class PickAndPlaceTaskGenerator(BaseTask):
         :param kwargs:
         """
         super().__init__(task_name="pick_and_place",
-                         intervention_split=kwargs.get(
-                             "intervention_split",
+                         use_train_space_only=kwargs.get(
+                             "use_train_space_only",
                              False),
-                         training=kwargs.get("training", True),
-                         sparse_reward_weight=
-                         kwargs.get("sparse_reward_weight", 0),
+                         fractional_reward_weight=
+                         kwargs.get("fractional_reward_weight", 0),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
                                     np.array([1, 1, 1])))
@@ -126,8 +125,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
         :return:
         """
         self.previous_end_effector_positions = \
-            self._robot.compute_end_effector_positions(
-                self._robot.get_latest_full_state()['positions'])
+            self._robot.get_latest_full_state()['end_effector_positions']
         self.previous_end_effector_positions = \
             self.previous_end_effector_positions.reshape(-1, 3)
         self.previous_object_position = \
@@ -160,8 +158,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                                     'cartesian_position')
         goal_orientation = self._stage.get_object_state('goal_block',
                                                        'orientation')
-        end_effector_positions = self._robot.compute_end_effector_positions(
-            self._robot.get_latest_full_state()['positions'])
+        end_effector_positions = self._robot.get_latest_full_state()['end_effector_positions']
         end_effector_positions = end_effector_positions.reshape(-1, 3)
 
         # calculate first reward term
