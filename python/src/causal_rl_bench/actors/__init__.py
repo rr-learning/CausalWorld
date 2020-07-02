@@ -1,0 +1,3 @@
+from causal_rl_bench.actors.reacher_policy import ReacherActorPolicy
+from causal_rl_bench.actors.dummy_policy import DummyActorPolicy
+from causal_rl_bench.actors.base_policy import BaseActorPolicy

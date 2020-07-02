@@ -1,5 +1,5 @@
 import numpy as np
-from causal_rl_bench.intervention_agents.base_policy import \
+from causal_rl_bench.intervention_actors.base_actor import \
     BaseInterventionActorPolicy
 
 
@@ -59,5 +59,5 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
 
         :return:
         """
-        return {'rigid_pose_agent': {'positions': self.positions,
+        return {'rigid_pose_actor': {'positions': self.positions,
                                      'orientations': self.orientations}}

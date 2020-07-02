@@ -1,5 +1,5 @@
 from causal_rl_bench.wrappers.policy_wrappers import MovingAverageActionWrapperActorPolicy
-from causal_rl_bench.agents.dummy_policy import DummyActorPolicy
+from causal_rl_bench.actors.dummy_policy import DummyActorPolicy
 import gym
 
 
@@ -7,7 +7,7 @@ class DeltaActionEnvWrapper(gym.ActionWrapper):
     def __init__(self, env):
         super(DeltaActionEnvWrapper, self).__init__(env)
         #TODO: discuss the action space of a delta action
-        self.env._add_wrapper_info({'delta_action': dict()})
+        self.env.add_wrapper_info({'delta_action': dict()})
 
     def action(self, action):
         #Take care of normalization here too
@@ -41,9 +41,6 @@ class DeltaActionEnvWrapper(gym.ActionWrapper):
                     observation=offset, key=self.env.action_mode)
         return action - offset
 
-    def reset(self, interventions_dict=None):
-        return self.env.reset(interventions_dict)
-
 
 class MovingAverageActionEnvWrapper(gym.ActionWrapper):
     def __init__(self, env, widow_size=8, initial_value=0):
@@ -52,7 +49,7 @@ class MovingAverageActionEnvWrapper(gym.ActionWrapper):
         self._policy = MovingAverageActionWrapperActorPolicy(self._policy,
                                                              widow_size=widow_size,
                                                              initial_value=initial_value)
-        self.env._add_wrapper_info({'moving_average_action': {'widow_size': widow_size,
+        self.env.add_wrapper_info({'moving_average_action': {'widow_size': widow_size,
                                                              'initial_value': initial_value}})
         return
 
@@ -62,6 +59,3 @@ class MovingAverageActionEnvWrapper(gym.ActionWrapper):
 
     def reverse_action(self, action):
         raise Exception("not implemented yet")
-
-    def reset(self, interventions_dict=None):
-        return self.env.reset(interventions_dict)

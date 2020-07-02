@@ -27,8 +27,7 @@ class HERGoalEnvWrapper(gym.GoalEnv):
                                                   observation=self.env.observation_space))
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata
-        self.env._add_wrapper_info(
-            {'her_environment': {'activate_sparse_reward': activate_sparse_reward}})
+        self.env.add_wrapper_info({'her_environment': {'activate_sparse_reward': activate_sparse_reward}})
 
     def __getattr__(self, name):
         if name.startswith('_'):
@@ -51,9 +50,9 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         obs_dict['desired_goal'] = info['desired_goal']
         return obs_dict, reward, done, info
 
-    def reset(self, **kwargs):
+    def reset(self):
         obs_dict = dict()
-        normal_obs = self.env.reset(**kwargs)
+        normal_obs = self.env.reset()
         obs_dict['observation'] = normal_obs
         obs_dict['achieved_goal'] = self.env.get_task().get_achieved_goal()
         obs_dict['desired_goal'] = self.env.get_task().get_desired_goal()

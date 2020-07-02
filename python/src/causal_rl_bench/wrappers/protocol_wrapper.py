@@ -5,8 +5,8 @@ class ProtocolWrapper(gym.Wrapper):
     def __init__(self, env, protocol):
         super(ProtocolWrapper, self).__init__(env)
         self.protocol = protocol
-        self.env._add_wrapper_info({'evaluation_environment':
-                                    self.protocol.get_name()})
+        self.env.add_wrapper_info({'evaluation_environment':
+                                       self.protocol.get_name()})
         self._elapsed_episodes = 0
         self._elapsed_timesteps = 0
         return

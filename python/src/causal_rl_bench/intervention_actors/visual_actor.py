@@ -1,4 +1,4 @@
-from causal_rl_bench.intervention_agents.base_policy import \
+from causal_rl_bench.intervention_actors.base_actor import \
     BaseInterventionActorPolicy
 import numpy as np
 
@@ -20,10 +20,10 @@ class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         if env.is_in_training_mode():
             self.task_intervention_space =\
-                env._task.get_testing_intervention_spaces()
+                env.get_task().get_testing_intervention_spaces()
         else:
             self.task_intervention_space = \
-                env._task.get_training_intervention_spaces()
+                env.get_task().get_training_intervention_spaces()
         return
 
     def _act(self, variables_dict):
@@ -53,4 +53,4 @@ class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
 
         :return:
         """
-        return {'visual_agent': dict()}
+        return {'visual_actor': dict()}
