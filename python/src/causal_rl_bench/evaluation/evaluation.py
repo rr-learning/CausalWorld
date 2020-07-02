@@ -15,6 +15,7 @@ from causal_rl_bench.wrappers.protocol_wrapper \
 from causal_rl_bench.loggers.tracker import Tracker
 import json
 
+
 class EvaluationPipeline(object):
     def __init__(self, evaluation_protocols, tracker_path=None,
                  world_params=None, task_params=None,

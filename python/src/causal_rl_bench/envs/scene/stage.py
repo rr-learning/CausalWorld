@@ -15,7 +15,8 @@ class Stage(object):
                  pybullet_client_full_id,
                  pybullet_client_w_goal_id,
                  pybullet_client_w_o_goal_id,
-                 cameras):
+                 cameras,
+                 camera_indicies):
         """
 
         :param observation_mode:
@@ -30,6 +31,7 @@ class Stage(object):
         self._pybullet_client_full_id = pybullet_client_full_id
         self._pybullet_client_w_goal_id = pybullet_client_w_goal_id
         self._pybullet_client_w_o_goal_id = pybullet_client_w_o_goal_id
+        self._camera_indicies = camera_indicies
         #TODO: move the ids from here
         self._normalize_observations = normalize_observations
         self._stage_observations = None
@@ -246,7 +248,8 @@ class Stage(object):
                                                          self._visual_objects,
                                                          self._observation_mode,
                                                          self._normalize_observations,
-                                                         cameras=self._cameras)
+                                                         cameras=self._cameras,
+                                                         camera_indicies=self._camera_indicies)
             self.update_goal_image()
         else:
             self._stage_observations = StageObservations(self._rigid_objects,

@@ -1,5 +1,5 @@
 class Curriculum(object):
-    def __init__(self, intervention_actors, actives, **kwargs):
+    def __init__(self, intervention_actors, actives):
         self.intervention_actors = intervention_actors
         self.actives = actives
 
