@@ -175,11 +175,11 @@ amount of common shared structure. The skills to learn range from simple to
 extremely challenging although the compositional nature of the environments
 should allow to reuse previously learned more primitive skills along a
 naturally emerging curriculum of tasks.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.envs.world</span> <span class="kn">import</span> <span class="n">World</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.envs.causalworld</span> <span class="kn">import</span> <span class="n">CausalWorld</span>
 <span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.task</span> <span class="kn">import</span> <span class="n">task_generator</span>
 
 <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s1">&#39;stacked_blocks&#39;</span><span class="p">)</span>
-<span class="n">env</span> <span class="o">=</span> <span class="n">World</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">)</span>
+<span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">)</span>
 <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
 <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
     <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
