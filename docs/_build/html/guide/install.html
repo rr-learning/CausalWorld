@@ -169,7 +169,16 @@
 <div class="section" id="install-as-a-pip-package-in-a-conda-env">
 <h2>Install as a pip package in a conda env<a class="headerlink" href="#install-as-a-pip-package-in-a-conda-env" title="Permalink to this headline">¶</a></h2>
 <p>Clone this repo and then create it's conda environment to install all dependencies.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git clone git@gitlab.is.tue.mpg.de:robotics/counterfactual.git
+<span class="nb">cd</span> counterfactual
+conda env create -f environment.yml
+</pre></div>
+</div>
 <p>Install the causal_rl_bench package inside the (causal_rl_bench) conda env.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>conda activate causal_rl_bench
+<span class="o">(</span>causal_rl_bench<span class="o">)</span> python -m pip install .
+</pre></div>
+</div>
 </div>
 </div>
 
