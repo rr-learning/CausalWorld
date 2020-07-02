@@ -6,9 +6,8 @@ import numpy as np
 class MyOwnTask(BaseTask):
     def __init__(self, **kwargs):
         super().__init__(task_name="new_task",
-                         intervention_split=False,
-                         training=True,
-                         sparse_reward_weight=1,
+                         use_train_space_only=False,
+                         fractional_reward_weight=1,
                          dense_reward_weights=np.array([]))
         self._task_robot_observation_keys = ["time_left_for_task",
                                              "joint_positions",

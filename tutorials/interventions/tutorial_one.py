@@ -9,7 +9,8 @@ def example():
     for _ in range(50):
         for i in range(10):
             obs, reward, done, info = env.step(env.action_space.sample())
-            random_intervention_dict = env.do_single_random_intervention()
+            random_intervention_dict, success_signal, obs = \
+                env.do_single_random_intervention()
         print("resetting")
         env.reset()
         for i in range(200):

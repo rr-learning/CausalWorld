@@ -22,7 +22,9 @@ class CausalWorld(gym.Env):
                  enable_visualization=False, seed=0,
                  action_mode="joint_positions", observation_mode="structured",
                  normalize_actions=True, normalize_observations=True,
-                 max_episode_length=None, data_recorder=None):
+                 max_episode_length=None, data_recorder=None,
+                 camera_indicies=np.array([0, 1, 2]),
+                 wrappers=None):
         """
 
         :param task:
@@ -43,6 +45,7 @@ class CausalWorld(gym.Env):
         self._enable_visualization = enable_visualization
         self.seed(seed)
         self._simulation_time = 1. / 250
+        self._camera_indicies = np.array(camera_indicies)
         self._skip_frame = skip_frame
         self.dt = self._simulation_time * self._skip_frame
         self._pybullet_client_w_o_goal_id = None
@@ -112,7 +115,8 @@ class CausalWorld(gym.Env):
                                      self._revolute_joint_ids,
                                      finger_tip_ids=self.finger_tip_ids,
                                      cameras=self._tool_cameras,
-                                     pinocchio_utils=self._pinocchio_utils)
+                                     pinocchio_utils=self._pinocchio_utils,
+                                     camera_indicies=self._camera_indicies)
         self._stage = Stage(observation_mode=observation_mode,
                             normalize_observations=normalize_observations,
                             pybullet_client_full_id=
@@ -121,7 +125,8 @@ class CausalWorld(gym.Env):
                             self._pybullet_client_w_goal_id,
                             pybullet_client_w_o_goal_id=
                             self._pybullet_client_w_o_goal_id,
-                            cameras=self._goal_cameras)
+                            cameras=self._goal_cameras,
+                            camera_indicies=self._camera_indicies)
         gym.Env.__init__(self)
         if task is None:
             self._task = task_generator("reaching")
@@ -260,7 +265,7 @@ class CausalWorld(gym.Env):
             self._reset_observations_space()
         # TODO: make sure that stage observations returned are up to date
         if self._data_recorder:
-            self._data_recorder.new_episode(self.get_state(),
+            self._data_recorder.new_episode(self.get_current_state_variables(),
                                             task_name=
                                             self._task._task_name,
                                             task_params=
@@ -318,7 +323,13 @@ class CausalWorld(gym.Env):
             if success_signal is not None:
                 if not success_signal:
                     self._tracker.add_invalid_intervention(interventions_info)
-        return interventions_dict, success_signal
+        if self._observation_mode == "cameras":
+            current_images = self._robot.get_current_camera_observations()
+            goal_images = self._stage.get_current_goal_image()
+            obs = np.concatenate((current_images, goal_images), axis=0)
+        else:
+            obs = self._task.filter_structured_observations()
+        return interventions_dict, success_signal, obs
 
     def do_intervention(self, interventions_dict,
                         check_bounds=None):
@@ -337,7 +348,13 @@ class CausalWorld(gym.Env):
         if success_signal is not None:
             if not success_signal:
                 self._tracker.add_invalid_intervention(interventions_info)
-        return success_signal
+        if self._observation_mode == "cameras":
+            current_images = self._robot.get_current_camera_observations()
+            goal_images = self._stage.get_current_goal_image()
+            obs = np.concatenate((current_images, goal_images), axis=0)
+        else:
+            obs = self._task.filter_structured_observations()
+        return success_signal, obs
 
     def get_state(self):
         """
