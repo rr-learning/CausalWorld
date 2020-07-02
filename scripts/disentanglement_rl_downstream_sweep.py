@@ -18,7 +18,7 @@ import numpy as np
 from stable_baselines.common.callbacks import CheckpointCallback
 from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 import causal_rl_bench.evaluation.visualization.visualiser as vis
-from causal_rl_bench.intervention_agents import GoalInterventionActorPolicy
+from causal_rl_bench.intervention_actors import GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
 from causal_rl_bench.benchmark.benchmarks import PUSHING_BENCHMARK

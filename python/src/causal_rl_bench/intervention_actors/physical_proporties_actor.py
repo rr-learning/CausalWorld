@@ -1,4 +1,4 @@
-from causal_rl_bench.intervention_agents.base_policy import \
+from causal_rl_bench.intervention_actors.base_actor import \
     BaseInterventionActorPolicy
 import numpy as np
 
@@ -68,4 +68,4 @@ class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
 
         :return:
         """
-        return {'physical_properties_agent': {'group': self.group}}
+        return {'physical_properties_actor': {'group': self.group}}

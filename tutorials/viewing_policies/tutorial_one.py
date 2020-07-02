@@ -1,5 +1,5 @@
 from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.agents.reacher_policy import ReacherActorPolicy
+from causal_rl_bench.actors.reacher_policy import ReacherActorPolicy
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import causal_rl_bench.viewers.task_viewer as viewer

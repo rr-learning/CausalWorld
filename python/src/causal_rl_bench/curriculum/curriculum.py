@@ -23,7 +23,8 @@ class Curriculum(object):
 
     def get_params(self):
         params = dict()
-        params['agent_params'] = dict()
+        params['actor_params'] = dict()
         for actor in self.intervention_actors:
-            params['agent_params'].update(actor.get_params())
+            params['actor_params'].update(actor.get_params())
+        params['actives'] = self.actives
         return params

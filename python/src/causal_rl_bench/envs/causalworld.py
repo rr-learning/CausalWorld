@@ -433,11 +433,10 @@ class CausalWorld(gym.Env):
         world_params["normalize_observations"] = \
             self._robot._robot_observations.is_normalized()
         world_params["max_episode_length"] = self._max_episode_length
-        world_params["simulation_time"] = self._simulation_time
         world_params["wrappers"] = self._wrappers_dict
         return world_params
 
-    def _add_wrapper_info(self, wrapper_dict):
+    def add_wrapper_info(self, wrapper_dict):
         """
 
         :param wrapper_dict:

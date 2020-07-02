@@ -5,7 +5,7 @@ class BaseInterventionActorPolicy(object):
 
     def initialize(self, env):
         """
-        This functions allows the intervention agent to query things from the env, such
+        This functions allows the intervention actor to query things from the env, such
         as intervention spaces or to have access to sampling funcs for goals..etc
         Parameters
         ---------

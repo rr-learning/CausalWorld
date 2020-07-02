@@ -1,7 +1,7 @@
 from stable_baselines import PPO2
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-from causal_rl_bench.agents.base_policy import BaseActorPolicy
+from causal_rl_bench.actors.base_policy import BaseActorPolicy
 import os
 
 
