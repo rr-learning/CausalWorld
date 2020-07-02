@@ -9,7 +9,8 @@ class PickingTaskGenerator(BaseTask):
         :param kwargs:
         """
         super().__init__(task_name="picking",
-                         use_train_space_only=kwargs.get("use_train_space_only", True),
+                         use_train_space_only=kwargs.get("use_train_space_only",
+                                                         False),
                          fractional_reward_weight=
                          kwargs.get("fractional_reward_weight", 1),
                          dense_reward_weights=
@@ -67,15 +68,15 @@ class PickingTaskGenerator(BaseTask):
                          ["tool_block_orientation"]}
         self._stage.add_silhoutte_general_object(**creation_dict)
         self._task_stage_observation_keys = ["tool_block_type",
-                                            "tool_block_size",
-                                            "tool_block_cartesian_position",
-                                            "tool_block_orientation",
-                                            "tool_block_linear_velocity",
-                                            "tool_block_angular_velocity",
-                                            "goal_block_type",
-                                            "goal_block_size",
-                                            "goal_block_cartesian_position",
-                                            "goal_block_orientation"]
+                                             "tool_block_size",
+                                             "tool_block_cartesian_position",
+                                             "tool_block_orientation",
+                                             "tool_block_linear_velocity",
+                                             "tool_block_angular_velocity",
+                                             "goal_block_type",
+                                             "goal_block_size",
+                                             "goal_block_cartesian_position",
+                                             "goal_block_orientation"]
 
         return
 
@@ -163,6 +164,8 @@ class PickingTaskGenerator(BaseTask):
         end_effector_positions = end_effector_positions.reshape(-1, 3)
         current_distance_from_block = np.linalg.norm(end_effector_positions -
                                                      block_position)
+        # print("block position is ", block_position)
+        # print("end effector positions ", end_effector_positions)
         previous_distance_from_block = np.linalg.norm(
             self.previous_end_effector_positions -
             self.previous_object_position)

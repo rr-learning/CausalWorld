@@ -41,4 +41,6 @@ class CurriculumWrapper(gym.Wrapper):
                 current_task_params=self.env.get_current_state_variables(),
                 episode=self._elapsed_episodes,
                 time_step=0)
-        return self.env.reset(interventions_dict)
+        if interventions_dict is not None:
+            self.env.set_starting_state(interventions_dict)
+        return self.env.reset()

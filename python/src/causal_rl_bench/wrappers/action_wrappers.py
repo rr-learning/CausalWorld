@@ -41,9 +41,6 @@ class DeltaActionEnvWrapper(gym.ActionWrapper):
                     observation=offset, key=self.env.action_mode)
         return action - offset
 
-    def reset(self, interventions_dict=None):
-        return self.env.reset(interventions_dict)
-
 
 class MovingAverageActionEnvWrapper(gym.ActionWrapper):
     def __init__(self, env, widow_size=8, initial_value=0):
@@ -62,6 +59,3 @@ class MovingAverageActionEnvWrapper(gym.ActionWrapper):
 
     def reverse_action(self, action):
         raise Exception("not implemented yet")
-
-    def reset(self, interventions_dict=None):
-        return self.env.reset(interventions_dict)

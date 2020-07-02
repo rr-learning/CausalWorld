@@ -50,7 +50,8 @@ class TestPickAndPlace(unittest.TestCase):
         actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
-        self.env.reset(interventions_dict=new_goal)
+        self.env.set_starting_state(interventions_dict=new_goal)
+        self.env.reset()
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             observations_1.append(obs)
@@ -103,7 +104,8 @@ class TestPickAndPlace(unittest.TestCase):
         for _ in range(10):
             invalid_interventions_before = env.get_tracker().invalid_intervention_steps
             new_goal = env.sample_new_goal()
-            env.reset(interventions_dict=new_goal)
+            env.set_starting_state(interventions_dict=new_goal)
+            env.reset()
             invalid_interventions_after = env.get_tracker().invalid_intervention_steps
             for _ in range(2):
                 for _ in range(100):

@@ -51,9 +51,9 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         obs_dict['desired_goal'] = info['desired_goal']
         return obs_dict, reward, done, info
 
-    def reset(self, **kwargs):
+    def reset(self):
         obs_dict = dict()
-        normal_obs = self.env.reset(**kwargs)
+        normal_obs = self.env.reset()
         obs_dict['observation'] = normal_obs
         obs_dict['achieved_goal'] = self.env.get_task().get_achieved_goal()
         obs_dict['desired_goal'] = self.env.get_task().get_desired_goal()

@@ -23,11 +23,11 @@ class ReachingTaskGenerator(BaseTask):
                                              "joint_velocities",
                                              "end_effector_positions"]
         self._task_params['default_goal_60'] = \
-            kwargs.get("default_goal_60", np.array([0, 0, 0.15]))
+            kwargs.get("default_goal_60", np.array([0, 0, 0.10]))
         self._task_params['default_goal_120'] = \
-            kwargs.get("default_goal_120", np.array([0, 0, 0.2]))
+            kwargs.get("default_goal_120", np.array([0, 0, 0.13]))
         self._task_params['default_goal_300'] = \
-            kwargs.get("default_goal_300", np.array([0, 0, 0.25]))
+            kwargs.get("default_goal_300", np.array([0, 0, 0.16]))
         self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self._task_params["joint_positions"] = \
@@ -180,11 +180,12 @@ class ReachingTaskGenerator(BaseTask):
         info['desired_goal'] = self._current_desired_goal
         info['achieved_goal'] = self._current_achieved_goal
         info['success'] = self._task_solved
-        info['possible_solution_intervention'] = dict()
-        info['possible_solution_intervention']['joint_positions'] = \
-            self._robot.get_joint_positions_from_tip_positions(self._current_desired_goal,
-                                                               self._robot.
-                                                                      get_latest_full_state()['positions'])
+        #TODO: below has a memory leak for now
+        # info['possible_solution_intervention'] = dict()
+        # info['possible_solution_intervention']['joint_positions'] = \
+        #     self._robot.get_joint_positions_from_tip_positions(self._current_desired_goal,
+        #                                                        self._robot.
+        #                                                               get_latest_full_state()['positions'])
         info['fractional_success'] = self._current_goal_distance
         info['ground_truth_current_state_varibales'] = \
             self.get_current_scm_values()

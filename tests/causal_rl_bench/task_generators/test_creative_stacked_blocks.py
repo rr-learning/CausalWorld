@@ -49,7 +49,7 @@ class TestCreativeStackedBlocks(unittest.TestCase):
         actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
-        self.env.do_intervention(new_goal)
+        self.env.set_starting_state(interventions_dict=new_goal)
         self.env.reset()
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
@@ -64,6 +64,8 @@ class TestCreativeStackedBlocks(unittest.TestCase):
                 obs, reward, done, info = self.env.step(actions[i])
                 observations_2.append(obs)
                 rewards_2.append(reward)
+                if not np.array_equal(observations_1[i], observations_2[i]):
+                    print(np.array(observations_1[i]) - np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 
