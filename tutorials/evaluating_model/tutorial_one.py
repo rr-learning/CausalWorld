@@ -65,8 +65,6 @@ def evaluate_trained_policy():
                                                          protocols.InitialPosesOOD(),
                                                          protocols.InEpisodePosesChange()],
                                    tracker_path=log_relative_path,
-                                   intervention_split=True,
-                                   visualize_evaluation=True,
                                    initial_seed=0)
 
     # For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol
