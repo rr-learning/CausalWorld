@@ -1,6 +1,5 @@
 from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
-import numpy as np
 
 
 def example():

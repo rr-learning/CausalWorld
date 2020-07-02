@@ -359,7 +359,6 @@ class CausalWorld(gym.Env):
         self._task._restore_pybullet_state(new_full_state['pybullet_state'])
         self._robot._control_index = new_full_state['control_index']
         self._robot.update_latest_full_state()
-        # self._task.restore_state(new_full_state)
         return
 
     def render(self, mode="human"):
@@ -497,7 +496,7 @@ class CausalWorld(gym.Env):
         """
         self._reset_world()
         finger_base_position = [0, 0, 0.0]
-        finger_base_orientation = pybullet.getQuaternionFromEuler([0, 0, 0])
+        finger_base_orientation = [0, 0,  0, 1]
         if initialize_goal_image:
             client_list = [self._pybullet_client_w_o_goal_id,
                            self._pybullet_client_w_goal_id,

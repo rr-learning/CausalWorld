@@ -405,6 +405,11 @@ class TriFingerRobot(object):
             client = self._pybullet_client_w_o_goal_id
         else:
             client = self._pybullet_client_full_id
+        position, _ = pybullet. \
+            getBasePositionAndOrientation(WorldConstants.ROBOT_ID,
+                                          physicsClientId=
+                                          client)
+        variable_params['robot_height'] = position[-1] + WorldConstants.ROBOT_HEIGHT
         for robot_finger_link in WorldConstants.LINK_IDS:
             variable_params[robot_finger_link] = dict()
             variable_params[robot_finger_link]['color'] = \
@@ -612,6 +617,26 @@ class TriFingerRobot(object):
             if intervention == "joint_velocities" or \
                     intervention == "joint_positions":
                 continue
+            if intervention == 'robot_height':
+                if self._pybullet_client_w_goal_id is not None:
+                    pybullet.resetBasePositionAndOrientation(
+                        WorldConstants.ROBOT_ID, [0, 0, interventions_dict[intervention] - WorldConstants.ROBOT_HEIGHT],
+                        [0, 0, 0, 1],
+                        physicsClientId=
+                        self._pybullet_client_w_goal_id)
+                if self._pybullet_client_w_o_goal_id is not None:
+                    pybullet.resetBasePositionAndOrientation(
+                        WorldConstants.ROBOT_ID,  [0, 0, interventions_dict[intervention] - WorldConstants.ROBOT_HEIGHT],
+                        [0, 0, 0, 1],
+                        physicsClientId=
+                        self._pybullet_client_w_o_goal_id)
+                if self._pybullet_client_full_id is not None:
+                    pybullet.resetBasePositionAndOrientation(
+                        WorldConstants.ROBOT_ID,  [0, 0, interventions_dict[intervention] - WorldConstants.ROBOT_HEIGHT],
+                        [0, 0, 0, 1],
+                        physicsClientId=
+                        self._pybullet_client_full_id)
+                continue
             if "robot_finger" in intervention:
                 for sub_intervention_variable in \
                         interventions_dict[intervention]:
@@ -663,7 +688,7 @@ class TriFingerRobot(object):
                 self._control_index = interventions_dict["control_index"]
             else:
                 raise Exception("The intervention state variable specified is "
-                                "not allowed")
+                                "not allowed", intervention)
         self.update_latest_full_state()
         return
 
