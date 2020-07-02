@@ -47,7 +47,7 @@ class BaseTask(object):
         self._default_starting_state = dict()
         self._empty_stage = None
         self._recreation_time = 0
-        self._period_to_clear_memory = 10
+        self._period_to_clear_memory = 50
         self._current_desired_goal = None
         self._current_achieved_goal = None
         self._current_goal_distance = None
@@ -115,20 +115,20 @@ class BaseTask(object):
         old_number_of_visual_objects = len(self._stage.get_visual_objects())
         reset_observation_space = False
         self._stage.remove_everything()
-        if self._recreation_time % self._period_to_clear_memory == 0:
+        if self._recreation_time != 0 and self._recreation_time % self._period_to_clear_memory == 0:
             self._create_world_func()
             self._robot._disable_velocity_control()
             self._robot.set_full_env_state(state_dict
                                            ['robot_object_state'])
             self._remove_pybullet_state(self._empty_stage)
             self._empty_stage = self._save_pybullet_state()
-            self._recreation_time += 1
         else:
             self._restore_pybullet_state(self._empty_stage)
             self._robot.set_full_env_state(state_dict
                                            ['robot_object_state'])
         self._stage.set_full_env_state(
             state_dict['stage_object_state'])
+        self._recreation_time += 1
         new_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         new_number_of_visual_objects = len(self._stage.get_visual_objects())
         if old_number_of_rigid_objects != new_number_of_rigid_objects:

@@ -7,7 +7,7 @@ dependencies:
 - pinocchio==2.4.2
 - jupyter
 - pip:
-  - pybullet
+  - pybullet==2.8.2
   - gym
   - pandas
   - catkin_pkg
