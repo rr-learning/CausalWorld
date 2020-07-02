@@ -77,67 +77,67 @@ class TestPicking(unittest.TestCase):
                 obs, reward, done, info = self.env.step(desired_action)
         return obs
 
-    # def test_02_mass(self):
-    #     self.env.set_action_mode('end_effector_positions')
-    #     intervention = {'tool_block': {'mass': 0.02}}
-    #     self.env.do_intervention(interventions_dict=intervention)
-    #     for _ in range(1):
-    #         obs = self.env.reset()
-    #         self.lift_last_finger_first(obs)
-    #         desired_grip = self.grip_block()
-    #         self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
-    #         final_obs = self.lift_block(desired_grip)
-    #         self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
-    #
-    # def test_08_mass(self):
-    #     self.env.set_action_mode('end_effector_positions')
-    #     intervention = {'tool_block': {'mass': 0.08}}
-    #     self.env.do_intervention(interventions_dict=intervention)
-    #     for _ in range(1):
-    #         obs = self.env.reset()
-    #         self.lift_last_finger_first(obs)
-    #         desired_grip = self.grip_block()
-    #         self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
-    #         final_obs = self.lift_block(desired_grip)
-    #         self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
-    #
-    # def test_1_mass(self):
-    #     self.env.set_action_mode('end_effector_positions')
-    #     intervention = {'tool_block': {'mass': 0.1}}
-    #     self.env.do_intervention(interventions_dict=intervention)
-    #     for _ in range(1):
-    #         obs = self.env.reset()
-    #         self.lift_last_finger_first(obs)
-    #         desired_grip = self.grip_block()
-    #         self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
-    #         final_obs = self.lift_block(desired_grip)
-    #         self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
-    #
-    # def test_determinism_w_interventions(self):
-    #     self.env.set_action_mode('joint_positions')
-    #     observations_1 = []
-    #     rewards_1 = []
-    #     horizon = 100
-    #     actions = [self.env.action_space.sample() for _ in range(horizon)]
-    #     actions = np.array(actions)
-    #     new_goal = self.env.sample_new_goal()
-    #     self.env.set_starting_state(interventions_dict=new_goal)
-    #     self.env.reset()
-    #     for i in range(horizon):
-    #         obs, reward, done, info = self.env.step(actions[i])
-    #         observations_1.append(obs)
-    #         rewards_1.append(reward)
-    #
-    #     for _ in range(10):
-    #         observations_2 = []
-    #         rewards_2 = []
-    #         self.env.reset()
-    #         for i in range(horizon):
-    #             obs, reward, done, info = self.env.step(actions[i])
-    #             observations_2.append(obs)
-    #             rewards_2.append(reward)
-    #             assert np.array_equal(observations_1[i], observations_2[i])
-    #         assert rewards_1 == rewards_2
+    def test_02_mass(self):
+        self.env.set_action_mode('end_effector_positions')
+        intervention = {'tool_block': {'mass': 0.02}}
+        self.env.do_intervention(interventions_dict=intervention)
+        for _ in range(1):
+            obs = self.env.reset()
+            self.lift_last_finger_first(obs)
+            desired_grip = self.grip_block()
+            self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
+            final_obs = self.lift_block(desired_grip)
+            self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
+
+    def test_08_mass(self):
+        self.env.set_action_mode('end_effector_positions')
+        intervention = {'tool_block': {'mass': 0.08}}
+        self.env.do_intervention(interventions_dict=intervention)
+        for _ in range(1):
+            obs = self.env.reset()
+            self.lift_last_finger_first(obs)
+            desired_grip = self.grip_block()
+            self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
+            final_obs = self.lift_block(desired_grip)
+            self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
+
+    def test_1_mass(self):
+        self.env.set_action_mode('end_effector_positions')
+        intervention = {'tool_block': {'mass': 0.1}}
+        self.env.do_intervention(interventions_dict=intervention)
+        for _ in range(1):
+            obs = self.env.reset()
+            self.lift_last_finger_first(obs)
+            desired_grip = self.grip_block()
+            self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
+            final_obs = self.lift_block(desired_grip)
+            self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
+
+    def test_determinism_w_interventions(self):
+        self.env.set_action_mode('joint_positions')
+        observations_1 = []
+        rewards_1 = []
+        horizon = 100
+        actions = [self.env.action_space.sample() for _ in range(horizon)]
+        actions = np.array(actions)
+        new_goal = self.env.sample_new_goal()
+        self.env.set_starting_state(interventions_dict=new_goal)
+        self.env.reset()
+        for i in range(horizon):
+            obs, reward, done, info = self.env.step(actions[i])
+            observations_1.append(obs)
+            rewards_1.append(reward)
+
+        for _ in range(10):
+            observations_2 = []
+            rewards_2 = []
+            self.env.reset()
+            for i in range(horizon):
+                obs, reward, done, info = self.env.step(actions[i])
+                observations_2.append(obs)
+                rewards_2.append(reward)
+                assert np.array_equal(observations_1[i], observations_2[i])
+            assert rewards_1 == rewards_2
 
     def test_determinism_w_in_episode_interventions(self):
         self.env.set_action_mode('joint_positions')
@@ -172,25 +172,25 @@ class TestPicking(unittest.TestCase):
             assert np.array_equal(observations_1[i], observations_2[i])
         assert rewards_1 == rewards_2
 
-    # def test_goal_intervention(self):
-    #     task = task_generator(task_generator_id='picking')
-    #     env = CausalWorld(task=task, enable_visualization=False, normalize_observations=False)
-    #     for _ in range(10):
-    #         invalid_interventions_before = env.get_tracker().invalid_intervention_steps
-    #         new_goal = env.sample_new_goal()
-    #         env.set_starting_state(interventions_dict=new_goal)
-    #         env.reset()
-    #         invalid_interventions_after = env.get_tracker().invalid_intervention_steps
-    #         for _ in range(2):
-    #             for _ in range(100):
-    #                 obs, reward, done, info = env.step(env.action_space.low)
-    #                 #TODO: this shouldnt be the case when the benchmark is complete
-    #                 #Its a hack for now
-    #                 if invalid_interventions_before == invalid_interventions_after:
-    #                     assert np.array_equal(cyl2cart(new_goal['goal_block']
-    #                                           ['cylindrical_position']),
-    #                                           obs[-7:-4])
-    #             env.reset()
-    #
-    #     env.close()
-    #
+    def test_goal_intervention(self):
+        task = task_generator(task_generator_id='picking')
+        env = CausalWorld(task=task, enable_visualization=False, normalize_observations=False)
+        for _ in range(10):
+            invalid_interventions_before = env.get_tracker().invalid_intervention_steps
+            new_goal = env.sample_new_goal()
+            env.set_starting_state(interventions_dict=new_goal)
+            env.reset()
+            invalid_interventions_after = env.get_tracker().invalid_intervention_steps
+            for _ in range(2):
+                for _ in range(100):
+                    obs, reward, done, info = env.step(env.action_space.low)
+                    #TODO: this shouldnt be the case when the benchmark is complete
+                    #Its a hack for now
+                    if invalid_interventions_before == invalid_interventions_after:
+                        assert np.array_equal(cyl2cart(new_goal['goal_block']
+                                              ['cylindrical_position']),
+                                              obs[-7:-4])
+                env.reset()
+
+        env.close()
+
