@@ -40,7 +40,6 @@ naturally emerging curriculum of tasks.
 
    guide/install.rst
    guide/getting_started.rst
-   guide/tutorials.rst
    guide/task_setups.rst
    guide/evaluating_policy.rst
 

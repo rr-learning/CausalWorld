@@ -165,12 +165,10 @@
 <span class="sd">        :param kwargs:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_name</span><span class="o">=</span><span class="s2">&quot;picking&quot;</span><span class="p">,</span>
-                         <span class="n">intervention_split</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-                             <span class="s2">&quot;intervention_split&quot;</span><span class="p">,</span>
-                             <span class="kc">False</span><span class="p">),</span>
-                         <span class="n">training</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-                         <span class="n">sparse_reward_weight</span><span class="o">=</span>
-                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                         <span class="n">use_train_space_only</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_train_space_only&quot;</span><span class="p">,</span>
+                                                         <span class="kc">False</span><span class="p">),</span>
+                         <span class="n">fractional_reward_weight</span><span class="o">=</span>
+                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                          <span class="n">dense_reward_weights</span><span class="o">=</span>
                          <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">,</span>
                                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">250</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">125</span><span class="p">,</span>
@@ -226,15 +224,15 @@
                          <span class="p">[</span><span class="s2">&quot;tool_block_orientation&quot;</span><span class="p">]}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tool_block_type&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;tool_block_size&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;tool_block_cartesian_position&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;tool_block_orientation&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;tool_block_linear_velocity&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;tool_block_angular_velocity&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;goal_block_type&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;goal_block_size&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;goal_block_cartesian_position&quot;</span><span class="p">,</span>
-                                            <span class="s2">&quot;goal_block_orientation&quot;</span><span class="p">]</span>
+                                             <span class="s2">&quot;tool_block_size&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_cartesian_position&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_orientation&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_linear_velocity&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_angular_velocity&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_type&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_size&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_cartesian_position&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_orientation&quot;</span><span class="p">]</span>
 
         <span class="k">return</span>
 
@@ -317,11 +315,13 @@
         <span class="n">rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">previous_block_to_center</span> <span class="o">-</span> <span class="n">current_block_to_center</span><span class="p">)</span>
         <span class="n">rewards</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="o">-</span> <span class="n">current_block_to_center</span><span class="p">)</span>
 
-        <span class="n">end_effector_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">compute_end_effector_positions</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_latest_full_state</span><span class="p">()[</span><span class="s1">&#39;positions&#39;</span><span class="p">])</span>
+        <span class="n">end_effector_positions</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_latest_full_state</span><span class="p">()[</span><span class="s1">&#39;end_effector_positions&#39;</span><span class="p">]</span>
         <span class="n">end_effector_positions</span> <span class="o">=</span> <span class="n">end_effector_positions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         <span class="n">current_distance_from_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">end_effector_positions</span> <span class="o">-</span>
                                                      <span class="n">block_position</span><span class="p">)</span>
+        <span class="c1"># print(&quot;block position is &quot;, block_position)</span>
+        <span class="c1"># print(&quot;end effector positions &quot;, end_effector_positions)</span>
         <span class="n">previous_distance_from_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">-</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_position</span><span class="p">)</span>
@@ -367,8 +367,7 @@
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">compute_end_effector_positions</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_latest_full_state</span><span class="p">()[</span><span class="s1">&#39;positions&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_latest_full_state</span><span class="p">()[</span><span class="s1">&#39;end_effector_positions&#39;</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">=</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_object_position</span> <span class="o">=</span> \

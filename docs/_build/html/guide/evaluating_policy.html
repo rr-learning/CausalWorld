@@ -88,7 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_setups.html">Task distributions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Evaluation Protocols</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#using-a-default-protocols">Using a default protocols</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-default-protocols">Using default protocols</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#defining-a-customized-protocol">Defining a customized protocol</a></li>
 </ul>
 </li>
@@ -163,8 +163,264 @@
             
   <div class="section" id="evaluation-protocols">
 <span id="evaluating-policy"></span><h1>Evaluation Protocols<a class="headerlink" href="#evaluation-protocols" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="using-a-default-protocols">
-<h2>Using a default protocols<a class="headerlink" href="#using-a-default-protocols" title="Permalink to this headline">¶</a></h2>
+<p>An evaluation protocol comprises a set of episodes with distinct environment realisations
+that differ in certain variables of the environments... tbd</p>
+<p>Below we show some demo code how you can systematically evaluate agents on a set
+of different protocols and visualize the results in radar plots of different scores</p>
+<div class="section" id="using-default-protocols">
+<h2>Using default protocols<a class="headerlink" href="#using-default-protocols" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.task</span> <span class="kn">import</span> <span class="n">task_generator</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.envs.causalworld</span> <span class="kn">import</span> <span class="n">CausalWorld</span>
+<span class="kn">from</span> <span class="nn">stable_baselines</span> <span class="kn">import</span> <span class="n">PPO2</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common.policies</span> <span class="kn">import</span> <span class="n">MlpPolicy</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common</span> <span class="kn">import</span> <span class="n">set_global_seeds</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common.vec_env</span> <span class="kn">import</span> <span class="n">SubprocVecEnv</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.evaluation.evaluation</span> <span class="kn">import</span> <span class="n">EvaluationPipeline</span>
+<span class="kn">import</span> <span class="nn">causal_rl_bench.evaluation.protocols</span> <span class="k">as</span> <span class="nn">protocols</span>
+
+
+<span class="n">log_relative_path</span> <span class="o">=</span> <span class="s1">&#39;./pushing_policy_tutorial_1&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_make_env</span><span class="p">(</span><span class="n">rank</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_init</span><span class="p">():</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s2">&quot;pushing&quot;</span><span class="p">)</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">seed</span><span class="o">=</span><span class="n">rank</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">env</span>
+    <span class="n">set_global_seeds</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_init</span>
+
+
+<span class="k">def</span> <span class="nf">train_policy</span><span class="p">():</span>
+    <span class="n">ppo_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="mf">0.9988</span><span class="p">,</span>
+                  <span class="s2">&quot;n_steps&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                  <span class="s2">&quot;ent_coef&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                  <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+                  <span class="s2">&quot;vf_coef&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">,</span>
+                  <span class="s2">&quot;max_grad_norm&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                  <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+                  <span class="s2">&quot;nminibatches&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                  <span class="s2">&quot;noptepochs&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                  <span class="s2">&quot;cliprange&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+                  <span class="s2">&quot;tensorboard_log&quot;</span><span class="p">:</span> <span class="n">log_relative_path</span><span class="p">}</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">policy_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">act_fun</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">net_arch</span><span class="o">=</span><span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">])</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">SubprocVecEnv</span><span class="p">([</span><span class="n">_make_env</span><span class="p">(</span><span class="n">rank</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)])</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PPO2</span><span class="p">(</span><span class="n">MlpPolicy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">_init_setup_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">policy_kwargs</span><span class="o">=</span><span class="n">policy_kwargs</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">ppo_config</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">total_timesteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                <span class="n">tb_log_name</span><span class="o">=</span><span class="s2">&quot;ppo2&quot;</span><span class="p">,</span>
+                <span class="n">reset_num_timesteps</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">))</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">env_method</span><span class="p">(</span><span class="s2">&quot;save_world&quot;</span><span class="p">,</span> <span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">evaluate_trained_policy</span><span class="p">():</span>
+    <span class="c1"># Load the PPO2 policy trained on the pushing task</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PPO2</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="s1">&#39;model.zip&#39;</span><span class="p">))</span>
+
+    <span class="c1"># define a method for the policy fn of your trained model</span>
+
+    <span class="k">def</span> <span class="nf">policy_fn</span><span class="p">(</span><span class="n">obs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">obs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># pass the different protocols you&#39;d like to evaluate in the following</span>
+    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">EvaluationPipeline</span><span class="p">(</span><span class="n">evaluation_protocols</span><span class="o">=</span><span class="p">[</span><span class="n">protocols</span><span class="o">.</span><span class="n">GoalPosesOOD</span><span class="p">(),</span>
+                                                         <span class="n">protocols</span><span class="o">.</span><span class="n">InitialPosesOOD</span><span class="p">(),</span>
+                                                         <span class="n">protocols</span><span class="o">.</span><span class="n">InEpisodePosesChange</span><span class="p">()],</span>
+                                   <span class="n">tracker_path</span><span class="o">=</span><span class="n">log_relative_path</span><span class="p">,</span>
+                                   <span class="n">intervention_split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">visualize_evaluation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">initial_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_policy</span><span class="p">(</span><span class="n">policy_fn</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">evaluator</span><span class="o">.</span><span class="n">save_scores</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">scores</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">train_policy</span><span class="p">()</span>
+    <span class="n">evaluate_trained_policy</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.evaluation.evaluation</span> <span class="kn">import</span> <span class="n">EvaluationPipeline</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.benchmark.benchmarks</span> <span class="kn">import</span> <span class="n">REACHING_BENCHMARK</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.task</span> <span class="kn">import</span> <span class="n">task_generator</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.envs.causalworld</span> <span class="kn">import</span> <span class="n">CausalWorld</span>
+<span class="kn">import</span> <span class="nn">causal_rl_bench.evaluation.visualization.visualiser</span> <span class="k">as</span> <span class="nn">vis</span>
+
+<span class="kn">from</span> <span class="nn">stable_baselines</span> <span class="kn">import</span> <span class="n">PPO2</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common.policies</span> <span class="kn">import</span> <span class="n">MlpPolicy</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common</span> <span class="kn">import</span> <span class="n">set_global_seeds</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common.vec_env</span> <span class="kn">import</span> <span class="n">SubprocVecEnv</span>
+
+<span class="n">log_relative_path</span> <span class="o">=</span> <span class="s1">&#39;./pushing_policy_tutorial_2&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_make_env</span><span class="p">(</span><span class="n">rank</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_init</span><span class="p">():</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s2">&quot;reaching&quot;</span><span class="p">)</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">seed</span><span class="o">=</span><span class="n">rank</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">env</span>
+    <span class="n">set_global_seeds</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_init</span>
+
+
+<span class="k">def</span> <span class="nf">train_policy</span><span class="p">():</span>
+    <span class="n">ppo_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="mf">0.9988</span><span class="p">,</span>
+                  <span class="s2">&quot;n_steps&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                  <span class="s2">&quot;ent_coef&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                  <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+                  <span class="s2">&quot;vf_coef&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">,</span>
+                  <span class="s2">&quot;max_grad_norm&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                  <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+                  <span class="s2">&quot;nminibatches&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                  <span class="s2">&quot;noptepochs&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                  <span class="s2">&quot;cliprange&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+                  <span class="s2">&quot;tensorboard_log&quot;</span><span class="p">:</span> <span class="n">log_relative_path</span><span class="p">}</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">policy_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">act_fun</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">net_arch</span><span class="o">=</span><span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">])</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">SubprocVecEnv</span><span class="p">([</span><span class="n">_make_env</span><span class="p">(</span><span class="n">rank</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)])</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PPO2</span><span class="p">(</span><span class="n">MlpPolicy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">_init_setup_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">policy_kwargs</span><span class="o">=</span><span class="n">policy_kwargs</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">ppo_config</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">total_timesteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                <span class="n">tb_log_name</span><span class="o">=</span><span class="s2">&quot;ppo2&quot;</span><span class="p">,</span>
+                <span class="n">reset_num_timesteps</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">))</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">env_method</span><span class="p">(</span><span class="s2">&quot;save_world&quot;</span><span class="p">,</span> <span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">():</span>
+    <span class="c1"># Load the PPO2 policy trained on the reaching task</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PPO2</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="s1">&#39;model.zip&#39;</span><span class="p">))</span>
+    <span class="c1"># define a method for the policy fn of your trained model</span>
+
+    <span class="k">def</span> <span class="nf">policy_fn</span><span class="p">(</span><span class="n">obs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">obs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Let&#39;s evaluate the policy on some default evaluation protocols for reaching task</span>
+    <span class="n">evaluation_protocols</span> <span class="o">=</span> <span class="n">REACHING_BENCHMARK</span><span class="p">[</span><span class="s1">&#39;evaluation_protocols&#39;</span><span class="p">]</span>
+
+    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">EvaluationPipeline</span><span class="p">(</span><span class="n">evaluation_protocols</span><span class="o">=</span>
+                                   <span class="n">evaluation_protocols</span><span class="p">,</span>
+                                   <span class="n">tracker_path</span><span class="o">=</span><span class="n">log_relative_path</span><span class="p">,</span>
+                                   <span class="n">intervention_split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">visualize_evaluation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">initial_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_policy</span><span class="p">(</span><span class="n">policy_fn</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">evaluator</span><span class="o">.</span><span class="n">save_scores</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">experiments</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;reaching_model&#39;</span><span class="p">:</span> <span class="n">scores</span><span class="p">}</span>
+    <span class="n">vis</span><span class="o">.</span><span class="n">generate_visual_analysis</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="n">experiments</span><span class="o">=</span><span class="n">experiments</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1">#first train the policy, skip if u already trained the policy</span>
+    <span class="n">train_policy</span><span class="p">()</span>
+    <span class="n">evaluate_model</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.evaluation.evaluation</span> <span class="kn">import</span> <span class="n">EvaluationPipeline</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.benchmark.benchmarks</span> <span class="kn">import</span> <span class="n">PUSHING_BENCHMARK</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.task</span> <span class="kn">import</span> <span class="n">task_generator</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.envs.causalworld</span> <span class="kn">import</span> <span class="n">CausalWorld</span>
+<span class="kn">import</span> <span class="nn">causal_rl_bench.evaluation.visualization.visualiser</span> <span class="k">as</span> <span class="nn">vis</span>
+
+<span class="kn">from</span> <span class="nn">stable_baselines</span> <span class="kn">import</span> <span class="n">PPO2</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common.policies</span> <span class="kn">import</span> <span class="n">MlpPolicy</span>
+<span class="kn">import</span> <span class="nn">tensorflow</span> <span class="k">as</span> <span class="nn">tf</span>
+<span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">set_verbosity</span><span class="p">(</span><span class="n">tf</span><span class="o">.</span><span class="n">compat</span><span class="o">.</span><span class="n">v1</span><span class="o">.</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common</span> <span class="kn">import</span> <span class="n">set_global_seeds</span>
+<span class="kn">from</span> <span class="nn">stable_baselines.common.vec_env</span> <span class="kn">import</span> <span class="n">SubprocVecEnv</span>
+
+<span class="n">log_relative_path</span> <span class="o">=</span> <span class="s1">&#39;./pushing_policy_tutorial_3&#39;</span>
+
+
+<span class="k">def</span> <span class="nf">_make_env</span><span class="p">(</span><span class="n">rank</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_init</span><span class="p">():</span>
+        <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s2">&quot;pushing&quot;</span><span class="p">)</span>
+        <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                          <span class="n">seed</span><span class="o">=</span><span class="n">rank</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">env</span>
+    <span class="n">set_global_seeds</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_init</span>
+
+
+<span class="k">def</span> <span class="nf">train_policy</span><span class="p">():</span>
+    <span class="n">ppo_config</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;gamma&quot;</span><span class="p">:</span> <span class="mf">0.9988</span><span class="p">,</span>
+                  <span class="s2">&quot;n_steps&quot;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+                  <span class="s2">&quot;ent_coef&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+                  <span class="s2">&quot;learning_rate&quot;</span><span class="p">:</span> <span class="mf">0.001</span><span class="p">,</span>
+                  <span class="s2">&quot;vf_coef&quot;</span><span class="p">:</span> <span class="mf">0.99</span><span class="p">,</span>
+                  <span class="s2">&quot;max_grad_norm&quot;</span><span class="p">:</span> <span class="mf">0.1</span><span class="p">,</span>
+                  <span class="s2">&quot;lam&quot;</span><span class="p">:</span> <span class="mf">0.95</span><span class="p">,</span>
+                  <span class="s2">&quot;nminibatches&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+                  <span class="s2">&quot;noptepochs&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">,</span>
+                  <span class="s2">&quot;cliprange&quot;</span><span class="p">:</span> <span class="mf">0.2</span><span class="p">,</span>
+                  <span class="s2">&quot;tensorboard_log&quot;</span><span class="p">:</span> <span class="n">log_relative_path</span><span class="p">}</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">policy_kwargs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">act_fun</span><span class="o">=</span><span class="n">tf</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">tanh</span><span class="p">,</span> <span class="n">net_arch</span><span class="o">=</span><span class="p">[</span><span class="mi">256</span><span class="p">,</span> <span class="mi">128</span><span class="p">])</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">SubprocVecEnv</span><span class="p">([</span><span class="n">_make_env</span><span class="p">(</span><span class="n">rank</span><span class="o">=</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">)])</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PPO2</span><span class="p">(</span><span class="n">MlpPolicy</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">_init_setup_model</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                 <span class="n">policy_kwargs</span><span class="o">=</span><span class="n">policy_kwargs</span><span class="p">,</span>
+                 <span class="n">verbose</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">ppo_config</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">learn</span><span class="p">(</span><span class="n">total_timesteps</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span>
+                <span class="n">tb_log_name</span><span class="o">=</span><span class="s2">&quot;ppo2&quot;</span><span class="p">,</span>
+                <span class="n">reset_num_timesteps</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="s1">&#39;model&#39;</span><span class="p">))</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">env_method</span><span class="p">(</span><span class="s2">&quot;save_world&quot;</span><span class="p">,</span> <span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">evaluate_model</span><span class="p">():</span>
+    <span class="c1"># Load the PPO2 policy trained on the pushing task</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">PPO2</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="s1">&#39;model.zip&#39;</span><span class="p">))</span>
+    <span class="c1"># define a method for the policy fn of your trained model</span>
+
+    <span class="k">def</span> <span class="nf">policy_fn</span><span class="p">(</span><span class="n">obs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">obs</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1"># Let&#39;s evaluate the policy on some default evaluation protocols for reaching task</span>
+    <span class="n">evaluation_protocols</span> <span class="o">=</span> <span class="n">PUSHING_BENCHMARK</span><span class="p">[</span><span class="s1">&#39;evaluation_protocols&#39;</span><span class="p">]</span>
+
+    <span class="n">evaluator</span> <span class="o">=</span> <span class="n">EvaluationPipeline</span><span class="p">(</span><span class="n">evaluation_protocols</span><span class="o">=</span>
+                                   <span class="n">evaluation_protocols</span><span class="p">,</span>
+                                   <span class="n">tracker_path</span><span class="o">=</span><span class="n">log_relative_path</span><span class="p">,</span>
+                                   <span class="n">intervention_split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">visualize_evaluation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                   <span class="n">initial_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c1"># For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol</span>
+    <span class="n">scores</span> <span class="o">=</span> <span class="n">evaluator</span><span class="o">.</span><span class="n">evaluate_policy</span><span class="p">(</span><span class="n">policy_fn</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="n">evaluator</span><span class="o">.</span><span class="n">save_scores</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">)</span>
+    <span class="n">experiments</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;pushing_model&#39;</span><span class="p">:</span> <span class="n">scores</span><span class="p">}</span>
+    <span class="n">vis</span><span class="o">.</span><span class="n">generate_visual_analysis</span><span class="p">(</span><span class="n">log_relative_path</span><span class="p">,</span> <span class="n">experiments</span><span class="o">=</span><span class="n">experiments</span><span class="p">)</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="c1">#first train the policy, skip if u already trained the policy</span>
+    <span class="n">train_policy</span><span class="p">()</span>
+    <span class="n">evaluate_model</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="defining-a-customized-protocol">
 <h2>Defining a customized protocol<a class="headerlink" href="#defining-a-customized-protocol" title="Permalink to this headline">¶</a></h2>

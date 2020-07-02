@@ -169,11 +169,10 @@
 <span class="sd">        :param kwargs:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_name</span><span class="o">=</span><span class="s2">&quot;stacked_blocks&quot;</span><span class="p">,</span>
-                         <span class="n">intervention_split</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;intervention_split&quot;</span><span class="p">,</span>
-                                                       <span class="kc">False</span><span class="p">),</span>
-                         <span class="n">training</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-                         <span class="n">sparse_reward_weight</span><span class="o">=</span>
-                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                         <span class="n">use_train_space_only</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_train_space_only&quot;</span><span class="p">,</span>
+                                                         <span class="kc">False</span><span class="p">),</span>
+                         <span class="n">fractional_reward_weight</span><span class="o">=</span>
+                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                          <span class="n">dense_reward_weights</span><span class="o">=</span>
                          <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">,</span>
                                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])))</span>
@@ -221,6 +220,7 @@
                       <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
         <span class="n">change_per_level</span> <span class="o">=</span> <span class="mf">0.005</span>
         <span class="n">rigid_block_side</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">silhouettes_creation_dicts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;num_of_levels&quot;</span><span class="p">]):</span>
             <span class="n">change_per_level</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="n">curr_height</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span>
@@ -267,7 +267,7 @@
                                      <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
                                      <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span>
                                                        <span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)}</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+                    <span class="n">silhouettes_creation_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">creation_dict</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
                                                             <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
                                                             <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_type&#39;</span><span class="p">)</span>
@@ -281,6 +281,8 @@
                                                             <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
                                                             <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_orientation&#39;</span><span class="p">)</span>
                 <span class="n">start_position</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">silhouettes_creation_dicts</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">silhouettes_creation_dicts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="k">return</span>
 
 <div class="viewcode-block" id="CreativeStackedBlocksGeneratorTask.sample_new_goal"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.sample_new_goal">[docs]</a>    <span class="k">def</span> <span class="nf">sample_new_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -462,6 +464,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">remove_everything</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">silhouettes_creation_dicts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">block_sizes</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">chosen_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_random_target</span><span class="p">(</span>
             <span class="n">num_of_levels</span><span class="o">=</span><span class="n">num_of_levels</span><span class="p">,</span>
             <span class="n">min_size</span><span class="o">=</span><span class="n">blocks_min_size</span><span class="p">,</span>
@@ -527,7 +530,7 @@
                                      <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="s2">&quot;cube&quot;</span><span class="p">,</span>
                                      <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">silhouette_position</span><span class="p">),</span>
                                      <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">block_sizes</span><span class="p">[</span><span class="n">level_num</span><span class="p">][</span><span class="n">i</span><span class="p">])}</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+                    <span class="n">silhouettes_creation_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">creation_dict</span><span class="p">))</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
                                                             <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
                                                             <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_type&#39;</span><span class="p">)</span>
@@ -544,6 +547,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_mass</span> <span class="o">=</span> <span class="n">blocks_mass</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_min_size</span> <span class="o">=</span> <span class="n">blocks_min_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_max_level_width</span> <span class="o">=</span> <span class="n">max_level_width</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">silhouettes_creation_dicts</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">silhouettes_creation_dicts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">_generate_random_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_boundaries</span><span class="p">,</span>

@@ -164,17 +164,15 @@
 
 
 <div class="viewcode-block" id="BaseTask"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask">[docs]</a><span class="k">class</span> <span class="nc">BaseTask</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">intervention_split</span><span class="p">,</span>
-                 <span class="n">training</span><span class="p">,</span> <span class="n">sparse_reward_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">dense_reward_weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span>
-                 <span class="n">is_goal_distance_dense</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                 <span class="n">calculate_additional_dense_rewards</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">use_train_space_only</span><span class="p">,</span>
+                 <span class="n">fractional_reward_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                 <span class="n">dense_reward_weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param task_name:</span>
-<span class="sd">        :param intervention_split:</span>
+<span class="sd">        :param use_train_space_only:</span>
 <span class="sd">        :param training:</span>
-<span class="sd">        :param sparse_reward_weight:</span>
+<span class="sd">        :param fractional_reward_weight:</span>
 <span class="sd">        :param dense_reward_weights:</span>
 <span class="sd">        :param is_goal_distance_dense:</span>
 <span class="sd">        :param calculate_additional_dense_rewards:</span>
@@ -194,23 +192,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_full_observations_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;task_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sparse_reward_weight</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fractional_reward_weight</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dense_reward_weights</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;activate_sparse_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;intervention_split&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">intervention_split</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">training</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_train_space_only</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;is_goal_distance_dense&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_goal_distance_dense</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;calculate_additional_dense_rewards&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">calculate_additional_dense_rewards</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_starting_state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_default_starting_state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_empty_stage</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_recreation_time</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_period_to_clear_memory</span> <span class="o">=</span> <span class="mi">50</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_desired_goal</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_achieved_goal</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_goal_distance</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_max_episode_length</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_world_func</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">_save_pybullet_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -241,8 +239,25 @@
                              <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span><span class="p">)</span>
         <span class="k">return</span>
 
-    <span class="k">def</span> <span class="nf">_save_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_remove_pybullet_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pybullet_state</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pybullet</span><span class="o">.</span> \
+                    <span class="n">removeState</span><span class="p">(</span><span class="n">pybullet_state</span><span class="p">[</span><span class="s1">&#39;full&#39;</span><span class="p">],</span>
+                                 <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">pybullet</span><span class="o">.</span> \
+                    <span class="n">removeState</span><span class="p">(</span><span class="n">pybullet_state</span><span class="p">[</span><span class="s1">&#39;w_goal&#39;</span><span class="p">],</span>
+                                 <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span> \
+                <span class="n">removeState</span><span class="p">(</span><span class="n">pybullet_state</span><span class="p">[</span><span class="s1">&#39;w_o_goal&#39;</span><span class="p">],</span>
+                             <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">save_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="c1"># state[&#39;pybullet_states&#39;] = \</span>
+        <span class="c1">#     self._save_pybullet_state()</span>
         <span class="n">state</span><span class="p">[</span><span class="s1">&#39;stage_object_state&#39;</span><span class="p">]</span> <span class="o">=</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_full_env_state</span><span class="p">()</span>
         <span class="n">state</span><span class="p">[</span><span class="s1">&#39;robot_object_state&#39;</span><span class="p">]</span> <span class="o">=</span> \
@@ -251,18 +266,25 @@
             <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">state</span>
 
-    <span class="k">def</span> <span class="nf">_restore_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
-        <span class="c1">#remove everything in the arena</span>
-        <span class="c1">#old number of rigid objects and number of visual objects</span>
+    <span class="k">def</span> <span class="nf">restore_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_dict</span><span class="p">):</span>
         <span class="n">old_number_of_rigid_objects</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">())</span>
         <span class="n">old_number_of_visual_objects</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">())</span>
         <span class="n">reset_observation_space</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">remove_everything</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_restore_pybullet_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_empty_stage</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">set_full_env_state</span><span class="p">(</span><span class="n">state_dict</span>
-                                      <span class="p">[</span><span class="s1">&#39;robot_object_state&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recreation_time</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_recreation_time</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">_period_to_clear_memory</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_world_func</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">_disable_velocity_control</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">set_full_env_state</span><span class="p">(</span><span class="n">state_dict</span>
+                                           <span class="p">[</span><span class="s1">&#39;robot_object_state&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_pybullet_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_empty_stage</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_empty_stage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_pybullet_state</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_restore_pybullet_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_empty_stage</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">set_full_env_state</span><span class="p">(</span><span class="n">state_dict</span>
+                                           <span class="p">[</span><span class="s1">&#39;robot_object_state&#39;</span><span class="p">])</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">set_full_env_state</span><span class="p">(</span>
             <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;stage_object_state&#39;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_recreation_time</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">new_number_of_rigid_objects</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">())</span>
         <span class="n">new_number_of_visual_objects</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">old_number_of_rigid_objects</span> <span class="o">!=</span> <span class="n">new_number_of_rigid_objects</span><span class="p">:</span>
@@ -270,25 +292,27 @@
         <span class="k">if</span> <span class="n">old_number_of_visual_objects</span> <span class="o">!=</span> <span class="n">new_number_of_visual_objects</span><span class="p">:</span>
             <span class="n">reset_observation_space</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span> <span class="o">=</span> <span class="n">state_dict</span><span class="p">[</span><span class="s1">&#39;task_observations&#39;</span><span class="p">]</span>
+        <span class="c1"># self._restore_pybullet_state(state_dict[&#39;pybullet_states&#39;])</span>
         <span class="k">return</span> <span class="n">reset_observation_space</span>
+
+    <span class="c1"># def remove_state(self, state_dict):</span>
+    <span class="c1">#     self._remove_pybullet_state(state_dict[&#39;pybullet_states&#39;])</span>
+    <span class="c1">#     del state_dict</span>
+    <span class="c1">#     return</span>
 
 <div class="viewcode-block" id="BaseTask.is_in_training_mode"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.is_in_training_mode">[docs]</a>    <span class="k">def</span> <span class="nf">is_in_training_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;intervention_split&#39;</span><span class="p">]</span> <span class="ow">and</span> \
-                <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">]:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">False</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="BaseTask.set_super_sparse_reward"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.set_super_sparse_reward">[docs]</a>    <span class="k">def</span> <span class="nf">set_super_sparse_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseTask.activate_sparse_reward"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.activate_sparse_reward">[docs]</a>    <span class="k">def</span> <span class="nf">activate_sparse_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;is_goal_distance_dense&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;activate_sparse_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span></div>
 
 <div class="viewcode-block" id="BaseTask.get_description"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_description">[docs]</a>    <span class="k">def</span> <span class="nf">get_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -363,7 +387,8 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="n">possible_corresponding_goal</span><span class="p">,</span> <span class="s1">&#39;cartesian_position&#39;</span><span class="p">)</span>
                 <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;orientation&#39;</span><span class="p">]</span> <span class="o">=</span> \
                     <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="n">possible_corresponding_goal</span><span class="p">,</span> <span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
-        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ground_truth_scm_variables_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
+        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ground_truth_current_state_varibales&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;fractional_success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_goal_distance</span>
         <span class="k">return</span> <span class="n">info</span></div>
 
@@ -412,20 +437,17 @@
                                      <span class="p">[</span><span class="s1">&#39;cylindrical_position&#39;</span><span class="p">][:,</span> <span class="mi">1</span><span class="p">]))</span>
         <span class="k">return</span> <span class="n">intervention_dict</span></div>
 
-    <span class="c1"># def reset_default_state(self):</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#</span>
-    <span class="c1">#     :return:</span>
-    <span class="c1">#     &quot;&quot;&quot;</span>
-    <span class="c1">#     self.stage.remove_everything()</span>
-    <span class="c1">#     self._task_stage_observation_keys = []</span>
-    <span class="c1">#     self.robot.tri_finger.reset_world()</span>
-    <span class="c1">#     self._task_stage_observation_keys = []</span>
-    <span class="c1">#     self.initial_state = dict(self.default_state)</span>
-    <span class="c1">#     self._set_up_stage_arena()</span>
-    <span class="c1">#     self._set_testing_intervention_spaces()</span>
-    <span class="c1">#     self._set_training_intervention_spaces()</span>
-    <span class="c1">#     self.stage.finalize_stage()</span>
+<div class="viewcode-block" id="BaseTask.reset_default_state"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.reset_default_state">[docs]</a>    <span class="k">def</span> <span class="nf">reset_default_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">restore_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_starting_state</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_solved</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_task_state</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_starting_state</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span>\
+            <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_starting_state</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
     <span class="k">def</span> <span class="nf">_set_training_intervention_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -624,23 +646,22 @@
                                                           <span class="n">achieved_goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_achieved_goal</span><span class="p">)</span>
         <span class="n">goal_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_goal_distance</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_update_success</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_goal_distance</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;is_goal_distance_dense&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;activate_sparse_reward&#39;</span><span class="p">]:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_solved</span><span class="p">:</span>
                 <span class="n">goal_distance</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">goal_distance</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;calculate_additional_dense_rewards&#39;</span><span class="p">]:</span>
+                <span class="n">goal_distance</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">goal_distance</span>
+        <span class="k">else</span><span class="p">:</span>
             <span class="n">dense_rewards</span><span class="p">,</span> <span class="n">update_task_state_dict</span> <span class="o">=</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">_calculate_dense_rewards</span><span class="p">(</span><span class="n">achieved_goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_achieved_goal</span><span class="p">,</span>
                                               <span class="n">desired_goal</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_desired_goal</span><span class="p">)</span>
             <span class="n">reward</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dense_rewards</span><span class="p">)</span> <span class="o">*</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">])</span> \
                         <span class="o">+</span> <span class="n">goal_distance</span> <span class="o">*</span> \
-                        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_update_task_state</span><span class="p">(</span><span class="n">update_task_state_dict</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">reward</span> <span class="o">=</span> <span class="n">goal_distance</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">reward</span></div>
+            <span class="k">return</span> <span class="n">reward</span></div>
 
 <div class="viewcode-block" id="BaseTask.compute_reward"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.compute_reward">[docs]</a>    <span class="k">def</span> <span class="nf">compute_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">achieved_goal</span><span class="p">,</span> <span class="n">desired_goal</span><span class="p">,</span> <span class="n">info</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -652,22 +673,25 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">goal_distance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal_distance</span><span class="p">(</span><span class="n">desired_goal</span><span class="o">=</span><span class="n">desired_goal</span><span class="p">,</span>
                                             <span class="n">achieved_goal</span><span class="o">=</span><span class="n">achieved_goal</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;is_goal_distance_dense&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;activate_sparse_reward&#39;</span><span class="p">]:</span>
             <span class="c1">#TODO: not exactly right, but its a limitation of HER</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_check_preliminary_success</span><span class="p">(</span><span class="n">goal_distance</span><span class="p">):</span>
                 <span class="n">goal_distance</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">goal_distance</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="n">reward</span> <span class="o">=</span> <span class="n">goal_distance</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">reward</span></div>
+                <span class="n">goal_distance</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">return</span> <span class="n">goal_distance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">reward</span> <span class="o">=</span> <span class="n">goal_distance</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">reward</span></div>
 
-<div class="viewcode-block" id="BaseTask.init_task"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.init_task">[docs]</a>    <span class="k">def</span> <span class="nf">init_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">stage</span><span class="p">,</span> <span class="n">max_episode_length</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseTask.init_task"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.init_task">[docs]</a>    <span class="k">def</span> <span class="nf">init_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot</span><span class="p">,</span> <span class="n">stage</span><span class="p">,</span> <span class="n">max_episode_length</span><span class="p">,</span> <span class="n">create_world_func</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param robot:</span>
 <span class="sd">        :param stage:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_world_func</span> <span class="o">=</span> <span class="n">create_world_func</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span> <span class="o">=</span> <span class="n">robot</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span> <span class="o">=</span> <span class="n">stage</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -682,9 +706,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_empty_stage</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_pybullet_state</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_up_stage_arena</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_default_starting_state</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_save_state</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_state</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_starting_state</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">_save_state</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">save_state</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">finalize_stage</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">max_episode_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_max_episode_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_default_max_episode_length</span><span class="p">()</span>
@@ -742,12 +766,14 @@
 
 <div class="viewcode-block" id="BaseTask.reset_task"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.reset_task">[docs]</a>    <span class="k">def</span> <span class="nf">reset_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-
+<span class="sd">        TODO: NOTE: With the current implementation, no contact points are saved</span>
+<span class="sd">        when resetting task</span>
 <span class="sd">        :param interventions_dict:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="n">reset_observation_space_signal</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_restore_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_starting_state</span><span class="p">)</span>
+        <span class="n">reset_observation_space_signal</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">restore_state</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_starting_state</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_solved</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">success_signal</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">interventions_info</span> <span class="o">=</span> <span class="kc">None</span>
@@ -755,9 +781,9 @@
             <span class="n">success_signal</span><span class="p">,</span> <span class="n">interventions_info</span><span class="p">,</span> <span class="n">reset_observation_space_signal</span> <span class="o">=</span> \
                 <span class="bp">self</span><span class="o">.</span><span class="n">apply_interventions</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">,</span>
                                          <span class="n">check_bounds</span><span class="o">=</span>
-                                         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;intervention_split&#39;</span><span class="p">])</span>
+                                         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">])</span>
             <span class="k">if</span> <span class="n">success_signal</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_current_starting_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_state</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_starting_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_state</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_set_task_state</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">success_signal</span><span class="p">,</span> <span class="n">interventions_info</span><span class="p">,</span> <span class="n">reset_observation_space_signal</span></div>
 
@@ -830,23 +856,13 @@
         <span class="c1">#the goal position</span>
         <span class="k">return</span> <span class="kc">False</span></div>
 
-<div class="viewcode-block" id="BaseTask.set_sparse_reward"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.set_sparse_reward">[docs]</a>    <span class="k">def</span> <span class="nf">set_sparse_reward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sparse_reward_weight</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param sparse_reward_weight:</span>
-<span class="sd">        :return:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">sparse_reward_weight</span>
-        <span class="k">return</span></div>
-
 <div class="viewcode-block" id="BaseTask.do_single_random_intervention"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.do_single_random_intervention">[docs]</a>    <span class="k">def</span> <span class="nf">do_single_random_intervention</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">interventions_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">]:</span>
             <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span>
@@ -906,34 +922,29 @@
             <span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_task_generator_variables_values</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">variable_params</span></div>
 
-<div class="viewcode-block" id="BaseTask.get_current_task_parameters"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_current_task_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_task_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="BaseTask.get_current_state_variables"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.get_current_state_variables">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_state_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1">#this is all the variables that are available and exposed</span>
+        <span class="c1">#this is all the variables that are availaavailableble and exposed</span>
         <span class="n">current_variables_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
-        <span class="c1">#filter them only if intervention spaces split is enforced</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;intervention_split&#39;</span><span class="p">]:</span>
-            <span class="c1">#choose intervention space</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">]:</span>
-                <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span>
-            <span class="n">task_params_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">]:</span>
+            <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span>
+            <span class="n">state_variables_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
             <span class="k">for</span> <span class="n">variable_name</span> <span class="ow">in</span> <span class="n">intervention_space</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
                         <span class="n">intervention_space</span><span class="p">[</span><span class="n">variable_name</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
-                    <span class="n">task_params_dict</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="n">state_variables_dict</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
                     <span class="k">for</span> <span class="n">subvariable_name</span> <span class="ow">in</span> <span class="n">intervention_space</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]:</span>
-                        <span class="n">task_params_dict</span><span class="p">[</span><span class="n">variable_name</span><span class="p">][</span><span class="n">subvariable_name</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="n">state_variables_dict</span><span class="p">[</span><span class="n">variable_name</span><span class="p">][</span><span class="n">subvariable_name</span><span class="p">]</span> <span class="o">=</span> \
                             <span class="n">current_variables_values</span><span class="p">[</span><span class="n">variable_name</span><span class="p">][</span><span class="n">subvariable_name</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">task_params_dict</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_variables_values</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
+                    <span class="n">state_variables_dict</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_variables_values</span><span class="p">[</span><span class="n">variable_name</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">task_params_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">current_variables_values</span><span class="p">)</span>
+            <span class="n">state_variables_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">current_variables_values</span><span class="p">)</span>
         <span class="c1"># you can add task specific ones after that</span>
-        <span class="k">return</span> <span class="n">task_params_dict</span></div>
+        <span class="k">return</span> <span class="n">state_variables_dict</span></div>
 
 <div class="viewcode-block" id="BaseTask.is_intervention_in_bounds"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask.is_intervention_in_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">is_intervention_in_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -941,7 +952,7 @@
 <span class="sd">        :param interventions_dict:</span>
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;training&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">]:</span>
             <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span>
@@ -1029,7 +1040,7 @@
         <span class="c1">#     current_robot_state = self.robot.get_full_state()</span>
         <span class="c1"># else:</span>
         <span class="c1">#     current_robot_state = self.robot.get_default_state()</span>
-        <span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_save_state</span><span class="p">()</span>
+        <span class="n">current_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">save_state</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">apply_interventions</span><span class="p">(</span><span class="n">robot_interventions_dict</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">apply_interventions</span><span class="p">(</span><span class="n">stage_interventions_dict</span><span class="p">)</span>
         <span class="n">task_generator_intervention_success_signal</span><span class="p">,</span> <span class="n">reset_observation_space_signal</span> <span class="o">=</span> \
@@ -1047,9 +1058,10 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">check_feasibility_of_robot_state</span><span class="p">():</span>
                 <span class="n">robot_infeasible</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">stage_infeasible</span> <span class="ow">or</span> <span class="n">robot_infeasible</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_restore_state</span><span class="p">(</span><span class="n">current_state</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">restore_state</span><span class="p">(</span><span class="n">current_state</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_restore_pybullet_state</span><span class="p">(</span><span class="n">pre_contact_check_state</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_remove_pybullet_state</span><span class="p">(</span><span class="n">pre_contact_check_state</span><span class="p">)</span>
         <span class="n">interventions_info</span><span class="p">[</span><span class="s1">&#39;robot_infeasible&#39;</span><span class="p">]</span> <span class="o">=</span> \
             <span class="n">robot_infeasible</span>
         <span class="n">interventions_info</span><span class="p">[</span><span class="s1">&#39;stage_infeasible&#39;</span><span class="p">]</span> <span class="o">=</span> \
@@ -1069,7 +1081,7 @@
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">check_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">check_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;intervention_split&#39;</span><span class="p">]</span>
+            <span class="n">check_bounds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">]</span>
         <span class="n">success_signal</span><span class="p">,</span> <span class="n">interventions_info</span><span class="p">,</span> <span class="n">reset_observation_space_signal</span> <span class="o">=</span> \
             <span class="bp">self</span><span class="o">.</span><span class="n">apply_interventions</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">,</span>
                                      <span class="n">check_bounds</span><span class="o">=</span><span class="n">check_bounds</span><span class="p">)</span>

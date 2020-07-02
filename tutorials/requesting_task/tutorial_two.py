@@ -10,7 +10,7 @@ def example():
     env.reset()
     for _ in range(5):
         obs, reward, done, info = env.step(env.action_space.sample())
-    #show last images
+    # Show last camera observations
     for i in range(6):
         plt.imshow(obs[i])
         plt.show()

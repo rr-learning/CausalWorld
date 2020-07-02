@@ -1,0 +1,850 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>causal_rl_bench.envs.scene.stage &mdash; causal_rl_bench 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/task_setups.html">Task distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/evaluating_policy.html">Evaluation Protocols</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/causal_rl_bench.html">CausalRLBench</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">causal_rl_bench</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>causal_rl_bench.envs.scene.stage</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for causal_rl_bench.envs.scene.stage</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.envs.scene.observations</span> <span class="kn">import</span> <span class="n">StageObservations</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.envs.scene.objects</span> <span class="kn">import</span> <span class="n">Cuboid</span><span class="p">,</span> <span class="n">StaticCuboid</span><span class="p">,</span> <span class="n">MeshObject</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.envs.scene.silhouette</span> <span class="kn">import</span> <span class="n">SCuboid</span><span class="p">,</span> <span class="n">SSphere</span><span class="p">,</span> <span class="n">SMeshObject</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.utils.state_utils</span> <span class="kn">import</span> <span class="n">get_intersection</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pybullet</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.configs.world_constants</span> <span class="kn">import</span> <span class="n">WorldConstants</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span>
+
+
+<div class="viewcode-block" id="Stage"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage">[docs]</a><span class="k">class</span> <span class="nc">Stage</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_mode</span><span class="p">,</span>
+                 <span class="n">normalize_observations</span><span class="p">,</span>
+                 <span class="n">pybullet_client_full_id</span><span class="p">,</span>
+                 <span class="n">pybullet_client_w_goal_id</span><span class="p">,</span>
+                 <span class="n">pybullet_client_w_o_goal_id</span><span class="p">,</span>
+                 <span class="n">cameras</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param observation_mode:</span>
+<span class="sd">        :param normalize_observations:</span>
+<span class="sd">        :param pybullet_client_full:</span>
+<span class="sd">        :param pybullet_client_w_goal:</span>
+<span class="sd">        :param pybullet_client_w_o_goal:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">=</span> <span class="n">observation_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="o">=</span> <span class="n">pybullet_client_full_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="o">=</span> <span class="n">pybullet_client_w_goal_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="o">=</span> <span class="n">pybullet_client_w_o_goal_id</span>
+        <span class="c1">#TODO: move the ids from here</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span> <span class="o">=</span> <span class="n">normalize_observations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_default_gravity</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mf">9.81</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_current_gravity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_default_gravity</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cameras</span> <span class="o">=</span> <span class="n">cameras</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_goal_image</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">get_floor_height</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+
+    <span class="k">def</span> <span class="nf">get_arena_bb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span>  <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ARENA_BB</span>
+
+    <span class="k">def</span> <span class="nf">get_rigid_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span>
+
+    <span class="k">def</span> <span class="nf">get_visual_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span>
+
+    <span class="k">def</span> <span class="nf">get_full_env_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">env_state</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;rigid_objects&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rigid_object_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">rigid_object_key</span><span class="p">],</span> <span class="n">Cuboid</span><span class="p">):</span>
+                <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;rigid_objects&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;cube&#39;</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span>
+                                                   <span class="p">[</span><span class="n">rigid_object_key</span><span class="p">]</span><span class="o">.</span>
+                                                   <span class="n">get_recreation_params</span><span class="p">()])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">rigid_object_key</span><span class="p">],</span> <span class="n">StaticCuboid</span><span class="p">):</span>
+                <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;rigid_objects&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;static_cube&#39;</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span>
+                                                   <span class="p">[</span><span class="n">rigid_object_key</span><span class="p">]</span><span class="o">.</span>
+                                                   <span class="n">get_recreation_params</span><span class="p">()])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">rigid_object_key</span><span class="p">],</span> <span class="n">MeshObject</span><span class="p">):</span>
+                <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;rigid_objects&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;mesh&#39;</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span>
+                                                   <span class="p">[</span><span class="n">rigid_object_key</span><span class="p">]</span><span class="o">.</span>
+                                                   <span class="n">get_recreation_params</span><span class="p">()])</span>
+        <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;visual_objects&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">visual_object_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">visual_object_key</span><span class="p">],</span> <span class="n">SCuboid</span><span class="p">):</span>
+                <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;visual_objects&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;cube&#39;</span><span class="p">,</span>
+                                                   <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span>
+                                                   <span class="p">[</span><span class="n">visual_object_key</span><span class="p">]</span><span class="o">.</span>
+                                                   <span class="n">get_recreation_params</span><span class="p">()])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">visual_object_key</span><span class="p">],</span> <span class="n">SSphere</span><span class="p">):</span>
+                <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;visual_objects&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;sphere&#39;</span><span class="p">,</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span>
+                                                    <span class="p">[</span><span class="n">visual_object_key</span><span class="p">]</span><span class="o">.</span>
+                                                    <span class="n">get_recreation_params</span><span class="p">()])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">visual_object_key</span><span class="p">],</span> <span class="n">SMeshObject</span><span class="p">):</span>
+                <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;visual_objects&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="s1">&#39;mesh&#39;</span><span class="p">,</span>
+                                                    <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span>
+                                                    <span class="p">[</span><span class="n">visual_object_key</span><span class="p">]</span><span class="o">.</span>
+                                                    <span class="n">get_recreation_params</span><span class="p">()])</span>
+        <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;arena_scm_values&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values_for_arena</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">env_state</span>
+
+    <span class="k">def</span> <span class="nf">set_full_env_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">remove_everything</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rigid_object_info</span> <span class="ow">in</span> <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;rigid_objects&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">rigid_object_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_rigid_mesh_object</span><span class="p">(</span><span class="o">**</span><span class="n">rigid_object_info</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_rigid_general_object</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">rigid_object_info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                              <span class="o">**</span><span class="n">rigid_object_info</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">visual_object_info</span> <span class="ow">in</span> <span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;visual_objects&#39;</span><span class="p">]:</span>
+            <span class="k">if</span> <span class="n">visual_object_info</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;mesh&#39;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_silhoutte_mesh_object</span><span class="p">(</span><span class="o">**</span><span class="n">visual_object_info</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="n">shape</span><span class="o">=</span><span class="n">visual_object_info</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                  <span class="o">**</span><span class="n">visual_object_info</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_interventions</span><span class="p">(</span><span class="n">env_state</span><span class="p">[</span><span class="s1">&#39;arena_scm_values&#39;</span><span class="p">])</span>
+        <span class="c1">#update the stage observations with them</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">visual_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">visual_objects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span>
+        <span class="k">return</span> <span class="n">env_state</span>
+
+<div class="viewcode-block" id="Stage.add_rigid_general_object"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.add_rigid_general_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_rigid_general_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param shape:</span>
+<span class="sd">        :param object_params:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;name already exists as key for scene objects&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;cube&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">Cuboid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span>
+                                               <span class="n">_rigid_objects_client_instances</span><span class="p">,</span>
+                                               <span class="n">name</span><span class="p">,</span>
+                                               <span class="o">**</span><span class="n">object_params</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;static_cube&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">StaticCuboid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span>
+                                                     <span class="n">_rigid_objects_client_instances</span><span class="p">,</span>
+                                                     <span class="n">name</span><span class="p">,</span>
+                                                     <span class="o">**</span><span class="n">object_params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;shape is not yet implemented&quot;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.remove_general_object"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.remove_general_object">[docs]</a>    <span class="k">def</span> <span class="nf">remove_general_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;name does not exists as key for scene objects&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+            
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">remove</span><span class="p">()</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.remove_everything"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.remove_everything">[docs]</a>    <span class="k">def</span> <span class="nf">remove_everything</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">current_objects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> \
+                          <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">current_objects</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">remove_general_object</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.add_rigid_mesh_object"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.add_rigid_mesh_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_rigid_mesh_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param filename:</span>
+<span class="sd">        :param object_params:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;name already exists as key for scene objects&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">MeshObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">,</span>
+                                               <span class="n">name</span><span class="p">,</span>
+                                               <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.add_silhoutte_general_object"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.add_silhoutte_general_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_silhoutte_general_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param shape:</span>
+<span class="sd">        :param object_params:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;name already exists as key for scene objects&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;cube&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">SCuboid</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">shape</span> <span class="o">==</span> <span class="s2">&quot;sphere&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">SSphere</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;shape is not implemented yet&quot;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.add_silhoutte_mesh_object"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.add_silhoutte_mesh_object">[docs]</a>    <span class="k">def</span> <span class="nf">add_silhoutte_mesh_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param name:</span>
+<span class="sd">        :param filename:</span>
+<span class="sd">        :param object_params:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;name already exists as key for scene objects&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">SMeshObject</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span><span class="p">,</span>
+                                                 <span class="n">name</span><span class="p">,</span>
+                                                 <span class="n">filename</span><span class="p">,</span> <span class="o">**</span><span class="n">object_params</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.finalize_stage"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.finalize_stage">[docs]</a>    <span class="k">def</span> <span class="nf">finalize_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">==</span> <span class="s2">&quot;cameras&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span> <span class="o">=</span> <span class="n">StageObservations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span><span class="p">,</span>
+                                                         <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cameras</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_goal_image</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span> <span class="o">=</span> <span class="n">StageObservations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span><span class="p">,</span>
+                                                         <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.select_observations"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.select_observations">[docs]</a>    <span class="k">def</span> <span class="nf">select_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_keys</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param observation_keys:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">reset_observation_keys</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">initialize_observations</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">observation_keys</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">add_observation</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">set_observation_spaces</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Stage.get_full_state"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.get_full_state">[docs]</a>    <span class="k">def</span> <span class="nf">get_full_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state_type</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param state_type:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">state_type</span> <span class="o">==</span> <span class="s1">&#39;list&#39;</span><span class="p">:</span>
+            <span class="n">stage_state</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">elif</span> <span class="n">state_type</span> <span class="o">==</span> <span class="s1">&#39;dict&#39;</span><span class="p">:</span>
+            <span class="n">stage_state</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;type is not supported&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+                <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+                <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;possible error here&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">state_type</span> <span class="o">==</span> <span class="s1">&#39;list&#39;</span><span class="p">:</span>
+                <span class="n">stage_state</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">object</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">state_type</span><span class="o">=</span><span class="s1">&#39;list&#39;</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">state_type</span> <span class="o">==</span> <span class="s1">&#39;dict&#39;</span><span class="p">:</span>
+                <span class="n">stage_state</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">object</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="n">state_type</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">stage_state</span></div>
+
+<div class="viewcode-block" id="Stage.set_full_state"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.set_full_state">[docs]</a>    <span class="k">def</span> <span class="nf">set_full_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_state</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param new_state:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#TODO: under the assumption that the new state has the same number of objects</span>
+        <span class="n">start</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+                <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">object</span><span class="o">.</span><span class="n">get_state_size</span><span class="p">()</span>
+                <span class="nb">object</span><span class="o">.</span><span class="n">set_full_state</span><span class="p">(</span><span class="n">new_state</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+                <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="n">end</span> <span class="o">=</span> <span class="n">start</span> <span class="o">+</span> <span class="nb">object</span><span class="o">.</span><span class="n">get_state_size</span><span class="p">()</span>
+                <span class="nb">object</span><span class="o">.</span><span class="n">set_full_state</span><span class="p">(</span><span class="n">new_state</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">])</span>
+            <span class="n">start</span> <span class="o">=</span> <span class="n">end</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">==</span> <span class="s2">&quot;cameras&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_goal_image</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.set_objects_pose"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.set_objects_pose">[docs]</a>    <span class="k">def</span> <span class="nf">set_objects_pose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">orientations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param names:</span>
+<span class="sd">        :param positions:</span>
+<span class="sd">        :param orientations:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+                <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="nb">object</span><span class="o">.</span><span class="n">set_pose</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">orientations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+                <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+                <span class="nb">object</span><span class="o">.</span><span class="n">set_pose</span><span class="p">(</span><span class="n">positions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">orientations</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;Object </span><span class="si">{}</span><span class="s2"> doesnt exist&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">==</span> <span class="s2">&quot;cameras&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_goal_image</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="Stage.get_current_observations"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.get_current_observations">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper_keys</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param helper_keys:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">get_current_observations</span><span class="p">(</span><span class="n">helper_keys</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Stage.get_observation_spaces"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.get_observation_spaces">[docs]</a>    <span class="k">def</span> <span class="nf">get_observation_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">get_observation_spaces</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Stage.random_position"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.random_position">[docs]</a>    <span class="k">def</span> <span class="nf">random_position</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">height_limits</span><span class="o">=</span><span class="p">(</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">),</span>
+                        <span class="n">angle_limits</span><span class="o">=</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
+                        <span class="n">radius_limits</span><span class="o">=</span><span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">),</span>
+                        <span class="n">allowed_section</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+                                                  <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param height_limits:</span>
+<span class="sd">        :param angle_limits:</span>
+<span class="sd">        :param radius_limits:</span>
+<span class="sd">        :param allowed_section:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">satisfying_constraints</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="n">satisfying_constraints</span><span class="p">:</span>
+            <span class="n">angle</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="n">angle_limits</span><span class="p">)</span>
+            <span class="c1"># for uniform sampling with respect to the disc area use scaling</span>
+            <span class="n">radial_distance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">radius_limits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span>
+                                                        <span class="n">radius_limits</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">height_limits</span><span class="p">,</span> <span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">)):</span>
+                <span class="n">height_z</span> <span class="o">=</span> <span class="n">height_limits</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">height_z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">*</span><span class="n">height_limits</span><span class="p">)</span>
+
+            <span class="n">object_position</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">radial_distance</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span>
+                <span class="n">radial_distance</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span>
+                <span class="n">height_z</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="c1">#check if satisfying_constraints</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">object_position</span> <span class="o">&gt;</span> <span class="n">allowed_section</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">and</span> \
+                    <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">object_position</span> <span class="o">&lt;</span> <span class="n">allowed_section</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                <span class="n">satisfying_constraints</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="k">return</span> <span class="n">object_position</span></div>
+
+<div class="viewcode-block" id="Stage.get_current_object_keys"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.get_current_object_keys">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_object_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">+</span> \
+               <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="Stage.object_intervention"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.object_intervention">[docs]</a>    <span class="k">def</span> <span class="nf">object_intervention</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param key:</span>
+<span class="sd">        :param interventions_dict:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+            <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+            <span class="nb">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The key </span><span class="si">{}</span><span class="s2"> passed doesn&#39;t exist in the stage yet&quot;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="c1"># save the old state of the object before intervention</span>
+        <span class="nb">object</span><span class="o">.</span><span class="n">apply_interventions</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">==</span> <span class="s2">&quot;cameras&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_goal_image</span><span class="p">()</span>
+        <span class="c1">#self.pybullet_client.stepSimulation()</span>
+        <span class="k">return</span></div>
+
+    <span class="k">def</span> <span class="nf">get_current_scm_values_for_arena</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="n">variable_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">variable_params</span><span class="p">[</span><span class="s2">&quot;floor_color&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">getVisualShapeData</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_ID</span><span class="p">,</span>
+                                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">7</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">variable_params</span><span class="p">[</span><span class="s2">&quot;floor_friction&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">getDynamicsInfo</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_ID</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">variable_params</span><span class="p">[</span><span class="s2">&quot;stage_color&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">getVisualShapeData</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">,</span>
+                                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">7</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">variable_params</span><span class="p">[</span><span class="s2">&quot;stage_friction&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">getDynamicsInfo</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
+                                     <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">variable_params</span><span class="p">[</span><span class="s2">&quot;gravity&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_current_gravity</span>
+        <span class="k">return</span> <span class="n">variable_params</span>
+
+    <span class="k">def</span> <span class="nf">get_current_scm_values_for_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_full_state</span><span class="p">(</span><span class="n">state_type</span><span class="o">=</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Stage.get_current_scm_values"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.get_current_scm_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_current_scm_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">variable_params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values_for_arena</span><span class="p">()</span>
+        <span class="n">variable_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values_for_objects</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">variable_params</span></div>
+
+<div class="viewcode-block" id="Stage.apply_interventions"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.apply_interventions">[docs]</a>    <span class="k">def</span> <span class="nf">apply_interventions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param interventions_dict:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">intervention</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">object_intervention</span><span class="p">(</span><span class="n">intervention</span><span class="p">,</span>
+                                             <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;floor_color&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">changeVisualShape</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_ID</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">rgbaColor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span>
+                        <span class="p">)</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">changeVisualShape</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_ID</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">rgbaColor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;stage_color&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_object_client_instances</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">changeVisualShape</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">rgbaColor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">changeVisualShape</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">rgbaColor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                            <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;stage_friction&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">changeDynamics</span><span class="p">(</span>
+                        <span class="n">bodyUniqueId</span><span class="o">=</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">,</span>
+                        <span class="n">linkIndex</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">lateralFriction</span><span class="o">=</span><span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;floor_friction&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">changeDynamics</span><span class="p">(</span>
+                        <span class="n">bodyUniqueId</span><span class="o">=</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_ID</span><span class="p">,</span>
+                        <span class="n">linkIndex</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>
+                        <span class="n">lateralFriction</span><span class="o">=</span><span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;gravity&quot;</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">client</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">setGravity</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">[</span>
+                                        <span class="n">intervention</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                                      <span class="n">interventions_dict</span><span class="p">[</span>
+                                        <span class="n">intervention</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span>
+                                       <span class="n">interventions_dict</span><span class="p">[</span>
+                                        <span class="n">intervention</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span>
+                                        <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_current_gravity</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The intervention on stage &quot;</span>
+                                <span class="s2">&quot;is not supported yet&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">==</span> <span class="s2">&quot;cameras&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_goal_image</span><span class="p">()</span>
+        <span class="k">return</span></div>
+
+    <span class="k">def</span> <span class="nf">get_object_full_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get_state</span><span class="p">(</span><span class="s1">&#39;dict&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The key </span><span class="si">{}</span><span class="s2"> passed doesn&#39;t exist in the stage yet&quot;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_object_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">state_variable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get_variable_state</span><span class="p">(</span>
+                <span class="n">state_variable</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">get_variable_state</span><span class="p">(</span>
+                <span class="n">state_variable</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The key </span><span class="si">{}</span><span class="s2"> passed doesn&#39;t exist in the stage yet&quot;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_object</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The key </span><span class="si">{}</span><span class="s2"> passed doesn&#39;t exist in the stage yet&quot;</span>
+                            <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">are_blocks_colliding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block1</span><span class="p">,</span> <span class="n">block2</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span>
+                <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block2</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span>
+                     <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block2</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">check_stage_free_of_colliding_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">is_colliding_with_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">)</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span>
+                     <span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">is_colliding_with_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block1</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_ID</span><span class="p">)</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span>
+                     <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_ID</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">get_normal_interaction_force_between_blocks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block1</span><span class="p">,</span> <span class="n">block2</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span>
+                <span class="n">block2</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block1</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span>
+                     <span class="n">block2</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="n">contact</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">add_observation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_key</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">upper_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">add_observation</span><span class="p">(</span><span class="n">observation_key</span><span class="p">,</span> <span class="n">lower_bound</span><span class="p">,</span>
+                                                 <span class="n">upper_bound</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">normalize_observation_for_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">normalize_observation_for_key</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span>
+                                                                      <span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">denormalize_observation_for_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">denormalize_observation_for_key</span><span class="p">(</span><span class="n">observation</span><span class="p">,</span>
+                                                                        <span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_current_goal_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_goal_image</span>
+
+    <span class="k">def</span> <span class="nf">update_goal_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_goal_image</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span><span class="o">.</span><span class="n">get_current_goal_image</span><span class="p">()</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="Stage.check_feasiblity_of_stage"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.Stage.check_feasiblity_of_stage">[docs]</a>    <span class="k">def</span> <span class="nf">check_feasiblity_of_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks the feasibility of the current state of the stage</span>
+<span class="sd">        (i.e checks if any of the bodies in the simulation are in a penetration</span>
+<span class="sd">        mode)</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            feasibility_flag: bool</span>
+<span class="sd">                A boolean indicating whether the stage is in a collision state</span>
+<span class="sd">                or not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects_client_instances</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">contact</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.08</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="c1">#check if all the visual objects are within the bb og the available arena</span>
+        <span class="k">for</span> <span class="n">visual_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">get_intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">visual_object</span><span class="p">]</span><span class="o">.</span>
+                                   <span class="n">get_bounding_box</span><span class="p">(),</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">_get_stage_bb</span><span class="p">())</span><span class="o">/</span>\
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">[</span><span class="n">visual_object</span><span class="p">]</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mf">0.95</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">_get_stage_bb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ARENA_BB</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                <span class="nb">tuple</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ARENA_BB</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

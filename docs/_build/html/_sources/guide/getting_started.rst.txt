@@ -32,8 +32,92 @@ Setting up an environment can be as simple as two lines of codes
 
 By default you are getting an task that has a feature observation space, takes 9 joint positions for the action
 spaces and allows you to solve the task within the number of objects in the arena times 10 seconds. All of this is
-easy customizable as you will learn one of the many tutorials provided.
+easy customizable as you will learn in one of the many tutorials provided.
+
+---------------
+Basics: Setting up an environment with different tasks
 ---------------
 
-Demo
-----
+.. literalinclude:: ../../tutorials/requesting_task/tutorial_one.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/requesting_task/tutorial_two.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/requesting_task/tutorial_three.py
+   :language: python
+
+---------------
+Changing the environment instance: Performing interventions
+---------------
+
+.. literalinclude:: ../../tutorials/interventions/tutorial_one.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/interventions/tutorial_two.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/interventions/tutorial_three.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/interventions/tutorial_four.py
+   :language: python
+
+---------------
+Training agents using stable-baselines
+---------------
+
+.. literalinclude:: ../../tutorials/stable_baselines/tutorial_one.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/stable_baselines/tutorial_two.py
+   :language: python
+
+---------------
+Viewing and recording policies or logged data
+---------------
+
+.. literalinclude:: ../../tutorials/viewing_policies/tutorial_one.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/viewing_policies/tutorial_two.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/viewing_policies/tutorial_three.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/viewing_policies/tutorial_four.py
+   :language: python
+
+---------------
+Defining a training curriculum of task variations
+---------------
+
+.. literalinclude:: ../../tutorials/curriculums/tutorial_one.py
+   :language: python
+
+---------------
+Changing the action space of the robot
+---------------
+
+.. literalinclude:: ../../tutorials/change_action_space/tutorial_one.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/change_action_space/tutorial_two.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/change_action_space/tutorial_three.py
+   :language: python
+
+---------------
+Other Utilities: Model Predictive Control, Logging data, loading wrapped environments
+---------------
+
+.. literalinclude:: ../../tutorials/mpc_w_true_model/tutorial_one.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/logging_data/tutorial_one.py
+   :language: python
+
+.. literalinclude:: ../../tutorials/saving_and_loading/tutorial_one.py
+   :language: python

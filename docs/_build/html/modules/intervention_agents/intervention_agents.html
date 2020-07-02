@@ -180,268 +180,27 @@
 <span id="intervention-agents"></span><h1>Intervention Agents<a class="headerlink" href="#module-causal_rl_bench.intervention_agents" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="baseinterventionactorpolicy">
 <h2>BaseInterventionActorPolicy<a class="headerlink" href="#baseinterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.BaseInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">BaseInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/base_policy.html#BaseInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><p>This class indicates the interface of a meta actor</p>
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.act">
-<code class="sig-name descname">act</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">variables_dict</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/base_policy.html#BaseInterventionActorPolicy.act"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.act" title="Permalink to this definition">¶</a></dt>
-<dd><p>This functions enables the meta actor to decide on specific
-interventions.
-:param variables_dict: The current dict of variables that it can intervene on with</p>
-<blockquote>
-<div><p>their current values. (this can be a two level dict)</p>
-</div></blockquote>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><strong>interventions_dict</strong> -- Dict of variables that the meta actor decided to intervene on
-with the corresponding values.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/base_policy.html#BaseInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/base_policy.html#BaseInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.BaseInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><p>This functions allows the intervention agent to query things from the env, such
-as intervention spaces or to have access to sampling funcs for goals..etc
-:param env:
-:type env: Env</p>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="randominterventionactorpolicy">
 <h2>RandomInterventionActorPolicy<a class="headerlink" href="#randominterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.RandomInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">RandomInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/random.html#RandomInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.RandomInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.RandomInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/random.html#RandomInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.RandomInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.RandomInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/random.html#RandomInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.RandomInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>env</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="goalinterventionactorpolicy">
 <h2>GoalInterventionActorPolicy<a class="headerlink" href="#goalinterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.GoalInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">GoalInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/goal_agent.html#GoalInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.GoalInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.GoalInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/goal_agent.html#GoalInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.GoalInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.GoalInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/goal_agent.html#GoalInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.GoalInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>env</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="jointsinterventionactorpolicy">
 <h2>JointsInterventionActorPolicy<a class="headerlink" href="#jointsinterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.JointsInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">JointsInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/joints_agent.html#JointsInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.JointsInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.JointsInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/joints_agent.html#JointsInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.JointsInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.JointsInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/joints_agent.html#JointsInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.JointsInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>env</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="reacherinterventionactorpolicy">
 <h2>ReacherInterventionActorPolicy<a class="headerlink" href="#reacherinterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">ReacherInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/reacher_randomizer.html#ReacherInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/reacher_randomizer.html#ReacherInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/reacher_randomizer.html#ReacherInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.ReacherInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>env</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="rigidposeinterventionactorpolicy">
 <h2>RigidPoseInterventionActorPolicy<a class="headerlink" href="#rigidposeinterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">RigidPoseInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">positions</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">orientations</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/rigid_block_pose.html#RigidPoseInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/rigid_block_pose.html#RigidPoseInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/rigid_block_pose.html#RigidPoseInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.RigidPoseInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>env</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="visualinterventionactorpolicy">
 <h2>VisualInterventionActorPolicy<a class="headerlink" href="#visualinterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.VisualInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">VisualInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/visual_agent.html#VisualInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.VisualInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.VisualInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/visual_agent.html#VisualInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.VisualInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.VisualInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/visual_agent.html#VisualInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.VisualInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>env</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 <div class="section" id="physicalpropertiesinterventionactorpolicy">
 <h2>PhysicalPropertiesInterventionActorPolicy<a class="headerlink" href="#physicalpropertiesinterventionactorpolicy" title="Permalink to this headline">¶</a></h2>
-<dl class="py class">
-<dt id="causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.intervention_agents.</code><code class="sig-name descname">PhysicalPropertiesInterventionActorPolicy</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">group</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/physical_proporties_agent.html#PhysicalPropertiesInterventionActorPolicy"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy.get_params">
-<code class="sig-name descname">get_params</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/physical_proporties_agent.html#PhysicalPropertiesInterventionActorPolicy.get_params"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy.get_params" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy.initialize">
-<code class="sig-name descname">initialize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">env</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/intervention_agents/physical_proporties_agent.html#PhysicalPropertiesInterventionActorPolicy.initialize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.intervention_agents.PhysicalPropertiesInterventionActorPolicy.initialize" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>env</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
 </div>
 </div>
 

@@ -169,11 +169,10 @@
 <span class="sd">        :param kwargs:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_name</span><span class="o">=</span><span class="s2">&quot;general&quot;</span><span class="p">,</span>
-                         <span class="n">intervention_split</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;intervention_split&quot;</span><span class="p">,</span>
-                                                       <span class="kc">False</span><span class="p">),</span>
-                         <span class="n">training</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;training&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">),</span>
-                         <span class="n">sparse_reward_weight</span><span class="o">=</span>
-                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;sparse_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                         <span class="n">use_train_space_only</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_train_space_only&quot;</span><span class="p">,</span>
+                                                         <span class="kc">False</span><span class="p">),</span>
+                         <span class="n">fractional_reward_weight</span><span class="o">=</span>
+                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
                          <span class="n">dense_reward_weights</span><span class="o">=</span>
                          <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">,</span>
                                     <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])))</span>
@@ -332,6 +331,7 @@
         <span class="c1">#raise the fingers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">remove_everything</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">silhouettes_creation_dicts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">joint_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_upper_joint_positions</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">reset_state</span><span class="p">(</span><span class="n">joint_positions</span><span class="o">=</span><span class="n">joint_positions</span><span class="p">,</span>
                                 <span class="n">joint_velocities</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span>

@@ -182,8 +182,18 @@
 <h2>BaseTask<a class="headerlink" href="#basetask" title="Permalink to this headline">¶</a></h2>
 <dl class="py class">
 <dt id="causal_rl_bench.task_generators.BaseTask">
-<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.task_generators.</code><code class="sig-name descname">BaseTask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task_name</span></em>, <em class="sig-param"><span class="n">intervention_split</span></em>, <em class="sig-param"><span class="n">training</span></em>, <em class="sig-param"><span class="n">sparse_reward_weight</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">dense_reward_weights</span><span class="o">=</span><span class="default_value">array([], dtype=float64)</span></em>, <em class="sig-param"><span class="n">is_goal_distance_dense</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">calculate_additional_dense_rewards</span><span class="o">=</span><span class="default_value">True</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.task_generators.</code><code class="sig-name descname">BaseTask</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">task_name</span></em>, <em class="sig-param"><span class="n">use_train_space_only</span></em>, <em class="sig-param"><span class="n">fractional_reward_weight</span><span class="o">=</span><span class="default_value">1</span></em>, <em class="sig-param"><span class="n">dense_reward_weights</span><span class="o">=</span><span class="default_value">array([], dtype=float64)</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="py method">
+<dt id="causal_rl_bench.task_generators.BaseTask.activate_sparse_reward">
+<code class="sig-name descname">activate_sparse_reward</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.activate_sparse_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.activate_sparse_reward" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt id="causal_rl_bench.task_generators.BaseTask.apply_interventions">
 <code class="sig-name descname">apply_interventions</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interventions_dict</span></em>, <em class="sig-param"><span class="n">check_bounds</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.apply_interventions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.apply_interventions" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
@@ -299,8 +309,8 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="causal_rl_bench.task_generators.BaseTask.get_current_task_parameters">
-<code class="sig-name descname">get_current_task_parameters</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.get_current_task_parameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.get_current_task_parameters" title="Permalink to this definition">¶</a></dt>
+<dt id="causal_rl_bench.task_generators.BaseTask.get_current_state_variables">
+<code class="sig-name descname">get_current_state_variables</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.get_current_state_variables"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.get_current_state_variables" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p></p>
@@ -390,7 +400,7 @@
 
 <dl class="py method">
 <dt id="causal_rl_bench.task_generators.BaseTask.init_task">
-<code class="sig-name descname">init_task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">robot</span></em>, <em class="sig-param"><span class="n">stage</span></em>, <em class="sig-param"><span class="n">max_episode_length</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.init_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.init_task" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">init_task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">robot</span></em>, <em class="sig-param"><span class="n">stage</span></em>, <em class="sig-param"><span class="n">max_episode_length</span></em>, <em class="sig-param"><span class="n">create_world_func</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.init_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.init_task" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -438,16 +448,22 @@
 </dd></dl>
 
 <dl class="py method">
-<dt id="causal_rl_bench.task_generators.BaseTask.reset_task">
-<code class="sig-name descname">reset_task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interventions_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.reset_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.reset_task" title="Permalink to this definition">¶</a></dt>
+<dt id="causal_rl_bench.task_generators.BaseTask.reset_default_state">
+<code class="sig-name descname">reset_default_state</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.reset_default_state"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.reset_default_state" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>interventions_dict</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="causal_rl_bench.task_generators.BaseTask.reset_task">
+<code class="sig-name descname">reset_task</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">interventions_dict</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.reset_task"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.reset_task" title="Permalink to this definition">¶</a></dt>
+<dd><p>TODO: NOTE: With the current implementation, no contact points are saved
+when resetting task
+:param interventions_dict:
+:return:</p>
 </dd></dl>
 
 <dl class="py method">
@@ -462,29 +478,6 @@
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.task_generators.BaseTask.set_sparse_reward">
-<code class="sig-name descname">set_sparse_reward</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sparse_reward_weight</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.set_sparse_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.set_sparse_reward" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>sparse_reward_weight</strong> -- </p>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="causal_rl_bench.task_generators.BaseTask.set_super_sparse_reward">
-<code class="sig-name descname">set_super_sparse_reward</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/task_generators/base_task.html#BaseTask.set_super_sparse_reward"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.task_generators.BaseTask.set_super_sparse_reward" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p></p>
 </dd>
 </dl>
 </dd></dl>
