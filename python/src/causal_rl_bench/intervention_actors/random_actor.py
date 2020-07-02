@@ -1,4 +1,4 @@
-from causal_rl_bench.intervention_agents.base_policy import \
+from causal_rl_bench.intervention_actors.base_actor import \
     BaseInterventionActorPolicy
 import numpy as np
 
@@ -54,4 +54,4 @@ class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
 
         :return:
         """
-        return {'random_agent': dict()}
+        return {'random_actor': dict()}

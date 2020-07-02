@@ -6,7 +6,7 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
     PICK_AND_PLACE_BENCHMARK, \
     TOWER_2_BENCHMARK
 import causal_rl_bench.evaluation.visualization.visualiser as vis
-from causal_rl_bench.intervention_agents import RandomInterventionActorPolicy, GoalInterventionActorPolicy
+from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 import argparse
 import os
 import json

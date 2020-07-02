@@ -1,4 +1,4 @@
-from causal_rl_bench.intervention_agents.base_policy import \
+from causal_rl_bench.intervention_actors.base_actor import \
     BaseInterventionActorPolicy
 import numpy as np
 
@@ -43,4 +43,4 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         
         :return:
         """
-        return {'joints_agent': dict()}
+        return {'joints_actor': dict()}

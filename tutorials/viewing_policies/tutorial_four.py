@@ -6,7 +6,7 @@ import causal_rl_bench.viewers.task_viewer as viewer
 
 
 def example():
-    # This tutorial shows how to view policies of trained agents
+    # This tutorial shows how to view policies of trained actors
 
     task = task_generator(task_generator_id='picking')
     world_params = dict()

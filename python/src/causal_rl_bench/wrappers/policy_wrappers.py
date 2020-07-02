@@ -1,4 +1,4 @@
-from causal_rl_bench.agents.base_policy import BaseActorPolicy
+from causal_rl_bench.actors.base_policy import BaseActorPolicy
 
 
 class MovingAverageActionWrapperActorPolicy(BaseActorPolicy):
