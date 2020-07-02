@@ -38,7 +38,7 @@ def test_pd_gains():
     for _ in range(zero_hold):
         chosen_action = env.action_space.high
         obs, reward, done, info = env.step(chosen_action)
-    current_joint_positions = obs[:9]
+    current_joint_positions = obs[1:10]
     if (((current_joint_positions - chosen_action) > 0.1).any()):
         raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
                              format(chosen_action, current_joint_positions))
@@ -46,7 +46,7 @@ def test_pd_gains():
     for _ in range(zero_hold):
         chosen_action = env.action_space.low
         obs, reward, done, info = env.step(chosen_action)
-    current_joint_positions = obs[:9]
+    current_joint_positions = obs[1:10]
     if (((current_joint_positions - chosen_action) > 0.1).any()):
         raise AssertionError("The pd controller failed to reach these values {} but reached instead {}".
                              format(chosen_action, current_joint_positions))

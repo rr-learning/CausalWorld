@@ -43,8 +43,7 @@ def baseline_model(model_num):
                                       PICKING_BENCHMARK,
                                       PICK_AND_PLACE_BENCHMARK,
                                       TOWER_2_BENCHMARK])
-    task_configs = [{'task_configs': {'intervention_split': True,
-                                      'training': True,
+    task_configs = [{'task_configs': {'use_train_space_only': True,
                                       'sparse_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
@@ -127,7 +126,6 @@ def get_TD3_model(model_settings, model_path):
     policy_kwargs = dict(layers=NET_LAYERS)
     td3_config = {"gamma": 0.98,
                   "tau": 0.01,
-                  "ent_coef": 'auto',
                   "learning_rate": 0.00025,
                   "buffer_size": 1000000,
                   "learning_starts": 1000,
@@ -178,13 +176,14 @@ def get_SAC_HER_model(model_settings, model_path):
 
 
 def get_PPO_model(model_settings, model_path):
+    number_of_time_steps_per_iteration = 120000
     ppo_config = {"gamma": 0.99,
-                  "n_steps": 600,
+                  "n_steps": int(number_of_time_steps_per_iteration / num_of_envs),
                   "ent_coef": 0.01,
                   "learning_rate": 0.00025,
                   "vf_coef": 0.5,
                   "max_grad_norm": 0.5,
-                  "nminibatches": 4,
+                  "nminibatches": 40,
                   "noptepochs": 4}
     model_settings['train_configs'] = ppo_config
     save_model_settings(os.path.join(model_path, 'model_settings.json'),
@@ -276,8 +275,6 @@ if __name__ == '__main__':
     evaluator = EvaluationPipeline(evaluation_protocols=
                                    evaluation_protocols,
                                    tracker_path=output_path,
-                                   intervention_split=False,
-                                   visualize_evaluation=False,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)
     evaluator.save_scores(evaluation_path)

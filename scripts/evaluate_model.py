@@ -79,8 +79,6 @@ if __name__ == '__main__':
     evaluator = EvaluationPipeline(evaluation_protocols=
                                    evaluation_protocols,
                                    tracker_path=output_path,
-                                   intervention_split=False,
-                                   visualize_evaluation=False,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)
     evaluator.save_scores(evaluation_path, prefix=str(time_steps))
