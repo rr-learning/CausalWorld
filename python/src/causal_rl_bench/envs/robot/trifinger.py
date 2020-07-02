@@ -407,6 +407,10 @@ class TriFingerRobot(object):
             client = self._pybullet_client_full_id
         for robot_finger_link in WorldConstants.LINK_IDS:
             variable_params[robot_finger_link] = dict()
+            bug = len(pybullet.getVisualShapeData(WorldConstants.ROBOT_ID,
+                                            physicsClientId=client))
+            if bug == 0:
+                print("hi")
             variable_params[robot_finger_link]['color'] = \
                 pybullet.getVisualShapeData(WorldConstants.ROBOT_ID,
                                             physicsClientId=client)\
@@ -664,7 +668,7 @@ class TriFingerRobot(object):
             else:
                 raise Exception("The intervention state variable specified is "
                                 "not allowed")
-
+        self.update_latest_full_state()
         return
 
     def check_feasibility_of_robot_state(self):
