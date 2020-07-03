@@ -386,8 +386,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;goal_300&#39;</span><span class="p">][</span><span class="s1">&#39;cartesian_position&#39;</span><span class="p">]</span> <span class="o">=</span> \
             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lower_bound</span><span class="p">,</span>
                       <span class="n">upper_bound</span><span class="p">])</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;number_of_obstacles&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="c1"># self._training_intervention_spaces[&#39;number_of_obstacles&#39;] = \</span>
+        <span class="c1">#     np.array([1, 5])</span>
 
         <span class="k">return</span>
 
@@ -437,8 +437,8 @@
             <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">lower_bound</span><span class="p">,</span>
                       <span class="n">upper_bound</span><span class="p">])</span>
         <span class="c1">#TODO:dicuss this!</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;number_of_obstacles&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="c1"># self._testing_intervention_spaces[&#39;number_of_obstacles&#39;] = \</span>
+        <span class="c1">#     np.array([1, 5])</span>
         <span class="k">return</span>
 
 <div class="viewcode-block" id="ReachingTaskGenerator.get_task_generator_variables_values"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator.get_task_generator_variables_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_task_generator_variables_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

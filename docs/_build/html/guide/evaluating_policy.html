@@ -236,8 +236,6 @@ of different protocols and visualize the results in radar plots of different sco
                                                          <span class="n">protocols</span><span class="o">.</span><span class="n">InitialPosesOOD</span><span class="p">(),</span>
                                                          <span class="n">protocols</span><span class="o">.</span><span class="n">InEpisodePosesChange</span><span class="p">()],</span>
                                    <span class="n">tracker_path</span><span class="o">=</span><span class="n">log_relative_path</span><span class="p">,</span>
-                                   <span class="n">intervention_split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                   <span class="n">visualize_evaluation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                    <span class="n">initial_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol</span>
@@ -319,8 +317,6 @@ of different protocols and visualize the results in radar plots of different sco
     <span class="n">evaluator</span> <span class="o">=</span> <span class="n">EvaluationPipeline</span><span class="p">(</span><span class="n">evaluation_protocols</span><span class="o">=</span>
                                    <span class="n">evaluation_protocols</span><span class="p">,</span>
                                    <span class="n">tracker_path</span><span class="o">=</span><span class="n">log_relative_path</span><span class="p">,</span>
-                                   <span class="n">intervention_split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                   <span class="n">visualize_evaluation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                    <span class="n">initial_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol</span>
@@ -404,8 +400,6 @@ of different protocols and visualize the results in radar plots of different sco
     <span class="n">evaluator</span> <span class="o">=</span> <span class="n">EvaluationPipeline</span><span class="p">(</span><span class="n">evaluation_protocols</span><span class="o">=</span>
                                    <span class="n">evaluation_protocols</span><span class="p">,</span>
                                    <span class="n">tracker_path</span><span class="o">=</span><span class="n">log_relative_path</span><span class="p">,</span>
-                                   <span class="n">intervention_split</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                                   <span class="n">visualize_evaluation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                    <span class="n">initial_seed</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
     <span class="c1"># For demonstration purposes we evaluate the policy on 10 per cent of the default number of episodes per protocol</span>

@@ -220,12 +220,14 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
 <span class="k">def</span> <span class="nf">example</span><span class="p">():</span>
     <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s1">&#39;stacked_blocks&#39;</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">skip_frame</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-                      <span class="n">action_mode</span><span class="o">=</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span> <span class="n">observation_mode</span><span class="o">=</span><span class="s2">&quot;cameras&quot;</span><span class="p">)</span>
+                      <span class="n">action_mode</span><span class="o">=</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span>
+                      <span class="n">observation_mode</span><span class="o">=</span><span class="s2">&quot;cameras&quot;</span><span class="p">,</span>
+                      <span class="n">camera_indicies</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
     <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
         <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
-    <span class="c1"># Show last camera observations</span>
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+    <span class="c1">#show last images</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
     <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -242,19 +244,20 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
 <span class="k">def</span> <span class="nf">control_policy</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">obs</span><span class="p">):</span>
     <span class="k">return</span> \
         <span class="n">env</span><span class="o">.</span><span class="n">get_robot</span><span class="p">()</span><span class="o">.</span><span class="n">get_joint_positions_from_tip_positions</span><span class="p">(</span>
-            <span class="n">obs</span><span class="p">[</span><span class="o">-</span><span class="mi">9</span><span class="p">:],</span> <span class="n">obs</span><span class="p">[:</span><span class="mi">9</span><span class="p">])</span>
+            <span class="n">obs</span><span class="p">[</span><span class="o">-</span><span class="mi">9</span><span class="p">:],</span> <span class="n">obs</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">10</span><span class="p">])</span>
 
 
 <span class="k">def</span> <span class="nf">end_effector_pos</span><span class="p">():</span>
     <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s1">&#39;reaching&#39;</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                      <span class="n">action_mode</span><span class="o">=</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span> <span class="n">normalize_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                      <span class="n">action_mode</span><span class="o">=</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span>
+                      <span class="n">normalize_actions</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="n">normalize_observations</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">100</span><span class="p">):</span>
         <span class="n">goal_dict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">sample_new_goal</span><span class="p">()</span>
-        <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">goal_dict</span><span class="p">)</span>
-        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">obs</span><span class="p">[</span><span class="o">-</span><span class="mi">9</span><span class="p">:])</span>
+        <span class="n">success_signal</span><span class="p">,</span> <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">goal_dict</span><span class="p">)</span>
+        <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">control_policy</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">obs</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">250</span><span class="p">):</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">control_policy</span><span class="p">(</span><span class="n">env</span><span class="p">,</span> <span class="n">obs</span><span class="p">))</span>
     <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -278,7 +281,8 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">50</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
-            <span class="n">random_intervention_dict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_single_random_intervention</span><span class="p">()</span>
+            <span class="n">random_intervention_dict</span><span class="p">,</span> <span class="n">success_signal</span><span class="p">,</span> <span class="n">obs</span> <span class="o">=</span> \
+                <span class="n">env</span><span class="o">.</span><span class="n">do_single_random_intervention</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;resetting&quot;</span><span class="p">)</span>
         <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">):</span>
@@ -303,7 +307,7 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">200</span><span class="p">):</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
-        <span class="n">success_signal</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">({</span><span class="s1">&#39;stage_color&#39;</span><span class="p">:</span>
+        <span class="n">success_signal</span><span class="p">,</span> <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">({</span><span class="s1">&#39;stage_color&#39;</span><span class="p">:</span>
                                                   <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span>
                                                                     <span class="mi">1</span><span class="p">,</span>
                                                                     <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">])})</span>
@@ -359,7 +363,7 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
         <span class="n">goal_intervention_dict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">sample_new_goal</span><span class="p">()</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;new goal chosen: &quot;</span><span class="p">,</span> <span class="n">goal_intervention_dict</span><span class="p">)</span>
-        <span class="n">success_signal</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">goal_intervention_dict</span><span class="p">)</span>
+        <span class="n">success_signal</span><span class="p">,</span> <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">goal_intervention_dict</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goal Intervention success signal&quot;</span><span class="p">,</span> <span class="n">success_signal</span><span class="p">)</span>
     <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
@@ -378,16 +382,15 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
     <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
         <span class="n">goal_intervention_dict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">sample_new_goal</span><span class="p">()</span>
-        <span class="n">success_signal</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">goal_intervention_dict</span><span class="p">)</span>
+        <span class="n">success_signal</span><span class="p">,</span> <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">goal_intervention_dict</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Goal Intervention success signal&quot;</span><span class="p">,</span> <span class="n">success_signal</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;now we solve it with privileged info&quot;</span><span class="p">)</span>
-        <span class="n">success_signal</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">])</span>
+        <span class="n">success_signal</span><span class="p">,</span> <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_intervention</span><span class="p">(</span><span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">])</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Partial Solution Setting Intervention Succes Signal&quot;</span><span class="p">,</span> <span class="n">success_signal</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">500</span><span class="p">):</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">low</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">reward</span><span class="p">)</span>
     <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
@@ -794,13 +797,7 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
             <span class="n">desired_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">9</span><span class="p">,])</span>
-            <span class="n">current_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">obs</span><span class="p">[:</span><span class="mi">9</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what I wanted to reach&quot;</span><span class="p">,</span> <span class="n">current_obs</span> <span class="o">+</span> <span class="n">desired_action</span><span class="p">)</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">desired_action</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what I actually reached&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">obs</span><span class="p">[:</span><span class="mi">9</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;diff is&quot;</span><span class="p">,</span> <span class="n">current_obs</span> <span class="o">+</span> <span class="n">desired_action</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">obs</span><span class="p">[:</span><span class="mi">9</span><span class="p">],</span>
-                                                                      <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-                <span class="c1"># desired_action = obs[:9]</span>
     <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
@@ -847,7 +844,7 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
-<span class="k">def</span> <span class="nf">apply_delta_action</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">smooth_action</span><span class="p">():</span>
     <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">task_generator_id</span><span class="o">=</span><span class="s1">&#39;reaching&#39;</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                       <span class="n">action_mode</span><span class="o">=</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span>
@@ -858,17 +855,12 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1000</span><span class="p">):</span>
             <span class="n">desired_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">9</span><span class="p">,])</span>
-            <span class="n">current_obs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">obs</span><span class="p">[:</span><span class="mi">9</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what I wanted to reach&quot;</span><span class="p">,</span> <span class="n">current_obs</span> <span class="o">+</span> <span class="n">desired_action</span><span class="p">)</span>
             <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">desired_action</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;what I actually reached&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">obs</span><span class="p">[:</span><span class="mi">9</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;diff is&quot;</span><span class="p">,</span> <span class="n">current_obs</span> <span class="o">+</span> <span class="n">desired_action</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">obs</span><span class="p">[:</span><span class="mi">9</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-                <span class="c1"># desired_action = obs[:9]</span>
     <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
 
 <span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
-    <span class="n">apply_delta_action</span><span class="p">()</span>
+    <span class="n">smooth_action</span><span class="p">()</span>
 
 </pre></div>
 </div>
@@ -989,12 +981,12 @@ easy customizable as you will learn in one of the many tutorials provided.</p>
     <span class="n">episode</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">get_episode</span><span class="p">(</span><span class="mi">14</span><span class="p">)</span>
 
     <span class="c1"># Initialize a new environment according a specific episode and replay it</span>
-    <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">episode</span><span class="o">.</span><span class="n">_task_name</span><span class="p">,</span> <span class="o">**</span><span class="n">episode</span><span class="o">.</span><span class="n">_task_params</span><span class="p">)</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">task_generator</span><span class="p">(</span><span class="n">episode</span><span class="o">.</span><span class="n">task_name</span><span class="p">,</span> <span class="o">**</span><span class="n">episode</span><span class="o">.</span><span class="n">task_params</span><span class="p">)</span>
     <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="p">,</span>
                       <span class="o">**</span><span class="n">episode</span><span class="o">.</span><span class="n">world_params</span><span class="p">,</span>
-                      <span class="n">logging</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                       <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">env</span><span class="o">.</span><span class="n">set_full_state</span><span class="p">(</span><span class="n">episode</span><span class="o">.</span><span class="n">initial_full_state</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">set_starting_state</span><span class="p">(</span><span class="n">episode</span><span class="o">.</span><span class="n">initial_full_state</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">action</span> <span class="ow">in</span> <span class="n">episode</span><span class="o">.</span><span class="n">robot_actions</span><span class="p">:</span>
         <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
     <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>

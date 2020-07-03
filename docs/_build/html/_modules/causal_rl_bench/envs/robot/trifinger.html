@@ -173,7 +173,8 @@
                  <span class="n">revolute_joint_ids</span><span class="p">,</span>
                  <span class="n">finger_tip_ids</span><span class="p">,</span>
                  <span class="n">pinocchio_utils</span><span class="p">,</span>
-                 <span class="n">cameras</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                 <span class="n">cameras</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">camera_indicies</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param action_mode:</span>
@@ -214,9 +215,11 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_set_finger_state_in_goal_image</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span> <span class="o">=</span> <span class="n">cameras</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span> <span class="o">=</span> <span class="n">camera_indicies</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span> <span class="o">=</span> <span class="n">TriFingerObservations</span><span class="p">(</span><span class="n">observation_mode</span><span class="p">,</span>
                                                          <span class="n">normalize_observations</span><span class="p">,</span>
-                                                         <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span><span class="p">)</span>
+                                                         <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span><span class="p">,</span>
+                                                         <span class="n">camera_indicies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span><span class="p">)</span>
         <span class="c1">#Take care with the following last action and last clipped action</span>
         <span class="c1"># always follow the action mode normalization</span>
         <span class="c1">#last_applied_joint_positions is always saved here as</span>
@@ -321,7 +324,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">=</span> <span class="n">observation_mode</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span> <span class="o">=</span> \
             <span class="n">TriFingerObservations</span><span class="p">(</span><span class="n">observation_mode</span><span class="p">,</span>
-                                  <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span><span class="p">)</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span><span class="p">,</span>
+                                  <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span><span class="p">,</span>
+                                  <span class="n">camera_indicies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_observation_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span>

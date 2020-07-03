@@ -171,7 +171,8 @@
                  <span class="n">pybullet_client_full_id</span><span class="p">,</span>
                  <span class="n">pybullet_client_w_goal_id</span><span class="p">,</span>
                  <span class="n">pybullet_client_w_o_goal_id</span><span class="p">,</span>
-                 <span class="n">cameras</span><span class="p">):</span>
+                 <span class="n">cameras</span><span class="p">,</span>
+                 <span class="n">camera_indicies</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param observation_mode:</span>
@@ -186,6 +187,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="o">=</span> <span class="n">pybullet_client_full_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="o">=</span> <span class="n">pybullet_client_w_goal_id</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="o">=</span> <span class="n">pybullet_client_w_o_goal_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span> <span class="o">=</span> <span class="n">camera_indicies</span>
         <span class="c1">#TODO: move the ids from here</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span> <span class="o">=</span> <span class="n">normalize_observations</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span> <span class="o">=</span> <span class="kc">None</span>
@@ -402,7 +404,8 @@
                                                          <span class="bp">self</span><span class="o">.</span><span class="n">_visual_objects</span><span class="p">,</span>
                                                          <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span><span class="p">,</span>
                                                          <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span><span class="p">,</span>
-                                                         <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cameras</span><span class="p">)</span>
+                                                         <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cameras</span><span class="p">,</span>
+                                                         <span class="n">camera_indicies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_goal_image</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_stage_observations</span> <span class="o">=</span> <span class="n">StageObservations</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">,</span>
