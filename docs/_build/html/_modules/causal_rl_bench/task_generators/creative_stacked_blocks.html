@@ -1,0 +1,770 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>causal_rl_bench.task_generators.creative_stacked_blocks &mdash; causal_rl_bench 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/task_setups.html">Task distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../guide/evaluating_policy.html">Evaluation Protocols</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules/causal_rl_bench.html">CausalRLBench</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">causal_rl_bench</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>causal_rl_bench.task_generators.creative_stacked_blocks</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for causal_rl_bench.task_generators.creative_stacked_blocks</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.utils.rotation_utils</span> <span class="kn">import</span> <span class="n">euler_to_quaternion</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">copy</span>
+
+
+<div class="viewcode-block" id="CreativeStackedBlocksGeneratorTask"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask">[docs]</a><span class="k">class</span> <span class="nc">CreativeStackedBlocksGeneratorTask</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This task generator</span>
+<span class="sd">        will most probably deal with camera data if u want to use the</span>
+<span class="sd">        sample goal function</span>
+<span class="sd">        :param kwargs:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_name</span><span class="o">=</span><span class="s2">&quot;stacked_blocks&quot;</span><span class="p">,</span>
+                         <span class="n">use_train_space_only</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_train_space_only&quot;</span><span class="p">,</span>
+                                                         <span class="kc">False</span><span class="p">),</span>
+                         <span class="n">fractional_reward_weight</span><span class="o">=</span>
+                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+                         <span class="n">dense_reward_weights</span><span class="o">=</span>
+                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">,</span>
+                                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_robot_observation_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;time_left_for_task&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;joint_velocities&quot;</span><span class="p">,</span>
+                                            <span class="s2">&quot;end_effector_positions&quot;</span><span class="p">]</span>
+
+        <span class="c1">#for this task the stage observation keys will be set with the</span>
+        <span class="c1">#goal/structure building</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;tool_block_mass&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tool_block_mass&quot;</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">,</span> <span class="mf">0.035</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;num_of_levels&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;num_of_levels&quot;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;max_level_width&quot;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;max_level_width&quot;</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_stack_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;num_of_levels&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_mass</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;tool_block_mass&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_min_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_max_level_width</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;max_level_width&quot;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span> <span class="o">=</span> <span class="mi">0</span>
+
+<div class="viewcode-block" id="CreativeStackedBlocksGeneratorTask.get_description"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.get_description">[docs]</a>    <span class="k">def</span> <span class="nf">get_description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;Task where the goal is to stack arbitrary shapes of cuboids&quot;</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_up_stage_arena</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">number_of_blocks_per_level</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;max_level_width&quot;</span><span class="p">]</span> \
+                                         <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">])</span>
+        <span class="n">default_start_position</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">number_of_blocks_per_level</span> <span class="o">*</span>
+                                   <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">])</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">default_start_position</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">curr_height</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">-</span> \
+                      <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">change_per_level</span> <span class="o">=</span> <span class="mf">0.005</span>
+        <span class="n">rigid_block_side</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">silhouettes_creation_dicts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;num_of_levels&quot;</span><span class="p">]):</span>
+            <span class="n">change_per_level</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="n">curr_height</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span>
+            <span class="n">start_position</span> <span class="o">=</span> <span class="n">default_start_position</span> <span class="o">+</span> <span class="n">change_per_level</span>
+            <span class="n">rigid_block_side</span> <span class="o">*=</span> <span class="o">-</span><span class="mi">1</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">number_of_blocks_per_level</span><span class="p">):</span>
+                <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                         <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                         <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                 <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="s2">&quot;cube&quot;</span><span class="p">,</span>
+                                 <span class="s1">&#39;initial_position&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">start_position</span><span class="p">,</span>
+                                              <span class="n">rigid_block_side</span><span class="p">,</span>
+                                              <span class="n">curr_height</span><span class="p">],</span>
+                                 <span class="s1">&#39;initial_orientation&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                 <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span>
+                                                   <span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">],</span> <span class="mi">3</span><span class="p">),</span>
+                                 <span class="s1">&#39;mass&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;tool_block_mass&quot;</span><span class="p">]}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_rigid_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_type&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_size&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_cartesian_position&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_orientation&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_linear_velocity&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_angular_velocity&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">level</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;num_of_levels&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                             <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                             <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                     <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="s2">&quot;cube&quot;</span><span class="p">,</span>
+                                     <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">start_position</span><span class="p">,</span>
+                                                  <span class="mi">0</span><span class="p">,</span> <span class="n">curr_height</span><span class="p">],</span>
+                                     <span class="s1">&#39;orientation&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                                     <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span>
+                                                       <span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">],</span> <span class="mi">3</span><span class="p">)}</span>
+                    <span class="n">silhouettes_creation_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">creation_dict</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_type&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_size&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span><span class="o">+</span><span class="s2">&quot;level_&quot;</span><span class="o">+</span>
+                                                             <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span><span class="o">+</span><span class="s2">&quot;_num_&quot;</span><span class="o">+</span>
+                                                             <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;_cartesian_position&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_orientation&#39;</span><span class="p">)</span>
+                <span class="n">start_position</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">silhouettes_creation_dicts</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">silhouettes_creation_dicts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="CreativeStackedBlocksGeneratorTask.sample_new_goal"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.sample_new_goal">[docs]</a>    <span class="k">def</span> <span class="nf">sample_new_goal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">training</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param training:</span>
+<span class="sd">        :param level:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">intervention_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">training</span><span class="p">:</span>
+            <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">intervention_space</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span>
+        <span class="n">intervention_dict</span><span class="p">[</span><span class="s1">&#39;stack_levels&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span>\
+            <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;stack_levels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;stack_levels&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">intervention_dict</span><span class="p">[</span><span class="s1">&#39;blocks_mass&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span> \
+            <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;blocks_mass&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;blocks_mass&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">intervention_dict</span><span class="p">[</span><span class="s1">&#39;blocks_min_size&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span> \
+            <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;blocks_min_size&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;blocks_min_size&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">intervention_dict</span><span class="p">[</span><span class="s1">&#39;max_level_width&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span> \
+            <span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;max_level_width&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span>
+                           <span class="n">intervention_space</span><span class="p">[</span><span class="s1">&#39;max_level_width&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">intervention_dict</span></div>
+
+<div class="viewcode-block" id="CreativeStackedBlocksGeneratorTask.get_task_generator_variables_values"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.get_task_generator_variables_values">[docs]</a>    <span class="k">def</span> <span class="nf">get_task_generator_variables_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;stack_levels&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_stack_levels</span><span class="p">,</span>
+                <span class="s1">&#39;blocks_mass&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_mass</span><span class="p">,</span>
+                <span class="s1">&#39;blocks_min_size&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_min_size</span><span class="p">,</span>
+                <span class="s1">&#39;max_level_width&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_max_level_width</span><span class="p">,</span>
+                <span class="s1">&#39;number_of_obstacles&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="CreativeStackedBlocksGeneratorTask.apply_task_generator_interventions"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.CreativeStackedBlocksGeneratorTask.apply_task_generator_interventions">[docs]</a>    <span class="k">def</span> <span class="nf">apply_task_generator_interventions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param interventions_dict:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#TODO: support level removal intervention</span>
+        <span class="c1"># elif variable_name == &#39;stack_levels&#39;:</span>
+        <span class="c1">#     #remove levels now</span>
+        <span class="c1">#     if self.current_stack_levels &gt; variable_value:</span>
+        <span class="c1">#         for i in range(variable_value, self.current_stack_levels):</span>
+        <span class="c1">#             self.stage.remove_general_object(&quot;target_&quot;+&quot;level_&quot; + str(i))</span>
+        <span class="c1">#             select_rigid_objects_to_remove = [key.startswith(&quot;block_&quot; + &quot;level_&quot; + str(i))</span>
+        <span class="c1">#                                               for key in self.stage.rigid_objects]</span>
+        <span class="c1">#             rigid_objects_to_remove = list(compress(list(self.stage.rigid_objects.keys()),</span>
+        <span class="c1">#                                                     select_rigid_objects_to_remove))</span>
+        <span class="c1">#             for rigid_object_to_remove in rigid_objects_to_remove:</span>
+        <span class="c1">#                 self.stage.remove_general_object(rigid_object_to_remove)</span>
+        <span class="c1">#         self.current_stack_levels = variable_value</span>
+        <span class="c1">#         self._set_intervention_spaces()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span>
+        <span class="n">reset_observation_space</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;number_of_obstacles&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="c1">#if its more than what I have</span>
+            <span class="c1">#TODO: maybe check feasibility of stage?</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;number_of_obstacles&quot;</span><span class="p">])</span> <span class="o">&gt;</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span><span class="p">,</span>
+                               <span class="nb">int</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;number_of_obstacles&quot;</span><span class="p">])):</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_rigid_general_object</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;obstacle_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                                         <span class="n">shape</span><span class="o">=</span><span class="s2">&quot;static_cube&quot;</span><span class="p">,</span>
+                                                         <span class="n">size</span><span class="o">=</span>
+                                                        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">]),</span>
+                                                         <span class="n">color</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                                                         <span class="n">position</span><span class="o">=</span>
+                                                        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                                                <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;obstacle_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_type&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;obstacle_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_size&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;obstacle_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_cartesian_position&quot;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;obstacle_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_orientation&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">interventions_dict</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;max_level_width&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_max_level_width</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;max_level_width&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;blocks_min_size&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_min_size</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;blocks_min_size&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;stack_levels&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_stack_levels</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;stack_levels&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;blocks_mass&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_mass</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;blocks_mass&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;max_level_width&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span> <span class="ow">or</span> <span class="s2">&quot;blocks_min_size&quot;</span> <span class="ow">in</span> \
+                <span class="n">interventions_dict</span> <span class="ow">or</span> \
+                <span class="s2">&quot;stack_levels&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_create_new_challenge</span><span class="p">(</span><span class="n">num_of_levels</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span>
+                                                         <span class="n">current_stack_levels</span><span class="p">),</span>
+                                       <span class="n">blocks_min_size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
+                                       <span class="n">current_blocks_min_size</span><span class="p">,</span>
+                                       <span class="n">blocks_mass</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_mass</span><span class="p">,</span>
+                                       <span class="n">max_level_width</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span>
+                                       <span class="n">current_max_level_width</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="s2">&quot;blocks_mass&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="n">new_interventions_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">rigid_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">():</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">()[</span><span class="n">rigid_object</span><span class="p">]</span><span class="o">.</span><span class="n">is_not_fixed</span><span class="p">:</span>
+                    <span class="n">new_interventions_dict</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="n">new_interventions_dict</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;mass&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_mass</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;this task generator variable &quot;</span>
+                            <span class="s2">&quot;is not yet defined&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_testing_intervention_spaces</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_training_intervention_spaces</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">finalize_stage</span><span class="p">()</span>
+        <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">reset_observation_space</span></div>
+
+    <span class="k">def</span> <span class="nf">_set_training_intervention_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1">#for now remove all possible interventions on the goal in general</span>
+        <span class="c1">#intevrntions on size of objects might become tricky to handle</span>
+        <span class="c1">#contradicting interventions here?</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CreativeStackedBlocksGeneratorTask</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
+            <span class="n">_set_training_intervention_spaces</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">visual_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">():</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="n">visual_object</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">rigid_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">():</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;stack_levels&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;blocks_mass&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;blocks_min_size&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.035</span><span class="p">,</span> <span class="mf">0.065</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;max_level_width&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.035</span><span class="p">,</span> <span class="mf">0.12</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;number_of_obstacles&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_set_testing_intervention_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CreativeStackedBlocksGeneratorTask</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span>\
+            <span class="n">_set_testing_intervention_spaces</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">visual_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">():</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="n">visual_object</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">rigid_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">():</span>
+            <span class="k">del</span> <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;size&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;stack_levels&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">6</span><span class="p">,</span> <span class="mi">8</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;blocks_mass&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.06</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;blocks_min_size&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.065</span><span class="p">,</span> <span class="mf">0.075</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;max_level_width&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.12</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span><span class="p">[</span><span class="s1">&#39;number_of_obstacles&#39;</span><span class="p">]</span> <span class="o">=</span> \
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_create_new_challenge</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_of_levels</span><span class="p">,</span> <span class="n">blocks_min_size</span><span class="p">,</span>
+                              <span class="n">blocks_mass</span><span class="p">,</span> <span class="n">max_level_width</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param num_of_levels:</span>
+<span class="sd">        :param blocks_min_size:</span>
+<span class="sd">        :param blocks_mass:</span>
+<span class="sd">        :param max_level_width:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">remove_everything</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">silhouettes_creation_dicts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">block_sizes</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">chosen_y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_random_target</span><span class="p">(</span>
+            <span class="n">num_of_levels</span><span class="o">=</span><span class="n">num_of_levels</span><span class="p">,</span>
+            <span class="n">min_size</span><span class="o">=</span><span class="n">blocks_min_size</span><span class="p">,</span>
+            <span class="n">max_level_width</span><span class="o">=</span><span class="n">max_level_width</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">level_num</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">block_sizes</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">block_sizes</span><span class="p">[</span><span class="n">level_num</span><span class="p">])):</span>
+                <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span>
+                                         <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                 <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="s2">&quot;cube&quot;</span><span class="p">,</span>
+                                 <span class="s1">&#39;mass&#39;</span><span class="p">:</span> <span class="n">blocks_mass</span><span class="p">,</span>
+                                 <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                                 <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">block_sizes</span><span class="p">[</span><span class="n">level_num</span><span class="p">][</span><span class="n">i</span><span class="p">]}</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_rigid_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+                <span class="n">block_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">random_position</span><span class="p">(</span>
+                    <span class="n">height_limits</span><span class="o">=</span><span class="mf">0.0325</span><span class="p">)</span>
+                <span class="n">block_orientation</span> <span class="o">=</span> <span class="n">euler_to_quaternion</span><span class="p">(</span>
+                    <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)])</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">set_objects_pose</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span>
+                    <span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)],</span>
+                    <span class="n">positions</span><span class="o">=</span><span class="p">[</span><span class="n">block_position</span><span class="p">],</span>
+                    <span class="n">orientations</span><span class="o">=</span><span class="p">[</span><span class="n">block_orientation</span><span class="p">])</span>
+                <span class="n">trial_index</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+                <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">check_feasiblity_of_stage</span><span class="p">()</span> <span class="ow">and</span> \
+                        <span class="n">trial_index</span> <span class="o">&lt;</span> <span class="mi">10</span><span class="p">:</span>
+                    <span class="n">block_position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">random_position</span><span class="p">(</span>
+                        <span class="n">height_limits</span><span class="o">=</span><span class="p">[</span><span class="mf">0.0325</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
+                    <span class="n">block_orientation</span> <span class="o">=</span> <span class="n">euler_to_quaternion</span><span class="p">(</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">set_objects_pose</span><span class="p">(</span><span class="n">names</span><span class="o">=</span><span class="p">[</span>
+                        <span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span>
+                            <span class="n">i</span><span class="p">)],</span>
+                        <span class="n">positions</span><span class="o">=</span><span class="p">[</span><span class="n">block_position</span><span class="p">],</span>
+                        <span class="n">orientations</span><span class="o">=</span><span class="p">[</span>
+                            <span class="n">block_orientation</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+                    <span class="n">trial_index</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">silhouette_position</span> <span class="o">=</span> <span class="p">[</span><span class="n">positions</span><span class="p">[</span><span class="n">level_num</span><span class="p">][</span><span class="n">i</span><span class="p">],</span> <span class="n">chosen_y</span><span class="p">,</span>
+                                       <span class="p">(</span><span class="n">level_num</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span>
+                                       <span class="n">blocks_min_size</span>
+                                       <span class="o">+</span> <span class="p">(</span><span class="o">-</span><span class="n">blocks_min_size</span>
+                                          <span class="o">/</span> <span class="mi">2</span> <span class="o">+</span> <span class="mi">0</span><span class="p">)]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_type&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_size&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_cartesian_position&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_orientation&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_linear_velocity&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;tool_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                        <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_angular_velocity&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">level_num</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_of_levels</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]:</span>
+                    <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span>
+                                     <span class="s1">&#39;shape&#39;</span><span class="p">:</span> <span class="s2">&quot;cube&quot;</span><span class="p">,</span>
+                                     <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">silhouette_position</span><span class="p">),</span>
+                                     <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">block_sizes</span><span class="p">[</span><span class="n">level_num</span><span class="p">][</span><span class="n">i</span><span class="p">])}</span>
+                    <span class="n">silhouettes_creation_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">creation_dict</span><span class="p">))</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_type&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_size&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_cartesian_position&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;goal_&quot;</span> <span class="o">+</span> <span class="s2">&quot;level_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">level_num</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;_num_&quot;</span> <span class="o">+</span>
+                                                            <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_orientation&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_stack_levels</span> <span class="o">=</span> <span class="n">num_of_levels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_mass</span> <span class="o">=</span> <span class="n">blocks_mass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_blocks_min_size</span> <span class="o">=</span> <span class="n">blocks_min_size</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_max_level_width</span> <span class="o">=</span> <span class="n">max_level_width</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">silhouettes_creation_dicts</span><span class="p">)):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_general_object</span><span class="p">(</span><span class="o">**</span><span class="n">silhouettes_creation_dicts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_generate_random_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allowed_boundaries</span><span class="p">,</span>
+                               <span class="n">start_z</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="mf">0.035</span><span class="p">,</span>
+                               <span class="n">max_level_width</span><span class="o">=</span><span class="mf">0.12</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function will return a random position and size of a block</span>
+<span class="sd">        while respecting the allowed boundaries passed</span>
+<span class="sd">        :param allowed_boundaries:</span>
+<span class="sd">        :param start_z:</span>
+<span class="sd">        :param min_size:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                                       <span class="o">+</span> <span class="n">min_size</span><span class="p">,</span>
+                                       <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                                       <span class="o">-</span> <span class="n">min_size</span><span class="p">,</span>
+                                       <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                                       <span class="o">+</span> <span class="n">min_size</span><span class="p">,</span>
+                                       <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                                       <span class="o">-</span> <span class="n">min_size</span><span class="p">,</span>
+                                       <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">position_x_y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">2</span><span class="p">],</span>
+                                         <span class="n">allowed_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">][:</span><span class="mi">2</span><span class="p">])</span>
+        <span class="c1"># choose size width, depth, height</span>
+        <span class="n">allowed_max_width</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">position_x_y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">position_x_y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">*</span> <span class="mi">2</span>
+        <span class="n">allowed_max_width</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">allowed_max_width</span><span class="p">,</span> <span class="n">max_level_width</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">min_size</span><span class="p">,</span>
+                                 <span class="p">[</span><span class="n">allowed_max_width</span><span class="p">,</span> <span class="n">min_size</span><span class="p">,</span> <span class="n">min_size</span><span class="p">])</span>
+        <span class="n">position_z</span> <span class="o">=</span> <span class="n">start_z</span> <span class="o">+</span> <span class="n">size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">/</span><span class="mi">2</span>
+        <span class="n">position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">position_x_y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position_x_y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">position_z</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">size</span><span class="p">,</span> <span class="n">position</span>
+
+    <span class="k">def</span> <span class="nf">_generate_random_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_of_levels</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+                                <span class="n">min_size</span><span class="o">=</span><span class="mf">0.035</span><span class="p">,</span>
+                                <span class="n">max_level_width</span><span class="o">=</span><span class="mf">0.12</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function generated a sampled target, should be modified to new</span>
+<span class="sd">        sample goal</span>
+<span class="sd">        :param levels_num:</span>
+<span class="sd">        :param min_size:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">level_blocks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">current_boundaries</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+                                       <span class="p">[:</span><span class="mi">2</span><span class="p">],</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_arena_bb</span><span class="p">()[</span><span class="mi">1</span><span class="p">][</span>
+                                       <span class="p">:</span><span class="mi">2</span><span class="p">]])</span>
+        <span class="n">start_z</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">level_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">size</span><span class="p">,</span> <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_random_block</span><span class="p">(</span>
+            <span class="n">allowed_boundaries</span><span class="o">=</span><span class="n">current_boundaries</span><span class="p">,</span> <span class="n">start_z</span><span class="o">=</span><span class="n">start_z</span><span class="p">,</span>
+            <span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">,</span>
+            <span class="n">max_level_width</span><span class="o">=</span><span class="n">max_level_width</span><span class="p">)</span>
+        <span class="n">level_blocks</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]]])</span>
+        <span class="k">for</span> <span class="n">level_index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">num_of_levels</span><span class="p">):</span>
+            <span class="n">start_z</span> <span class="o">=</span> <span class="n">start_z</span> <span class="o">+</span> <span class="n">size</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">new_allowed_boundaries</span> <span class="o">=</span> <span class="p">[</span><span class="n">position</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">size</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span>
+                                      <span class="n">position</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">size</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">current_boundaries</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">current_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                             <span class="n">new_allowed_boundaries</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                  <span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="n">current_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                             <span class="n">new_allowed_boundaries</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+            <span class="n">size</span><span class="p">,</span> <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_generate_random_block</span><span class="p">(</span>
+                <span class="n">allowed_boundaries</span><span class="o">=</span><span class="n">current_boundaries</span><span class="p">,</span>
+                <span class="n">start_z</span><span class="o">=</span><span class="n">start_z</span><span class="p">,</span> <span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">,</span>
+                <span class="n">max_level_width</span><span class="o">=</span><span class="n">max_level_width</span><span class="p">)</span>
+            <span class="n">level_blocks</span><span class="o">.</span><span class="n">append</span><span class="p">([[</span><span class="n">size</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">position</span><span class="p">[</span><span class="mi">0</span><span class="p">]]])</span>
+        <span class="n">chosen_y</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">new_level_blocks</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_blocks_to_use</span><span class="p">(</span><span class="n">level_blocks</span><span class="p">,</span>
+                                         <span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">)</span>
+        <span class="n">new_level_blocks</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_blocks_to_use</span><span class="p">(</span><span class="n">new_level_blocks</span><span class="p">,</span>
+                                         <span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">)</span>
+        <span class="n">new_level_blocks</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_generate_blocks_to_use</span><span class="p">(</span><span class="n">new_level_blocks</span><span class="p">,</span>
+                                         <span class="n">min_size</span><span class="o">=</span><span class="n">min_size</span><span class="p">)</span>
+        <span class="c1">#now return the actual block sizes that needs to be created</span>
+        <span class="n">block_sizes</span><span class="p">,</span> <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_block_sizes</span><span class="p">(</span><span class="n">new_level_blocks</span><span class="p">,</span>
+                                                       <span class="n">min_size</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">block_sizes</span><span class="p">,</span> <span class="n">positions</span><span class="p">,</span> <span class="n">chosen_y</span>
+
+    <span class="k">def</span> <span class="nf">_generate_blocks_to_use</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level_blocks</span><span class="p">,</span>
+                                <span class="n">min_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param level_blocks:</span>
+<span class="sd">        :param min_size:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_level_blocks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">level_blocks</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">level_blocks</span><span class="p">)):</span>
+            <span class="n">current_level_blocks</span> <span class="o">=</span> <span class="n">level_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="c1"># try splitting randomly 4 times if the big block at</span>
+            <span class="c1"># least has size of twice the min size</span>
+            <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">current_level_blocks</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">current_level_blocks</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">min_size</span> <span class="o">*</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># try splitting to half the size</span>
+                    <span class="c1"># TODO: split a random split and</span>
+                    <span class="c1"># check for stability instead</span>
+                    <span class="n">block_1_center</span> <span class="o">=</span> <span class="n">current_level_blocks</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> \
+                                     <span class="n">current_level_blocks</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">4</span>
+                    <span class="n">block_1_size</span> <span class="o">=</span> <span class="n">current_level_blocks</span><span class="p">[</span><span class="n">j</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="n">block_2_size</span> <span class="o">=</span> <span class="n">current_level_blocks</span><span class="p">[</span><span class="n">j</span><span class="p">][</span>
+                                       <span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">block_1_size</span>
+                    <span class="n">block_2_center</span> <span class="o">=</span> <span class="n">block_1_center</span> <span class="o">-</span> <span class="n">block_1_size</span> <span class="o">/</span> <span class="mi">2</span> <span class="o">-</span> \
+                                     <span class="n">block_2_size</span> <span class="o">/</span> <span class="mi">2</span>
+                    <span class="c1"># now check for stability of</span>
+                    <span class="c1"># structure with the previous levels</span>
+                    <span class="n">stability_levels_check</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span>
+                        <span class="n">new_level_blocks</span><span class="p">[:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+                    <span class="n">stability_levels_check</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">block_1_size</span><span class="p">,</span>
+                                                    <span class="n">block_1_center</span><span class="p">]</span>
+                    <span class="n">stability_levels_check</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="p">[</span><span class="n">block_2_size</span><span class="p">,</span> <span class="n">block_2_center</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_stable_structure</span><span class="p">(</span><span class="n">stability_levels_check</span><span class="p">):</span>
+                        <span class="n">new_level_blocks</span><span class="p">[:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">stability_levels_check</span>
+        <span class="k">return</span> <span class="n">new_level_blocks</span>
+
+    <span class="k">def</span> <span class="nf">_is_stable_structure</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level_blocks</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param level_blocks:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># [[[width, center][width, center]]]</span>
+        <span class="n">current_min</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+        <span class="n">current_max</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">level_blocks</span><span class="p">)):</span>
+            <span class="n">current_level_blocks</span> <span class="o">=</span> <span class="n">level_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">new_min</span> <span class="o">=</span> <span class="mf">0.5</span>
+            <span class="n">new_max</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.5</span>
+            <span class="c1"># now check that for each block its</span>
+            <span class="c1"># center lies within the current min and current max</span>
+            <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">current_level_blocks</span><span class="p">:</span>
+                <span class="n">new_min</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">new_min</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="n">new_max</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">new_max</span><span class="p">,</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">current_max</span> <span class="ow">or</span> <span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">current_min</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">False</span>
+            <span class="n">current_min</span> <span class="o">=</span> <span class="n">new_min</span>
+            <span class="n">current_max</span> <span class="o">=</span> <span class="n">new_max</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_get_block_sizes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level_blocks</span><span class="p">,</span> <span class="n">min_size</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param level_blocks:</span>
+<span class="sd">        :param min_size:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">block_sizes</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">level_blocks</span><span class="p">)):</span>
+            <span class="n">block_sizes</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">positions</span><span class="o">.</span><span class="n">append</span><span class="p">([])</span>
+            <span class="n">current_level_blocks</span> <span class="o">=</span> <span class="n">level_blocks</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">block</span> <span class="ow">in</span> <span class="n">current_level_blocks</span><span class="p">:</span>
+                <span class="n">block_sizes</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">block</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">min_size</span><span class="p">,</span> <span class="n">min_size</span><span class="p">])</span>
+                <span class="n">positions</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">block_sizes</span><span class="p">,</span> <span class="n">positions</span></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -23,11 +23,11 @@ naturally emerging curriculum of tasks.
 
 .. code-block:: python
 
-    from causal_rl_bench.envs.world import World
+    from causal_rl_bench.envs.causalworld import CausalWorld
     from causal_rl_bench.task_generators.task import task_generator
 
     task = task_generator(task_generator_id='stacked_blocks')
-    env = World(task=task)
+    env = CausalWorld(task=task)
     env.reset()
     for _ in range(2000):
         obs, reward, done, info = env.step(env.action_space.sample())
@@ -40,7 +40,6 @@ naturally emerging curriculum of tasks.
 
    guide/install.rst
    guide/getting_started.rst
-   guide/tutorials.rst
    guide/task_setups.rst
    guide/evaluating_policy.rst
 

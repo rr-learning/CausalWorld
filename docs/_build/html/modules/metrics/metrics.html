@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<html class="writer-html5" lang="python" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,18 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
@@ -29,10 +34,6 @@
     <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="prev" title="Intervention Agents" href="../intervention_agents/intervention_agents.html" /> 
@@ -49,7 +50,7 @@
           
 
           
-            <a href="../../index.html" class="icon icon-home"> causal_rl_bench
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
           
 
           
@@ -72,6 +73,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -83,7 +85,6 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../guide/tutorials.html">Tutorials</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/task_setups.html">Task distributions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../guide/evaluating_policy.html">Evaluation Protocols</a></li>
 </ul>
@@ -106,6 +107,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -144,7 +146,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../../index.html">Docs</a> &raquo;</li>
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
         
           <li><a href="../causal_rl_bench.html">CausalRLBench</a> &raquo;</li>
         
@@ -167,10 +169,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="metrics">
-<h1>Metrics<a class="headerlink" href="#metrics" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="module-causal_rl_bench.metrics">
+<span id="metrics"></span><h1>Metrics<a class="headerlink" href="#module-causal_rl_bench.metrics" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="basemetric">
 <h2>BaseMetric<a class="headerlink" href="#basemetric" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="causal_rl_bench.metrics.BaseMetric">
+<em class="property">class </em><code class="sig-prename descclassname">causal_rl_bench.metrics.</code><code class="sig-name descname">BaseMetric</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/metrics/metric_base.html#BaseMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.metrics.BaseMetric" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="causal_rl_bench.metrics.BaseMetric.get_metric_score">
+<code class="sig-name descname">get_metric_score</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/metrics/metric_base.html#BaseMetric.get_metric_score"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.metrics.BaseMetric.get_metric_score" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="causal_rl_bench.metrics.BaseMetric.process_episode">
+<code class="sig-name descname">process_episode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">episode_obj</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/metrics/metric_base.html#BaseMetric.process_episode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.metrics.BaseMetric.process_episode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>episode_obj</strong> -- </p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="causal_rl_bench.metrics.BaseMetric.reset">
+<code class="sig-name descname">reset</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/causal_rl_bench/metrics/metric_base.html#BaseMetric.reset"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#causal_rl_bench.metrics.BaseMetric.reset" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="meansuccessratemetric">
 <h2>MeanSuccessRateMetric<a class="headerlink" href="#meansuccessratemetric" title="Permalink to this headline">¶</a></h2>
@@ -195,11 +235,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -210,7 +258,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {
