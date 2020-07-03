@@ -16,7 +16,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                           dense_reward_weights=np.array([250, 0, 125,
                                                          0, 750, 0, 0,
                                                          0.005]),
-                          sparse_reward_weight=0,
+                          fractional_reward_weight=0,
                           goal_height=0.15,
                           tool_block_mass=0.02)
     env = CausalWorld(task=task, skip_frame=skip_frame,
@@ -64,4 +64,3 @@ if __name__ == '__main__':
                  total_time_steps=total_time_steps,
                  validate_every_timesteps=total_time_steps_per_update,
                  task_name=task_name)
-

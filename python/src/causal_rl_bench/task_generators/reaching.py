@@ -230,8 +230,8 @@ class ReachingTaskGenerator(BaseTask):
         self._training_intervention_spaces['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
-        self._training_intervention_spaces['number_of_obstacles'] = \
-            np.array([1, 5])
+        # self._training_intervention_spaces['number_of_obstacles'] = \
+        #     np.array([1, 5])
 
         return
 
@@ -281,8 +281,8 @@ class ReachingTaskGenerator(BaseTask):
             np.array([lower_bound,
                       upper_bound])
         #TODO:dicuss this!
-        self._testing_intervention_spaces['number_of_obstacles'] = \
-            np.array([1, 5])
+        # self._testing_intervention_spaces['number_of_obstacles'] = \
+        #     np.array([1, 5])
         return
 
     def get_task_generator_variables_values(self):

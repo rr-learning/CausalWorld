@@ -34,12 +34,12 @@ def example():
     episode = data.get_episode(14)
 
     # Initialize a new environment according a specific episode and replay it
-    task = task_generator(episode._task_name, **episode._task_params)
+    task = task_generator(episode.task_name, **episode.task_params)
     env = CausalWorld(task,
                       **episode.world_params,
-                      logging=False,
                       enable_visualization=True)
-    env.set_full_state(episode.initial_full_state)
+    env.set_starting_state(episode.initial_full_state)
+    env.reset()
     for action in episode.robot_actions:
         env.step(action)
     env.close()

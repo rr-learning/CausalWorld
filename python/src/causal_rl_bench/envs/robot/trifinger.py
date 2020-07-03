@@ -17,7 +17,8 @@ class TriFingerRobot(object):
                  revolute_joint_ids,
                  finger_tip_ids,
                  pinocchio_utils,
-                 cameras=None):
+                 cameras=None,
+                 camera_indicies=np.array([0, 1, 2])):
         """
 
         :param action_mode:
@@ -58,9 +59,11 @@ class TriFingerRobot(object):
         if self._pybullet_client_w_goal_id is not None:
             self._set_finger_state_in_goal_image()
         self._tool_cameras = cameras
+        self._camera_indicies = camera_indicies
         self._robot_observations = TriFingerObservations(observation_mode,
                                                          normalize_observations,
-                                                         cameras=self._tool_cameras)
+                                                         cameras=self._tool_cameras,
+                                                         camera_indicies=self._camera_indicies)
         #Take care with the following last action and last clipped action
         # always follow the action mode normalization
         #last_applied_joint_positions is always saved here as
@@ -165,7 +168,9 @@ class TriFingerRobot(object):
         self._observation_mode = observation_mode
         self._robot_observations = \
             TriFingerObservations(observation_mode,
-                                  self._normalize_observations)
+                                  self._normalize_observations,
+                                  cameras=self._tool_cameras,
+                                  camera_indicies=self._camera_indicies)
 
     def get_observation_mode(self):
         return self._observation_mode

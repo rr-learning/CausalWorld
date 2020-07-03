@@ -6,10 +6,11 @@ class StageObservations(object):
     def __init__(self, rigid_objects, visual_objects,
                  observation_mode="structured",
                  normalize_observations=True,
-                 cameras=None):
+                 cameras=None,
+                 camera_indicies=np.array([0, 1, 2])):
         self._normalized_observations = normalize_observations
         self._observation_mode = observation_mode
-
+        self._camera_indicies = camera_indicies
         self._low_norm = -1
         self._high_norm = 1
         if observation_mode == "cameras":
@@ -18,10 +19,11 @@ class StageObservations(object):
 
         self._lower_bounds = dict()
         self._upper_bounds = dict()
+        num_of_cameras = self._camera_indicies.shape[0]
         self._lower_bounds["goal_image"] = \
-            np.zeros(shape=(1, 128, 128, 3), dtype=np.float64)
+            np.zeros(shape=(num_of_cameras, 128, 128, 3), dtype=np.float64)
         self._upper_bounds["goal_image"] = \
-            np.full(shape=(1, 128, 128, 3), fill_value=255,
+            np.full(shape=(num_of_cameras, 128, 128, 3), fill_value=255,
                     dtype=np.float64)
         self._goal_cameras = cameras
 
@@ -211,7 +213,10 @@ class StageObservations(object):
         self.set_observation_spaces()
 
     def get_current_goal_image(self):
-        camera_obs = np.stack((self._goal_cameras[0].get_image()), axis=0)
+        images = []
+        for i in self._camera_indicies:
+            images.append(self._goal_cameras[i].get_image())
+        camera_obs = np.stack(images, axis=0)
         if self._normalized_observations:
             camera_obs = self.normalize_observation_for_key(camera_obs,
                                                             "goal_image")
