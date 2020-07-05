@@ -85,6 +85,7 @@ def record_video_of_policy(task, world_params, policy_fn, file_name,
             for _ in range(actual_skip_frame):
                 obs, reward, done, info = env.step(action=desired_action)
                 recorder.capture_frame()
+    recorder.close()
     env.close()
 
 
