@@ -44,7 +44,7 @@ def baseline_model(model_num):
                                       PICK_AND_PLACE_BENCHMARK,
                                       TOWER_2_BENCHMARK])
     task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'sparse_reward_weight': 1}}]
+                                      'fractional_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
                                       'enable_visualization': False,
