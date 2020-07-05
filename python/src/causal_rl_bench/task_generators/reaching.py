@@ -4,34 +4,25 @@ from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class ReachingTaskGenerator(BaseTask):
-    def __init__(self, **kwargs):
-        """
-
-        :param kwargs:
-        """
+    def __init__(self, use_train_space_only=False,
+                 fractional_reward_weight=0,
+                 dense_reward_weights=np.array([100000,0, 0, 0]),
+                 default_goal_60= np.array([0, 0, 0.10]),
+                 default_goal_120= np.array([0, 0, 0.13]),
+                 default_goal_300= np.array([0, 0, 0.16]),
+                 joint_positions=None):
         super().__init__(task_name="reaching",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                         False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 0),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([100000,
-                                              0, 0, 0])))
+                         use_train_space_only=use_train_space_only,
+                         fractional_reward_weight=fractional_reward_weight,
+                         dense_reward_weights=dense_reward_weights)
         self._task_robot_observation_keys = ["time_left_for_task",
                                              "joint_positions",
                                              "joint_velocities",
                                              "end_effector_positions"]
-        self._task_params['default_goal_60'] = \
-            kwargs.get("default_goal_60", np.array([0, 0, 0.10]))
-        self._task_params['default_goal_120'] = \
-            kwargs.get("default_goal_120", np.array([0, 0, 0.13]))
-        self._task_params['default_goal_300'] = \
-            kwargs.get("default_goal_300", np.array([0, 0, 0.16]))
-        self._task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
-        self._task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
+        self._task_params['default_goal_60'] = default_goal_60
+        self._task_params['default_goal_120'] = default_goal_120
+        self._task_params['default_goal_300'] = default_goal_300
+        self._task_params["joint_positions"] = joint_positions
         self.previous_end_effector_positions = None
         self.previous_joint_velocities = None
         self.current_number_of_obstacles = 0

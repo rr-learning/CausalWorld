@@ -10,7 +10,7 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         self.env = env
         self.metadata = self.env.metadata
         self.action_space = env.action_space
-        current_goal = self.env.get_task().get_achieved_goal()
+        current_goal = self.env.get_task().get_achieved_goal().flatten()
         goal_space_shape = current_goal.shape
         #TODO: get the actual bonds here for proper normalization maybe?
         self.action_space = self.env.action_space
@@ -46,16 +46,16 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         obs_dict = dict()
         normal_obs, reward, done, info = self.env.step(action)
         obs_dict['observation'] = normal_obs
-        obs_dict['achieved_goal'] = info['achieved_goal']
-        obs_dict['desired_goal'] = info['desired_goal']
+        obs_dict['achieved_goal'] = info['achieved_goal'].flatten()
+        obs_dict['desired_goal'] = info['desired_goal'].flatten()
         return obs_dict, reward, done, info
 
     def reset(self):
         obs_dict = dict()
         normal_obs = self.env.reset()
         obs_dict['observation'] = normal_obs
-        obs_dict['achieved_goal'] = self.env.get_task().get_achieved_goal()
-        obs_dict['desired_goal'] = self.env.get_task().get_desired_goal()
+        obs_dict['achieved_goal'] = self.env.get_task().get_achieved_goal().flatten()
+        obs_dict['desired_goal'] = self.env.get_task().get_desired_goal().flatten()
         return obs_dict
 
     def render(self, mode='human', **kwargs):
