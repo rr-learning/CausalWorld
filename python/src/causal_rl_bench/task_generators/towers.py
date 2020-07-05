@@ -15,25 +15,28 @@ class TowersGeneratorTask(BaseTask):
                          use_train_space_only=kwargs.get("use_train_space_only",
                                                          False),
                          fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
+                         kwargs.get("fractional_reward_weight", 0),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
-                                    np.array([])))
+                                    np.array([750,
+                                              125,
+                                              250,
+                                              0.005])))
         self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+                                             "joint_positions",
+                                             "joint_velocities",
+                                             "end_effector_positions"]
 
-        #for this task the stage observation keys will be set with the
-        #goal/structure building
+        # for this task the stage observation keys will be set with the
+        # goal/structure building
         self._task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.08)
         self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self._task_params["number_of_blocks_in_tower"] = \
-            kwargs.get("number_of_blocks_in_tower", np.array([1, 1, 5]))
+            kwargs.get("number_of_blocks_in_tower", np.array([1, 1, 2]))
         self._task_params["tower_dims"] = \
-            kwargs.get("tower_dims", np.array([0.035, 0.035, 0.175]))
+            kwargs.get("tower_dims", np.array([0.065, 0.065, 0.13]))
         self._task_params["tower_center"] = \
             kwargs.get("tower_center", np.array([0, 0]))
         self.current_tower_dims = np.array(self._task_params["tower_dims"])
@@ -49,7 +52,7 @@ class TowersGeneratorTask(BaseTask):
         """
         return "Task where the goal is to stack arbitrary number of towers side by side"
 
-    #TODO: add obstacles interventions? up to a 10 obstacles?
+    # TODO: add obstacles interventions? up to a 10 obstacles?
     def _set_up_stage_arena(self):
         """
 
@@ -104,29 +107,29 @@ class TowersGeneratorTask(BaseTask):
                                      'size': block_size}
                     silhouettes_creation_dicts.append(copy.deepcopy(creation_dict))
                     self._task_stage_observation_keys.append("tool_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_type')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_type')
                     self._task_stage_observation_keys.append("tool_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_size')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_size')
                     self._task_stage_observation_keys.append("tool_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_cartesian_position')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_cartesian_position')
                     self._task_stage_observation_keys.append("tool_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_orientation')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_orientation')
                     self._task_stage_observation_keys.append("tool_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_linear_velocity')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_linear_velocity')
                     self._task_stage_observation_keys.append("tool_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_angular_velocity')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_angular_velocity')
                     self._task_stage_observation_keys.append("goal_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_type')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_type')
                     self._task_stage_observation_keys.append("goal_" + "level_" +
-                                                            str(level) + "_col_" +
-                                                            str(col) + "_row_" + str(row) + '_size')
+                                                             str(level) + "_col_" +
+                                                             str(col) + "_row_" + str(row) + '_size')
                     self._task_stage_observation_keys.append("goal_" + "level_" +
                                                              str(level) + "_col_" +
                                                              str(col) + "_row_" + str(row) + '_cartesian_position')
@@ -149,16 +152,16 @@ class TowersGeneratorTask(BaseTask):
 
         :return:
         """
-        #for now remove all possible interventions on the goal in general
-        #intevrntions on size of objects might become tricky to handle
-        #contradicting interventions here?
+        # for now remove all possible interventions on the goal in general
+        # intevrntions on size of objects might become tricky to handle
+        # contradicting interventions here?
         super(TowersGeneratorTask, self)._set_training_intervention_spaces()
         for visual_object in self._stage.get_visual_objects():
             del self._training_intervention_spaces[visual_object]
         for rigid_object in self._stage.get_rigid_objects():
             del self._training_intervention_spaces[rigid_object]['size']
         self._training_intervention_spaces['number_of_blocks_in_tower'] = \
-            np.array([[1, 1, 1], [4, 4,4]])
+            np.array([[1, 1, 1], [4, 4, 4]])
         self._training_intervention_spaces['blocks_mass'] = \
             np.array([0.02, 0.06])
         self._training_intervention_spaces['tower_dims'] = \
@@ -241,7 +244,7 @@ class TowersGeneratorTask(BaseTask):
             self.current_tool_block_mass = interventions_dict["blocks_mass"]
         if "tower_center" in interventions_dict:
             self.current_tower_center = interventions_dict["tower_center"]
-        #TODO: tae care of center and orientation seperatly since we dont need to recreate everything,
+        # TODO: tae care of center and orientation seperatly since we dont need to recreate everything,
         # just translate and rotate!!
         if "tower_dims" in interventions_dict or "number_of_blocks_in_tower" in interventions_dict or \
                 "tower_center" in interventions_dict or "tower_orientation" in interventions_dict:
@@ -262,3 +265,82 @@ class TowersGeneratorTask(BaseTask):
         self._set_training_intervention_spaces()
         self._stage.finalize_stage()
         return True, reset_observation_space
+
+    def _calculate_dense_rewards(self, desired_goal, achieved_goal):
+        """
+
+        :param desired_goal:
+        :param achieved_goal:
+        :return:
+        """
+        end_effector_positions = self._robot.get_latest_full_state()['end_effector_positions']
+        end_effector_positions = end_effector_positions.reshape(-1, 3)
+        joint_velocities = self._robot.get_latest_full_state()['velocities']
+
+        block_level_0_position = self._stage.get_object_state('tool_level_0_col_0_row_0',
+                                                              'cartesian_position')
+        block_level_0_orientation = self._stage.get_object_state('tool_level_0_col_0_row_0',
+                                                                 'orientation')
+
+        block_level_1_position = self._stage.get_object_state('tool_level_1_col_0_row_0',
+                                                              'cartesian_position')
+        block_level_1_orientation = self._stage.get_object_state('tool_level_1_col_0_row_0',
+                                                                 'orientation')
+        rewards = list()
+
+        # term 1
+        current_distance_from_block = np.linalg.norm(end_effector_positions -
+                                                     self.previous_block_level_1_position)
+        previous_distance_from_block = np.linalg.norm(
+            self.previous_end_effector_positions -
+            self.previous_block_level_1_position)
+        rewards.append(previous_distance_from_block -
+                       current_distance_from_block)
+
+        # term 2
+        current_horizontal_distance_from_blocks = np.linalg.norm(block_level_0_position[:2] -
+                                                                 block_level_1_position[:2])
+
+        previous_horizontal_distance_from_blocks = np.linalg.norm(self.previous_block_level_0_position[:2] -
+                                                                  self.previous_block_level_1_position[:2])
+
+        rewards.append(previous_horizontal_distance_from_blocks -
+                       current_horizontal_distance_from_blocks)
+
+        # term 3
+        current_vertical_distance_from_blocks = np.linalg.norm(block_level_1_position[2] -
+                                                               block_level_0_position[2] - 0.065)
+
+        previous_vertical_distance_from_blocks = np.linalg.norm(self.previous_block_level_0_position[2] -
+                                                                self.previous_block_level_1_position[2] - 0.065)
+
+        rewards.append(previous_vertical_distance_from_blocks -
+                       current_vertical_distance_from_blocks)
+
+        # term 4
+        rewards.append(- np.linalg.norm(
+            joint_velocities - self.previous_joint_velocities))
+
+        update_task_info = {'current_end_effector_positions': end_effector_positions}
+        return rewards, update_task_info
+
+    def _set_task_state(self):
+        """
+
+        :return:
+        """
+        self.previous_end_effector_positions = \
+            self._robot.get_latest_full_state()['end_effector_positions']
+        self.previous_end_effector_positions = \
+            self.previous_end_effector_positions.reshape(-1, 3)
+        self.previous_joint_velocities = \
+            self._robot.get_latest_full_state()['velocities']
+        self.previous_block_level_0_position = self._stage.get_object_state('tool_level_0_col_0_row_0',
+                                                                            'cartesian_position')
+        self.previous_block_level_0_orientation = self._stage.get_object_state('tool_level_0_col_0_row_0',
+                                                                               'orientation')
+
+        self.previous_block_level_1_position = self._stage.get_object_state('tool_level_1_col_0_row_0',
+                                                                            'cartesian_position')
+        self.previous_block_level_1_orientation = self._stage.get_object_state('tool_level_1_col_0_row_0',
+                                                                               'orientation')
