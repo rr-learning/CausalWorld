@@ -4,9 +4,10 @@ channels:
 dependencies:
 - python=3.7.4
 - sphinx
+- pinocchio==2.2.2
 - jupyter
 - pip:
-  - pybullet
+  - pybullet==2.8.2
   - gym
   - pandas
   - catkin_pkg
@@ -15,3 +16,4 @@ dependencies:
   - stable-baselines==2.10.0
   - pytest
   - mpi4py
+  - psutil

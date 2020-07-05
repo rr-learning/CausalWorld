@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="python" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="python" > <!--<![endif]-->
+<html class="writer-html5" lang="python" >
 <head>
   <meta charset="utf-8">
   
@@ -12,12 +11,18 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
   
   
   
 
   
-  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
@@ -29,14 +34,10 @@
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Evaluation Protocols" href="evaluating_policy.html" />
-    <link rel="prev" title="Tutorials" href="tutorials.html" /> 
+    <link rel="prev" title="Getting Started" href="getting_started.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -50,7 +51,7 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> causal_rl_bench
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
           
 
           
@@ -73,6 +74,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -84,8 +86,13 @@
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tutorials.html">Tutorials</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Task distributions</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Task distributions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#available-task-generators">Available task generators</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#observation-spaces">Observation spaces</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rewards-and-additional-information">Rewards and additional information</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#defining-your-own-task">Defining your own task</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="evaluating_policy.html">Evaluation Protocols</a></li>
 </ul>
 <p class="caption"><span class="caption-text">Contents</span></p>
@@ -96,6 +103,7 @@
             
           
         </div>
+        
       </div>
     </nav>
 
@@ -134,7 +142,7 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="../index.html">Docs</a> &raquo;</li>
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Task distributions</li>
     
@@ -157,6 +165,82 @@
             
   <div class="section" id="task-distributions">
 <span id="task-setups"></span><h1>Task distributions<a class="headerlink" href="#task-distributions" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="available-task-generators">
+<h2>Available task generators<a class="headerlink" href="#available-task-generators" title="Permalink to this headline">¶</a></h2>
+<p>List and visualisations of existing task-generators:
+- pushing
+- picking
+- pick and place
+- towers
+- stacked-blocks
+- creative-stacked-blocks
+- general</p>
+</div>
+<div class="section" id="observation-spaces">
+<h2>Observation spaces<a class="headerlink" href="#observation-spaces" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="rewards-and-additional-information">
+<h2>Rewards and additional information<a class="headerlink" href="#rewards-and-additional-information" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="defining-your-own-task">
+<h2>Defining your own task<a class="headerlink" href="#defining-your-own-task" title="Permalink to this headline">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.envs.causalworld</span> <span class="kn">import</span> <span class="n">CausalWorld</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="k">class</span> <span class="nc">MyOwnTask</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_name</span><span class="o">=</span><span class="s2">&quot;new_task&quot;</span><span class="p">,</span>
+                         <span class="n">use_train_space_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">fractional_reward_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                         <span class="n">dense_reward_weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_robot_observation_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;time_left_for_task&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;joint_velocities&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;end_effector_positions&quot;</span><span class="p">]</span>
+
+    <span class="c1">#This is not even needed, it will just be an empty stage</span>
+    <span class="k">def</span> <span class="nf">_set_up_stage_arena</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#NOTE: you need to add rigid objects before silhouettes for determinism (pybullet limitation)</span>
+        <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;tool_block&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;./assets/719.obj&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;initial_position&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_rigid_mesh_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+        <span class="n">creation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s2">&quot;goal_block&quot;</span><span class="p">,</span>
+                         <span class="s1">&#39;filename&#39;</span><span class="p">:</span> <span class="s1">&#39;./assets/719.obj&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;position&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">]}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">add_silhoutte_mesh_object</span><span class="p">(</span><span class="o">**</span><span class="n">creation_dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_stage_observation_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tool_block_type&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_size&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_cartesian_position&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_orientation&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_linear_velocity&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;tool_block_angular_velocity&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_type&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_size&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_cylindrical_position&quot;</span><span class="p">,</span>
+                                             <span class="s2">&quot;goal_block_orientation&quot;</span><span class="p">]</span>
+        <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">example</span><span class="p">():</span>
+    <span class="n">task</span> <span class="o">=</span> <span class="n">MyOwnTask</span><span class="p">()</span>
+    <span class="n">env</span> <span class="o">=</span> <span class="n">CausalWorld</span><span class="p">(</span><span class="n">task</span><span class="o">=</span><span class="n">task</span><span class="p">,</span> <span class="n">enable_visualization</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">2000</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">):</span>
+            <span class="n">obs</span><span class="p">,</span> <span class="n">reward</span><span class="p">,</span> <span class="n">done</span><span class="p">,</span> <span class="n">info</span> <span class="o">=</span> \
+                <span class="n">env</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="n">env</span><span class="o">.</span><span class="n">action_space</span><span class="o">.</span><span class="n">sample</span><span class="p">())</span>
+        <span class="n">random_intervention_dict</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">do_single_random_intervention</span><span class="p">()</span>
+    <span class="n">env</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">example</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
 </div>
 
 
@@ -170,7 +254,7 @@
         <a href="evaluating_policy.html" class="btn btn-neutral float-right" title="Evaluation Protocols" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="tutorials.html" class="btn btn-neutral float-left" title="Tutorials" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="getting_started.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -179,11 +263,19 @@
 
   <div role="contentinfo">
     <p>
+        
         &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -194,7 +286,6 @@
 
   </div>
   
-
 
   <script type="text/javascript">
       jQuery(function () {

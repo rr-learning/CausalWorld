@@ -12,7 +12,7 @@ import os
 import json
 import numpy as np
 from stable_baselines.common.callbacks import CheckpointCallback
-from causal_rl_bench.intervention_agents import RandomInterventionActorPolicy, GoalInterventionActorPolicy
+from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
 from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
@@ -41,7 +41,7 @@ def baseline_model(model_num):
                                       PICK_AND_PLACE_BENCHMARK,
                                       TOWER_2_BENCHMARK])
     task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'sparse_reward_weight': 1}}]
+                                      'fractional_reward_weight': 1}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
                                       'enable_visualization': False,

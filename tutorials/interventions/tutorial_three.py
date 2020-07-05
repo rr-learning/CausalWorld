@@ -11,7 +11,7 @@ def goal_interventions():
             obs, reward, done, info = env.step(env.action_space.sample())
         goal_intervention_dict = env.sample_new_goal()
         print("new goal chosen: ", goal_intervention_dict)
-        success_signal = env.do_intervention(goal_intervention_dict)
+        success_signal, obs = env.do_intervention(goal_intervention_dict)
         print("Goal Intervention success signal", success_signal)
     env.close()
 

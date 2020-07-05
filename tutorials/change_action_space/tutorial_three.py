@@ -4,7 +4,7 @@ from causal_rl_bench.wrappers.action_wrappers import MovingAverageActionEnvWrapp
 import numpy as np
 
 
-def apply_delta_action():
+def smooth_action():
     task = task_generator(task_generator_id='reaching')
     env = CausalWorld(task=task, enable_visualization=True,
                       action_mode="joint_positions",
@@ -15,15 +15,10 @@ def apply_delta_action():
         obs = env.reset()
         for _ in range(1000):
             desired_action = np.zeros([9,])
-            current_obs = np.around(obs[:9], decimals=2)
-            print("what I wanted to reach", current_obs + desired_action)
             obs, reward, done, info = env.step(desired_action)
-            print("what I actually reached", np.around(obs[:9], decimals=2))
-            print("diff is", current_obs + desired_action - np.around(obs[:9], decimals=2))
-                # desired_action = obs[:9]
     env.close()
 
 
 if __name__ == '__main__':
-    apply_delta_action()
+    smooth_action()
 

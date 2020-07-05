@@ -16,7 +16,9 @@ class TriFingerRobot(object):
                  pybullet_client_w_o_goal_id,
                  revolute_joint_ids,
                  finger_tip_ids,
-                 cameras=None):
+                 pinocchio_utils,
+                 cameras=None,
+                 camera_indicies=np.array([0, 1, 2])):
         """
 
         :param action_mode:
@@ -41,6 +43,7 @@ class TriFingerRobot(object):
         self._skip_frame = skip_frame
         self._simulation_time = simulation_time
         self._dt = self._simulation_time * self._skip_frame
+        self._pinocchio_utils = pinocchio_utils
         #TODO: for some reason this is needed
         self._control_index = -1
         self._position_gains = np.array(
@@ -56,9 +59,11 @@ class TriFingerRobot(object):
         if self._pybullet_client_w_goal_id is not None:
             self._set_finger_state_in_goal_image()
         self._tool_cameras = cameras
+        self._camera_indicies = camera_indicies
         self._robot_observations = TriFingerObservations(observation_mode,
                                                          normalize_observations,
-                                                         cameras=self._tool_cameras)
+                                                         cameras=self._tool_cameras,
+                                                         camera_indicies=self._camera_indicies)
         #Take care with the following last action and last clipped action
         # always follow the action mode normalization
         #last_applied_joint_positions is always saved here as
@@ -115,7 +120,9 @@ class TriFingerRobot(object):
         self._latest_full_state = {'positions': current_position,
                                    'velocities': current_velocity,
                                    'torques': current_torques,
-                                   'end_effector_positions': self._compute_end_effector_positions()}
+                                   'end_effector_positions':
+                                       self._compute_end_effector_positions(
+                                           current_position)}
 
         return
 
@@ -161,7 +168,9 @@ class TriFingerRobot(object):
         self._observation_mode = observation_mode
         self._robot_observations = \
             TriFingerObservations(observation_mode,
-                                  self._normalize_observations)
+                                  self._normalize_observations,
+                                  cameras=self._tool_cameras,
+                                  camera_indicies=self._camera_indicies)
 
     def get_observation_mode(self):
         return self._observation_mode
@@ -401,6 +410,11 @@ class TriFingerRobot(object):
             client = self._pybullet_client_w_o_goal_id
         else:
             client = self._pybullet_client_full_id
+        position, _ = pybullet. \
+            getBasePositionAndOrientation(WorldConstants.ROBOT_ID,
+                                          physicsClientId=
+                                          client)
+        variable_params['robot_height'] = position[-1] + WorldConstants.ROBOT_HEIGHT
         for robot_finger_link in WorldConstants.LINK_IDS:
             variable_params[robot_finger_link] = dict()
             variable_params[robot_finger_link]['color'] = \
@@ -417,7 +431,7 @@ class TriFingerRobot(object):
         return self._robot_observations.get_current_observations(
             self._latest_full_state, helper_keys)
 
-    def _compute_end_effector_positions(self):
+    def _compute_end_effector_positions(self, joint_positions):
         result = np.array([])
         if self._pybullet_client_full_id is not None:
             position_1 = pybullet.getLinkState(
@@ -457,6 +471,13 @@ class TriFingerRobot(object):
         result[2] -= WorldConstants.FLOOR_HEIGHT
         result[5] -= WorldConstants.FLOOR_HEIGHT
         result[-1] -= WorldConstants.FLOOR_HEIGHT
+        # tip_positions = self._pinocchio_utils.forward_kinematics(
+        #     joint_positions
+        # )
+        # result_2 = np.concatenate(tip_positions)
+        # result_2[2] -= WorldConstants.FLOOR_HEIGHT
+        # result_2[5] -= WorldConstants.FLOOR_HEIGHT
+        # result_2[-1] -= WorldConstants.FLOOR_HEIGHT
         return result
 
     def _process_action_joint_positions(self, robot_state):
@@ -601,6 +622,26 @@ class TriFingerRobot(object):
             if intervention == "joint_velocities" or \
                     intervention == "joint_positions":
                 continue
+            if intervention == 'robot_height':
+                if self._pybullet_client_w_goal_id is not None:
+                    pybullet.resetBasePositionAndOrientation(
+                        WorldConstants.ROBOT_ID, [0, 0, interventions_dict[intervention] - WorldConstants.ROBOT_HEIGHT],
+                        [0, 0, 0, 1],
+                        physicsClientId=
+                        self._pybullet_client_w_goal_id)
+                if self._pybullet_client_w_o_goal_id is not None:
+                    pybullet.resetBasePositionAndOrientation(
+                        WorldConstants.ROBOT_ID,  [0, 0, interventions_dict[intervention] - WorldConstants.ROBOT_HEIGHT],
+                        [0, 0, 0, 1],
+                        physicsClientId=
+                        self._pybullet_client_w_o_goal_id)
+                if self._pybullet_client_full_id is not None:
+                    pybullet.resetBasePositionAndOrientation(
+                        WorldConstants.ROBOT_ID,  [0, 0, interventions_dict[intervention] - WorldConstants.ROBOT_HEIGHT],
+                        [0, 0, 0, 1],
+                        physicsClientId=
+                        self._pybullet_client_full_id)
+                continue
             if "robot_finger" in intervention:
                 for sub_intervention_variable in \
                         interventions_dict[intervention]:
@@ -652,8 +693,8 @@ class TriFingerRobot(object):
                 self._control_index = interventions_dict["control_index"]
             else:
                 raise Exception("The intervention state variable specified is "
-                                "not allowed")
-
+                                "not allowed", intervention)
+        self.update_latest_full_state()
         return
 
     def check_feasibility_of_robot_state(self):

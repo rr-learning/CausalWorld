@@ -15,6 +15,7 @@ from causal_rl_bench.wrappers.protocol_wrapper \
 from causal_rl_bench.loggers.tracker import Tracker
 import json
 
+
 class EvaluationPipeline(object):
     def __init__(self, evaluation_protocols, tracker_path=None,
                  world_params=None, task_params=None,
@@ -37,8 +38,6 @@ class EvaluationPipeline(object):
         if tracker_path:
             if 'seed' in self.tracker.world_params:
                 del self.tracker.world_params['seed']
-            if 'simulation_time' in self.tracker.world_params:
-                del self.tracker.world_params['simulation_time']
             if 'wrappers' in self.tracker.world_params:
                 del self.tracker.world_params['wrappers']
             self.env = CausalWorld(self.task,

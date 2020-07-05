@@ -1,0 +1,1089 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="python" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>causal_rl_bench.envs.robot.trifinger &mdash; causal_rl_bench 1.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+        <script src="../../../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home" alt="Documentation Home"> causal_rl_bench
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Guide</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/install.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/task_setups.html">Task distributions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../guide/evaluating_policy.html">Evaluation Protocols</a></li>
+</ul>
+<p class="caption"><span class="caption-text">Contents</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../modules/causal_rl_bench.html">CausalRLBench</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">causal_rl_bench</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>causal_rl_bench.envs.robot.trifinger</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for causal_rl_bench.envs.robot.trifinger</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.envs.robot.action</span> <span class="kn">import</span> <span class="n">TriFingerAction</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.envs.robot.observations</span> <span class="kn">import</span> <span class="n">TriFingerObservations</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pybullet</span>
+<span class="kn">from</span> <span class="nn">causal_rl_bench.configs.world_constants</span> <span class="kn">import</span> <span class="n">WorldConstants</span>
+
+
+<div class="viewcode-block" id="TriFingerRobot"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.TriFingerRobot">[docs]</a><span class="k">class</span> <span class="nc">TriFingerRobot</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_mode</span><span class="p">,</span>
+                 <span class="n">observation_mode</span><span class="p">,</span>
+                 <span class="n">skip_frame</span><span class="p">,</span> <span class="n">normalize_actions</span><span class="p">,</span>
+                 <span class="n">normalize_observations</span><span class="p">,</span>
+                 <span class="n">simulation_time</span><span class="p">,</span>
+                 <span class="n">pybullet_client_full_id</span><span class="p">,</span>
+                 <span class="n">pybullet_client_w_goal_id</span><span class="p">,</span>
+                 <span class="n">pybullet_client_w_o_goal_id</span><span class="p">,</span>
+                 <span class="n">revolute_joint_ids</span><span class="p">,</span>
+                 <span class="n">finger_tip_ids</span><span class="p">,</span>
+                 <span class="n">pinocchio_utils</span><span class="p">,</span>
+                 <span class="n">cameras</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">camera_indicies</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param action_mode:</span>
+<span class="sd">        :param observation_mode:</span>
+<span class="sd">        :param skip_frame:</span>
+<span class="sd">        :param normalize_actions:</span>
+<span class="sd">        :param normalize_observations:</span>
+<span class="sd">        :param simulation_time:</span>
+<span class="sd">        :param pybullet_client_full:</span>
+<span class="sd">        :param pybullet_client_w_goal:</span>
+<span class="sd">        :param pybullet_client_w_o_goal:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="o">=</span> <span class="n">pybullet_client_full_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="o">=</span> <span class="n">pybullet_client_w_goal_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="o">=</span> <span class="n">pybullet_client_w_o_goal_id</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span> <span class="o">=</span> <span class="n">revolute_joint_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finger_tip_ids</span> <span class="o">=</span> <span class="n">finger_tip_ids</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_actions</span> <span class="o">=</span> <span class="n">normalize_actions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span> <span class="o">=</span> <span class="n">normalize_observations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">=</span> <span class="n">action_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">=</span> <span class="n">observation_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span> <span class="o">=</span> <span class="n">skip_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_simulation_time</span> <span class="o">=</span> <span class="n">simulation_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation_time</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_pinocchio_utils</span> <span class="o">=</span> <span class="n">pinocchio_utils</span>
+        <span class="c1">#TODO: for some reason this is needed</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_position_gains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_velocity_gains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_safety_kd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.08</span><span class="p">,</span> <span class="mf">0.04</span><span class="p">]</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_motor_torque</span> <span class="o">=</span> <span class="mf">0.36</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span> <span class="o">=</span> <span class="n">TriFingerAction</span><span class="p">(</span><span class="n">action_mode</span><span class="p">,</span>
+                                              <span class="n">normalize_actions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_finger_state_in_goal_image</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span> <span class="o">=</span> <span class="n">cameras</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span> <span class="o">=</span> <span class="n">camera_indicies</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span> <span class="o">=</span> <span class="n">TriFingerObservations</span><span class="p">(</span><span class="n">observation_mode</span><span class="p">,</span>
+                                                         <span class="n">normalize_observations</span><span class="p">,</span>
+                                                         <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span><span class="p">,</span>
+                                                         <span class="n">camera_indicies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span><span class="p">)</span>
+        <span class="c1">#Take care with the following last action and last clipped action</span>
+        <span class="c1"># always follow the action mode normalization</span>
+        <span class="c1">#last_applied_joint_positions is always saved here as</span>
+        <span class="c1"># denormalized but when its part of the obs space then it follows</span>
+        <span class="c1">#the observation mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_action</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_clipped_action</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">action_mode</span> <span class="o">!=</span> <span class="s2">&quot;joint_torques&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_camera_observations</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1">#TODO: repeated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_state_size</span> <span class="o">=</span> <span class="mi">18</span>
+        <span class="c1">#TODO: move this to pybullet_fingers repo maybe?</span>
+        <span class="c1">#disable velocity control mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_disable_velocity_control</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">get_link_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span>
+
+    <span class="k">def</span> <span class="nf">get_control_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span>
+
+    <span class="k">def</span> <span class="nf">get_full_env_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_full_env_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env_state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">apply_interventions</span><span class="p">(</span><span class="n">env_state</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">env_state</span>
+
+    <span class="k">def</span> <span class="nf">update_latest_full_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">current_joint_states</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span>\
+                <span class="n">getJointStates</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">,</span>
+                 <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">current_joint_states</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span>\
+                <span class="n">getJointStates</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">,</span>
+                 <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+            <span class="p">)</span>
+        <span class="n">current_position</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">joint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">current_joint_states</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">current_velocity</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">joint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">current_joint_states</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">current_torques</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">joint</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">joint</span> <span class="ow">in</span> <span class="n">current_joint_states</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;positions&#39;</span><span class="p">:</span> <span class="n">current_position</span><span class="p">,</span>
+                                   <span class="s1">&#39;velocities&#39;</span><span class="p">:</span> <span class="n">current_velocity</span><span class="p">,</span>
+                                   <span class="s1">&#39;torques&#39;</span><span class="p">:</span> <span class="n">current_torques</span><span class="p">,</span>
+                                   <span class="s1">&#39;end_effector_positions&#39;</span><span class="p">:</span>
+                                       <span class="bp">self</span><span class="o">.</span><span class="n">_compute_end_effector_positions</span><span class="p">(</span>
+                                           <span class="n">current_position</span><span class="p">)}</span>
+
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">update_images</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#TODO: this is just a sekelton for now</span>
+        <span class="n">observations</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">observations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_image</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_camera_observations</span> <span class="o">=</span> <span class="n">observations</span>
+
+<div class="viewcode-block" id="TriFingerRobot.compute_pd_control_torques"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.TriFingerRobot.compute_pd_control_torques">[docs]</a>    <span class="k">def</span> <span class="nf">compute_pd_control_torques</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute torque command to reach given target position using a PD</span>
+<span class="sd">        controller.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            joint_positions (array-like, shape=(n,)):  Desired joint positions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of torques to be sent to the joints of the finger in order to</span>
+<span class="sd">            reach the specified joint_positions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">position_error</span> <span class="o">=</span> <span class="n">joint_positions</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;positions&#39;</span><span class="p">]</span>
+        <span class="n">position_feedback</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_position_gains</span><span class="p">)</span> <span class="o">*</span> \
+                            <span class="n">position_error</span>
+        <span class="n">velocity_feedback</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_velocity_gains</span><span class="p">)</span> <span class="o">*</span> \
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;velocities&#39;</span><span class="p">]</span>
+        <span class="n">joint_torques</span> <span class="o">=</span> <span class="n">position_feedback</span> <span class="o">-</span> <span class="n">velocity_feedback</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_full_state</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">joint_torques</span></div>
+
+    <span class="k">def</span> <span class="nf">set_action_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action_mode</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">=</span> <span class="n">action_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span> <span class="o">=</span> <span class="n">TriFingerAction</span><span class="p">(</span><span class="n">action_mode</span><span class="p">,</span>
+                                              <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_actions</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_upper_joint_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span><span class="o">.</span><span class="n">joint_positions_upper_bounds</span>
+
+    <span class="k">def</span> <span class="nf">get_action_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span>
+
+    <span class="k">def</span> <span class="nf">set_observation_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_mode</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">=</span> <span class="n">observation_mode</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span> <span class="o">=</span> \
+            <span class="n">TriFingerObservations</span><span class="p">(</span><span class="n">observation_mode</span><span class="p">,</span>
+                                  <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span><span class="p">,</span>
+                                  <span class="n">cameras</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_tool_cameras</span><span class="p">,</span>
+                                  <span class="n">camera_indicies</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camera_indicies</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_observation_mode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span>
+
+    <span class="k">def</span> <span class="nf">set_skip_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_frame</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span> <span class="o">=</span> <span class="n">skip_frame</span>
+
+    <span class="k">def</span> <span class="nf">get_skip_frame</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span>
+
+    <span class="k">def</span> <span class="nf">get_full_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_full_state</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;positions&#39;</span><span class="p">],</span>
+                         <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;velocities&#39;</span><span class="p">])</span>
+
+    <span class="k">def</span> <span class="nf">set_full_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_finger_state</span><span class="p">(</span><span class="n">state</span><span class="p">[:</span><span class="mi">9</span><span class="p">],</span> <span class="n">state</span><span class="p">[</span><span class="mi">9</span><span class="p">:])</span>
+        <span class="c1"># here the previous actions will all be zeros to</span>
+        <span class="c1"># avoid dealing with different action modes for now</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_clipped_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">!=</span> <span class="s2">&quot;joint_torques&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">state</span><span class="p">[:</span><span class="mi">9</span><span class="p">])</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">get_last_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_action</span>
+
+    <span class="k">def</span> <span class="nf">get_last_clipped_action</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_clipped_action</span>
+
+    <span class="k">def</span> <span class="nf">get_last_applied_joint_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span>
+
+    <span class="k">def</span> <span class="nf">get_observation_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">get_observation_spaces</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_action_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span><span class="o">.</span><span class="n">get_action_space</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_state_size</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_state_size</span>
+
+    <span class="k">def</span> <span class="nf">step_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">stepSimulation</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">stepSimulation</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">apply_action</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">action</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">clipped_action</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span><span class="o">.</span><span class="n">clip_action</span><span class="p">(</span><span class="n">action</span><span class="p">)</span>
+        <span class="n">action_to_apply</span> <span class="o">=</span> <span class="n">clipped_action</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_actions</span><span class="p">:</span>
+            <span class="n">action_to_apply</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span><span class="o">.</span><span class="n">denormalize_action</span><span class="p">(</span><span class="n">clipped_action</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">==</span> <span class="s2">&quot;joint_positions&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span> <span class="o">=</span> <span class="n">action_to_apply</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span><span class="p">):</span>
+                <span class="n">desired_torques</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">compute_pd_control_torques</span><span class="p">(</span><span class="n">action_to_apply</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_torque_commands</span><span class="p">(</span>
+                    <span class="n">desired_torque_commands</span><span class="o">=</span><span class="n">desired_torques</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">==</span> <span class="s2">&quot;joint_torques&quot;</span><span class="p">:</span>
+            <span class="c1">#TODO: deal with clipped action here and observation part too</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_torque_commands</span><span class="p">(</span>
+                    <span class="n">desired_torque_commands</span><span class="o">=</span><span class="n">action_to_apply</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">==</span> <span class="s2">&quot;end_effector_positions&quot;</span><span class="p">:</span>
+            <span class="c1">#TODO: check if the desired tip positions are in the feasible set</span>
+            <span class="n">joint_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_joint_positions_from_tip_positions</span>\
+                <span class="p">(</span><span class="n">action_to_apply</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;positions&#39;</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span> <span class="o">=</span> <span class="n">joint_positions</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span><span class="p">):</span>
+                <span class="n">desired_torques</span> <span class="o">=</span> \
+                    <span class="bp">self</span><span class="o">.</span><span class="n">compute_pd_control_torques</span><span class="p">(</span><span class="n">joint_positions</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">send_torque_commands</span><span class="p">(</span>
+                    <span class="n">desired_torque_commands</span><span class="o">=</span><span class="n">desired_torques</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">step_simulation</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The action mode </span><span class="si">{}</span><span class="s2"> is not supported&quot;</span><span class="o">.</span>
+                            <span class="nb">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span><span class="p">))</span>
+        <span class="c1">#now we get the observations</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_mode</span> <span class="o">==</span> <span class="s2">&quot;cameras&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">update_images</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_action</span> <span class="o">=</span> <span class="n">action</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_clipped_action</span> <span class="o">=</span> <span class="n">clipped_action</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">get_dt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span>
+
+    <span class="k">def</span> <span class="nf">get_latest_full_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span>
+
+<div class="viewcode-block" id="TriFingerRobot.send_torque_commands"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.TriFingerRobot.send_torque_commands">[docs]</a>    <span class="k">def</span> <span class="nf">send_torque_commands</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_torque_commands</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param desired_torque_commands:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">torque_commands</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safety_torque_check</span><span class="p">(</span><span class="n">desired_torque_commands</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">setJointMotorControlArray</span><span class="p">(</span>
+                <span class="n">bodyUniqueId</span><span class="o">=</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                <span class="n">jointIndices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">,</span>
+                <span class="n">controlMode</span><span class="o">=</span><span class="n">pybullet</span><span class="o">.</span><span class="n">TORQUE_CONTROL</span><span class="p">,</span>
+                <span class="n">forces</span><span class="o">=</span><span class="n">torque_commands</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">setJointMotorControlArray</span><span class="p">(</span>
+                <span class="n">bodyUniqueId</span><span class="o">=</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                <span class="n">jointIndices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">,</span>
+                <span class="n">controlMode</span><span class="o">=</span><span class="n">pybullet</span><span class="o">.</span><span class="n">TORQUE_CONTROL</span><span class="p">,</span>
+                <span class="n">forces</span><span class="o">=</span><span class="n">torque_commands</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">torque_commands</span></div>
+
+    <span class="k">def</span> <span class="nf">_safety_torque_check</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_torques</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param desired_torques:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">applied_torques</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">desired_torques</span><span class="p">),</span>
+            <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_motor_torque</span><span class="p">,</span>
+            <span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_motor_torque</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">applied_torques</span> <span class="o">-=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_safety_kd</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;velocities&#39;</span><span class="p">]</span>
+
+        <span class="n">applied_torques</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">applied_torques</span><span class="p">),</span>
+                <span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_motor_torque</span><span class="p">,</span>
+                <span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_motor_torque</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">applied_torques</span>
+
+<div class="viewcode-block" id="TriFingerRobot.inverse_kinematics"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.TriFingerRobot.inverse_kinematics">[docs]</a>    <span class="k">def</span> <span class="nf">inverse_kinematics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">desired_tip_positions</span><span class="p">,</span> <span class="n">rest_pose</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        :param desired_tip_positions:</span>
+<span class="sd">        :param rest_pose:</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">desired</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">desired_tip_positions</span><span class="p">)</span>
+        <span class="n">desired</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="n">desired</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="n">desired</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">+=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="n">joint_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="mi">9</span><span class="p">])</span>
+        <span class="n">finger_tip_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_finger_tip_ids</span>
+        <span class="n">final_joint_pose</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">calculateInverseKinematics2</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                                               <span class="p">[</span><span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                                <span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                                <span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                                                               <span class="p">[</span><span class="n">desired</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+                                                                <span class="n">desired</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span>
+                                                                <span class="n">desired</span><span class="p">[</span><span class="mi">6</span><span class="p">:]],</span>
+                                                                <span class="n">solver</span><span class="o">=</span><span class="n">pybullet</span><span class="o">.</span><span class="n">IK_DLS</span><span class="p">,</span>
+                                                                <span class="n">currentPositions</span><span class="o">=</span><span class="n">rest_pose</span><span class="p">,</span>
+                                                                <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+        <span class="n">joint_pos</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_joint_pose</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">final_joint_pose</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">calculateInverseKinematics2</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                                               <span class="p">[</span><span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                                <span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span>
+                                                               <span class="p">[</span><span class="n">desired</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span>
+                                                                <span class="n">desired</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+                                                                <span class="n">desired</span><span class="p">[</span><span class="mi">6</span><span class="p">:]],</span>
+                                                                <span class="n">solver</span><span class="o">=</span><span class="n">pybullet</span><span class="o">.</span><span class="n">IK_DLS</span><span class="p">,</span>
+                                                                <span class="n">currentPositions</span><span class="o">=</span><span class="n">rest_pose</span><span class="p">,</span>
+                                                                <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+        <span class="n">joint_pos</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span> <span class="o">=</span> <span class="n">final_joint_pose</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">final_joint_pose</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">calculateInverseKinematics2</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                                               <span class="p">[</span><span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                                                <span class="n">finger_tip_ids</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span>
+                                                               <span class="p">[</span><span class="n">desired</span><span class="p">[</span><span class="mi">6</span><span class="p">:],</span>
+                                                                <span class="n">desired</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span>
+                                                                <span class="n">desired</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]],</span>
+                                                                <span class="n">solver</span><span class="o">=</span><span class="n">pybullet</span><span class="o">.</span><span class="n">IK_DLS</span><span class="p">,</span>
+                                                                <span class="n">currentPositions</span><span class="o">=</span><span class="n">rest_pose</span><span class="p">,</span>
+                                                                <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>
+        <span class="n">joint_pos</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span> <span class="o">=</span> <span class="n">final_joint_pose</span><span class="p">[</span><span class="mi">6</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">joint_pos</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">joint_pos</span> <span class="o">=</span> <span class="n">rest_pose</span>
+        <span class="k">return</span> <span class="n">joint_pos</span></div>
+
+    <span class="k">def</span> <span class="nf">get_joint_positions_from_tip_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tip_positions</span><span class="p">,</span>
+                                               <span class="n">default_pose</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">tip_positions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="n">tip_positions</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">+=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="n">tip_positions</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">+=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="k">if</span> <span class="n">default_pose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_kinematics</span><span class="p">(</span>
+                <span class="n">tip_positions</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_rest_pose</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse_kinematics</span><span class="p">(</span>
+                <span class="n">tip_positions</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="n">default_pose</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">positions</span>
+
+    <span class="k">def</span> <span class="nf">get_current_camera_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">get_current_camera_observations</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_rest_pose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">deg45</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">4</span>
+        <span class="n">positions</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="n">deg45</span><span class="p">,</span> <span class="o">-</span><span class="n">deg45</span><span class="p">]</span>
+        <span class="n">joint_positions</span> <span class="o">=</span> <span class="n">positions</span> <span class="o">*</span> <span class="mi">3</span>
+        <span class="n">end_effector_positions</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.05142966</span><span class="p">,</span> <span class="mf">0.03035857</span><span class="p">,</span> <span class="mf">0.32112874</span><span class="p">,</span>
+                                  <span class="mf">0.00057646</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.05971867</span><span class="p">,</span> <span class="mf">0.32112874</span><span class="p">,</span>
+                                  <span class="o">-</span><span class="mf">0.05200612</span><span class="p">,</span> <span class="mf">0.02936011</span><span class="p">,</span> <span class="mf">0.32112874</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">joint_positions</span><span class="p">,</span> <span class="n">end_effector_positions</span>
+
+    <span class="k">def</span> <span class="nf">get_default_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_rest_pose</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                         <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">get_current_scm_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># TODO: not a complete list yet of what we want to expose</span>
+        <span class="n">variable_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_full_state</span><span class="p">()</span>
+        <span class="n">variable_params</span><span class="p">[</span><span class="s1">&#39;joint_positions&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;positions&#39;</span><span class="p">]</span>
+        <span class="n">variable_params</span><span class="p">[</span><span class="s1">&#39;control_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span>
+        <span class="n">variable_params</span><span class="p">[</span><span class="s1">&#39;joint_velocities&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;velocities&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="n">position</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span> \
+            <span class="n">getBasePositionAndOrientation</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                          <span class="n">physicsClientId</span><span class="o">=</span>
+                                          <span class="n">client</span><span class="p">)</span>
+        <span class="n">variable_params</span><span class="p">[</span><span class="s1">&#39;robot_height&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">position</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_HEIGHT</span>
+        <span class="k">for</span> <span class="n">robot_finger_link</span> <span class="ow">in</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">:</span>
+            <span class="n">variable_params</span><span class="p">[</span><span class="n">robot_finger_link</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">variable_params</span><span class="p">[</span><span class="n">robot_finger_link</span><span class="p">][</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">pybullet</span><span class="o">.</span><span class="n">getVisualShapeData</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                            <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)</span>\
+                       <span class="p">[</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">VISUAL_SHAPE_IDS</span><span class="p">[</span><span class="n">robot_finger_link</span><span class="p">]][</span><span class="mi">7</span><span class="p">][:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">variable_params</span><span class="p">[</span><span class="n">robot_finger_link</span><span class="p">][</span><span class="s1">&#39;mass&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="n">pybullet</span><span class="o">.</span><span class="n">getDynamicsInfo</span><span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                         <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="n">robot_finger_link</span><span class="p">],</span>
+                                         <span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">variable_params</span>
+
+    <span class="k">def</span> <span class="nf">get_current_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">helper_keys</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">get_current_observations</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">,</span> <span class="n">helper_keys</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compute_end_effector_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">):</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">position_1</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">linkIndex</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+            <span class="p">)</span>
+            <span class="n">position_2</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">linkIndex</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+            <span class="p">)</span>
+            <span class="n">position_3</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">linkIndex</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">position_1</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">linkIndex</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+                <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+            <span class="p">)</span>
+            <span class="n">position_2</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">linkIndex</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+            <span class="p">)</span>
+            <span class="n">position_3</span> <span class="o">=</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getLinkState</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">linkIndex</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span>
+                <span class="n">computeForwardKinematics</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+            <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">position_1</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">position_2</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">position_3</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="n">result</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">-=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="n">result</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">FLOOR_HEIGHT</span>
+        <span class="c1"># tip_positions = self._pinocchio_utils.forward_kinematics(</span>
+        <span class="c1">#     joint_positions</span>
+        <span class="c1"># )</span>
+        <span class="c1"># result_2 = np.concatenate(tip_positions)</span>
+        <span class="c1"># result_2[2] -= WorldConstants.FLOOR_HEIGHT</span>
+        <span class="c1"># result_2[5] -= WorldConstants.FLOOR_HEIGHT</span>
+        <span class="c1"># result_2[-1] -= WorldConstants.FLOOR_HEIGHT</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_process_action_joint_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">robot_state</span><span class="p">):</span>
+        <span class="c1">#This returns the absolute joint positions command sent in position control mode</span>
+        <span class="c1"># (end effector and joint positions)</span>
+        <span class="c1">#this observation shouldnt be used in torque control</span>
+        <span class="n">last_joints_action_applied</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_last_applied_joint_positions</span><span class="p">()</span>
+        <span class="c1">#always denormalized by default</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_normalize_observations</span><span class="p">:</span>
+            <span class="n">last_joints_action_applied</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_observation_for_key</span><span class="p">(</span>
+                <span class="n">observation</span><span class="o">=</span><span class="n">last_joints_action_applied</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="s1">&#39;action_joint_positions&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">last_joints_action_applied</span>
+
+    <span class="k">def</span> <span class="nf">clear</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_clipped_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_full_state</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span><span class="p">[</span><span class="s1">&#39;positions&#39;</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">reset_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">joint_velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                    <span class="n">end_effector_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_latest_full_state</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+        <span class="k">if</span> <span class="n">end_effector_positions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_positions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_joint_positions_from_tip_positions</span><span class="p">(</span>
+                <span class="n">end_effector_positions</span><span class="p">,</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_rest_pose</span><span class="p">()[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="k">if</span> <span class="n">joint_positions</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_rest_pose</span><span class="p">()[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">joint_velocities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">joint_velocities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_set_finger_state</span><span class="p">(</span><span class="n">joint_positions</span><span class="p">,</span> <span class="n">joint_velocities</span><span class="p">)</span>
+        <span class="c1">#here the previous actions will all be zeros to avoid dealing with different action modes for now</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_last_clipped_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">!=</span> <span class="s2">&quot;joint_torques&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">joint_positions</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">sample_joint_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_strategy</span><span class="o">=</span><span class="s2">&quot;separated&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sampling_strategy</span> <span class="o">==</span> <span class="s2">&quot;uniform&quot;</span><span class="p">:</span>
+            <span class="c1">#TODO: need to check for collisions here and if its feasible or not</span>
+            <span class="n">positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span><span class="o">.</span>
+                                          <span class="n">joint_positions_lower_bounds</span><span class="p">,</span>
+                                          <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span><span class="o">.</span>
+                                          <span class="n">joint_positions_upper_bounds</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;not yet implemented&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">positions</span>
+
+    <span class="k">def</span> <span class="nf">sample_end_effector_positions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampling_strategy</span><span class="o">=</span><span class="s2">&quot;from_joints&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sampling_strategy</span> <span class="o">==</span> <span class="s2">&quot;middle_stage&quot;</span><span class="p">:</span>
+            <span class="n">tip_positions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span>
+                <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">],</span>
+                <span class="p">[</span><span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.15</span><span class="p">])</span>
+            <span class="c1"># TODO:add heuristics if the points are in the reachabe sets or not.</span>
+            <span class="c1">#red is 300, green is 60, blue is 180</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;not yet implemented&quot;</span><span class="p">)</span>
+            <span class="c1">#perform inverse kinemetics</span>
+            <span class="c1">#TODO:add heuristics if the points are in the reachabe sets or not.</span>
+        <span class="k">return</span> <span class="n">tip_positions</span>
+
+    <span class="k">def</span> <span class="nf">forward_simulation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="n">n_steps</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation_time</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
+                <span class="n">pybullet</span><span class="o">.</span><span class="n">stepSimulation</span><span class="p">(</span>
+                    <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+                <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n_steps</span><span class="p">):</span>
+                <span class="n">pybullet</span><span class="o">.</span><span class="n">stepSimulation</span><span class="p">(</span>
+                    <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+                <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">select_observations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_keys</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">reset_observation_keys</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">observation_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s2">&quot;action_joint_positions&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">add_observation</span><span class="p">(</span>
+                    <span class="s2">&quot;action_joint_positions&quot;</span><span class="p">,</span>
+                    <span class="n">observation_fn</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_process_action_joint_positions</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">add_observation</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">disconnect</span><span class="p">(</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span>
+            <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">add_observation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation_key</span><span class="p">,</span> <span class="n">lower_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                        <span class="n">upper_bound</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">observation_fn</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">add_observation</span><span class="p">(</span><span class="n">observation_key</span><span class="p">,</span>
+                                                 <span class="n">lower_bound</span><span class="p">,</span>
+                                                 <span class="n">upper_bound</span><span class="p">,</span>
+                                                 <span class="n">observation_fn</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">normalize_observation_for_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">normalize_observation_for_key</span><span class="p">(</span>
+            <span class="n">observation</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">denormalize_observation_for_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">observation</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_robot_observations</span><span class="o">.</span><span class="n">denormalize_observation_for_key</span><span class="p">(</span>
+            <span class="n">observation</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">apply_interventions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">):</span>
+        <span class="c1">#TODO: add friction of each link</span>
+        <span class="n">old_state</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_full_state</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;joint_positions&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="n">new_joint_positions</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_joint_positions</span> <span class="o">=</span> <span class="n">old_state</span><span class="p">[:</span><span class="mi">9</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;joint_velocities&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="n">new_joint_velcoities</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;joint_velocities&quot;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_joint_velcoities</span> <span class="o">=</span> <span class="n">old_state</span><span class="p">[</span><span class="mi">9</span><span class="p">:]</span>
+
+        <span class="k">if</span> <span class="s2">&quot;joint_positions&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span> <span class="ow">or</span> \
+                <span class="s2">&quot;joint_velocities&quot;</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_set_finger_state</span><span class="p">(</span><span class="n">new_joint_positions</span><span class="p">,</span> <span class="n">new_joint_velcoities</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_last_clipped_action</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_action_mode</span> <span class="o">!=</span> <span class="s2">&quot;joint_torques&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_last_applied_joint_positions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_joint_positions</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">intervention</span> <span class="ow">in</span> <span class="n">interventions_dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;joint_velocities&quot;</span> <span class="ow">or</span> \
+                    <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;joint_positions&quot;</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s1">&#39;robot_height&#39;</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">resetBasePositionAndOrientation</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span> <span class="o">-</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_HEIGHT</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">resetBasePositionAndOrientation</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span> <span class="o">-</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_HEIGHT</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span><span class="p">)</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">resetBasePositionAndOrientation</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>  <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span> <span class="o">-</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_HEIGHT</span><span class="p">],</span>
+                        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="s2">&quot;robot_finger&quot;</span> <span class="ow">in</span> <span class="n">intervention</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">sub_intervention_variable</span> <span class="ow">in</span> \
+                        <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="n">sub_intervention_variable</span> <span class="o">==</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">pybullet</span><span class="o">.</span><span class="n">changeVisualShape</span><span class="p">(</span>
+                                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span>
+                                <span class="n">rgbaColor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="n">sub_intervention_variable</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span>
+                                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">pybullet</span><span class="o">.</span><span class="n">changeVisualShape</span><span class="p">(</span>
+                                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span>
+                                <span class="n">rgbaColor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="n">sub_intervention_variable</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span>
+                                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">pybullet</span><span class="o">.</span><span class="n">changeVisualShape</span><span class="p">(</span>
+                                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span>
+                                <span class="n">rgbaColor</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                                    <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span>
+                                    <span class="p">[</span><span class="n">sub_intervention_variable</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span>
+                                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">sub_intervention_variable</span> <span class="o">==</span> <span class="s1">&#39;mass&#39;</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">pybullet</span><span class="o">.</span><span class="n">changeDynamics</span> \
+                                <span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                 <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span> <span class="n">mass</span><span class="o">=</span>
+                                 <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span>
+                                 <span class="p">[</span><span class="n">sub_intervention_variable</span><span class="p">],</span>
+                                 <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">pybullet</span><span class="o">.</span><span class="n">changeDynamics</span> \
+                                <span class="p">(</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                                 <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="n">intervention</span><span class="p">],</span> <span class="n">mass</span><span class="o">=</span>
+                                 <span class="n">interventions_dict</span><span class="p">[</span><span class="n">intervention</span><span class="p">]</span>
+                                 <span class="p">[</span><span class="n">sub_intervention_variable</span><span class="p">],</span>
+                                 <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span>
+                            <span class="s2">&quot;The intervention state variable specified is &quot;</span>
+                            <span class="s2">&quot;not allowed&quot;</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">intervention</span> <span class="o">==</span> <span class="s2">&quot;control_index&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span> <span class="o">=</span> <span class="n">interventions_dict</span><span class="p">[</span><span class="s2">&quot;control_index&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;The intervention state variable specified is &quot;</span>
+                                <span class="s2">&quot;not allowed&quot;</span><span class="p">,</span> <span class="n">intervention</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_full_state</span><span class="p">()</span>
+        <span class="k">return</span>
+
+<div class="viewcode-block" id="TriFingerRobot.check_feasibility_of_robot_state"><a class="viewcode-back" href="../../../../modules/envs/envs.html#causal_rl_bench.envs.TriFingerRobot.check_feasibility_of_robot_state">[docs]</a>    <span class="k">def</span> <span class="nf">check_feasibility_of_robot_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        This function checks the feasibility of the current state of the robot</span>
+<span class="sd">        (i.e checks if its in penetration with anything now</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ---------</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            feasibility_flag: bool</span>
+<span class="sd">                A boolean indicating whether the stage is in a collision state</span>
+<span class="sd">                or not.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">or</span>
+                <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">)</span> <span class="ow">and</span> \
+                    <span class="n">contact</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.005</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+    <span class="k">def</span> <span class="nf">is_self_colliding</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">and</span> \
+                    <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">is_colliding_with_stage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">)</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                     <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">STAGE_ID</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">is_in_contact_with_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">and</span>
+                <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">and</span>
+                     <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">def</span> <span class="nf">get_normal_interaction_force_with_block</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">,</span>
+                                                <span class="n">finger_tip_number</span><span class="p">):</span>
+        <span class="c1"># TODO: doesnt account for several contacts per body</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+        <span class="k">if</span> <span class="n">finger_tip_number</span> <span class="o">==</span> <span class="mi">60</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_60_link_3&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">finger_tip_number</span> <span class="o">==</span> <span class="mi">120</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_120_link_3&#39;</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">finger_tip_number</span> <span class="o">==</span> <span class="mi">300</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_300_link_3&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s2">&quot;finger tip number doesnt exist&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">and</span>
+                <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="ow">or</span> \
+                    <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span>
+                     <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">return</span> <span class="n">contact</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span>
+                    <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">idx</span><span class="p">)</span> <span class="ow">or</span>  \
+                        <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span>
+                         <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">block</span><span class="o">.</span><span class="n">_block_ids</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                     <span class="ow">and</span> <span class="n">contact</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">idx</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">contact</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">get_tip_contact_states</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1">#TODO: only support open and closed states (should support slipping too)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">client</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+        <span class="n">contact_tips</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="c1">#all are open</span>
+        <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">contact</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_60_link_3&#39;</span><span class="p">]:</span>
+                    <span class="n">contact_tips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">contact</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_120_link_3&#39;</span><span class="p">]:</span>
+                    <span class="n">contact_tips</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">contact</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_300_link_3&#39;</span><span class="p">]:</span>
+                    <span class="n">contact_tips</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">contact</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_60_link_3&#39;</span><span class="p">]:</span>
+                    <span class="n">contact_tips</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">contact</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_180_link_3&#39;</span><span class="p">]:</span>
+                    <span class="n">contact_tips</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+                <span class="k">elif</span> <span class="n">contact</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">LINK_IDS</span><span class="p">[</span><span class="s1">&#39;robot_finger_300_link_3&#39;</span><span class="p">]:</span>
+                    <span class="n">contact_tips</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">contact_tips</span>
+
+    <span class="k">def</span> <span class="nf">_disable_velocity_control</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        To disable the high friction velocity motors created by</span>
+<span class="sd">        default at all revolute and prismatic joints while loading them from</span>
+<span class="sd">        the urdf.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">setJointMotorControlArray</span><span class="p">(</span>
+                <span class="n">bodyUniqueId</span><span class="o">=</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                <span class="n">jointIndices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">,</span>
+                <span class="n">controlMode</span><span class="o">=</span><span class="n">pybullet</span><span class="o">.</span><span class="n">VELOCITY_CONTROL</span><span class="p">,</span>
+                <span class="n">targetVelocities</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">),</span>
+                <span class="n">forces</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">),</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">setJointMotorControlArray</span><span class="p">(</span>
+                <span class="n">bodyUniqueId</span><span class="o">=</span><span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span>
+                <span class="n">jointIndices</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">,</span>
+                <span class="n">controlMode</span><span class="o">=</span><span class="n">pybullet</span><span class="o">.</span><span class="n">VELOCITY_CONTROL</span><span class="p">,</span>
+                <span class="n">targetVelocities</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">),</span>
+                <span class="n">forces</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">),</span>
+                <span class="n">physicsClientId</span><span class="o">=</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_set_finger_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">,</span>
+                         <span class="n">joint_velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">joint_velocities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">joint_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">):</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">resetJointState</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">joint_id</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span> <span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">joint_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">):</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">resetJointState</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">joint_id</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">joint_velocities</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_full_id</span>
+                    <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">joint_velocities</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">joint_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">):</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">resetJointState</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">joint_id</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+                    <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">joint_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">):</span>
+                    <span class="n">pybullet</span><span class="o">.</span><span class="n">resetJointState</span><span class="p">(</span>
+                        <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">joint_id</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">joint_velocities</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                        <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_o_goal_id</span>
+                    <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_latest_full_state</span><span class="p">()</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">_set_finger_state_in_goal_image</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">joint_positions</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_robot_actions</span><span class="o">.</span><span class="n">joint_positions_lower_bounds</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">joint_id</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_revolute_joint_ids</span><span class="p">):</span>
+            <span class="n">pybullet</span><span class="o">.</span><span class="n">resetJointState</span><span class="p">(</span>
+                <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">,</span> <span class="n">joint_id</span><span class="p">,</span> <span class="n">joint_positions</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">physicsClientId</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_pybullet_client_w_goal_id</span>
+            <span class="p">)</span>
+        <span class="k">return</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Ossama Ahmed and Frederik Trauble
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
