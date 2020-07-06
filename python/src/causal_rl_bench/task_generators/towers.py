@@ -39,7 +39,7 @@ class TowersGeneratorTask(BaseTask):
         self.current_tower_dims = np.array(self._task_params["tower_dims"])
         self.current_number_of_blocks_in_tower = \
             np.array(self._task_params["number_of_blocks_in_tower"])
-        self.current_tool_block_mass = int(self._task_params["tool_block_mass"])
+        self.current_tool_block_mass = float(self._task_params["tool_block_mass"])
         self.current_tower_center = np.array(self._task_params["tower_center"])
 
     def get_description(self):
