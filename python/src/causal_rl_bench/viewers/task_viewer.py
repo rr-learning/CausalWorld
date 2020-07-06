@@ -70,7 +70,7 @@ def record_video_of_policy(task, world_params, policy_fn, file_name,
                            env_wrappers_args=np.array([])):
     #TODO: discuss the speed of the current render method since it takes a long time to render a frame
     actual_skip_frame = world_params["skip_frame"]
-    env = get_world(task.task_name,
+    env = get_world(task._task_name,
                     task.get_task_params(),
                     world_params,
                     enable_visualization=False,
