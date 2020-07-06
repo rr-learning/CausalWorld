@@ -17,7 +17,7 @@ or used in a catkin workspace.
   ```bash
   git clone https://github.com/rr-learning/CausalRLBench
   cd CausalRLBench
-  conda env create -f environment.yml
+  conda env create -f environment.yml OR conda env update --prefix ./env --file environment.yml  --prune
   ```
 
 2. Install the causal_rl_bench package inside the (causal_rl_bench) conda env.

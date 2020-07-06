@@ -16,7 +16,6 @@ class TriFingerRobot(object):
                  pybullet_client_w_o_goal_id,
                  revolute_joint_ids,
                  finger_tip_ids,
-                 pinocchio_utils,
                  cameras=None,
                  camera_indicies=np.array([0, 1, 2])):
         """
@@ -43,7 +42,6 @@ class TriFingerRobot(object):
         self._skip_frame = skip_frame
         self._simulation_time = simulation_time
         self._dt = self._simulation_time * self._skip_frame
-        self._pinocchio_utils = pinocchio_utils
         #TODO: for some reason this is needed
         self._control_index = -1
         self._position_gains = np.array(

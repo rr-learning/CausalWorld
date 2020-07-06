@@ -11,7 +11,6 @@ from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.robot.camera import Camera
 from causal_rl_bench.configs.world_constants import WorldConstants
 import copy
-from causal_rl_bench.envs.robot.pinocchio_utils import PinocchioUtils
 
 
 class CausalWorld(gym.Env):
@@ -62,7 +61,6 @@ class CausalWorld(gym.Env):
             self._robot_properties_path, "urdf", "trifinger.urdf"
         )
         self._create_world(initialize_goal_image=True)
-        self._pinocchio_utils = PinocchioUtils(self._finger_urdf_path)
         self._tool_cameras = None
         self._goal_cameras = None
         if observation_mode == 'cameras':
@@ -115,7 +113,6 @@ class CausalWorld(gym.Env):
                                      self._revolute_joint_ids,
                                      finger_tip_ids=self.finger_tip_ids,
                                      cameras=self._tool_cameras,
-                                     pinocchio_utils=self._pinocchio_utils,
                                      camera_indicies=self._camera_indicies)
         self._stage = Stage(observation_mode=observation_mode,
                             normalize_observations=normalize_observations,
@@ -157,6 +154,14 @@ class CausalWorld(gym.Env):
         self._disabled_actions = False
         #TODO: I am not sure if this reset is necassary, TO BE CONFIRMED
         # self.reset()
+        return
+
+    def expose_potential_partial_solution(self):
+        self._task.expose_potential_partial_solution()
+        return
+
+    def add_ground_truth_state_to_info(self):
+        self._task.add_ground_truth_state_to_info()
         return
 
     def are_actions_normalized(self):

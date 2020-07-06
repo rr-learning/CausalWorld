@@ -1,0 +1,48 @@
+from rlpyt.samplers.serial.sampler import SerialSampler
+from rlpyt.samplers.parallel.cpu.sampler import CpuSampler
+from rlpyt.envs.gym import make as gym_make
+from rlpyt.algos.qpg.sac import SAC
+from rlpyt.agents.qpg.sac_agent import SacAgent
+from rlpyt.runners.minibatch_rl import MinibatchRl
+from rlpyt.utils.logging.context import logger_context
+from causal_rl_bench.task_generators.task import task_generator
+from causal_rl_bench.envs.causalworld import CausalWorld
+from rlpyt.envs.gym import GymEnvWrapper
+
+
+def _make_env(rank):
+    task = task_generator(task_generator_id='reaching')
+    env = CausalWorld(task=task, skip_frame=10,
+                      enable_visualization=False,
+                      seed=0 + rank, max_episode_length=600)
+    env = GymEnvWrapper(env)
+    return env
+
+
+def build_and_train():
+    affinity = dict(cuda_idx=None, workers_cpus=list(range(15)))
+    sampler = CpuSampler(
+        EnvCls=_make_env,
+        env_kwargs=dict(rank=0),
+        batch_T=100,
+        batch_B=20,  # 20 parallel environments.
+    )
+    algo = SAC(bootstrap_timelimit=False)  # Run with defaults.
+    agent = SacAgent()
+    runner = MinibatchRl(
+        algo=algo,
+        agent=agent,
+        sampler=sampler,
+        n_steps=50e6,
+        log_interval_steps=20,
+        affinity=affinity,
+    )
+    config = dict(env_id='reaching')
+    name = "sac_reaching"
+    log_dir = "example_2"
+    with logger_context(log_dir, 0, name, config):
+        runner.train()
+
+
+if __name__ == "__main__":
+    build_and_train()
