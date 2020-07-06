@@ -715,7 +715,7 @@ class TriFingerRobot(object):
         for contact in pybullet.getContactPoints(physicsClientId=client):
             if (contact[1] == WorldConstants.ROBOT_ID or
                 contact[2] == WorldConstants.ROBOT_ID) and \
-                    contact[8] < -0.005:
+                    contact[8] < -0.0095:
                 return False
         return True
 
