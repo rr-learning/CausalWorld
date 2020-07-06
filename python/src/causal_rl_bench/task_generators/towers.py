@@ -321,7 +321,13 @@ class TowersGeneratorTask(BaseTask):
         rewards.append(- np.linalg.norm(
             joint_velocities - self.previous_joint_velocities))
 
-        update_task_info = {'current_end_effector_positions': end_effector_positions}
+        update_task_info = {'current_end_effector_positions': end_effector_positions,
+                            'current_velocity': joint_velocities,
+                            'current_tool_level_0_col_0_row_0_position': block_level_0_position,
+                            'current_tool_level_0_col_0_row_0_orientation': block_level_0_orientation,
+                            'current_tool_level_1_col_0_row_0_position': block_level_1_position,
+                            'current_tool_level_1_col_0_row_0_orientation': block_level_1_orientation
+                            }
         return rewards, update_task_info
 
     def _set_task_state(self):
@@ -344,3 +350,23 @@ class TowersGeneratorTask(BaseTask):
                                                                             'cartesian_position')
         self.previous_block_level_1_orientation = self._stage.get_object_state('tool_level_1_col_0_row_0',
                                                                                'orientation')
+
+    def _update_task_state(self, update_task_info):
+        """
+
+        :param update_task_info:
+        :return:
+        """
+        self.previous_end_effector_positions = \
+            update_task_info['current_end_effector_positions']
+        self.previous_tool_level_0_col_0_row_0_position = \
+            update_task_info['current_tool_level_0_col_0_row_0_position']
+        self.previous_tool_level_1_col_0_row_0_position = \
+            update_task_info['current_tool_level_1_col_0_row_0_position']
+        self.previous_tool_level_0_col_0_row_0_orientation = \
+            update_task_info['current_tool_level_0_col_0_row_0_orientation']
+        self.previous_tool_level_1_col_0_row_0_orientation = \
+            update_task_info['current_tool_level_1_col_0_row_0_orientation']
+        self.previous_joint_velocities = \
+            update_task_info['current_velocity']
+        return

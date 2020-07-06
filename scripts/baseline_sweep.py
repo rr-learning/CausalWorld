@@ -26,7 +26,7 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
 from stable_baselines.ddpg.noise import NormalActionNoise
 
 world_seed = 0
-num_of_envs = 20
+num_of_envs = 2
 
 NUM_RANDOM_SEEDS = 2
 NET_LAYERS = [256, 256]
