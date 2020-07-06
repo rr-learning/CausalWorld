@@ -5,6 +5,7 @@ from causal_rl_bench.task_generators.task import task_generator
 def privileged_information():
     task = task_generator(task_generator_id='pushing')
     env = CausalWorld(task=task, enable_visualization=True)
+    env.expose_potential_partial_solution()
     env.reset()
     for _ in range(10):
         goal_intervention_dict = env.sample_new_goal()

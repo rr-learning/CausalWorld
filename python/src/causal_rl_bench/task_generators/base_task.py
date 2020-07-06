@@ -53,6 +53,8 @@ class BaseTask(object):
         self._current_goal_distance = None
         self._max_episode_length = None
         self._create_world_func = None
+        self._is_partial_solution_exposed = False
+        self._is_ground_truth_state_exposed = False
         return
 
     def _save_pybullet_state(self):
@@ -221,20 +223,30 @@ class BaseTask(object):
         info['desired_goal'] = self._current_desired_goal
         info['achieved_goal'] = self._current_achieved_goal
         info['success'] = self._task_solved
-        info['possible_solution_intervention'] = dict()
-        for rigid_object in self._stage._rigid_objects:
-            #check if there is an equivilant visual object corresponding
-            possible_corresponding_goal = rigid_object.replace('tool', 'goal')
-            if possible_corresponding_goal in self._stage.get_visual_objects():
-                info['possible_solution_intervention'][rigid_object] = dict()
-                info['possible_solution_intervention'][rigid_object]['cartesian_position'] = \
-                    self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
-                info['possible_solution_intervention'][rigid_object]['orientation'] = \
-                    self._stage.get_object_state(possible_corresponding_goal, 'orientation')
-        info['ground_truth_current_state_varibales'] = \
-            self.get_current_scm_values()
+        if self._is_ground_truth_state_exposed:
+            info['ground_truth_current_state_varibales'] = \
+                self.get_current_scm_values()
+        if self._is_partial_solution_exposed:
+            info['possible_solution_intervention'] = dict()
+            for rigid_object in self._stage._rigid_objects:
+                #check if there is an equivilant visual object corresponding
+                possible_corresponding_goal = rigid_object.replace('tool', 'goal')
+                if possible_corresponding_goal in self._stage.get_visual_objects():
+                    info['possible_solution_intervention'][rigid_object] = dict()
+                    info['possible_solution_intervention'][rigid_object]['cartesian_position'] = \
+                        self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
+                    info['possible_solution_intervention'][rigid_object]['orientation'] = \
+                        self._stage.get_object_state(possible_corresponding_goal, 'orientation')
         info['fractional_success'] = self._current_goal_distance
         return info
+
+    def expose_potential_partial_solution(self):
+        self._is_partial_solution_exposed = True
+        return
+
+    def add_ground_truth_state_to_info(self):
+        self._is_ground_truth_state_exposed = True
+        return
 
     def _update_task_state(self, update_task_state_dict):
         """
