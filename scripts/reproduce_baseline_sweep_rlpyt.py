@@ -29,9 +29,9 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
     TOWER_2_BENCHMARK
 
 world_seed = 0
-num_of_envs = 2
+num_of_envs = 20
 
-NUM_RANDOM_SEEDS = 2
+NUM_RANDOM_SEEDS = 20
 NET_LAYERS = [256, 256]
 
 
@@ -126,7 +126,7 @@ def train_model_num(model_settings, output_path):
         EnvCls=_make_env,
         env_kwargs=dict(rank=0, model_settings=model_settings),
         batch_T=6000,
-        batch_B=2,  # 20 parallel environments.
+        batch_B=len(cpus),  # 20 parallel environments.
     )
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
     if model_settings['algorithm'] == 'PPO':
