@@ -74,7 +74,3 @@ or used in a catkin workspace.
             obs, reward, done, info = env.step(env.action_space.sample())
     env.close()
   ```
-  
-git clone https://github.com/vitchyr/rlkit.git
-cd rlkit 
-pip install -e .
