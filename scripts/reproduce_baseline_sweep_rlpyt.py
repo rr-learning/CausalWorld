@@ -16,6 +16,8 @@ import argparse
 import torch
 import os
 import json
+from rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
+import numpy as np
 from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 import causal_rl_bench.evaluation.visualization.visualiser as vis
 from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
@@ -103,21 +105,22 @@ def _make_env(rank, model_settings):
     env = CurriculumWrapper(env,
                             intervention_actors=model_settings["intervention_actors"],
                             actives=model_settings["actives"])
+    env.save_world(output_path)
     env = GymEnvWrapper(env)
     return env
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = int(3000000)
-    validate_every_timesteps = int(500000)
     utils_rlpyt.seed.set_seed(model_settings['seed'])
-
-    affinity = dict(cuda_idx=None, workers_cpus=list(range(15)))
+    env = _make_env(0, model_settings)
+    env.save_world(output_path)
+    env.close()
+    affinity = dict(cuda_idx=None, workers_cpus=list(range(20)))
     sampler = CpuSampler(
         EnvCls=_make_env,
         env_kwargs=dict(rank=0, model_settings=model_settings),
-        batch_T=1000,
-        batch_B=2,  # 20 parallel environments.
+        batch_T=6000,
+        batch_B=20,  # 20 parallel environments.
     )
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
     if model_settings['algorithm'] == 'PPO':
@@ -157,8 +160,8 @@ def train_model_num(model_settings, output_path):
         algo=algo,
         agent=agent,
         sampler=sampler,
-        n_steps=6e3,
-        log_interval_steps=600,
+        n_steps=int(40e6),
+        log_interval_steps=int(1e4),
         affinity=affinity,
     )
     config = dict(rank=0, model_settings=model_settings)
@@ -166,8 +169,8 @@ def train_model_num(model_settings, output_path):
     log_dir = os.path.join(os.path.dirname(__file__), '..', '..', output_path)
     with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='gap'):
         runner.train()
-
-    return agent
+    n_itr = runner.get_n_itr()
+    return agent, n_itr
 
 
 if __name__ == '__main__':
@@ -186,12 +189,26 @@ if __name__ == '__main__':
 
     model_settings = baseline_model(model_num)
 
-    agent = train_model_num(model_settings, output_path)
+    agent, n_itr = train_model_num(model_settings, output_path)
+    agent.eval_mode(n_itr)
+    agent.reset()
 
     # define a method for the policy fn of your trained model
-    def policy_fn(obs):
-        obs_torch = torch.from_numpy(obs)
-        return agent.step(observation=obs_torch, prev_action=torch.zeros(9), prev_reward=0).action.numpy()
+
+    def policy_fn(obs, prev_action=None, prev_reward=None):
+        if prev_reward is None:
+            prev_reward = np.zeros(1, dtype="float32")
+        else:
+            prev_reward = np.array([prev_reward], dtype="float32")
+        if prev_action is None:
+            prev_action = buffer_from_example(np.zeros(9, dtype="float32"), 1)
+        else:
+            prev_action = prev_action.astype('float32')
+        obs = obs.astype('float32')
+        obs_pyt, act_pyt, rew_pyt = torchify_buffer((obs, prev_action, prev_reward))
+        act_pyt, agent_info = agent.step(obs_pyt, act_pyt, rew_pyt)
+        action = numpify_buffer(act_pyt)
+        return action
 
 
     animation_path = os.path.join(output_path, 'animation')
