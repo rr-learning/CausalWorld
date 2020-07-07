@@ -34,7 +34,7 @@ class StackedBlocksGeneratorTask(BaseTask):
         self._task_params["blocks_min_size"] = \
             kwargs.get("blocks_min_size", 0.035)
         self._task_params["num_of_levels"] = \
-            kwargs.get("num_of_levels", 8)
+            kwargs.get("num_of_levels", 3)
         self._task_params["max_level_width"] = \
             kwargs.get("max_level_width", 0.12)
         self.current_stack_levels = self._task_params["num_of_levels"]
