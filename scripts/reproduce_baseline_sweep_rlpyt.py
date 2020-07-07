@@ -9,6 +9,7 @@ from rlpyt.runners.minibatch_rl import MinibatchRl
 from rlpyt.utils.logging.context import logger_context
 from rlpyt.envs.gym import GymEnvWrapper
 from rlpyt import utils as utils_rlpyt
+from rlpyt.models.pg.mujoco_ff_model import MujocoFfModel
 from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 import causal_rl_bench.viewers.task_viewer as viewer
@@ -31,7 +32,7 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
 world_seed = 0
 num_of_envs = 20
 
-NUM_RANDOM_SEEDS = 20
+NUM_RANDOM_SEEDS = 2
 NET_LAYERS = [256, 256]
 
 
@@ -114,8 +115,12 @@ def train_model_num(model_settings, output_path):
     utils_rlpyt.seed.set_seed(model_settings['seed'])
     env = _make_env(0, model_settings)
     env.save_world(output_path)
+    observation_shape = env.spaces.observation.shape
+    output_size = env.spaces.action.shape[0]
     env.close()
-    cpus = psutil.Process.cpu_affinity()  # should return a list or a tuple
+    p = psutil.Process()
+    cpus = p.cpu_affinity()  # should return a list or a tuple
+    # cpus = [[1]]
     affinity = dict(
         cuda_idx=None,  # whichever one you have
         master_cpus=cpus,
@@ -138,7 +143,10 @@ def train_model_num(model_settings, output_path):
                       "minibatches": 40,
                       "epochs": 4}
         algo = PPO(**ppo_config)
-        agent = GaussianPgAgent(**model_kwargs)
+        model_kwargs['model_kwargs'].update({'observation_shape': observation_shape})
+        model_kwargs['model_kwargs'].update({'action_size': output_size})
+        agent = GaussianPgAgent(ModelCls=MujocoFfModel, **model_kwargs)
+        name = "ppo"
     elif model_settings['algorithm'] == 'SAC':
         sac_config = {"discount": 0.98,
                       "batch_size": 256,
@@ -149,6 +157,7 @@ def train_model_num(model_settings, output_path):
                       "target_entropy": -9}
         algo = SAC(**sac_config, bootstrap_timelimit=False)
         agent = SacAgent(**model_kwargs)
+        name = "sac"
     elif model_settings['algorithm'] == 'TD3':
         td3_config = {"discount": 0.98,
                       "batch_size": 256,
@@ -158,6 +167,7 @@ def train_model_num(model_settings, output_path):
                       "learning_rate": 0.00025}
         algo = TD3(**td3_config, bootstrap_timelimit=False)
         agent = Td3Agent( **model_kwargs,)
+        name = "td3"
     else:
         algo = SAC(bootstrap_timelimit=False)
         agent = SacAgent()
@@ -171,7 +181,6 @@ def train_model_num(model_settings, output_path):
         affinity=affinity,
     )
     config = dict(rank=0, model_settings=model_settings)
-    name = "sac"
     log_dir = os.path.join(os.path.dirname(__file__), '..', '..', output_path)
     with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='gap'):
         runner.train()
