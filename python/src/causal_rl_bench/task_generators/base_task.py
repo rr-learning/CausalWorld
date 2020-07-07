@@ -10,7 +10,8 @@ import pybullet
 class BaseTask(object):
     def __init__(self, task_name, use_train_space_only,
                  fractional_reward_weight=1,
-                 dense_reward_weights=np.array([])):
+                 dense_reward_weights=np.array([]),
+                 activate_sparse_reward=False):
         """
 
         :param task_name:
@@ -38,7 +39,7 @@ class BaseTask(object):
         self._task_params["task_name"] = self._task_name
         self._task_params["fractional_reward_weight"] = fractional_reward_weight
         self._task_params["dense_reward_weights"] = dense_reward_weights
-        self._task_params['activate_sparse_reward'] = False
+        self._task_params['activate_sparse_reward'] = activate_sparse_reward
         self._training_intervention_spaces = dict()
         self._testing_intervention_spaces = dict()
         self._task_params['use_train_space_only'] = use_train_space_only
@@ -954,3 +955,6 @@ class BaseTask(object):
         else:
             episode_length = len(self._stage.get_rigid_objects()) * 10
         return episode_length
+
+    def get_task_name(self):
+        return self._task_name

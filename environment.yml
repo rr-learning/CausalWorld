@@ -18,3 +18,4 @@ dependencies:
   - mpi4py
   - psutil
   - pyprind
+  - torch==1.2.0
