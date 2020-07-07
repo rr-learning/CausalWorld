@@ -19,25 +19,33 @@ from rlkit.samplers.data_collector import MdpPathCollector
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 from causal_rl_bench.intervention_actors.goal_actor import GoalInterventionActorPolicy
 import os
+import numpy as np
 
 
 def experiment(variant):
     # unwrap the TimeLimitEnv wrapper since we manually termiante after 50 steps
-    task = task_generator(task_generator_id='reaching')
-    eval_env = CausalWorld(task=task, skip_frame=1,
+    task = task_generator(task_generator_id='picking',
+                          dense_reward_weights=np.array([250, 0, 125,
+                                                         0, 750, 0, 0,
+                                                         0.005]),
+                          fractional_reward_weight=1,
+                          goal_height=0.15,
+                          tool_block_mass=0.02)
+    eval_env = CausalWorld(task=task, skip_frame=3,
                            enable_visualization=False,
-                           seed=0, max_episode_length=1250)
-    eval_env = CurriculumWrapper(eval_env,
-                            intervention_actors=[GoalInterventionActorPolicy()],
-                            actives=[(0, 1000000000, 1, 0)])
+                           seed=0, max_episode_length=600)
     # eval_env = HERGoalEnvWrapper(eval_env)
-    task = task_generator(task_generator_id='reaching')
-    expl_env = CausalWorld(task=task, skip_frame=1,
+    task = task_generator(task_generator_id='picking',
+                          dense_reward_weights=np.array([250, 0, 125,
+                                                         0, 750, 0, 0,
+                                                         0.005]),
+                          fractional_reward_weight=1,
+                          goal_height=0.15,
+                          tool_block_mass=0.02
+                          )
+    expl_env = CausalWorld(task=task, skip_frame=3,
                            enable_visualization=False,
-                           seed=0, max_episode_length=1250)
-    expl_env = CurriculumWrapper(expl_env,
-                                 intervention_actors=[GoalInterventionActorPolicy()],
-                                 actives=[(0, 1000000000, 1, 0)])
+                           seed=0, max_episode_length=600)
     # expl_env = HERGoalEnvWrapper(expl_env)
     # observation_key = 'observation'
     # desired_goal_key = 'desired_goal'
@@ -142,11 +150,11 @@ if __name__ == "__main__":
         algo_kwargs=dict(
             batch_size=256,
             num_epochs=3000,
-            num_eval_steps_per_epoch=1250,
-            num_expl_steps_per_train_loop=50000,
-            num_trains_per_train_loop=1000,
+            num_eval_steps_per_epoch=600,
+            num_expl_steps_per_train_loop=1200,
+            num_trains_per_train_loop=1200,
             min_num_steps_before_training=1000,
-            max_path_length=1250,
+            max_path_length=600,
         ),
         sac_trainer_kwargs=dict(
             discount=0.98,
@@ -170,5 +178,7 @@ if __name__ == "__main__":
             hidden_sizes=[256, 128],
         ),
     )
-    setup_logger('her-sac-fetch-experiment', base_log_dir=os.path.dirname(__file__), variant=variant)
+    setup_logger('sac-picking-experiment',
+                 base_log_dir=os.path.dirname(__file__),
+                 variant=variant)
     experiment(variant)
