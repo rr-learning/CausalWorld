@@ -55,8 +55,8 @@ if __name__ == '__main__':
     number_of_time_steps_per_iteration = 120000
     num_of_envs = 20
     log_relative_path = 'baseline_reaching_ppo'
-    maximum_episode_length = 600
-    skip_frame = 3
+    maximum_episode_length = 1000
+    skip_frame = 1
     seed_num = 0
     task_name = 'reaching'
     ppo_config = {"gamma": 0.99,
