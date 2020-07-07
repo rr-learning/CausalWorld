@@ -16,13 +16,13 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                           dense_reward_weights=np.array([250, 0, 125,
                                                          0, 750, 0, 0,
                                                          0.005]),
-                          fractional_reward_weight=0,
+                          fractional_reward_weight=1,
                           goal_height=0.15,
                           tool_block_mass=0.02)
     env = CausalWorld(task=task, skip_frame=skip_frame,
                       enable_visualization=False,
                       seed=seed_num, max_episode_length=
-                maximum_episode_length)
+                      maximum_episode_length)
     set_global_seeds(seed_num)
     policy_kwargs = dict(layers=[256, 128])
     checkpoint_callback = CheckpointCallback(

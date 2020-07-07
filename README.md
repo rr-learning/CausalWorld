@@ -38,6 +38,28 @@ or used in a catkin workspace.
   ```bash
   (causal_rl_bench) python -m unittest discover tests/causal_rl_bench/
   ```
+  
+5. Install other packages for rlkit (optional)
+
+  ```bash
+  (causal_rl_bench) cd ..
+  (causal_rl_bench) git clone https://github.com/vitchyr/rlkit.git
+  (causal_rl_bench) cd rlkit 
+  (causal_rl_bench) pip install -e .
+  (causal_rl_bench) pip install torch==1.2.0
+  (causal_rl_bench) pip install gtimer
+  ```
+
+6. Install other packages for viskit (optional)
+  ```bash
+  (causal_rl_bench) cd ..
+  (causal_rl_bench) git clone https://github.com/vitchyr/viskit.git
+  (causal_rl_bench) cd viskit 
+  (causal_rl_bench) pip install -e .
+  (causal_rl_bench) python viskit/frontend.py path/to/dir/exp*
+  ```
+  
+7. Install other packages for rlpyt (optional)
 
 ## Try out the package
 
@@ -53,3 +75,6 @@ or used in a catkin workspace.
     env.close()
   ```
   
+git clone https://github.com/vitchyr/rlkit.git
+cd rlkit 
+pip install -e .

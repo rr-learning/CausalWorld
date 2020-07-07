@@ -20,7 +20,7 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         if env.is_in_training_mode():
             self.task_intervention_space = \
-                env._task.get_testing_intervention_spaces()
+                env._task.get_training_intervention_spaces()
         else:
             self.task_intervention_space = \
                 env._task.get_training_intervention_spaces()
