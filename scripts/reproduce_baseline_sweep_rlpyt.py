@@ -13,7 +13,7 @@ from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 import causal_rl_bench.viewers.task_viewer as viewer
 import argparse
-import torch
+import psutil
 import os
 import json
 from rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
@@ -115,12 +115,18 @@ def train_model_num(model_settings, output_path):
     env = _make_env(0, model_settings)
     env.save_world(output_path)
     env.close()
-    affinity = dict(cuda_idx=None, workers_cpus=list(range(20)))
+    cpus = psutil.Process.cpu_affinity()  # should return a list or a tuple
+    affinity = dict(
+        cuda_idx=None,  # whichever one you have
+        master_cpus=cpus,
+        workers_cpus=list([x] for x in cpus),  # If just one cpu per worker
+        set_affinity=True,  # can set to False if you want to turn off rlpyt assigning the psutil cpu_affinity
+    )
     sampler = CpuSampler(
         EnvCls=_make_env,
         env_kwargs=dict(rank=0, model_settings=model_settings),
         batch_T=6000,
-        batch_B=20,  # 20 parallel environments.
+        batch_B=2,  # 20 parallel environments.
     )
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
     if model_settings['algorithm'] == 'PPO':
