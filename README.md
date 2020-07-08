@@ -68,6 +68,11 @@ or used in a catkin workspace.
   (causal_rl_bench) pip install pyprind
   ```
 
+8. Install other packages for stable baselines (optional)
+ ```bash
+  (causal_rl_bench) pip install stable-baselines==2.10.0
+  (causal_rl_bench) pip install tensorflow==1.14.0
+  ```
 
 ## Try out the package
 
