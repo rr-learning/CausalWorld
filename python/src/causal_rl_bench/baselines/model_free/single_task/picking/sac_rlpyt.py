@@ -1,11 +1,14 @@
 from rlpyt.samplers.parallel.cpu.sampler import CpuSampler
+from rlpyt.samplers.async_.cpu_sampler import AsyncCpuSampler
+from rlpyt.samplers.async_.collectors import DbCpuResetCollector
 from rlpyt.algos.qpg.sac import SAC
 from rlpyt.agents.qpg.sac_agent import SacAgent
-from rlpyt.runners.minibatch_rl import MinibatchRl
+from rlpyt.runners.async_rl import AsyncRlEval
 from rlpyt.utils.logging.context import logger_context
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.causalworld import CausalWorld
 from rlpyt.envs.gym import GymEnvWrapper
+from rlpyt.utils.launching.affinity import encode_affinity
 import os
 import numpy as np
 from rlpyt import utils as utils_rlpyt
@@ -30,16 +33,20 @@ def _make_env(rank):
 def build_and_train():
     p = psutil.Process()
     cpus = p.cpu_affinity()
-    affinity = dict(cuda_idx=None,
-                    master_cpus=cpus,
-                    workers_cpus=list([x] for x in cpus),
-                    set_affinity=True)
-    sampler = CpuSampler(
+    affinity_code = encode_affinity(n_cpu_core=4,
+                                    n_gpu=0,
+                                    async_sample=True)
+    # affinity = dict(cuda_idx=None,
+    #                 master_cpus=cpus,
+    #                 workers_cpus=list([x] for x in cpus),
+    #                 set_affinity=True)
+    sampler = AsyncCpuSampler(
         EnvCls=_make_env,
         env_kwargs=dict(rank=0),
-        batch_T=1,
-        batch_B=1,
-        max_decorrelation_steps=0
+        batch_T=30,
+        batch_B=100,
+        max_decorrelation_steps=0,
+        CollectorCls=DbCpuResetCollector
     )
     algo = SAC(batch_size=256,
                min_steps_learn=10000,
@@ -57,13 +64,13 @@ def build_and_train():
                updates_per_sync=1,
                bootstrap_timelimit=False)  # Run with defaults.
     agent = SacAgent(model_kwargs={'hidden_sizes': [256, 256]})
-    runner = MinibatchRl(
+    runner = AsyncRlEval(
         algo=algo,
         agent=agent,
         sampler=sampler,
         n_steps=50e6,
         log_interval_steps=10000,
-        affinity=affinity,
+        affinity=affinity_code,
     )
     config = dict(env_id='picking')
     name = "sac_picking"
