@@ -195,12 +195,12 @@ def train_model_num(model_settings, output_path):
         agent=agent,
         sampler=sampler,
         n_steps=int(40e6),
-        log_interval_steps=int(1e4),
+        log_interval_steps=int(1e6),
         affinity=affinity,
     )
     config = dict(rank=0, model_settings=model_settings)
     log_dir = os.path.join(os.path.dirname(__file__), '..', '..', output_path)
-    with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='gap'):
+    with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='all'):
         runner.train()
     n_itr = runner.get_n_itr()
     return agent, n_itr
