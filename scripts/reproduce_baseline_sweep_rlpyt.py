@@ -141,6 +141,8 @@ def train_model_num(model_settings, output_path):
                       "value_loss_coeff": 0.5,
                       "clip_grad_norm": 0.5,
                       "minibatches": 40,
+                      "gae_lambda": 0.95,
+                      "ratio_clip": 0.2,
                       "epochs": 4}
         algo = PPO(**ppo_config)
         model_kwargs['model_kwargs'].update({'observation_shape': observation_shape})
