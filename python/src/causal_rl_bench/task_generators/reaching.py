@@ -10,11 +10,13 @@ class ReachingTaskGenerator(BaseTask):
                  default_goal_60= np.array([0, 0, 0.10]),
                  default_goal_120= np.array([0, 0, 0.13]),
                  default_goal_300= np.array([0, 0, 0.16]),
-                 joint_positions=None):
+                 joint_positions=None,
+                 activate_sparse_reward=False):
         super().__init__(task_name="reaching",
                          use_train_space_only=use_train_space_only,
                          fractional_reward_weight=fractional_reward_weight,
-                         dense_reward_weights=dense_reward_weights)
+                         dense_reward_weights=dense_reward_weights,
+                         activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
                                              "joint_positions",
                                              "joint_velocities",
