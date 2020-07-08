@@ -60,6 +60,14 @@ or used in a catkin workspace.
   ```
   
 7. Install other packages for rlpyt (optional)
+ ```bash
+  (causal_rl_bench) cd ..
+  (causal_rl_bench) git clone https://github.com/astooke/rlpyt.git
+  (causal_rl_bench) cd rlpyt 
+  (causal_rl_bench) pip install -e .
+  (causal_rl_bench) pip install pyprind
+  ```
+
 
 ## Try out the package
 

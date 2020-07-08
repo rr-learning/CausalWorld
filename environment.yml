@@ -17,4 +17,3 @@ dependencies:
   - pytest
   - mpi4py
   - psutil
-  - pyprind
