@@ -455,7 +455,7 @@ class BaseTask(object):
         # intersection areas / union of all visual_objects
         #reshape the tensors if they are flattened with HER
         achieved_goal = np.reshape(achieved_goal, [-1, 2, 3])
-        desired_goal = np.reshape(achieved_goal, [-1, 2, 3])
+        desired_goal = np.reshape(desired_goal, [-1, 2, 3])
         intersection_area = 0
         #TODO: under the assumption that the visual objects dont intersect
         #TODO: deal with structured data for silhouettes
