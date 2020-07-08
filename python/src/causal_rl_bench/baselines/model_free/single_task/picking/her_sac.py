@@ -20,7 +20,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                           dense_reward_weights=np.array([250, 0, 125,
                                                          0, 750, 0, 0,
                                                          0.005]),
-                          fractional_reward_weight=0,
+                          fractional_reward_weight=1,
                           goal_height=0.15,
                           tool_block_mass=0.02)
     env = CausalWorld(task=task, skip_frame=skip_frame,
@@ -34,7 +34,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
         save_path=log_relative_path,
         name_prefix='model')
     model = HER(MlpPolicy, env, SAC,
-                verbose=1, policy_kwargs=dict(layers=[256, 256, 256]),
+                verbose=1, policy_kwargs=dict(layers=[256, 256]),
                 **her_config, seed=seed_num)
     model.learn(total_timesteps=total_time_steps,
                 tb_log_name="her_sac",

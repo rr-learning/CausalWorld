@@ -24,7 +24,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                       seed=seed_num, max_episode_length=
                       maximum_episode_length)
     set_global_seeds(seed_num)
-    policy_kwargs = dict(layers=[256, 128])
+    policy_kwargs = dict(layers=[256, 256])
     checkpoint_callback = CheckpointCallback(
         save_freq=int(validate_every_timesteps/num_of_envs),
         save_path=log_relative_path,

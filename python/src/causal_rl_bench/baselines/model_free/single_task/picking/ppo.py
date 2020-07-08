@@ -32,7 +32,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
         set_global_seeds(seed_num)
         return _init
 
-    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
+    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
     env = SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
     checkpoint_callback = CheckpointCallback(
         save_freq=int(validate_every_timesteps/num_of_envs),

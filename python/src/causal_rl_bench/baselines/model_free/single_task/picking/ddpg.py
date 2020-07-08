@@ -21,7 +21,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                           dense_reward_weights=np.array([250, 0, 125,
                                                          0, 750, 0, 0,
                                                          0.005]),
-                          fractional_reward_weight=0,
+                          fractional_reward_weight=1,
                           goal_height=0.15,
                           tool_block_mass=0.02)
     env = CausalWorld(task=task, skip_frame=skip_frame,
@@ -33,7 +33,7 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
     n_actions = env.action_space.shape[-1]
     param_noise = None
     action_noise = OrnsteinUhlenbeckActionNoise(mean=np.zeros(n_actions), sigma=float(0.5) * np.ones(n_actions))
-    policy_kwargs = dict(layers=[256, 128])
+    policy_kwargs = dict(layers=[256, 256])
     checkpoint_callback = CheckpointCallback(
         save_freq=int(validate_every_timesteps/num_of_envs),
         save_path=log_relative_path,
