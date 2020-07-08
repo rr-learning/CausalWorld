@@ -10,6 +10,8 @@ from rlpyt.utils.logging.context import logger_context
 from rlpyt.envs.gym import GymEnvWrapper
 from rlpyt import utils as utils_rlpyt
 from rlpyt.models.pg.mujoco_ff_model import MujocoFfModel
+from rlpyt.agents.pg.mujoco import MujocoFfAgent
+
 from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
 import causal_rl_bench.viewers.task_viewer as viewer
@@ -120,7 +122,7 @@ def train_model_num(model_settings, output_path):
     env.close()
     p = psutil.Process()
     cpus = p.cpu_affinity()  # should return a list or a tuple
-    # cpus = [[1]]
+    # cpus = [1]
     affinity = dict(
         cuda_idx=None,  # whichever one you have
         master_cpus=cpus,
@@ -130,7 +132,7 @@ def train_model_num(model_settings, output_path):
     sampler = CpuSampler(
         EnvCls=_make_env,
         env_kwargs=dict(rank=0, model_settings=model_settings),
-        batch_T=6000,
+        batch_T=1000,
         batch_B=len(cpus),  # 20 parallel environments.
     )
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
@@ -144,10 +146,23 @@ def train_model_num(model_settings, output_path):
                       "gae_lambda": 0.95,
                       "ratio_clip": 0.2,
                       "epochs": 4}
-        algo = PPO(**ppo_config)
-        model_kwargs['model_kwargs'].update({'observation_shape': observation_shape})
-        model_kwargs['model_kwargs'].update({'action_size': output_size})
-        agent = GaussianPgAgent(ModelCls=MujocoFfModel, **model_kwargs)
+        ppo_algo_configs = dict(
+            discount=0.99,
+            learning_rate=3e-4,
+            clip_grad_norm=1e6,
+            entropy_loss_coeff=0.0,
+            gae_lambda=0.95,
+            minibatches=32,
+            epochs=10,
+            ratio_clip=0.2,
+            normalize_advantage=True,
+            linear_lr_schedule=True
+        )
+        algo = PPO(**ppo_algo_configs)
+        #model_kwargs['model_kwargs'].update({'observation_shape': observation_shape})
+        #model_kwargs['model_kwargs'].update({'action_size': output_size})
+        #agent = GaussianPgAgent(ModelCls=MujocoFfModel, **model_kwargs)
+        agent = MujocoFfAgent()
         name = "ppo"
     elif model_settings['algorithm'] == 'SAC':
         sac_config = {"discount": 0.98,
@@ -168,11 +183,12 @@ def train_model_num(model_settings, output_path):
                       "target_update_tau": 0.01,
                       "learning_rate": 0.00025}
         algo = TD3(**td3_config, bootstrap_timelimit=False)
-        agent = Td3Agent( **model_kwargs,)
+        agent = Td3Agent(**model_kwargs)
         name = "td3"
     else:
         algo = SAC(bootstrap_timelimit=False)
         agent = SacAgent()
+        name = "sac"
 
     runner = MinibatchRl(
         algo=algo,
