@@ -202,9 +202,9 @@ class TowersGeneratorTask(BaseTask):
             intervention_space = self._training_intervention_spaces
         else:
             intervention_space = self._testing_intervention_spaces
-        intervention_dict['number_of_blocks_in_tower'] = np. \
-            random.randint(intervention_space['number_of_blocks_in_tower'][0],
-                           intervention_space['number_of_blocks_in_tower'][1])
+        intervention_dict['number_of_blocks_in_tower'] = [np. \
+            random.randint(intervention_space['number_of_blocks_in_tower'][0][i],
+                           intervention_space['number_of_blocks_in_tower'][1][i]) for i in range(3)]
         intervention_dict['blocks_mass'] = np. \
             random.uniform(intervention_space['blocks_mass'][0],
                            intervention_space['blocks_mass'][1])

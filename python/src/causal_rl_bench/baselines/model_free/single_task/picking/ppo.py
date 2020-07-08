@@ -20,21 +20,19 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                                   dense_reward_weights=np.array([250, 0, 125,
                                                                  0, 750, 0, 0,
                                                                  0.005]),
-                                  fractional_reward_weight=0,
+                                  fractional_reward_weight=1,
                                   goal_height=0.15,
                                   tool_block_mass=0.02)
             env = CausalWorld(task=task, skip_frame=skip_frame,
                               enable_visualization=False,
                               seed=seed_num + rank,
-                              max_episode_length=maximum_episode_length,
-                              normalize_actions=False,
-                              normalize_observations=False)
+                              max_episode_length=maximum_episode_length)
             return env
 
         set_global_seeds(seed_num)
         return _init
 
-    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
+    policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
     env = SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
     checkpoint_callback = CheckpointCallback(
         save_freq=int(validate_every_timesteps/num_of_envs),

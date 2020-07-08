@@ -7,6 +7,7 @@ from rlpyt.utils.logging.context import logger_context
 from causal_rl_bench.task_generators.task import task_generator
 from causal_rl_bench.envs.causalworld import CausalWorld
 from rlpyt.envs.gym import GymEnvWrapper
+import os
 
 
 def _make_env(rank):
@@ -23,8 +24,8 @@ def build_and_train():
     sampler = CpuSampler(
         EnvCls=_make_env,
         env_kwargs=dict(rank=0),
-        batch_T=100,
-        batch_B=20,  # 20 parallel environments.
+        batch_T=6000,
+        batch_B=20,
     )
     algo = SAC(bootstrap_timelimit=False)  # Run with defaults.
     agent = SacAgent()
@@ -33,13 +34,13 @@ def build_and_train():
         agent=agent,
         sampler=sampler,
         n_steps=50e6,
-        log_interval_steps=20,
+        log_interval_steps=600,
         affinity=affinity,
     )
     config = dict(env_id='reaching')
     name = "sac_reaching"
-    log_dir = "example_2"
-    with logger_context(log_dir, 0, name, config):
+    log_dir = os.path.join(os.path.dirname(__file__), "example")
+    with logger_context(log_dir, 0, name, config, use_summary_writer=True):
         runner.train()
 
 

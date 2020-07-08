@@ -38,6 +38,41 @@ or used in a catkin workspace.
   ```bash
   (causal_rl_bench) python -m unittest discover tests/causal_rl_bench/
   ```
+  
+5. Install other packages for rlkit (optional)
+
+  ```bash
+  (causal_rl_bench) cd ..
+  (causal_rl_bench) git clone https://github.com/vitchyr/rlkit.git
+  (causal_rl_bench) cd rlkit 
+  (causal_rl_bench) pip install -e .
+  (causal_rl_bench) pip install torch==1.2.0
+  (causal_rl_bench) pip install gtimer
+  ```
+
+6. Install other packages for viskit (optional)
+  ```bash
+  (causal_rl_bench) cd ..
+  (causal_rl_bench) git clone https://github.com/vitchyr/viskit.git
+  (causal_rl_bench) cd viskit 
+  (causal_rl_bench) pip install -e .
+  (causal_rl_bench) python viskit/frontend.py path/to/dir/exp*
+  ```
+  
+7. Install other packages for rlpyt (optional)
+ ```bash
+  (causal_rl_bench) cd ..
+  (causal_rl_bench) git clone https://github.com/astooke/rlpyt.git
+  (causal_rl_bench) cd rlpyt 
+  (causal_rl_bench) pip install -e .
+  (causal_rl_bench) pip install pyprind
+  ```
+
+8. Install other packages for stable baselines (optional)
+ ```bash
+  (causal_rl_bench) pip install stable-baselines==2.10.0
+  (causal_rl_bench) pip install tensorflow==1.14.0
+  ```
 
 ## Try out the package
 
@@ -52,4 +87,3 @@ or used in a catkin workspace.
             obs, reward, done, info = env.step(env.action_space.sample())
     env.close()
   ```
-  
