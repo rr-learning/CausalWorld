@@ -50,7 +50,7 @@ def baseline_model(model_num):
                                       PICK_AND_PLACE_BENCHMARK,
                                       TOWER_2_BENCHMARK])
     task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'fractional_reward_weight': 1}}]
+                                      'fractional_reward_weight': 100}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
                                       'enable_visualization': False,
@@ -121,8 +121,8 @@ def train_model_num(model_settings, output_path):
     output_size = env.spaces.action.shape[0]
     env.close()
     p = psutil.Process()
-    # cpus = p.cpu_affinity()  # should return a list or a tuple
-    cpus = [0, 1]
+    cpus = p.cpu_affinity()  # should return a list or a tuple
+    # cpus = [0, 1]
     affinity = dict(
         cuda_idx=None,  # whichever one you have
         master_cpus=cpus,
@@ -133,17 +133,17 @@ def train_model_num(model_settings, output_path):
         EnvCls=_make_env,
         env_kwargs=dict(rank=0, model_settings=model_settings),
         max_decorrelation_steps=0,
-        batch_T=600,
+        batch_T=6000,
         batch_B=len(cpus),  # 20 parallel environments.
     )
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
     if model_settings['algorithm'] == 'PPO':
-        ppo_config = {"discount": 0.99,
+        ppo_config = {"discount": 0.98,
                       "entropy_loss_coeff": 0.01,
                       "learning_rate": 0.00025,
                       "value_loss_coeff": 0.5,
                       "clip_grad_norm": 0.5,
-                      "minibatches": 4,
+                      "minibatches": 40,
                       "gae_lambda": 0.95,
                       "ratio_clip": 0.2,
                       "epochs": 4}
