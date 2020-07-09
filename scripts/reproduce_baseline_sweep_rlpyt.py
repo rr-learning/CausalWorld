@@ -121,8 +121,8 @@ def train_model_num(model_settings, output_path):
     output_size = env.spaces.action.shape[0]
     env.close()
     p = psutil.Process()
-    cpus = p.cpu_affinity()  # should return a list or a tuple
-    # cpus = [1]
+    # cpus = p.cpu_affinity()  # should return a list or a tuple
+    cpus = [0, 1]
     affinity = dict(
         cuda_idx=None,  # whichever one you have
         master_cpus=cpus,
@@ -132,7 +132,8 @@ def train_model_num(model_settings, output_path):
     sampler = CpuSampler(
         EnvCls=_make_env,
         env_kwargs=dict(rank=0, model_settings=model_settings),
-        batch_T=1000,
+        max_decorrelation_steps=0,
+        batch_T=600,
         batch_B=len(cpus),  # 20 parallel environments.
     )
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
@@ -142,7 +143,7 @@ def train_model_num(model_settings, output_path):
                       "learning_rate": 0.00025,
                       "value_loss_coeff": 0.5,
                       "clip_grad_norm": 0.5,
-                      "minibatches": 40,
+                      "minibatches": 4,
                       "gae_lambda": 0.95,
                       "ratio_clip": 0.2,
                       "epochs": 4}
@@ -158,11 +159,11 @@ def train_model_num(model_settings, output_path):
             normalize_advantage=True,
             linear_lr_schedule=True
         )
-        algo = PPO(**ppo_algo_configs)
+        algo = PPO(**ppo_config)
         #model_kwargs['model_kwargs'].update({'observation_shape': observation_shape})
         #model_kwargs['model_kwargs'].update({'action_size': output_size})
         #agent = GaussianPgAgent(ModelCls=MujocoFfModel, **model_kwargs)
-        agent = MujocoFfAgent()
+        agent = MujocoFfAgent(**model_kwargs)
         name = "ppo"
     elif model_settings['algorithm'] == 'SAC':
         sac_config = {"discount": 0.98,
