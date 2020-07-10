@@ -17,9 +17,9 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                  skip_frame, seed_num, her_config, total_time_steps,
                  validate_every_timesteps, task_name):
     task = task_generator(task_generator_id=task_name,
-                          dense_reward_weights=np.array([250, 0, 125,
-                                                         0, 750, 0, 0,
-                                                         0.005]),
+                          dense_reward_weights=np.array([0, 0, 0,
+                                                         0, 0, 0, 0,
+                                                         0]),
                           fractional_reward_weight=1,
                           goal_height=0.15,
                           tool_block_mass=0.02)
