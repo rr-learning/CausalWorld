@@ -1,4 +1,4 @@
-from rlpyt.samplers.parallel.gpu.sampler import GpuSampler
+from rlpyt.samplers.parallel.cpu.sampler import CpuSampler, CpuResetCollector
 from rlpyt.algos.qpg.sac import SAC
 from rlpyt.agents.qpg.sac_agent import SacAgent
 from rlpyt.runners.minibatch_rl import MinibatchRl
@@ -30,21 +30,22 @@ def _make_env(rank):
 def build_and_train():
     p = psutil.Process()
     cpus = p.cpu_affinity()
-    affinity = dict(cuda_idx=0,
+    affinity = dict(cuda_idx=None,
                     master_cpus=cpus,
                     workers_cpus=list([x] for x in cpus),
                     set_affinity=True)
-    sampler = GpuSampler(
+    sampler = CpuSampler(
         EnvCls=_make_env,
         env_kwargs=dict(rank=0),
         batch_T=1,
-        batch_B=100,
-        max_decorrelation_steps=0
+        batch_B=4,
+        max_decorrelation_steps=0,
+        CollectorCls=CpuResetCollector
     )
     algo = SAC(batch_size=256,
                min_steps_learn=10000,
                replay_size=1000000,
-               replay_ratio=256,
+               replay_ratio=256/4,
                target_update_interval=1,
                target_entropy=-9,
                target_update_tau=0.01,
@@ -66,8 +67,8 @@ def build_and_train():
         affinity=affinity,
     )
     config = dict(env_id='picking')
-    name = "sac_picking"
-    log_dir = os.path.join(os.path.dirname(__file__), "sac_picking")
+    name = "sac_rlpyt_picking"
+    log_dir = os.path.join(os.path.dirname(__file__), "sac_rlpyt_picking")
     with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='all'):
         runner.train()
 

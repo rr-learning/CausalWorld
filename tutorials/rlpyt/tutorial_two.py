@@ -14,11 +14,9 @@ def simulate_policy():
     env = CausalWorld(task=task, enable_visualization=True, skip_frame=3,
                       seed=0, max_episode_length=600)
     env = GymEnvWrapper(env)
-    file = './itr_359999.pkl'
+    file = './itr_1097499.pkl'
     data = torch.load(file)
     agent_state_dict = data['agent_state_dict']
-    # optimizer_state_dict = data['optimizer_state_dict']
-    # # algo = SAC(initial_optim_state_dict=optimizer_state_dict)  # Run with defaults.
     agent = SacAgent(initial_model_state_dict=agent_state_dict)
     agent.initialize(env_spaces=env.spaces)
     agent.eval_mode(itr=data['itr'])
@@ -27,10 +25,7 @@ def simulate_policy():
         # new_obs = np.hstack((obs['observation'], obs['desired_goal']))
         agent_info = agent.step(torchify_buffer(obs), prev_action=None, prev_reward=None)
         return agent_info.action.numpy()
-
-
     # env = HERGoalEnvWrapper(env)
-
     for _ in range(100):
         total_reward = 0
         o = env.reset()
@@ -39,6 +34,7 @@ def simulate_policy():
             total_reward += reward
         print("total reward is :", total_reward)
     env.close()
+
 
 if __name__ == "__main__":
     simulate_policy()
