@@ -20,7 +20,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                     np.array([750,
                                               50,
                                               250,
-                                              10,
+                                              0,
                                               0.005])))
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",

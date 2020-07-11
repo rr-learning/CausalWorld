@@ -26,7 +26,7 @@ from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
 from stable_baselines.ddpg.noise import NormalActionNoise
 
 world_seed = 0
-num_of_envs = 2
+num_of_envs = 20
 
 NUM_RANDOM_SEEDS = 2
 NET_LAYERS = [256, 256]
@@ -44,7 +44,7 @@ def baseline_model(model_num):
                                       PICK_AND_PLACE_BENCHMARK,
                                       TOWER_2_BENCHMARK])
     task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'fractional_reward_weight': 1}}]
+                                      'fractional_reward_weight': 100}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
                                       'enable_visualization': True,
@@ -204,7 +204,7 @@ def train_model_num(model_settings, output_path):
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-        total_time_steps = int(40000000)
+        total_time_steps = int(80000000)
         validate_every_timesteps = int(2000000)
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
@@ -251,11 +251,9 @@ if __name__ == '__main__':
 
     model = train_model_num(model_settings, output_path)
 
-
     # define a method for the policy fn of your trained model
-    def policy_fn(obs):
+    def policy_fn(obs, prev_action=None, prev_reward=None):
         return model.predict(obs, deterministic=True)[0]
-
 
     animation_path = os.path.join(output_path, 'animation')
     os.makedirs(animation_path)

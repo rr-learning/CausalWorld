@@ -290,10 +290,10 @@ class TowersGeneratorTask(BaseTask):
 
         # term 1
         current_distance_from_block = np.linalg.norm(end_effector_positions -
-                                                     self.previous_block_level_1_position)
+                                                     self.previous_block_level_0_position)
         previous_distance_from_block = np.linalg.norm(
             self.previous_end_effector_positions -
-            self.previous_block_level_1_position)
+            self.previous_block_level_0_position)
         rewards.append(previous_distance_from_block -
                        current_distance_from_block)
 
@@ -308,8 +308,8 @@ class TowersGeneratorTask(BaseTask):
                        current_horizontal_distance_from_blocks)
 
         # term 3
-        current_vertical_distance_from_blocks = np.linalg.norm(block_level_1_position[2] -
-                                                               block_level_0_position[2] - 0.065)
+        current_vertical_distance_from_blocks = np.linalg.norm(block_level_0_position[2] -
+                                                               block_level_1_position[2] - 0.065)
 
         previous_vertical_distance_from_blocks = np.linalg.norm(self.previous_block_level_0_position[2] -
                                                                 self.previous_block_level_1_position[2] - 0.065)
