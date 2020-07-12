@@ -15,12 +15,12 @@ class TowersGeneratorTask(BaseTask):
                          use_train_space_only=kwargs.get("use_train_space_only",
                                                          False),
                          fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 0),
+                         kwargs.get("fractional_reward_weight", 1),
                          dense_reward_weights=
                          kwargs.get("dense_reward_weights",
-                                    np.array([750,
-                                              125,
-                                              250,
+                                    np.array([100,
+                                              500,
+                                              1000,
                                               0.005])))
         self._task_robot_observation_keys = ["time_left_for_task",
                                              "joint_positions",
@@ -30,7 +30,7 @@ class TowersGeneratorTask(BaseTask):
         # for this task the stage observation keys will be set with the
         # goal/structure building
         self._task_params["tool_block_mass"] = \
-            kwargs.get("tool_block_mass", 0.08)
+            kwargs.get("tool_block_mass", 0.02)
         self._task_params["joint_positions"] = \
             kwargs.get("joint_positions", None)
         self._task_params["number_of_blocks_in_tower"] = \
@@ -80,6 +80,7 @@ class TowersGeneratorTask(BaseTask):
         block_size = tower_dims / number_of_blocks_in_tower
         curr_height = 0 - block_size[-1] / 2
         rigid_block_position = np.array([-0.12, -0.12, 0 + block_size[-1] / 2])
+        rigid_block_position = np.array([0.0, 0.0, 0 + block_size[-1] / 2])
         silhouettes_creation_dicts = []
         for level in range(number_of_blocks_in_tower[-1]):
             curr_height += block_size[-1]
@@ -163,7 +164,7 @@ class TowersGeneratorTask(BaseTask):
         self._training_intervention_spaces['number_of_blocks_in_tower'] = \
             np.array([[1, 1, 1], [4, 4, 4]])
         self._training_intervention_spaces['blocks_mass'] = \
-            np.array([0.02, 0.06])
+            np.array([0.015, 0.06])
         self._training_intervention_spaces['tower_dims'] = \
             np.array([[0.035, 0.035, 0.035], [0.10, 0.10, 0.10]])
         self._training_intervention_spaces['tower_center'] = \
@@ -203,8 +204,9 @@ class TowersGeneratorTask(BaseTask):
         else:
             intervention_space = self._testing_intervention_spaces
         intervention_dict['number_of_blocks_in_tower'] = [np. \
-            random.randint(intervention_space['number_of_blocks_in_tower'][0][i],
-                           intervention_space['number_of_blocks_in_tower'][1][i]) for i in range(3)]
+                                                              random.randint(
+            intervention_space['number_of_blocks_in_tower'][0][i],
+            intervention_space['number_of_blocks_in_tower'][1][i]) for i in range(3)]
         intervention_dict['blocks_mass'] = np. \
             random.uniform(intervention_space['blocks_mass'][0],
                            intervention_space['blocks_mass'][1])
