@@ -75,11 +75,11 @@ class GeneralGeneratorTask(BaseTask):
         for rigid_object in self._stage.get_rigid_objects():
             del self._training_intervention_spaces[rigid_object]['size']
         self._training_intervention_spaces['nums_objects'] = \
-            np.array([1, 15])
+            np.array([3, 5])
         self._training_intervention_spaces['blocks_mass'] = \
             np.array([0.02, 0.06])
         self._training_intervention_spaces['tool_block_size'] = \
-            np.array([0.035, 0.08])
+            np.array([0.05, 0.07])
         return
 
     def _set_testing_intervention_spaces(self):
@@ -92,12 +92,12 @@ class GeneralGeneratorTask(BaseTask):
             del self._testing_intervention_spaces[visual_object]
         for rigid_object in self._stage.get_rigid_objects():
             del self._testing_intervention_spaces[rigid_object]['size']
-        self._training_intervention_spaces['nums_objects'] = \
-            np.array([15, 20])
-        self._training_intervention_spaces['blocks_mass'] = \
+        self._testing_intervention_spaces['nums_objects'] = \
+            np.array([6, 9])
+        self._testing_intervention_spaces['blocks_mass'] = \
             np.array([0.06, 0.08])
-        self._training_intervention_spaces['tool_block_size'] = \
-            np.array([0.045, 0.06])
+        self._testing_intervention_spaces['tool_block_size'] = \
+            np.array([0.04, 0.05])
         return
 
     def sample_new_goal(self, training=True, level=None):
@@ -217,7 +217,7 @@ class GeneralGeneratorTask(BaseTask):
                                                     str(object_num)
                                                     + '_angular_velocity')
             # turn on simulation for 0.5 seconds
-            self._robot.forward_simulation(time=0.2)
+            self._robot.forward_simulation(time=0.5)
         for rigid_object in self._stage._rigid_objects:
             #search for the rigid object in the creation list
             creation_dict = {'name': rigid_object.replace('tool', 'goal'),
