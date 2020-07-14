@@ -75,7 +75,7 @@ class GeneralGeneratorTask(BaseTask):
         for rigid_object in self._stage.get_rigid_objects():
             del self._training_intervention_spaces[rigid_object]['size']
         self._training_intervention_spaces['nums_objects'] = \
-            np.array([3, 5])
+            np.array([1, 5])
         self._training_intervention_spaces['blocks_mass'] = \
             np.array([0.02, 0.06])
         self._training_intervention_spaces['tool_block_size'] = \
