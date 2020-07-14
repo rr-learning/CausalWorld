@@ -75,8 +75,8 @@ class ObjectSelectorWrapper(gym.Wrapper):
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
         self.env._disable_actions()
-        self.observation_space = gym.spaces.Box(self.env.observation_space.low[28:],
-                                                self.env.observation_space.high[28:],
+        self.observation_space = gym.spaces.Box(self.env.observation_space.low,
+                                                self.env.observation_space.high,
                                                 dtype=np.float64)
         self.objects_order = list(self.env.get_stage().get_rigid_objects().keys())
         self.objects_order.sort()
@@ -84,6 +84,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
         self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(number_of_objects),
                                               gym.spaces.Discrete(7),
                                               gym.spaces.Discrete(7)))
+        self.action_space = gym.spaces.MultiDiscrete([number_of_objects, 7, 7])
         self.env.add_wrapper_info({'object_selector': dict()})
 
     def step(self, action):
@@ -93,5 +94,6 @@ class ObjectSelectorWrapper(gym.Wrapper):
             self.env.get_current_state_variables())
         self.env.do_intervention(intervention_dict)
         obs, reward, done, info = self.env.step(self.env.action_space.low)
-        obs = obs[28:]
+        # obs = obs[28:]
         return obs, reward, done, info
+
