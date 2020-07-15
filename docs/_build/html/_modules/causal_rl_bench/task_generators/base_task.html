@@ -166,7 +166,8 @@
 <div class="viewcode-block" id="BaseTask"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.BaseTask">[docs]</a><span class="k">class</span> <span class="nc">BaseTask</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task_name</span><span class="p">,</span> <span class="n">use_train_space_only</span><span class="p">,</span>
                  <span class="n">fractional_reward_weight</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-                 <span class="n">dense_reward_weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])):</span>
+                 <span class="n">dense_reward_weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([]),</span>
+                 <span class="n">activate_sparse_reward</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="sd">        :param task_name:</span>
@@ -194,7 +195,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;task_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fractional_reward_weight</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dense_reward_weights</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;activate_sparse_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;activate_sparse_reward&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">activate_sparse_reward</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_training_intervention_spaces</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_testing_intervention_spaces</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;use_train_space_only&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">use_train_space_only</span>
@@ -209,6 +210,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_current_goal_distance</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_max_episode_length</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_create_world_func</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_partial_solution_exposed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_ground_truth_state_exposed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">_save_pybullet_state</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -377,20 +380,30 @@
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;desired_goal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_desired_goal</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;achieved_goal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_achieved_goal</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_solved</span>
-        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">rigid_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
-            <span class="c1">#check if there is an equivilant visual object corresponding</span>
-            <span class="n">possible_corresponding_goal</span> <span class="o">=</span> <span class="n">rigid_object</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;tool&#39;</span><span class="p">,</span> <span class="s1">&#39;goal&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">possible_corresponding_goal</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">():</span>
-                <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="n">rigid_object</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-                <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;cartesian_position&#39;</span><span class="p">]</span> <span class="o">=</span> \
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="n">possible_corresponding_goal</span><span class="p">,</span> <span class="s1">&#39;cartesian_position&#39;</span><span class="p">)</span>
-                <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;orientation&#39;</span><span class="p">]</span> <span class="o">=</span> \
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="n">possible_corresponding_goal</span><span class="p">,</span> <span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
-        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ground_truth_current_state_varibales&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_ground_truth_state_exposed</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ground_truth_current_state_varibales&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_partial_solution_exposed</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">rigid_object</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">_rigid_objects</span><span class="p">:</span>
+                <span class="c1">#check if there is an equivilant visual object corresponding</span>
+                <span class="n">possible_corresponding_goal</span> <span class="o">=</span> <span class="n">rigid_object</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;tool&#39;</span><span class="p">,</span> <span class="s1">&#39;goal&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">possible_corresponding_goal</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_visual_objects</span><span class="p">():</span>
+                    <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="n">rigid_object</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+                    <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;cartesian_position&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="n">possible_corresponding_goal</span><span class="p">,</span> <span class="s1">&#39;cartesian_position&#39;</span><span class="p">)</span>
+                    <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="n">rigid_object</span><span class="p">][</span><span class="s1">&#39;orientation&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_object_state</span><span class="p">(</span><span class="n">possible_corresponding_goal</span><span class="p">,</span> <span class="s1">&#39;orientation&#39;</span><span class="p">)</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;fractional_success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_goal_distance</span>
         <span class="k">return</span> <span class="n">info</span></div>
+
+    <span class="k">def</span> <span class="nf">expose_potential_partial_solution</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_partial_solution_exposed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">add_ground_truth_state_to_info</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_is_ground_truth_state_exposed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span>
 
     <span class="k">def</span> <span class="nf">_update_task_state</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">update_task_state_dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -596,6 +609,9 @@
 <span class="sd">        :return:</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># intersection areas / union of all visual_objects</span>
+        <span class="c1">#reshape the tensors if they are flattened with HER</span>
+        <span class="n">achieved_goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">achieved_goal</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+        <span class="n">desired_goal</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">desired_goal</span><span class="p">,</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
         <span class="n">intersection_area</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1">#TODO: under the assumption that the visual objects dont intersect</span>
         <span class="c1">#TODO: deal with structured data for silhouettes</span>
@@ -1094,7 +1110,10 @@
             <span class="n">episode_length</span> <span class="o">=</span> <span class="mi">5</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">episode_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stage</span><span class="o">.</span><span class="n">get_rigid_objects</span><span class="p">())</span> <span class="o">*</span> <span class="mi">10</span>
-        <span class="k">return</span> <span class="n">episode_length</span></div>
+        <span class="k">return</span> <span class="n">episode_length</span>
+
+    <span class="k">def</span> <span class="nf">get_task_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_name</span></div>
 </pre></div>
 
            </div>

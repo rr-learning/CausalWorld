@@ -160,34 +160,27 @@
 
 
 <div class="viewcode-block" id="ReachingTaskGenerator"><a class="viewcode-back" href="../../../modules/task_generators/task_generators.html#causal_rl_bench.task_generators.ReachingTaskGenerator">[docs]</a><span class="k">class</span> <span class="nc">ReachingTaskGenerator</span><span class="p">(</span><span class="n">BaseTask</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-
-<span class="sd">        :param kwargs:</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">use_train_space_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">fractional_reward_weight</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                 <span class="n">dense_reward_weights</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">100000</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]),</span>
+                 <span class="n">default_goal_60</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">]),</span>
+                 <span class="n">default_goal_120</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">]),</span>
+                 <span class="n">default_goal_300</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">]),</span>
+                 <span class="n">joint_positions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">activate_sparse_reward</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">task_name</span><span class="o">=</span><span class="s2">&quot;reaching&quot;</span><span class="p">,</span>
-                         <span class="n">use_train_space_only</span><span class="o">=</span><span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;use_train_space_only&quot;</span><span class="p">,</span>
-                                                         <span class="kc">False</span><span class="p">),</span>
-                         <span class="n">fractional_reward_weight</span><span class="o">=</span>
-                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fractional_reward_weight&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
-                         <span class="n">dense_reward_weights</span><span class="o">=</span>
-                         <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dense_reward_weights&quot;</span><span class="p">,</span>
-                                    <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">100000</span><span class="p">,</span>
-                                              <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])))</span>
+                         <span class="n">use_train_space_only</span><span class="o">=</span><span class="n">use_train_space_only</span><span class="p">,</span>
+                         <span class="n">fractional_reward_weight</span><span class="o">=</span><span class="n">fractional_reward_weight</span><span class="p">,</span>
+                         <span class="n">dense_reward_weights</span><span class="o">=</span><span class="n">dense_reward_weights</span><span class="p">,</span>
+                         <span class="n">activate_sparse_reward</span><span class="o">=</span><span class="n">activate_sparse_reward</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_task_robot_observation_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;time_left_for_task&quot;</span><span class="p">,</span>
                                              <span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span>
                                              <span class="s2">&quot;joint_velocities&quot;</span><span class="p">,</span>
                                              <span class="s2">&quot;end_effector_positions&quot;</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;default_goal_60&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default_goal_60&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.10</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;default_goal_120&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default_goal_120&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.13</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;default_goal_300&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;default_goal_300&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.16</span><span class="p">]))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;default_goal_60&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_goal_60</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;default_goal_120&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_goal_120</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s1">&#39;default_goal_300&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">default_goal_300</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_task_params</span><span class="p">[</span><span class="s2">&quot;joint_positions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">joint_positions</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_end_effector_positions</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">previous_joint_velocities</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_number_of_obstacles</span> <span class="o">=</span> <span class="mi">0</span>
@@ -336,15 +329,16 @@
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;desired_goal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_desired_goal</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;achieved_goal&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_achieved_goal</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_task_solved</span>
-        <span class="c1">#TODO: below has a memory leak for now</span>
-        <span class="c1"># info[&#39;possible_solution_intervention&#39;] = dict()</span>
-        <span class="c1"># info[&#39;possible_solution_intervention&#39;][&#39;joint_positions&#39;] = \</span>
-        <span class="c1">#     self._robot.get_joint_positions_from_tip_positions(self._current_desired_goal,</span>
-        <span class="c1">#                                                        self._robot.</span>
-        <span class="c1">#                                                               get_latest_full_state()[&#39;positions&#39;])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_ground_truth_state_exposed</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ground_truth_current_state_varibales&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_is_partial_solution_exposed</span><span class="p">:</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">info</span><span class="p">[</span><span class="s1">&#39;possible_solution_intervention&#39;</span><span class="p">][</span><span class="s1">&#39;joint_positions&#39;</span><span class="p">]</span> <span class="o">=</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span><span class="n">get_joint_positions_from_tip_positions</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_current_desired_goal</span><span class="p">,</span>
+                                                                   <span class="bp">self</span><span class="o">.</span><span class="n">_robot</span><span class="o">.</span>
+                                                                          <span class="n">get_latest_full_state</span><span class="p">()[</span><span class="s1">&#39;positions&#39;</span><span class="p">])</span>
         <span class="n">info</span><span class="p">[</span><span class="s1">&#39;fractional_success&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_current_goal_distance</span>
-        <span class="n">info</span><span class="p">[</span><span class="s1">&#39;ground_truth_current_state_varibales&#39;</span><span class="p">]</span> <span class="o">=</span> \
-            <span class="bp">self</span><span class="o">.</span><span class="n">get_current_scm_values</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">info</span></div>
 
     <span class="k">def</span> <span class="nf">_set_training_intervention_spaces</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

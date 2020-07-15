@@ -87,7 +87,6 @@
 <li class="toctree-l1"><a class="reference internal" href="install.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Task distributions</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#available-task-generators">Available task generators</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#observation-spaces">Observation spaces</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#rewards-and-additional-information">Rewards and additional information</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#defining-your-own-task">Defining your own task</a></li>
@@ -165,25 +164,81 @@
             
   <div class="section" id="task-distributions">
 <span id="task-setups"></span><h1>Task distributions<a class="headerlink" href="#task-distributions" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="available-task-generators">
-<h2>Available task generators<a class="headerlink" href="#available-task-generators" title="Permalink to this headline">¶</a></h2>
-<p>List and visualisations of existing task-generators:
-- pushing
-- picking
-- pick and place
-- towers
-- stacked-blocks
-- creative-stacked-blocks
-- general</p>
-</div>
+<a class="reference internal image-reference" href="../_images/demo_pushing.gif"><img alt="Pushing - single cuboid" class="align-left" src="../_images/demo_pushing.gif" style="width: 204.8px; height: 163.84px;" /></a>
+<a class="reference internal image-reference" href="../_images/demo_picking.gif"><img alt="Picking - single cuboid" class="align-left" src="../_images/demo_picking.gif" style="width: 204.8px; height: 163.84px;" /></a>
+<a class="reference internal image-reference" href="../_images/demo_pick_and_place.gif"><img alt="Pick and Place - single cuboid" class="align-left" src="../_images/demo_pick_and_place.gif" style="width: 204.8px; height: 163.84px;" /></a>
+<a class="reference internal image-reference" href="../_images/demo_towers.gif"><img alt="Towers - multiple cuboids" class="align-left" src="../_images/demo_towers.gif" style="width: 204.8px; height: 163.84px;" /></a>
+<a class="reference internal image-reference" href="../_images/demo_general.gif"><img alt="General constellation - multiple cuboids" class="align-left" src="../_images/demo_general.gif" style="width: 204.8px; height: 163.84px;" /></a>
+<a class="reference internal image-reference" href="../_images/demo_stacked_blocks.gif"><img alt="Stacked Blocks - multiple cuboids" class="align-left" src="../_images/demo_stacked_blocks.gif" style="width: 204.8px; height: 163.84px;" /></a>
+<a class="reference internal image-reference" href="../_images/demo_creative_stacked_blocks.gif"><img alt="Creative Stacked Blocks - multiple cuboids" class="align-left" src="../_images/demo_creative_stacked_blocks.gif" style="width: 204.8px; height: 163.84px;" /></a>
+<p><br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /> <br /></p>
+<p>CausalWorld comes with 8 task-distributions that range in difficulty from rather simple to extremely challenging.
+All tasks follow a common goal formulation: Build a given 3D goal shape (visualizes in opaque green above) from
+a given set of building blocks. By default each task-distribution that is passed to the CausalWorld environment
+generates by default a fixed characteristic goal shape of this distribution with fixed initial building block poses.
+Each task-generator exposes a complete set of
+task-defining variables such that one can systematically change or randomize any aspect of interest during training
+amd evaluation. Each task-generator comes with a default feature vector as observation space. Success within a given
+environment can be measured at any time step using the fractional volumetric overlap of the tool_blocks with the
+3D goal shapes.</p>
+<table class="colwidths-given docutils align-default" id="id1">
+<caption><span class="caption-text">Table of task-generators</span><a class="headerlink" href="#id1" title="Permalink to this table">¶</a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Task-generator</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Pushing</p></td>
+<td><p>The goal is to move or push a single cuboid towards a goal pose, which is positioned on the arena floor.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Picking</p></td>
+<td><p>The goal is to pick up a single cuboid and hold it in a certain goal pose in the air above the initial pose.</p></td>
+</tr>
+<tr class="row-even"><td><p>Pick and Place</p></td>
+<td><p>The goal is to pick up a single cuboid and place it behind a fixed barrier in a given goal pose on the arena floor.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Towers</p></td>
+<td><p>The goal is to build tower-shaped structures from a set of smaller cuboids under a give goal pose</p></td>
+</tr>
+<tr class="row-even"><td><p>Stacked Blocks</p></td>
+<td><p>The goal is to build wall-like goal shapes from a set of smaller cuboids under a give goal pose.  The additional difficulty is that the goal poses' stability might be very sensitive to small inaccuracies in the structure</p></td>
+</tr>
+<tr class="row-odd"><td><p>Creative Stacked Blocks</p></td>
+<td><p>The goal is to fill provided goal shapes from a set of smaller cuboids  The additional difficulty is that some goal shapes are in the air and an additional structure needs to be build from other cuboids to support stability.</p></td>
+</tr>
+<tr class="row-even"><td><p>General constellation</p></td>
+<td><p>The goal is to restore a stable constellation of cuboids in the arena.</p></td>
+</tr>
+<tr class="row-odd"><td><p>Reaching</p></td>
+<td><p>The goal is to reach three different positions in space. Note: This task does not fit into the target shape formulation from all the tasks above but is intended as a starter environment for testing your agent.</p></td>
+</tr>
+</tbody>
+</table>
 <div class="section" id="observation-spaces">
 <h2>Observation spaces<a class="headerlink" href="#observation-spaces" title="Permalink to this headline">¶</a></h2>
+<p>There are two default modes of observation spaces: 'cameras' and 'structured'</p>
+<p>cameras: Three cameras are mounter around the trifinger robot pointing on the floor. In this mode the observations
+after each time step are the three raw rgb images from these cameras showing the actual tool_blocks and fingers.
+The goal shape is depicted in three additional rgb images in which the robot fingers are removed from the scene.
+Images to be added here.</p>
+<p>structured: In this mode the observation space is a lower-dimensional feature vector that is structured in the following order with the number of dimensions in parenthesis:
+time left for task (1), joint_positions (9), joint_velocities (9), end_effector_positions (9). Then for each object in the
+environment additional 29-dimensions are use representing: tool_block_type (1), tool_block_size (3), tool_block_cartesian_position (3),
+tool_block_orientation (4), tool_block_linear_velocity (3), tool_block_angular_velocity (4),
+goal_block_type (1), goal_block_size (3), goal_block_cartesian_position (3), goal_block_orientation (4).
+Visualization of this layout to be added here.</p>
 </div>
 <div class="section" id="rewards-and-additional-information">
 <h2>Rewards and additional information<a class="headerlink" href="#rewards-and-additional-information" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="defining-your-own-task">
 <h2>Defining your own task<a class="headerlink" href="#defining-your-own-task" title="Permalink to this headline">¶</a></h2>
+<p>You'd like to have another task-generator with fancy objects or goal shapes? Define your own task just as shown below!</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.envs.causalworld</span> <span class="kn">import</span> <span class="n">CausalWorld</span>
 <span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.base_task</span> <span class="kn">import</span> <span class="n">BaseTask</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
