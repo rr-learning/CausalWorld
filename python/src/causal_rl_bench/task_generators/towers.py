@@ -80,7 +80,7 @@ class TowersGeneratorTask(BaseTask):
         block_size = tower_dims / number_of_blocks_in_tower
         curr_height = 0 - block_size[-1] / 2
         rigid_block_position = np.array([-0.12, -0.12, 0 + block_size[-1] / 2])
-        rigid_block_position = np.array([0.0, 0.0, 0 + block_size[-1] / 2])
+        # rigid_block_position = np.array([0.0, 0.0, 0 + block_size[-1] / 2])
         silhouettes_creation_dicts = []
         for level in range(number_of_blocks_in_tower[-1]):
             curr_height += block_size[-1]

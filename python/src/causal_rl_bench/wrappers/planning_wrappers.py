@@ -83,8 +83,8 @@ class ObjectSelectorWrapper(gym.Wrapper):
         number_of_objects = len(self.objects_order)
         self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(number_of_objects),
                                               gym.spaces.Discrete(7),
-                                              gym.spaces.Discrete(7)))
-        self.action_space = gym.spaces.MultiDiscrete([number_of_objects, 7, 7])
+                                              gym.spaces.Discrete(3)))
+        self.action_space = gym.spaces.MultiDiscrete([number_of_objects, 7, 3])
         self.env.add_wrapper_info({'object_selector': dict()})
 
     def step(self, action):
