@@ -36,8 +36,8 @@ def baseline_model(model_num):
     benchmarks = sweep('benchmarks', [PUSHING_BENCHMARK])
     task_configs = [{'task_configs': {'use_train_space_only': True,
                                       'fractional_reward_weight': 1,
-                                      'dense_reward_weights': [2500,
-                                                               2500,
+                                      'dense_reward_weights': [750,
+                                                               250,
                                                                0]}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
