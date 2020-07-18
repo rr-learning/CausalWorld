@@ -177,7 +177,7 @@ def get_PPO_model(model_settings, model_path):
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = int(5000001)
+    total_time_steps = int(10000001)
     validate_every_timesteps = int(500000)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
@@ -185,7 +185,7 @@ def train_model_num(model_settings, output_path):
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-        total_time_steps = int(140000000)
+        total_time_steps = int(200000000)
         validate_every_timesteps = int(2000000)
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
