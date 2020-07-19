@@ -8,8 +8,8 @@ solve very challenging tasks. Nevertheless, it is a common problem in RL
 that agents are poor at transferring their learned skills to different but
 related environments that share a lot of common structure as agents are usually
 evaluated on the training distribution itself and similarities to other
-environments are ambiguous. We propose a novel benchmark by releasing X sets of
-infinitely many fully parameterized training environments in a robotics setting
+environments are ambiguous. We propose a novel benchmark by releasing
+various fully parameterized training environments in a robotics setting
 which are equipped with unique
 sets of testing environments. These environments facilitate a precise evaluation
 protocol to test generalisation and robustness capabilities of the acting agents
