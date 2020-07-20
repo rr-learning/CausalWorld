@@ -148,7 +148,7 @@ def radar_plots(output_path, experiments):
                      horizontalalignment='center', verticalalignment='center')
         for d, color in zip(case_data, colors):
             ax.plot(theta, d, color=color)
-            ax.fill(theta, d, facecolor=color, alpha=0.25)
+            ax.fill(theta, d, facecolor=color, alpha=0.0)
         ax.set_varlabels(spoke_labels)
         ax.set_ylim(0, 1.0)
 

@@ -99,7 +99,7 @@ if __name__ == '__main__':
             scores_list = []
             for random_seed in range(NUM_RANDOM_SEEDS):
                 model_num = algorithm_index * (num_curriculum * NUM_RANDOM_SEEDS) \
-                            + num_curriculum * NUM_RANDOM_SEEDS \
+                            + curriculum_index * NUM_RANDOM_SEEDS \
                             + random_seed
                 scores_path = os.path.join(models_path, str(model_num), 'evaluation', 'scores.json')
                 if os.path.exists(scores_path):

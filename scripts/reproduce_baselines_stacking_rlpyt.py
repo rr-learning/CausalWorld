@@ -17,7 +17,7 @@ from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 import causal_rl_bench.evaluation.visualization.visualiser as vis
 from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.benchmark.benchmarks import PICK_AND_PLACE_BENCHMARK
+from causal_rl_bench.benchmark.benchmarks import TOWER_2_BENCHMARK
 from stable_baselines.ddpg.noise import NormalActionNoise
 
 world_seed = 0
@@ -33,13 +33,12 @@ def save_model_settings(file_path, model_settings):
 
 
 def baseline_model(model_num):
-    benchmarks = sweep('benchmarks', [PICK_AND_PLACE_BENCHMARK])
+    benchmarks = sweep('benchmarks', [TOWER_2_BENCHMARK])
     task_configs = [{'task_configs': {'use_train_space_only': True,
                                       'fractional_reward_weight': 1,
                                       'dense_reward_weights': [750,
                                                                50,
                                                                250,
-                                                               0,
                                                                0.005]}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
@@ -59,7 +58,7 @@ def baseline_model(model_num):
                            'actives': [(0, 1e9, 2, 0)]}
     curriculum_kwargs_3 = {'intervention_actors': [RandomInterventionActorPolicy()],
                            'actives': [(0, 1e9, 2, 0)]}
-    curriculum_kwargs = [curriculum_kwargs_2]
+    curriculum_kwargs = [curriculum_kwargs_1]
 
     return outer_product([benchmarks,
                           world_params,
@@ -178,7 +177,7 @@ def get_PPO_model(model_settings, model_path):
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = int(4000001)
+    total_time_steps = int(10000001)
     validate_every_timesteps = int(500000)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
@@ -186,7 +185,7 @@ def train_model_num(model_settings, output_path):
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-        total_time_steps = int(80000000)
+        total_time_steps = int(200000000)
         validate_every_timesteps = int(2000000)
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
