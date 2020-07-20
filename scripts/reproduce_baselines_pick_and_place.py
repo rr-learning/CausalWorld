@@ -59,8 +59,7 @@ def baseline_model(model_num):
                            'actives': [(0, 1e9, 2, 0)]}
     curriculum_kwargs_3 = {'intervention_actors': [RandomInterventionActorPolicy()],
                            'actives': [(0, 1e9, 2, 0)]}
-    curriculum_kwargs = [curriculum_kwargs_1,
-                         curriculum_kwargs_2]
+    curriculum_kwargs = [curriculum_kwargs_2]
 
     return outer_product([benchmarks,
                           world_params,
