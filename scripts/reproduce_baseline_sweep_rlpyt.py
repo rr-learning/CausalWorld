@@ -11,6 +11,7 @@ from rlpyt.envs.gym import GymEnvWrapper
 from rlpyt import utils as utils_rlpyt
 from rlpyt.models.pg.mujoco_ff_model import MujocoFfModel
 from rlpyt.agents.pg.mujoco import MujocoFfAgent
+from rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
 
 from causal_rl_bench.envs.causalworld import CausalWorld
 from causal_rl_bench.task_generators.task import task_generator
@@ -19,7 +20,6 @@ import argparse
 import psutil
 import os
 import json
-from rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
 import numpy as np
 from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 import causal_rl_bench.evaluation.visualization.visualiser as vis

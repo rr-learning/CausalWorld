@@ -64,7 +64,7 @@ if __name__ == '__main__':
     model = load_model_from_settings(model_settings, model_path, time_steps)
 
     # define a method for the policy fn of your trained model
-    def policy_fn(obs):
+    def policy_fn(obs, prev_action=None, prev_reward=None):
         return model.predict(obs, deterministic=True)[0]
 
 
