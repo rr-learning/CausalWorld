@@ -43,7 +43,7 @@ def save_model_settings(file_path, model_settings):
 def baseline_model(model_num):
     benchmarks = sweep('benchmarks', [TOWER_2_BENCHMARK])
     task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'fractional_reward_weight': 1,
+                                      'fractional_reward_weight': 0.0,
                                       'dense_reward_weights': [750,
                                                                50,
                                                                250,
