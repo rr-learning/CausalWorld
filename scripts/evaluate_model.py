@@ -28,8 +28,6 @@ def load_model_from_settings(model_settings, model_path, time_steps):
         model = SAC.load(policy_path)
     elif algorithm == 'TD3':
         model = TD3.load(policy_path)
-    elif algorithm == 'SAC_HER':
-        model = HER.load(policy_path)
     return model
 
 
