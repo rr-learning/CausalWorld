@@ -88,6 +88,7 @@
 <li class="toctree-l1"><a class="reference internal" href="getting_started.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="task_setups.html">Task distributions</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Evaluation Protocols</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#example">Example</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-default-protocols">Using default protocols</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#defining-a-customized-protocol">Defining a customized protocol</a></li>
 </ul>
@@ -163,12 +164,51 @@
             
   <div class="section" id="evaluation-protocols">
 <span id="evaluating-policy"></span><h1>Evaluation Protocols<a class="headerlink" href="#evaluation-protocols" title="Permalink to this headline">¶</a></h1>
-<p>An evaluation protocol comprises a set of episodes with distinct environment realisations
-that differ in certain variables of the environments... tbd</p>
-<p>Below we show some demo code how you can systematically evaluate agents on a set
-of different protocols and visualize the results in radar plots of different scores</p>
+<p>A central feature of CausalWorld is the explicit parametric formulation of environments
+that allow for a precise evaluation of generalisation capabilities with respect to any of the
+defining environment variables.</p>
+<p>In order to evaluate a certain generalisation aspect a evaluation protocol needs to be defined.
+Each evaluation protocol defines a set of episodes that might differ from each other with respect to the
+generalisation aspect under consideration. If e.g. the agent is evaluated regarding success under different
+masses each episodes is a counterfactual version of the other with the mass of a certain object being the
+only difference. It is straight forward to define protocols for other variables such as colors, object sizes,
+friction coefficients, different goals, different initial positions or even in-episode interventions aspect to
+test robustness aspects. After the given set of environments in a protocol are being evaluated,
+various aggregated success metrics are being computed based on the fractional reward profiles of each episode.
+For now the following metrics are computes:
+1. mean_last_fractional_success (which is the mean of the last fractional reward along all protocol episodes)
+2. mean_full_integrated_fractional_success (which is the mean of the normalized average fractional reward along all protocol episodes)
+3. mean_last_integrated_fractional_success (which is the mean of the normalized average fractional reward over the last 20 episode time steps along all protocol episodes)</p>
+<p>Each of the environments variables has two associated sets of accessible non-overlapping spaces: A and B.
+When use_train_space_only is activated for the CausalWorld Object during training all the variables
+are only allowed to take values within space A, though they generally wont visit the entire space spanned
+(In the extreme case of training on the default task only you will only train on one point in this space).
+Training on multiple points of this space can be achieved by the help of a CurriculumWrapper.</p>
+<p>Having an explicit split between spaces A and B allows to test generalisation capabilities towards values
+that are more in line with the notions of interpolating (space A) and extrapolating (space B) generalisation.</p>
+<div class="section" id="example">
+<h2>Example<a class="headerlink" href="#example" title="Permalink to this headline">¶</a></h2>
+<p>As an introductory example we want to show you how you can quantify different generalisation aspects depending
+on the curriculum exposed during training using the pushing task.
+We trained two different agents: First, on the default task only without any type of randomization applied
+between episodes. This means the agent always starts with the same initial tool_block pose and the same goal block
+pose. Naturally we expect the agent to overfit to this goal over time. Second, we train an agent using a goal
+randomization curriculum where we sample new goal poses within space A every two episodes. Still, we keep the
+initial tool_block poses and everything else fixed during training. As can be seen from the animation below we
+see that the former agent overfits to the single goal pose seen during training whereas the later can also push the
+tool block towards other goal poses. Evaluating both agents using the protocols defined in the pushing benchmark
+we can quantify and compare performance regarding different aspects in an explicit way. In this case we can see that
+the second agent not only generalizes to goal_poses in space A but also to goal_poses in space B, though slightly worse.
+Likewise we can see that the agents can generalize to new initial goal poses or in_episode poses interventions to name
+just a few interesting observations. Left (no goal pose randomization) and right (goal pose randomization).</p>
+<a class="reference internal image-reference" href="../_images/pushing_no_randomization.gif"><img alt="no goal pose randomization" class="align-left" src="../_images/pushing_no_randomization.gif" style="width: 320.0px; height: 269.0px;" /></a>
+<a class="reference internal image-reference" href="../_images/pushing_randomization.gif"><img alt="goal pose randomization" class="align-left" src="../_images/pushing_randomization.gif" style="width: 320.0px; height: 269.0px;" /></a>
+<a class="reference internal image-reference" href="../_images/radar_plots_mean_last_fractional_success.png"><img alt="mean last integrated fractional success, radar plot" class="align-center" src="../_images/radar_plots_mean_last_fractional_success.png" style="width: 630.0px; height: 630.0px;" /></a>
+</div>
 <div class="section" id="using-default-protocols">
 <h2>Using default protocols<a class="headerlink" href="#using-default-protocols" title="Permalink to this headline">¶</a></h2>
+<p>Below we show some demo code how you can systematically evaluate agents on a set
+of different protocols and visualize the results in radar plots of different scores</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">causal_rl_bench.task_generators.task</span> <span class="kn">import</span> <span class="n">task_generator</span>
 <span class="kn">from</span> <span class="nn">causal_rl_bench.envs.causalworld</span> <span class="kn">import</span> <span class="n">CausalWorld</span>
 <span class="kn">from</span> <span class="nn">stable_baselines</span> <span class="kn">import</span> <span class="n">PPO2</span>

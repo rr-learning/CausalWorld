@@ -63,7 +63,6 @@ def radar_factory(num_vars, frame='circle'):
 
         def _close_line(self, line):
             x, y = line.get_data()
-            # FIXME: markers at x[0], y[0] get doubled-up
             if x[0] != x[-1]:
                 x = np.concatenate((x, [x[0]]))
                 y = np.concatenate((y, [y[0]]))
@@ -132,7 +131,7 @@ def get_radar_data_from_experiments(experiments):
 
 def radar_plots(output_path, experiments):
     N = len(list(experiments[list(experiments.keys())[0]].keys()))
-    theta = radar_factory(N, frame='polygon')
+    theta = radar_factory(N, frame='circle')
 
     data = get_radar_data_from_experiments(experiments)
     spoke_labels = data.pop(0)
@@ -151,10 +150,11 @@ def radar_plots(output_path, experiments):
             ax.plot(theta, d, color=color)
             ax.fill(theta, d, facecolor=color, alpha=0.25)
         ax.set_varlabels(spoke_labels)
+        ax.set_ylim(0, 1.0)
 
         # add legend relative to top-left plot
         labels = experiments.keys()
-        legend = ax.legend(labels, loc=(0.9, .95),
+        legend = ax.legend(labels, loc=(0.85, .95),
                            labelspacing=0.1, fontsize='small')
 
         fig.text(0.5, 0.965, 'radar_plots_automatic_evaluation_causal_rl_bench',

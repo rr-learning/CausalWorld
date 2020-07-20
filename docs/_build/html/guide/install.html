@@ -179,6 +179,24 @@ conda env create -f environment.yml
 <span class="o">(</span>causal_rl_bench<span class="o">)</span> python -m pip install .
 </pre></div>
 </div>
+<p>Make the docs</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>causal_rl_bench<span class="o">)</span> <span class="nb">cd</span> docs
+<span class="o">(</span>causal_rl_bench<span class="o">)</span> make html
+</pre></div>
+</div>
+<p>Run the tests.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>causal_rl_bench<span class="o">)</span> python -m unittest discover tests/causal_rl_bench/
+</pre></div>
+</div>
+<p>Install other packages for rlkit (optional)</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>causal_rl_bench<span class="o">)</span> <span class="nb">cd</span> ..
+<span class="o">(</span>causal_rl_bench<span class="o">)</span> git clone https://github.com/vitchyr/rlkit.git
+<span class="o">(</span>causal_rl_bench<span class="o">)</span> <span class="nb">cd</span> rlkit
+<span class="o">(</span>causal_rl_bench<span class="o">)</span> pip install -e .
+<span class="o">(</span>causal_rl_bench<span class="o">)</span> pip install <span class="nv">torch</span><span class="o">==</span><span class="m">1</span>.2.0
+<span class="o">(</span>causal_rl_bench<span class="o">)</span> pip install gtimer
+</pre></div>
+</div>
 </div>
 </div>
 

@@ -54,6 +54,8 @@ if __name__ == '__main__':
                   "buffer_size": 1000000,
                   "learning_starts": 1000,
                   "batch_size": 256,
+                  "train_freq": 1,
+                  "gradient_steps": 1,
                   "tensorboard_log": log_relative_path}
     train_policy(num_of_envs=num_of_envs,
                  log_relative_path=log_relative_path,
