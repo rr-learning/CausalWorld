@@ -632,9 +632,9 @@ class BaseTask(object):
         :return:
         """
         self._robot.clear()
-        if interventions_dict is None:
-            reset_observation_space_signal = \
-                self.restore_state(self._current_starting_state)
+        reset_observation_space_signal = \
+            self.restore_state(self._current_starting_state)
+
         self._task_solved = False
         success_signal = None
         interventions_info = None
