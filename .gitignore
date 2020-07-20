@@ -6,7 +6,7 @@ __pycache__/
 *.DS_Store
 dist/
 
-tutorials/output/
+tutorials/output/*
 docs/_build/
 python/src/__pycache__/
 python/src/causal_rl_bench/envs/__pycache__/

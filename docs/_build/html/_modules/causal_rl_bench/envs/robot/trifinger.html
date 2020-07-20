@@ -172,7 +172,6 @@
                  <span class="n">pybullet_client_w_o_goal_id</span><span class="p">,</span>
                  <span class="n">revolute_joint_ids</span><span class="p">,</span>
                  <span class="n">finger_tip_ids</span><span class="p">,</span>
-                 <span class="n">pinocchio_utils</span><span class="p">,</span>
                  <span class="n">cameras</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
                  <span class="n">camera_indicies</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -199,7 +198,6 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span> <span class="o">=</span> <span class="n">skip_frame</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_simulation_time</span> <span class="o">=</span> <span class="n">simulation_time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_simulation_time</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_skip_frame</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_pinocchio_utils</span> <span class="o">=</span> <span class="n">pinocchio_utils</span>
         <span class="c1">#TODO: for some reason this is needed</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_control_index</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_position_gains</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
@@ -873,7 +871,7 @@
         <span class="k">for</span> <span class="n">contact</span> <span class="ow">in</span> <span class="n">pybullet</span><span class="o">.</span><span class="n">getContactPoints</span><span class="p">(</span><span class="n">physicsClientId</span><span class="o">=</span><span class="n">client</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">contact</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span> <span class="ow">or</span>
                 <span class="n">contact</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="n">WorldConstants</span><span class="o">.</span><span class="n">ROBOT_ID</span><span class="p">)</span> <span class="ow">and</span> \
-                    <span class="n">contact</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.005</span><span class="p">:</span>
+                    <span class="n">contact</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.0095</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span></div>
 
