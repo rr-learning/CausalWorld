@@ -137,6 +137,7 @@ def radar_plots(output_path, experiments):
     spoke_labels = data.pop(0)
 
     colors = ['b', 'r', 'g', 'm', 'y']
+    colors = ['#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c', '#fdbf6f', '#ff7f00', '#cab2d6']
     for (title, case_data) in data:
 
         fig, ax = plt.subplots(figsize=(9, 9), nrows=1, ncols=1,
