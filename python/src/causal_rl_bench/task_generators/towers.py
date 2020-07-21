@@ -290,6 +290,8 @@ class TowersGeneratorTask(BaseTask):
                                                                  'orientation')
         rewards = list()
 
+        target_height = 0.1
+
         # term 1
         current_distance_from_block = np.linalg.norm(end_effector_positions -
                                                      block_level_0_position)
@@ -306,7 +308,7 @@ class TowersGeneratorTask(BaseTask):
         previous_horizontal_distance_from_blocks = np.linalg.norm(self.previous_block_level_0_position[:2] -
                                                                   self.previous_block_level_1_position[:2])
 
-        delta_height = block_level_0_position[2] - block_level_1_position[2] - 0.065
+        delta_height = block_level_0_position[2] - target_height
         if delta_height > 0:
             rewards.append(previous_horizontal_distance_from_blocks -
                            current_horizontal_distance_from_blocks)
@@ -315,13 +317,23 @@ class TowersGeneratorTask(BaseTask):
 
         # term 3
         current_vertical_distance_from_blocks = np.linalg.norm(block_level_0_position[2] -
-                                                               block_level_1_position[2] - 0.065)
+                                                               target_height)
 
         previous_vertical_distance_from_blocks = np.linalg.norm(self.previous_block_level_0_position[2] -
-                                                                self.previous_block_level_1_position[2] - 0.065)
+                                                                target_height)
 
         rewards.append(previous_vertical_distance_from_blocks -
                        current_vertical_distance_from_blocks)
+
+        previous_block_to_center = np.sqrt(
+            (self.previous_block_level_0_position[0] ** 2 +
+             self.previous_block_level_0_position[1] ** 2))
+        current_block_to_center = np.sqrt((block_level_0_position[0] ** 2 +
+                                           block_level_0_position[1] ** 2))
+        if delta_height < 0:
+            rewards.append(previous_block_to_center - current_block_to_center)
+        else:
+            rewards.append(0.0)
 
         # term 4
         rewards.append(- np.linalg.norm(

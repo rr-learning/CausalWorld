@@ -19,9 +19,9 @@ class PickingTaskGenerator(BaseTask):
                                               0, 750, 0, 0,
                                               0.005])))
         self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+                                             "joint_positions",
+                                             "joint_velocities",
+                                             "end_effector_positions"]
         # TODO: check for nans when bounds are the same in normalization
         self._task_params["goal_height"] = \
             kwargs.get("goal_height", 0.15)
@@ -131,18 +131,18 @@ class PickingTaskGenerator(BaseTask):
         :param achieved_goal:
         :return:
         """
-        #rewards order
-        #1) delta how much are you getting the block close to the goal
-        #2) absolute how much the block is close to the goal
-        #3) delta how much are you getting the block close to the center
-        #4) absolute how much is the the block is close to the center
-        #5) delta how much the fingers are close to block
-        #6) absolute how much fingers are close to block
-        #7) mean dist_of closest two fingers outside_bounding_ellipsoid
-        #8) delta in joint velocities
+        # rewards order
+        # 1) delta how much are you getting the block close to the goal
+        # 2) absolute how much the block is close to the goal
+        # 3) delta how much are you getting the block close to the center
+        # 4) absolute how much is the the block is close to the center
+        # 5) delta how much the fingers are close to block
+        # 6) absolute how much fingers are close to block
+        # 7) mean dist_of closest two fingers outside_bounding_ellipsoid
+        # 8) delta in joint velocities
         rewards = list()
         block_position = self._stage.get_object_state('tool_block',
-                                                     'cartesian_position')
+                                                      'cartesian_position')
         target_height = self._stage.get_object_state('goal_block',
                                                      'cartesian_position')[-1]
         joint_velocities = self._robot.get_latest_full_state()['velocities']
@@ -172,9 +172,9 @@ class PickingTaskGenerator(BaseTask):
         rewards.append(previous_distance_from_block -
                        current_distance_from_block)
         rewards.append(- current_distance_from_block)
-        #check for all the fingers if they are inside the sphere or not
+        # check for all the fingers if they are inside the sphere or not
         object_size = self._stage.get_object_state('tool_block',
-                                                  'size')
+                                                   'size')
         dist_outside_bounding_ellipsoid = np.copy(np.abs(end_effector_positions
                                                          - block_position))
         dist_outside_bounding_ellipsoid[dist_outside_bounding_ellipsoid <

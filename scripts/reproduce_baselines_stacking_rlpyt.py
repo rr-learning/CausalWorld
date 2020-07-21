@@ -47,6 +47,7 @@ def baseline_model(model_num):
                                       'dense_reward_weights': [750,
                                                                50,
                                                                250,
+                                                               125,
                                                                0.005]}}]
 
     world_params = [{'world_params': {'skip_frame': 3,
@@ -126,18 +127,18 @@ def train_model_num(model_settings, output_path):
         EnvCls=_make_env,
         env_kwargs=dict(rank=0, model_settings=model_settings),
         max_decorrelation_steps=0,
-        batch_T=3000,
+        batch_T=6000,
         batch_B=len(cpus),  # 20 parallel environments.
     )
-    model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
+    model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256, 256]))
     if model_settings['algorithm'] == 'PPO':
         ppo_config = {"discount": 0.98,
-                      "entropy_loss_coeff": 2e-4,
+                      "entropy_loss_coeff": 1e-4,
                       "learning_rate": 0.00045,
                       "value_loss_coeff": 0.5,
-                      "clip_grad_norm": 0.5,
+                      "clip_grad_norm": 0.45,
                       "minibatches": 40,
-                      "gae_lambda": 0.91,
+                      "gae_lambda": 0.9,
                       "ratio_clip": 0.4,
                       "epochs": 4}
 
