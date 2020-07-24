@@ -8,7 +8,10 @@ import pybullet
 
 
 class BaseTask(object):
-    def __init__(self, task_name, use_train_space_only,
+
+    def __init__(self,
+                 task_name,
+                 use_train_space_only,
                  fractional_reward_weight=1,
                  dense_reward_weights=np.array([]),
                  activate_sparse_reward=False):
@@ -61,11 +64,11 @@ class BaseTask(object):
     def _save_pybullet_state(self):
         pybullet_state = dict()
         if self._stage._pybullet_client_full_id is not None:
-                pybullet_state['full'] = pybullet.\
-                    saveState(physicsClientId=self._stage._pybullet_client_full_id)
+            pybullet_state['full'] = pybullet.\
+                saveState(physicsClientId=self._stage._pybullet_client_full_id)
         if self._stage._pybullet_client_w_goal_id is not None:
-                pybullet_state['w_goal'] = pybullet.\
-                    saveState(physicsClientId=self._stage._pybullet_client_w_goal_id)
+            pybullet_state['w_goal'] = pybullet.\
+                saveState(physicsClientId=self._stage._pybullet_client_w_goal_id)
         if self._stage._pybullet_client_w_o_goal_id is not None:
             pybullet_state['w_o_goal'] = pybullet. \
                 saveState(physicsClientId=self._stage._pybullet_client_w_o_goal_id)
@@ -73,13 +76,13 @@ class BaseTask(object):
 
     def _restore_pybullet_state(self, pybullet_state):
         if self._stage._pybullet_client_full_id is not None:
-                pybullet.\
-                    restoreState(pybullet_state['full'],
-                                 physicsClientId=self._stage._pybullet_client_full_id)
+            pybullet.\
+                restoreState(pybullet_state['full'],
+                             physicsClientId=self._stage._pybullet_client_full_id)
         if self._stage._pybullet_client_w_goal_id is not None:
-                pybullet.\
-                    restoreState(pybullet_state['w_goal'],
-                                 physicsClientId=self._stage._pybullet_client_w_goal_id)
+            pybullet.\
+                restoreState(pybullet_state['w_goal'],
+                             physicsClientId=self._stage._pybullet_client_w_goal_id)
         if self._stage._pybullet_client_w_o_goal_id is not None:
             pybullet. \
                 restoreState(pybullet_state['w_o_goal'],
@@ -88,13 +91,13 @@ class BaseTask(object):
 
     def _remove_pybullet_state(self, pybullet_state):
         if self._stage._pybullet_client_full_id is not None:
-                pybullet. \
-                    removeState(pybullet_state['full'],
-                                 physicsClientId=self._stage._pybullet_client_full_id)
+            pybullet. \
+                removeState(pybullet_state['full'],
+                             physicsClientId=self._stage._pybullet_client_full_id)
         if self._stage._pybullet_client_w_goal_id is not None:
-                pybullet. \
-                    removeState(pybullet_state['w_goal'],
-                                 physicsClientId=self._stage._pybullet_client_w_goal_id)
+            pybullet. \
+                removeState(pybullet_state['w_goal'],
+                             physicsClientId=self._stage._pybullet_client_w_goal_id)
         if self._stage._pybullet_client_w_o_goal_id is not None:
             pybullet. \
                 removeState(pybullet_state['w_o_goal'],
@@ -121,16 +124,13 @@ class BaseTask(object):
         if self._recreation_time != 0 and self._recreation_time % self._period_to_clear_memory == 0:
             self._create_world_func()
             self._robot._disable_velocity_control()
-            self._robot.set_full_env_state(state_dict
-                                           ['robot_object_state'])
+            self._robot.set_full_env_state(state_dict['robot_object_state'])
             self._remove_pybullet_state(self._empty_stage)
             self._empty_stage = self._save_pybullet_state()
         else:
             self._restore_pybullet_state(self._empty_stage)
-            self._robot.set_full_env_state(state_dict
-                                           ['robot_object_state'])
-        self._stage.set_full_env_state(
-            state_dict['stage_object_state'])
+            self._robot.set_full_env_state(state_dict['robot_object_state'])
+        self._stage.set_full_env_state(state_dict['stage_object_state'])
         self._recreation_time += 1
         new_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         new_number_of_visual_objects = len(self._stage.get_visual_objects())
@@ -231,9 +231,12 @@ class BaseTask(object):
             info['possible_solution_intervention'] = dict()
             for rigid_object in self._stage._rigid_objects:
                 #check if there is an equivilant visual object corresponding
-                possible_corresponding_goal = rigid_object.replace('tool', 'goal')
-                if possible_corresponding_goal in self._stage.get_visual_objects():
-                    info['possible_solution_intervention'][rigid_object] = dict()
+                possible_corresponding_goal = rigid_object.replace(
+                    'tool', 'goal')
+                if possible_corresponding_goal in self._stage.get_visual_objects(
+                ):
+                    info['possible_solution_intervention'][rigid_object] = dict(
+                    )
                     info['possible_solution_intervention'][rigid_object]['cartesian_position'] = \
                         self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
                     info['possible_solution_intervention'][rigid_object]['orientation'] = \
@@ -329,7 +332,8 @@ class BaseTask(object):
             #               WorldConstants.ARENA_BB[0]])
             self._training_intervention_spaces[rigid_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
-            if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
+            if self._stage.get_rigid_objects(
+            )[rigid_object].__class__.__name__ == 'Cuboid':
                 self._training_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self._training_intervention_spaces[rigid_object]['color'] = \
@@ -345,7 +349,8 @@ class BaseTask(object):
             #               WorldConstants.ARENA_BB[0]])
             self._training_intervention_spaces[visual_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
-            if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
+            if self._stage.get_visual_objects(
+            )[visual_object].__class__.__name__ == 'SCuboid':
                 self._training_intervention_spaces[visual_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
             self._training_intervention_spaces[visual_object]['color'] = \
@@ -387,7 +392,8 @@ class BaseTask(object):
             #               WorldConstants.ARENA_BB[1]])
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
-            if self._stage.get_rigid_objects()[rigid_object].__class__.__name__ == 'Cuboid':
+            if self._stage.get_rigid_objects(
+            )[rigid_object].__class__.__name__ == 'Cuboid':
                 self._testing_intervention_spaces[rigid_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self._testing_intervention_spaces[rigid_object]['color'] = \
@@ -403,7 +409,8 @@ class BaseTask(object):
             #               WorldConstants.ARENA_BB[1]])
             self._testing_intervention_spaces[visual_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
-            if self._stage.get_visual_objects()[visual_object].__class__.__name__ == 'SCuboid':
+            if self._stage.get_visual_objects(
+            )[visual_object].__class__.__name__ == 'SCuboid':
                 self._testing_intervention_spaces[visual_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
             self._testing_intervention_spaces[visual_object]['color'] = \
@@ -429,8 +436,8 @@ class BaseTask(object):
         """
         desired_goal = []
         for visual_goal in self._stage.get_visual_objects():
-            desired_goal.append(self._stage.get_visual_objects()[visual_goal]
-                                .get_bounding_box())
+            desired_goal.append(self._stage.get_visual_objects()
+                                [visual_goal].get_bounding_box())
         return np.array(desired_goal)
 
     def get_achieved_goal(self):
@@ -463,8 +470,8 @@ class BaseTask(object):
         for desired_subgoal_bb in desired_goal:
             union_area += get_bounding_box_volume(desired_subgoal_bb)
             for rigid_object_bb in achieved_goal:
-                intersection_area += get_intersection(
-                    desired_subgoal_bb, rigid_object_bb)
+                intersection_area += get_intersection(desired_subgoal_bb,
+                                                      rigid_object_bb)
         if union_area > 0:
             sparse_reward = intersection_area / float(union_area)
         else:
@@ -502,8 +509,9 @@ class BaseTask(object):
         """
         self._current_desired_goal = self.get_desired_goal()
         self._current_achieved_goal = self.get_achieved_goal()
-        self._current_goal_distance = self._goal_distance(desired_goal=self._current_desired_goal,
-                                                          achieved_goal=self._current_achieved_goal)
+        self._current_goal_distance = self._goal_distance(
+            desired_goal=self._current_desired_goal,
+            achieved_goal=self._current_achieved_goal)
         goal_distance = self._current_goal_distance
         self._update_success(self._current_goal_distance)
         if self._task_params['activate_sparse_reward']:
@@ -541,7 +549,8 @@ class BaseTask(object):
                 goal_distance = 0
             return goal_distance
         else:
-            reward = goal_distance * self._task_params["fractional_reward_weight"]
+            reward = goal_distance * self._task_params[
+                "fractional_reward_weight"]
             return reward
 
     def init_task(self, robot, stage, max_episode_length, create_world_func):
@@ -555,14 +564,17 @@ class BaseTask(object):
         self._robot = robot
         self._stage = stage
         if self._task_params["joint_positions"] is not None:
-            self._robot.reset_state(
-                joint_positions=
-                np.array(self._task_params["joint_positions"]),
-                joint_velocities=np.zeros([9, ]))
+            self._robot.reset_state(joint_positions=np.array(
+                self._task_params["joint_positions"]),
+                                    joint_velocities=np.zeros([
+                                        9,
+                                    ]))
         else:
             self._robot.reset_state(
                 joint_positions=self._robot.get_rest_pose()[0],
-                joint_velocities=np.zeros([9, ]))
+                joint_velocities=np.zeros([
+                    9,
+                ]))
         self._empty_stage = self._save_pybullet_state()
         self._set_up_stage_arena()
         self._default_starting_state = \
@@ -574,10 +586,11 @@ class BaseTask(object):
             self._max_episode_length = self.get_default_max_episode_length()
         else:
             self._max_episode_length = max_episode_length
-        self._setup_non_default_robot_observation_key('time_left_for_task',
-                                                      self._calculate_time_left,
-                                                      lower_bound=np.array([0]),
-                                                      upper_bound=np.array([self._max_episode_length]))
+        self._setup_non_default_robot_observation_key(
+            'time_left_for_task',
+            self._calculate_time_left,
+            lower_bound=np.array([0]),
+            upper_bound=np.array([self._max_episode_length]))
         self._set_up_non_default_observations()
         # self.task_params.update(self.initial_state)
         self._set_training_intervention_spaces()
@@ -601,7 +614,8 @@ class BaseTask(object):
         :param upper_bound:
         :return:
         """
-        self._robot.add_observation(observation_key, lower_bound=lower_bound,
+        self._robot.add_observation(observation_key,
+                                    lower_bound=lower_bound,
                                     upper_bound=upper_bound)
         self._non_default_robot_observation_funcs[observation_key] = \
             observation_function
@@ -618,7 +632,8 @@ class BaseTask(object):
         :param upper_bound:
         :return:
         """
-        self._stage.add_observation(observation_key, lower_bound=lower_bound,
+        self._stage.add_observation(observation_key,
+                                    lower_bound=lower_bound,
                                     upper_bound=upper_bound)
         self._non_default_stage_observation_funcs[observation_key] = \
             observation_function
@@ -794,14 +809,14 @@ class BaseTask(object):
             intervention_space = self._training_intervention_spaces
             state_variables_dict = dict()
             for variable_name in intervention_space:
-                if isinstance(
-                        intervention_space[variable_name], dict):
+                if isinstance(intervention_space[variable_name], dict):
                     state_variables_dict[variable_name] = dict()
                     for subvariable_name in intervention_space[variable_name]:
                         state_variables_dict[variable_name][subvariable_name] = \
                             current_variables_values[variable_name][subvariable_name]
                 else:
-                    state_variables_dict[variable_name] = current_variables_values[variable_name]
+                    state_variables_dict[
+                        variable_name] = current_variables_values[variable_name]
         else:
             state_variables_dict = dict(current_variables_values)
         # you can add task specific ones after that
@@ -867,18 +882,19 @@ class BaseTask(object):
                stage_interventions_dict, \
                task_generator_interventions_dict
 
-    def apply_interventions(self, interventions_dict,
-                            check_bounds=False):
+    def apply_interventions(self, interventions_dict, check_bounds=False):
         """
 
         :param interventions_dict:
         :param check_bounds:
         :return:
         """
-        interventions_info = {'out_bounds': False,
-                              'robot_infeasible': None,
-                              'stage_infeasible': None,
-                              'task_generator_infeasible': None}
+        interventions_info = {
+            'out_bounds': False,
+            'robot_infeasible': None,
+            'stage_infeasible': None,
+            'task_generator_infeasible': None
+        }
 
         stage_infeasible = False
         robot_infeasible = False

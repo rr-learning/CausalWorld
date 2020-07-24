@@ -19,8 +19,11 @@ def simulate_policy():
         return a
 
     task = task_generator(task_generator_id='reaching')
-    env = CausalWorld(task=task, enable_visualization=True, skip_frame=1,
-                      seed=0, max_episode_length=2500)
+    env = CausalWorld(task=task,
+                      enable_visualization=True,
+                      skip_frame=1,
+                      seed=0,
+                      max_episode_length=2500)
     env = CurriculumWrapper(env,
                             intervention_actors=[GoalInterventionActorPolicy()],
                             actives=[(0, 1000000000, 1, 0)])
@@ -34,6 +37,7 @@ def simulate_policy():
             total_reward += reward
         print("total reward is :", total_reward)
     env.close()
+
 
 if __name__ == "__main__":
     simulate_policy()

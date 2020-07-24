@@ -2,6 +2,7 @@ from causal_rl_bench.actors.base_policy import BaseActorPolicy
 
 
 class DummyActorPolicy(BaseActorPolicy):
+
     def __init__(self):
         super(DummyActorPolicy, self).__init__()
         self.action = None

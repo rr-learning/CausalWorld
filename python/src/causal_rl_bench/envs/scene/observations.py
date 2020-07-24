@@ -3,7 +3,10 @@ from gym import spaces
 
 
 class StageObservations(object):
-    def __init__(self, rigid_objects, visual_objects,
+
+    def __init__(self,
+                 rigid_objects,
+                 visual_objects,
                  observation_mode="structured",
                  normalize_observations=True,
                  cameras=None,
@@ -140,25 +143,29 @@ class StageObservations(object):
                + self._low_norm
 
     def denormalize_observation(self, observation):
-        return self._low + (observation - self._low_norm) / (self._high_norm - self._low_norm) * (self._high - self._low)
+        return self._low + (observation - self._low_norm) / (
+            self._high_norm - self._low_norm) * (self._high - self._low)
 
     def normalize_observation_for_key(self, observation, key):
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
         if np.array(lower_key == higher_key).all():
             return observation
-        return (self._high_norm - self._low_norm) * (observation - lower_key) / (higher_key - lower_key) + self._low_norm
+        return (self._high_norm - self._low_norm) * (
+            observation - lower_key) / (higher_key - lower_key) + self._low_norm
 
     def denormalize_observation_for_key(self, observation, key):
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
         if np.array(lower_key == higher_key).all():
             return observation
-        return lower_key + (observation - self._low_norm) / (self._high_norm - self._low_norm) * (higher_key - lower_key)
+        return lower_key + (observation - self._low_norm) / (
+            self._high_norm - self._low_norm) * (higher_key - lower_key)
 
     def satisfy_constraints(self, observation):
         if self._normalized_observations:
-            return (observation > self._low_norm).all() and (observation < self._high_norm).all()
+            return (observation > self._low_norm).all() and (
+                observation < self._high_norm).all()
         else:
             return (observation > self._low).all() and \
                    (observation < self._high).all()
@@ -172,13 +179,15 @@ class StageObservations(object):
     def get_current_observations(self, helper_keys):
         observations_dict = dict()
         for rigid_object in self._rigid_objects.values():
-            observations_dict.update({rigid_object.get_name() +'_'+
-                                      k : v for k, v in
-                                      rigid_object.get_state().items()})
+            observations_dict.update({
+                rigid_object.get_name() + '_' + k: v
+                for k, v in rigid_object.get_state().items()
+            })
         for visual_object in self._visual_objects.values():
-            observations_dict.update({visual_object.get_name() +'_'+
-                                      k : v for k, v in
-                                      visual_object.get_state().items()})
+            observations_dict.update({
+                visual_object.get_name() + '_' + k: v
+                for k, v in visual_object.get_state().items()
+            })
         observation_dict_keys = list(observations_dict.keys())
         for observation in observation_dict_keys:
             if (observation not in self._observations_keys) and \
@@ -200,7 +209,9 @@ class StageObservations(object):
             self._observations_keys.remove(observation)
         self.set_observation_spaces()
 
-    def add_observation(self, observation_key, lower_bound=None,
+    def add_observation(self,
+                        observation_key,
+                        lower_bound=None,
                         upper_bound=None):
         if observation_key not in self._lower_bounds.keys() and \
                 (lower_bound is None or upper_bound is None):
@@ -218,8 +229,6 @@ class StageObservations(object):
             images.append(self._goal_cameras[i].get_image())
         camera_obs = np.stack(images, axis=0)
         if self._normalized_observations:
-            camera_obs = self.normalize_observation_for_key(camera_obs,
-                                                            "goal_image")
+            camera_obs = self.normalize_observation_for_key(
+                camera_obs, "goal_image")
         return camera_obs
-
-

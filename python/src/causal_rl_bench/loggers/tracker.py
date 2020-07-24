@@ -2,6 +2,7 @@ import pickle
 
 
 class TaskStats:
+
     def __init__(self, task):
         self.task_name = task._task_name
         self.task_params = task.get_task_params()
@@ -14,6 +15,7 @@ class TaskStats:
 
 
 class Tracker:
+
     def __init__(self, task=None, file_path=None, world_params=None):
         self.total_time_steps = 0
         self.total_resets = 0
@@ -74,27 +76,30 @@ class Tracker:
     def save(self, file_path):
         if self.world_params is None:
             raise Exception("world_params not set")
-        tracker_dict = {"task_stats_log":
-                            self.task_stats_log + [self._curr_task_stat],
-                        "total_time_steps":
-                            self.total_time_steps + self._curr_task_stat.time_steps,
-                        "total_resets":
-                            self.total_resets + self._curr_task_stat.num_resets,
-                        "total_interventions":
-                            self.total_interventions,
-                        "total_intervention_steps":
-                            self.total_intervention_steps,
-                        "total_invalid_intervention_steps":
-                            self.invalid_intervention_steps,
-                        "total_invalid_robot_intervention_steps":
-                            self.invalid_robot_intervention_steps,
-                        "total_invalid_stage_intervention_steps":
-                            self.invalid_stage_intervention_steps,
-                        "total_invalid_task_generator_intervention_steps":
-                            self.invalid_task_generator_intervention_steps,
-                        "total_invalid_out_of_bounds_intervention_steps":
-                            self.invalid_out_of_bounds_intervention_steps,
-                        "world_params": self.world_params}
+        tracker_dict = {
+            "task_stats_log":
+                self.task_stats_log + [self._curr_task_stat],
+            "total_time_steps":
+                self.total_time_steps + self._curr_task_stat.time_steps,
+            "total_resets":
+                self.total_resets + self._curr_task_stat.num_resets,
+            "total_interventions":
+                self.total_interventions,
+            "total_intervention_steps":
+                self.total_intervention_steps,
+            "total_invalid_intervention_steps":
+                self.invalid_intervention_steps,
+            "total_invalid_robot_intervention_steps":
+                self.invalid_robot_intervention_steps,
+            "total_invalid_stage_intervention_steps":
+                self.invalid_stage_intervention_steps,
+            "total_invalid_task_generator_intervention_steps":
+                self.invalid_task_generator_intervention_steps,
+            "total_invalid_out_of_bounds_intervention_steps":
+                self.invalid_out_of_bounds_intervention_steps,
+            "world_params":
+                self.world_params
+        }
         with open(file_path, "wb") as file_handle:
             pickle.dump(tracker_dict, file_handle)
 
@@ -102,7 +107,8 @@ class Tracker:
         with open(file_path, "rb") as file:
             tracker_dict = pickle.load(file)
             self.total_interventions += tracker_dict["total_interventions"]
-            self.total_intervention_steps += tracker_dict["total_intervention_steps"]
+            self.total_intervention_steps += tracker_dict[
+                "total_intervention_steps"]
             self.invalid_intervention_steps += tracker_dict[
                 "total_invalid_intervention_steps"]
             self.invalid_robot_intervention_steps += tracker_dict[
@@ -144,5 +150,3 @@ class Tracker:
 
     def get_total_invalid_out_of_bounds_intervention_steps(self):
         return self.invalid_out_of_bounds_intervention_steps
-
-

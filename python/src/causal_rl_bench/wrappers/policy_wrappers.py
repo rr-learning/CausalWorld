@@ -2,6 +2,7 @@ from causal_rl_bench.actors.base_policy import BaseActorPolicy
 
 
 class MovingAverageActionWrapperActorPolicy(BaseActorPolicy):
+
     def __init__(self, policy, widow_size=8, initial_value=0):
         super(BaseActorPolicy, self).__init__()
         self.__widow_size = widow_size

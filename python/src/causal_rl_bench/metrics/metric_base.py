@@ -1,4 +1,5 @@
 class BaseMetric(object):
+
     def __init__(self, name):
         """
 

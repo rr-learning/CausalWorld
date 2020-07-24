@@ -1,5 +1,6 @@
 class BaseInterventionActorPolicy(object):
     """This class indicates the interface of a meta actor"""
+
     def __init__(self, **kwargs):
         return
 
@@ -61,4 +62,3 @@ class BaseInterventionActorPolicy(object):
         :return:
         """
         raise Exception("get params is not implemented")
-

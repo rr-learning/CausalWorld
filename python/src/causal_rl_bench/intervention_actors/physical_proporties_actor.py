@@ -4,6 +4,7 @@ import numpy as np
 
 
 class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
+
     def __init__(self, group, **kwargs):
         """
 
@@ -42,17 +43,16 @@ class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
                     if 'mass' in self.task_intervention_space[variable]:
                         interventions_dict[variable] = dict()
                         interventions_dict[variable]['mass'] = np.random.uniform(
-                                                                self.task_intervention_space
-                                                                [variable]['mass'][0],
-                                                                self.task_intervention_space
-                                                                [variable]['mass'][1])
+                            self.task_intervention_space[variable]['mass'][0],
+                            self.task_intervention_space[variable]['mass'][1])
                     elif 'friction' in self.task_intervention_space[variable]:
                         interventions_dict[variable] = dict()
-                        interventions_dict[variable]['friction'] = np.random.uniform(
-                                                                self.task_intervention_space
-                                                                [variable]['friction'][0],
-                                                                self.task_intervention_space
-                                                                [variable]['friction'][1])
+                        interventions_dict[variable][
+                            'friction'] = np.random.uniform(
+                                self.task_intervention_space[variable]
+                                ['friction'][0],
+                                self.task_intervention_space[variable]
+                                ['friction'][1])
                 elif 'mass' in variable:
                     interventions_dict[variable] = np.random.uniform(
                         self.task_intervention_space[variable][0],

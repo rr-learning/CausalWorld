@@ -3,6 +3,7 @@ import numpy as np
 
 
 class RandomInTrainSet(Protocol):
+
     def __init__(self):
         super().__init__('random_in_train_set')
 

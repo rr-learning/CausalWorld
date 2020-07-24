@@ -4,6 +4,7 @@ import json
 
 
 class DataLoader:
+
     def __init__(self, episode_directory):
         if os.path.isdir(episode_directory):
             self.episode_directory = episode_directory
@@ -32,11 +33,13 @@ class DataLoader:
         if ceil_index_episode > self.max_episode_index:
             ceil_index_episode = self.max_episode_index
 
-        episode_file = "episode_{}_{}".format(floor_index_episode, ceil_index_episode)
+        episode_file = "episode_{}_{}".format(floor_index_episode,
+                                              ceil_index_episode)
         episodes_path = os.path.join(self.episode_directory, episode_file)
         if os.path.isfile(episodes_path):
             with open(episodes_path, "rb") as file:
                 episodes = pickle.load(file)
                 return episodes[infile_index_episode]
         else:
-            raise Exception("Error: Log file with requested episode does not exist")
+            raise Exception(
+                "Error: Log file with requested episode does not exist")

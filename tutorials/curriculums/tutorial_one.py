@@ -8,8 +8,7 @@ from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 def example():
     #initialize env
     task = task_generator(task_generator_id='reaching')
-    env = CausalWorld(task, skip_frame=10,
-                      enable_visualization=True)
+    env = CausalWorld(task, skip_frame=10, enable_visualization=True)
 
     # define a custom curriculum of interventions:
     # Goal intervention actor each episode after reset

@@ -2,9 +2,17 @@ import numpy as np
 
 
 class CrossEntropyMethod(object):
-    def __init__(self, planning_horizon, max_iterations, population_size,
-                 num_elite, action_upper_bound, action_lower_bound,
-                 model, epsilon=0.001, alpha=0.25):
+
+    def __init__(self,
+                 planning_horizon,
+                 max_iterations,
+                 population_size,
+                 num_elite,
+                 action_upper_bound,
+                 action_lower_bound,
+                 model,
+                 epsilon=0.001,
+                 alpha=0.25):
         #TODO: support a learned model too
         self.max_iterations = max_iterations
         self.population_size = population_size
@@ -19,8 +27,8 @@ class CrossEntropyMethod(object):
             (self.action_upper_bound + self.action_lower_bound)/2
         self.actions_mean = np.tile(np.expand_dims(self.actions_mean, 0),
                                     [self.planning_horizon, 1])
-        self.actions_variance = np.square(
-            self.action_upper_bound - self.action_lower_bound) / 16
+        self.actions_variance = np.square(self.action_upper_bound -
+                                          self.action_lower_bound) / 16
         self.actions_variance = np.tile(
             np.expand_dims(self.actions_variance, 0),
             [self.planning_horizon, 1])
@@ -34,10 +42,10 @@ class CrossEntropyMethod(object):
         while iteration_index < self.max_iterations:
             print("cem iteration number: ", iteration_index)
             #TODO: change to truncated one
-            action_samples = np.random.normal(current_actions_mean,
-                                              np.sqrt(current_actions_var),
-                                              size=[self.population_size,
-                                                    *self.actions_mean.shape])
+            action_samples = np.random.normal(
+                current_actions_mean,
+                np.sqrt(current_actions_var),
+                size=[self.population_size, *self.actions_mean.shape])
             rewards = self.model.evaluate_trajectories(action_samples)
             elites_indicies = rewards.argsort(axis=0)[-self.num_elite:][::-1]
             best_current_reward = np.max(rewards)
@@ -49,8 +57,8 @@ class CrossEntropyMethod(object):
             new_mean = np.mean(elites, axis=0)
             new_variance = np.var(elites, axis=0)
             current_actions_mean = (self.alpha * current_actions_mean) + (
-                                   (1 - self.alpha) * new_mean)
+                (1 - self.alpha) * new_mean)
             current_actions_var = (self.alpha * current_actions_var) + (
-                    (1 - self.alpha) * new_variance)
+                (1 - self.alpha) * new_variance)
             iteration_index += 1
         return best_action

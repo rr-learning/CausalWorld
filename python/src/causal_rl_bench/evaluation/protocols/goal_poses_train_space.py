@@ -2,6 +2,7 @@ from causal_rl_bench.evaluation.protocol import Protocol
 
 
 class GoalPosesTrainSpace(Protocol):
+
     def __init__(self):
         super().__init__('goal_poses_train_space')
 

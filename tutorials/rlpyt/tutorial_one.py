@@ -13,9 +13,11 @@ import os
 
 def _make_env(rank):
     task = task_generator(task_generator_id='reaching')
-    env = CausalWorld(task=task, skip_frame=10,
+    env = CausalWorld(task=task,
+                      skip_frame=10,
                       enable_visualization=False,
-                      seed=0 + rank, max_episode_length=600)
+                      seed=0 + rank,
+                      max_episode_length=600)
     env = GymEnvWrapper(env)
     return env
 

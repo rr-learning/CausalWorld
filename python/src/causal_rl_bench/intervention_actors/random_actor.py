@@ -4,6 +4,7 @@ import numpy as np
 
 
 class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
+
     def __init__(self, **kwargs):
         """
 

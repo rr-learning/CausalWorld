@@ -5,10 +5,10 @@ import unittest
 
 
 class TestCreativeStackedBlocks(unittest.TestCase):
+
     def setUp(self):
         self.task = task_generator(task_generator_id="creative_stacked_blocks")
-        self.env = CausalWorld(task=self.task,
-                               enable_visualization=False)
+        self.env = CausalWorld(task=self.task, enable_visualization=False)
         return
 
     def tearDown(self):
@@ -38,7 +38,9 @@ class TestCreativeStackedBlocks(unittest.TestCase):
                 observations_2.append(obs)
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
-                    print(np.array(observations_1[i]) - np.array(observations_2[i]))
+                    print(
+                        np.array(observations_1[i]) -
+                        np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 
@@ -65,7 +67,9 @@ class TestCreativeStackedBlocks(unittest.TestCase):
                 observations_2.append(obs)
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
-                    print(np.array(observations_1[i]) - np.array(observations_2[i]))
+                    print(
+                        np.array(observations_1[i]) -
+                        np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 
@@ -85,7 +89,10 @@ class TestCreativeStackedBlocks(unittest.TestCase):
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             if i == 50:
-                success_signal = self.env.do_intervention({'tool_level_0_num_1': {'cartesian_position': [0, 0, 2]}})
+                success_signal = self.env.do_intervention(
+                    {'tool_level_0_num_1': {
+                        'cartesian_position': [0, 0, 2]
+                    }})
         observations_2 = []
         rewards_2 = []
         self.env.reset()

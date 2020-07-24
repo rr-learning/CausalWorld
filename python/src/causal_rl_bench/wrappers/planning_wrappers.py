@@ -7,6 +7,7 @@ import numpy as np
 
 
 class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
+
     def __init__(self):
         super(ObjectSelectorActorPolicy, self).__init__()
         self.low_joint_positions = None
@@ -32,17 +33,23 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
             interventions_dict[self.selected_object]['cartesian_position'] = \
                 variables_dict[self.selected_object]['cartesian_position']
             if self.current_action[1] == 1:
-                interventions_dict[self.selected_object]['cartesian_position'][-1] += 0.002
+                interventions_dict[
+                    self.selected_object]['cartesian_position'][-1] += 0.002
             elif self.current_action[1] == 2:
-                interventions_dict[self.selected_object]['cartesian_position'][-1] -= 0.002
+                interventions_dict[
+                    self.selected_object]['cartesian_position'][-1] -= 0.002
             elif self.current_action[1] == 3:
-                interventions_dict[self.selected_object]['cartesian_position'][0] += 0.002
+                interventions_dict[
+                    self.selected_object]['cartesian_position'][0] += 0.002
             elif self.current_action[1] == 4:
-                interventions_dict[self.selected_object]['cartesian_position'][0] -= 0.002
+                interventions_dict[
+                    self.selected_object]['cartesian_position'][0] -= 0.002
             elif self.current_action[1] == 5:
-                interventions_dict[self.selected_object]['cartesian_position'][1] += 0.002
+                interventions_dict[
+                    self.selected_object]['cartesian_position'][1] += 0.002
             elif self.current_action[1] == 6:
-                interventions_dict[self.selected_object]['cartesian_position'][1] -= 0.002
+                interventions_dict[
+                    self.selected_object]['cartesian_position'][1] -= 0.002
             else:
                 raise Exception("The passed action mode is not supported")
         if self.current_action[2] != 0:
@@ -69,26 +76,30 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
 
 
 class ObjectSelectorWrapper(gym.Wrapper):
+
     def __init__(self, env):
         super(ObjectSelectorWrapper, self).__init__(env)
         self.env = env
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
         self.env._disable_actions()
-        self.observation_space = gym.spaces.Box(self.env.observation_space.low[28:],
-                                                self.env.observation_space.high[28:],
-                                                dtype=np.float64)
-        self.objects_order = list(self.env.get_stage().get_rigid_objects().keys())
+        self.observation_space = gym.spaces.Box(
+            self.env.observation_space.low[28:],
+            self.env.observation_space.high[28:],
+            dtype=np.float64)
+        self.objects_order = list(
+            self.env.get_stage().get_rigid_objects().keys())
         self.objects_order.sort()
         number_of_objects = len(self.objects_order)
-        self.action_space = gym.spaces.Tuple((gym.spaces.Discrete(number_of_objects),
-                                              gym.spaces.Discrete(7),
-                                              gym.spaces.Discrete(7)))
+        self.action_space = gym.spaces.Tuple(
+            (gym.spaces.Discrete(number_of_objects), gym.spaces.Discrete(7),
+             gym.spaces.Discrete(7)))
         self.env.add_wrapper_info({'object_selector': dict()})
 
     def step(self, action):
         #buffer action to the intervention actor
-        self.intervention_actor.add_action(action, self.objects_order[action[0]])
+        self.intervention_actor.add_action(action,
+                                           self.objects_order[action[0]])
         intervention_dict = self.intervention_actor.act(
             self.env.get_current_state_variables())
         self.env.do_intervention(intervention_dict)

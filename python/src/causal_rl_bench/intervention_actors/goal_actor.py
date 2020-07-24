@@ -3,6 +3,7 @@ from causal_rl_bench.intervention_actors.base_actor import \
 
 
 class GoalInterventionActorPolicy(BaseInterventionActorPolicy):
+
     def __init__(self, **kwargs):
         """
 

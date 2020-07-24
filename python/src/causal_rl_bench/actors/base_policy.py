@@ -4,6 +4,7 @@ class BaseActorPolicy(object):
     be implemented to record and view a trained policy using the
     TaskViewer class
     """
+
     def __init__(self, identifier=None):
         """
 

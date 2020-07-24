@@ -5,6 +5,7 @@ import unittest
 
 
 class TestReaching(unittest.TestCase):
+
     def setUp(self):
         self.task = task_generator(task_generator_id="reaching")
         self.env = CausalWorld(task=self.task,
@@ -25,7 +26,7 @@ class TestReaching(unittest.TestCase):
     #     for i in range(horizon):
     #         obs, reward, done, info = self.env.step(desired_goal)
 
-            # print(obs[19:28])
+    # print(obs[19:28])
 
     def test_determinism(self):
         observations_1 = []
@@ -50,7 +51,9 @@ class TestReaching(unittest.TestCase):
                 observations_2.append(obs)
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
-                    print(np.array(observations_1[i]) - np.array(observations_2[i]))
+                    print(
+                        np.array(observations_1[i]) -
+                        np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 

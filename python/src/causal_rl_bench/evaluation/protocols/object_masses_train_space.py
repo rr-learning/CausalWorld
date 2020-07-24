@@ -3,6 +3,7 @@ import numpy as np
 
 
 class ObjectMassesTrainSpace(Protocol):
+
     def __init__(self):
         super().__init__('object_masses_train_space')
 
@@ -16,8 +17,9 @@ class ObjectMassesTrainSpace(Protocol):
                         'mass' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()
                     if mass is None:
-                        mass = np.random.uniform(intervention_space[rigid_object]['mass'][0],
-                                                 intervention_space[rigid_object]['mass'][1])
+                        mass = np.random.uniform(
+                            intervention_space[rigid_object]['mass'][0],
+                            intervention_space[rigid_object]['mass'][1])
                     intervention_dict[rigid_object]['mass'] = mass
             return intervention_dict
         else:

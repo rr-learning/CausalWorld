@@ -11,13 +11,12 @@ import numpy as np
 def example():
     #initialize env
     task_gen = task_generator(task_generator_id='pushing')
-    env = CausalWorld(task_gen, skip_frame=1,
-                      enable_visualization=True)
+    env = CausalWorld(task_gen, skip_frame=1, enable_visualization=True)
     env = DeltaActionEnvWrapper(env)
-    env = CurriculumWrapper(env,
-                            intervention_actors=[
-                                VisualInterventionActorPolicy()],
-                            actives=[(0, 20, 1, 0)])
+    env = CurriculumWrapper(
+        env,
+        intervention_actors=[VisualInterventionActorPolicy()],
+        actives=[(0, 20, 1, 0)])
 
     for reset_idx in range(10):
         obs = env.reset()

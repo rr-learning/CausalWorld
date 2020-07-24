@@ -4,6 +4,7 @@ from causal_rl_bench.intervention_actors.base_actor import \
 
 
 class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
+
     def __init__(self, positions=True, orientations=True, **kwargs):
         """
 
@@ -59,5 +60,9 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
 
         :return:
         """
-        return {'rigid_pose_actor': {'positions': self.positions,
-                                     'orientations': self.orientations}}
+        return {
+            'rigid_pose_actor': {
+                'positions': self.positions,
+                'orientations': self.orientations
+            }
+        }
