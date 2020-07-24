@@ -6,4 +6,3 @@ from causal_rl_bench.envs.scene.stage import Stage, StaticCuboid, \
 from causal_rl_bench.envs.scene.objects import RigidObject
 
 from causal_rl_bench.envs.scene.silhouette import SilhouetteObject
-

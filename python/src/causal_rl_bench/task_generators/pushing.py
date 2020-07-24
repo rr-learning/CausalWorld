@@ -5,23 +5,22 @@ import numpy as np
 
 
 class PushingTaskGenerator(BaseTask):
+
     def __init__(self, **kwargs):
         """
 
         :param kwargs:
         """
-        super().__init__(task_name="pushing",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                        False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([750, 250, 100])))
-        self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+        super().__init__(
+            task_name="pushing",
+            use_train_space_only=kwargs.get("use_train_space_only", False),
+            fractional_reward_weight=kwargs.get("fractional_reward_weight", 1),
+            dense_reward_weights=kwargs.get("dense_reward_weights",
+                                            np.array([750, 250, 100])))
+        self._task_robot_observation_keys = [
+            "time_left_for_task", "joint_positions", "joint_velocities",
+            "end_effector_positions"
+        ]
         self._task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.08)
         self._task_params["joint_positions"] = \
@@ -52,31 +51,28 @@ class PushingTaskGenerator(BaseTask):
 
         :return:
         """
-        creation_dict = {'name': "tool_block",
-                         'shape': "cube",
-                         'initial_position': self._task_params
-                         ["tool_block_position"],
-                         'initial_orientation': self._task_params
-                         ["goal_block_position"],
-                         'mass': self._task_params["tool_block_mass"]}
+        creation_dict = {
+            'name': "tool_block",
+            'shape': "cube",
+            'initial_position': self._task_params["tool_block_position"],
+            'initial_orientation': self._task_params["goal_block_position"],
+            'mass': self._task_params["tool_block_mass"]
+        }
         self._stage.add_rigid_general_object(**creation_dict)
-        creation_dict = {'name': "goal_block",
-                         'shape': "cube",
-                         'position': self._task_params
-                         ["goal_block_position"],
-                         'orientation':  self._task_params
-                         ["goal_block_orientation"]}
+        creation_dict = {
+            'name': "goal_block",
+            'shape': "cube",
+            'position': self._task_params["goal_block_position"],
+            'orientation': self._task_params["goal_block_orientation"]
+        }
         self._stage.add_silhoutte_general_object(**creation_dict)
-        self._task_stage_observation_keys = ["tool_block_type",
-                                            "tool_block_size",
-                                            "tool_block_cartesian_position",
-                                            "tool_block_orientation",
-                                            "tool_block_linear_velocity",
-                                            "tool_block_angular_velocity",
-                                            "goal_block_type",
-                                            "goal_block_size",
-                                            "goal_block_cartesian_position",
-                                            "goal_block_orientation"]
+        self._task_stage_observation_keys = [
+            "tool_block_type", "tool_block_size",
+            "tool_block_cartesian_position", "tool_block_orientation",
+            "tool_block_linear_velocity", "tool_block_angular_velocity",
+            "goal_block_type", "goal_block_size",
+            "goal_block_cartesian_position", "goal_block_orientation"
+        ]
         return
 
     def _set_training_intervention_spaces(self):
@@ -136,13 +132,13 @@ class PushingTaskGenerator(BaseTask):
         # 8) delta in joint velocities
         rewards = list()
         block_position = self._stage.get_object_state('tool_block',
-                                                     'cartesian_position')
-        block_orientation = self._stage.get_object_state('tool_block',
-                                                        'orientation')
+                                                      'cartesian_position')
+        block_orientation = self._stage.get_object_state(
+            'tool_block', 'orientation')
         goal_position = self._stage.get_object_state('goal_block',
-                                                    'cartesian_position')
+                                                     'cartesian_position')
         goal_orientation = self._stage.get_object_state('goal_block',
-                                                       'orientation')
+                                                        'orientation')
         end_effector_positions = \
             self._robot.get_latest_full_state()['end_effector_positions']
         end_effector_positions = end_effector_positions.reshape(-1, 3)
@@ -163,23 +159,23 @@ class PushingTaskGenerator(BaseTask):
         rewards.append(previous_dist_to_goal - current_dist_to_goal)
 
         # calculate third reward term
-        quat_diff_old = quaternion_mul(np.expand_dims(goal_orientation, 0),
-                                       quaternion_conjugate(np.expand_dims(
-                                           self.previous_object_orientation,
-                                           0)))
+        quat_diff_old = quaternion_mul(
+            np.expand_dims(goal_orientation, 0),
+            quaternion_conjugate(
+                np.expand_dims(self.previous_object_orientation, 0)))
         angle_diff_old = 2 * np.arccos(np.clip(quat_diff_old[:, 3], -1., 1.))
 
-        quat_diff = quaternion_mul(np.expand_dims(goal_orientation, 0),
-                                   quaternion_conjugate(np.expand_dims(
-                                       block_orientation,
-                                       0)))
+        quat_diff = quaternion_mul(
+            np.expand_dims(goal_orientation, 0),
+            quaternion_conjugate(np.expand_dims(block_orientation, 0)))
         current_angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
 
-        rewards.append(angle_diff_old[0] -
-                       current_angle_diff[0])
-        update_task_info = {'current_end_effector_positions': end_effector_positions,
-                            'current_tool_block_position': block_position,
-                            'current_tool_block_orientation': block_orientation}
+        rewards.append(angle_diff_old[0] - current_angle_diff[0])
+        update_task_info = {
+            'current_end_effector_positions': end_effector_positions,
+            'current_tool_block_position': block_position,
+            'current_tool_block_orientation': block_orientation
+        }
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
@@ -233,4 +229,3 @@ class PushingTaskGenerator(BaseTask):
                 interventions_dict['goal_block']['size'] = \
                     interventions_dict['tool_block']['size']
         return interventions_dict
-

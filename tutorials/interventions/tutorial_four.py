@@ -14,8 +14,10 @@ def privileged_information():
         for i in range(1000):
             obs, reward, done, info = env.step(env.action_space.low)
         print("now we solve it with privileged info")
-        success_signal, obs = env.do_intervention(info['possible_solution_intervention'])
-        print("Partial Solution Setting Intervention Succes Signal", success_signal)
+        success_signal, obs = env.do_intervention(
+            info['possible_solution_intervention'])
+        print("Partial Solution Setting Intervention Succes Signal",
+              success_signal)
         for i in range(500):
             obs, reward, done, info = env.step(env.action_space.low)
     env.close()

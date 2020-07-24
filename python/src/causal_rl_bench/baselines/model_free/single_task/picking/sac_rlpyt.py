@@ -14,15 +14,16 @@ import psutil
 
 def _make_env(rank):
     task = task_generator(task_generator_id='picking',
-                          dense_reward_weights=np.array([250, 0, 125,
-                                                         0, 750, 0, 0,
-                                                         0.005]),
+                          dense_reward_weights=np.array(
+                              [250, 0, 125, 0, 750, 0, 0, 0.005]),
                           fractional_reward_weight=1,
                           goal_height=0.15,
                           tool_block_mass=0.02)
-    env = CausalWorld(task=task, skip_frame=3,
+    env = CausalWorld(task=task,
+                      skip_frame=3,
                       enable_visualization=False,
-                      seed=0, max_episode_length=600)
+                      seed=0,
+                      max_episode_length=600)
     env = GymEnvWrapper(env)
     return env
 
@@ -34,18 +35,16 @@ def build_and_train():
                     master_cpus=cpus,
                     workers_cpus=list([x] for x in cpus),
                     set_affinity=True)
-    sampler = CpuSampler(
-        EnvCls=_make_env,
-        env_kwargs=dict(rank=0),
-        batch_T=1,
-        batch_B=4,
-        max_decorrelation_steps=0,
-        CollectorCls=CpuResetCollector
-    )
+    sampler = CpuSampler(EnvCls=_make_env,
+                         env_kwargs=dict(rank=0),
+                         batch_T=1,
+                         batch_B=4,
+                         max_decorrelation_steps=0,
+                         CollectorCls=CpuResetCollector)
     algo = SAC(batch_size=256,
                min_steps_learn=10000,
                replay_size=1000000,
-               replay_ratio=256/4,
+               replay_ratio=256 / 4,
                target_update_interval=1,
                target_entropy=-9,
                target_update_tau=0.01,
@@ -69,7 +68,12 @@ def build_and_train():
     config = dict(env_id='picking')
     name = "sac_rlpyt_picking"
     log_dir = os.path.join(os.path.dirname(__file__), "sac_rlpyt_picking")
-    with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='all'):
+    with logger_context(log_dir,
+                        0,
+                        name,
+                        config,
+                        use_summary_writer=True,
+                        snapshot_mode='all'):
         runner.train()
 
 

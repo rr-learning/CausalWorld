@@ -46,15 +46,17 @@ def build_and_train():
     )
 
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256]))
-    ppo_config = {"discount": 0.98,
-                  "entropy_loss_coeff": 0.01,
-                  "learning_rate": 0.00025,
-                  "value_loss_coeff": 0.5,
-                  "clip_grad_norm": 0.5,
-                  "minibatches": 40,
-                  "gae_lambda": 0.95,
-                  "ratio_clip": 0.2,
-                  "epochs": 4}
+    ppo_config = {
+        "discount": 0.98,
+        "entropy_loss_coeff": 0.01,
+        "learning_rate": 0.00025,
+        "value_loss_coeff": 0.5,
+        "clip_grad_norm": 0.5,
+        "minibatches": 40,
+        "gae_lambda": 0.95,
+        "ratio_clip": 0.2,
+        "epochs": 4
+    }
 
     algo = PPO(**ppo_config)
     agent = MujocoFfAgent(**model_kwargs)
@@ -70,7 +72,12 @@ def build_and_train():
     config = dict(rank=0, env_id='picking')
     name = "ppo_rlpyt_pushing"
     log_dir = os.path.join(os.path.dirname(__file__), name)
-    with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='all'):
+    with logger_context(log_dir,
+                        0,
+                        name,
+                        config,
+                        use_summary_writer=True,
+                        snapshot_mode='all'):
         runner.train()
 
 

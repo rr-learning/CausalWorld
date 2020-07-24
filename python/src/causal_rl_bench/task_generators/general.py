@@ -5,6 +5,7 @@ import math
 
 
 class GeneralGeneratorTask(BaseTask):
+
     def __init__(self, **kwargs):
         """
         This task generator
@@ -12,18 +13,16 @@ class GeneralGeneratorTask(BaseTask):
         sample goal function
         :param kwargs:
         """
-        super().__init__(task_name="general",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                         False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([])))
-        self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+        super().__init__(
+            task_name="general",
+            use_train_space_only=kwargs.get("use_train_space_only", False),
+            fractional_reward_weight=kwargs.get("fractional_reward_weight", 1),
+            dense_reward_weights=kwargs.get("dense_reward_weights",
+                                            np.array([])))
+        self._task_robot_observation_keys = [
+            "time_left_for_task", "joint_positions", "joint_velocities",
+            "end_effector_positions"
+        ]
 
         #for this task the stage observation keys will be set with the
         #goal/structure building
@@ -34,14 +33,10 @@ class GeneralGeneratorTask(BaseTask):
         self._task_params["nums_objects"] = kwargs.get("nums_objects", 5)
         self._task_params["tool_block_size"] = \
             kwargs.get("tool_block_size", 0.05)
-        self.default_drop_positions = [[0.1, 0.1, 0.2],
-                                       [0, 0, 0.2],
-                                       [0.05, 0.05, 0.3],
-                                       [-0.05, -0.05, 0.1],
-                                       [-0.12,  -0.12, 0.2],
-                                       [-0.12, 0.12, 0.2],
-                                       [0.12, -0.10, 0.3],
-                                       [0.9, -0.8, 0.1]]
+        self.default_drop_positions = [[0.1, 0.1, 0.2], [0, 0, 0.2],
+                                       [0.05, 0.05, 0.3], [-0.05, -0.05, 0.1],
+                                       [-0.12, -0.12, 0.2], [-0.12, 0.12, 0.2],
+                                       [0.12, -0.10, 0.3], [0.9, -0.8, 0.1]]
         self.tool_mass = self._task_params["tool_block_mass"]
         self.nums_objects = self._task_params["nums_objects"]
         self.tool_block_size = np.array(self._task_params["tool_block_size"])
@@ -128,9 +123,11 @@ class GeneralGeneratorTask(BaseTask):
 
         :return:
         """
-        return {'nums_objects': self.nums_objects,
-                'blocks_mass': self.tool_mass,
-                'tool_block_size': self.tool_block_size}
+        return {
+            'nums_objects': self.nums_objects,
+            'blocks_mass': self.tool_mass,
+            'tool_block_size': self.tool_block_size
+        }
 
     def apply_task_generator_interventions(self, interventions_dict):
         """
@@ -187,48 +184,49 @@ class GeneralGeneratorTask(BaseTask):
                     object_num % len(self.default_drop_positions)]
                 dropping_orientation = [0, 0, 0, 1]
             else:
-                dropping_position = np.random.uniform(self._stage.get_arena_bb()[0],
-                                                      self._stage.get_arena_bb()[1])
-                dropping_orientation = euler_to_quaternion(np.random.uniform(
-                    low=0, high=2 * math.pi, size=3))
-            creation_dict = {'name': "tool_"+str(object_num),
-                             'shape': "cube",
-                             'initial_position': dropping_position,
-                             'initial_orientation': dropping_orientation,
-                             'mass': self.tool_mass,
-                             'size': np.repeat(self.tool_block_size, 3)}
+                dropping_position = np.random.uniform(
+                    self._stage.get_arena_bb()[0],
+                    self._stage.get_arena_bb()[1])
+                dropping_orientation = euler_to_quaternion(
+                    np.random.uniform(low=0, high=2 * math.pi, size=3))
+            creation_dict = {
+                'name': "tool_" + str(object_num),
+                'shape': "cube",
+                'initial_position': dropping_position,
+                'initial_orientation': dropping_orientation,
+                'mass': self.tool_mass,
+                'size': np.repeat(self.tool_block_size, 3)
+            }
             self._stage.add_rigid_general_object(**creation_dict)
-            self._task_stage_observation_keys.append("tool_" +
-                                                    str(object_num)
-                                                    + '_type')
-            self._task_stage_observation_keys.append("tool_" +
-                                                    str(object_num)
-                                                    + '_size')
-            self._task_stage_observation_keys.append("tool_" +
-                                                    str(object_num)
-                                                    + '_cartesian_position')
-            self._task_stage_observation_keys.append("tool_" +
-                                                    str(object_num)
-                                                    + '_orientation')
-            self._task_stage_observation_keys.append("tool_" +
-                                                    str(object_num)
-                                                    + '_linear_velocity')
-            self._task_stage_observation_keys.append("tool_" +
-                                                    str(object_num)
-                                                    + '_angular_velocity')
+            self._task_stage_observation_keys.append("tool_" + str(object_num) +
+                                                     '_type')
+            self._task_stage_observation_keys.append("tool_" + str(object_num) +
+                                                     '_size')
+            self._task_stage_observation_keys.append("tool_" + str(object_num) +
+                                                     '_cartesian_position')
+            self._task_stage_observation_keys.append("tool_" + str(object_num) +
+                                                     '_orientation')
+            self._task_stage_observation_keys.append("tool_" + str(object_num) +
+                                                     '_linear_velocity')
+            self._task_stage_observation_keys.append("tool_" + str(object_num) +
+                                                     '_angular_velocity')
             # turn on simulation for 0.5 seconds
             self._robot.forward_simulation(time=0.5)
         for rigid_object in self._stage._rigid_objects:
             #search for the rigid object in the creation list
-            creation_dict = {'name': rigid_object.replace('tool', 'goal'),
-                             'shape': "cube",
-                             'position':
-                                 self._stage.get_object_state(
-                                     rigid_object, 'cartesian_position'),
-                             'orientation':
-                                 self._stage.get_object_state(
-                                     rigid_object, 'orientation'),
-                             'size': np.repeat(self.tool_block_size, 3)}
+            creation_dict = {
+                'name':
+                    rigid_object.replace('tool', 'goal'),
+                'shape':
+                    "cube",
+                'position':
+                    self._stage.get_object_state(rigid_object,
+                                                 'cartesian_position'),
+                'orientation':
+                    self._stage.get_object_state(rigid_object, 'orientation'),
+                'size':
+                    np.repeat(self.tool_block_size, 3)
+            }
             self._stage.add_silhoutte_general_object(**creation_dict)
             self._task_stage_observation_keys.append(
                 rigid_object.replace('tool', 'goal') + '_type')
@@ -259,8 +257,9 @@ class GeneralGeneratorTask(BaseTask):
                                              orientations=[block_orientation])
                 self._robot.step_simulation()
                 trial_index += 1
-        self._robot.reset_state(
-            joint_positions=self._robot.get_rest_pose()[0],
-            joint_velocities=np.zeros([9, ]))
+        self._robot.reset_state(joint_positions=self._robot.get_rest_pose()[0],
+                                joint_velocities=np.zeros([
+                                    9,
+                                ]))
         self._robot.update_latest_full_state()
         return

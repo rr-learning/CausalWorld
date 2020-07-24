@@ -3,6 +3,7 @@ import numpy as np
 
 
 class ObjectColorsTrainSpace(Protocol):
+
     def __init__(self):
         super().__init__('object_colors_train_space')
 
@@ -16,8 +17,9 @@ class ObjectColorsTrainSpace(Protocol):
                         'color' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()
                     if color is None:
-                        color = np.random.uniform(intervention_space[rigid_object]['color'][0],
-                                                  intervention_space[rigid_object]['color'][1])
+                        color = np.random.uniform(
+                            intervention_space[rigid_object]['color'][0],
+                            intervention_space[rigid_object]['color'][1])
                     intervention_dict[rigid_object]['color'] = color
             return intervention_dict
         else:

@@ -25,25 +25,36 @@ class DataRecorder:
         self.last_episode_number_dumbed = len(self.episodes) - 1
         self._curr = None
 
-    def new_episode(self, initial_full_state, task_name, task_params=None, world_params=None):
+    def new_episode(self,
+                    initial_full_state,
+                    task_name,
+                    task_params=None,
+                    world_params=None):
         if self._curr:
             self.episodes.append(self._curr)
-        self._curr = Episode(task_name, initial_full_state, task_params=task_params, world_params=world_params)
+        self._curr = Episode(task_name,
+                             initial_full_state,
+                             task_params=task_params,
+                             world_params=world_params)
         if self.path is not None and \
                 len(self.episodes) % self.rec_dumb_frequency == 0 and len(self.episodes) != 0:
             self.save()
 
     def append(self, robot_action, observation, reward, info, done, timestamp):
-        self._curr.append(robot_action, observation, reward, info, done, timestamp)
+        self._curr.append(robot_action, observation, reward, info, done,
+                          timestamp)
 
     def save(self):
         if self.path is None:
             return
         if len(self._curr.observations):
             self.episodes.append(self._curr)
-        new_episode_number_dumbed = self.last_episode_number_dumbed + len(self.episodes)
-        file_path = os.path.join(self.path, "episode_{}_{}".format(self.last_episode_number_dumbed + 1,
-                                                                   new_episode_number_dumbed))
+        new_episode_number_dumbed = self.last_episode_number_dumbed + len(
+            self.episodes)
+        file_path = os.path.join(
+            self.path,
+            "episode_{}_{}".format(self.last_episode_number_dumbed + 1,
+                                   new_episode_number_dumbed))
         with open(file_path, "wb") as file_handle:
             pickle.dump(self.episodes, file_handle)
             self.last_episode_number_dumbed = new_episode_number_dumbed
@@ -51,8 +62,10 @@ class DataRecorder:
 
         info_path = os.path.join(self.path, "info.json")
         with open(info_path, "w") as json_file:
-            info_dict = {"dumb_frequency": self.rec_dumb_frequency,
-                         "max_episode_index": new_episode_number_dumbed}
+            info_dict = {
+                "dumb_frequency": self.rec_dumb_frequency,
+                "max_episode_index": new_episode_number_dumbed
+            }
             json.dump(info_dict, json_file)
 
     def get_number_of_logged_episodes(self):

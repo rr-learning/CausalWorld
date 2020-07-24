@@ -13,24 +13,28 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                  skip_frame, seed_num, sac_config, total_time_steps,
                  validate_every_timesteps, task_name):
     task = task_generator(task_generator_id=task_name,
-                          dense_reward_weights=np.array([250, 0, 125,
-                                                         0, 750, 0, 0,
-                                                         0.005]),
+                          dense_reward_weights=np.array(
+                              [250, 0, 125, 0, 750, 0, 0, 0.005]),
                           fractional_reward_weight=1,
                           goal_height=0.15,
                           tool_block_mass=0.02)
-    env = CausalWorld(task=task, skip_frame=skip_frame,
+    env = CausalWorld(task=task,
+                      skip_frame=skip_frame,
                       enable_visualization=False,
-                      seed=seed_num, max_episode_length=
-                      maximum_episode_length)
+                      seed=seed_num,
+                      max_episode_length=maximum_episode_length)
     set_global_seeds(seed_num)
     policy_kwargs = dict(layers=[256, 256])
-    checkpoint_callback = CheckpointCallback(
-        save_freq=int(validate_every_timesteps/num_of_envs),
-        save_path=log_relative_path,
-        name_prefix='model')
-    model = SAC(MlpPolicy, env, verbose=1, policy_kwargs=policy_kwargs,
-                **sac_config, seed=seed_num)
+    checkpoint_callback = CheckpointCallback(save_freq=int(
+        validate_every_timesteps / num_of_envs),
+                                             save_path=log_relative_path,
+                                             name_prefix='model')
+    model = SAC(MlpPolicy,
+                env,
+                verbose=1,
+                policy_kwargs=policy_kwargs,
+                **sac_config,
+                seed=seed_num)
     model.learn(total_timesteps=total_time_steps,
                 tb_log_name="sac",
                 callback=checkpoint_callback)
@@ -46,17 +50,19 @@ if __name__ == '__main__':
     skip_frame = 3
     seed_num = 0
     task_name = 'picking'
-    sac_config = {"gamma": 0.98,
-                  "tau": 0.01,
-                  "ent_coef": 'auto',
-                  "target_entropy": -9,
-                  "learning_rate": 0.00025,
-                  "buffer_size": 1000000,
-                  "learning_starts": 1000,
-                  "batch_size": 256,
-                  "train_freq": 1,
-                  "gradient_steps": 1,
-                  "tensorboard_log": log_relative_path}
+    sac_config = {
+        "gamma": 0.98,
+        "tau": 0.01,
+        "ent_coef": 'auto',
+        "target_entropy": -9,
+        "learning_rate": 0.00025,
+        "buffer_size": 1000000,
+        "learning_starts": 1000,
+        "batch_size": 256,
+        "train_freq": 1,
+        "gradient_steps": 1,
+        "tensorboard_log": log_relative_path
+    }
     train_policy(num_of_envs=num_of_envs,
                  log_relative_path=log_relative_path,
                  maximum_episode_length=maximum_episode_length,

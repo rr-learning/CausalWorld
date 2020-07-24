@@ -3,6 +3,7 @@ import numpy as np
 
 
 class DefaultTask(Protocol):
+
     def __init__(self):
         super().__init__('default_task')
 

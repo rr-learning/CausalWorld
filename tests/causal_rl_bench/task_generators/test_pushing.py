@@ -6,10 +6,10 @@ import unittest
 
 
 class TestPushing(unittest.TestCase):
+
     def setUp(self):
         self.task = task_generator(task_generator_id="pushing")
-        self.env = CausalWorld(task=self.task,
-                               enable_visualization=False)
+        self.env = CausalWorld(task=self.task, enable_visualization=False)
         return
 
     def tearDown(self):
@@ -39,7 +39,9 @@ class TestPushing(unittest.TestCase):
                 observations_2.append(obs)
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
-                    print(np.array(observations_1[i]) - np.array(observations_2[i]))
+                    print(
+                        np.array(observations_1[i]) -
+                        np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 
@@ -67,7 +69,9 @@ class TestPushing(unittest.TestCase):
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
                     print(i)
-                    print(np.array(observations_1[i]) - np.array(observations_2[i]))
+                    print(
+                        np.array(observations_1[i]) -
+                        np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 
@@ -95,7 +99,9 @@ class TestPushing(unittest.TestCase):
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
                     print(i)
-                    print(np.array(observations_1[i]) - np.array(observations_2[i]))
+                    print(
+                        np.array(observations_1[i]) -
+                        np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 
@@ -115,8 +121,10 @@ class TestPushing(unittest.TestCase):
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             if i == 50:
-                success_signal = self.env.do_intervention({'tool_block':
-                                                        {'cartesian_position': [0.1, 0.1, 0.0425]}})
+                success_signal = self.env.do_intervention(
+                    {'tool_block': {
+                        'cartesian_position': [0.1, 0.1, 0.0425]
+                    }})
         observations_2 = []
         rewards_2 = []
         self.env.reset()
@@ -129,22 +137,27 @@ class TestPushing(unittest.TestCase):
 
     def test_goal_intervention(self):
         task = task_generator(task_generator_id='pushing')
-        env = CausalWorld(task=task, enable_visualization=False, normalize_observations=False)
+        env = CausalWorld(task=task,
+                          enable_visualization=False,
+                          normalize_observations=False)
         for _ in range(10):
-            invalid_interventions_before = env.get_tracker().invalid_intervention_steps
+            invalid_interventions_before = env.get_tracker(
+            ).invalid_intervention_steps
             new_goal = env.sample_new_goal()
             env.set_starting_state(interventions_dict=new_goal)
             env.reset()
-            invalid_interventions_after = env.get_tracker().invalid_intervention_steps
+            invalid_interventions_after = env.get_tracker(
+            ).invalid_intervention_steps
             for _ in range(2):
                 for _ in range(100):
                     obs, reward, done, info = env.step(env.action_space.low)
                     #TODO: this shouldnt be the case when the benchmark is complete
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:
-                        assert np.array_equal(cyl2cart(new_goal['goal_block']
-                                              ['cylindrical_position']), obs[-7:-4])
+                        assert np.array_equal(
+                            cyl2cart(
+                                new_goal['goal_block']['cylindrical_position']),
+                            obs[-7:-4])
                 env.reset()
 
         env.close()
-

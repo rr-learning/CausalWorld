@@ -4,6 +4,7 @@ import numpy as np
 
 
 class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
+
     def __init__(self, **kwargs):
         """
 
@@ -38,10 +39,8 @@ class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
                 if 'color' in self.task_intervention_space[variable]:
                     interventions_dict[variable] = dict()
                     interventions_dict[variable]['color'] = np.random.uniform(
-                                                            self.task_intervention_space
-                                                            [variable]['color'][0],
-                                                            self.task_intervention_space
-                                                            [variable]['color'][1])
+                        self.task_intervention_space[variable]['color'][0],
+                        self.task_intervention_space[variable]['color'][1])
             elif 'color' in variable:
                 interventions_dict[variable] = np.random.uniform(
                     self.task_intervention_space[variable][0],

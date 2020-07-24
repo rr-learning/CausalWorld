@@ -10,7 +10,8 @@ def control_policy(env, obs):
 
 def end_effector_pos():
     task = task_generator(task_generator_id='reaching')
-    env = CausalWorld(task=task, enable_visualization=True,
+    env = CausalWorld(task=task,
+                      enable_visualization=True,
                       action_mode="joint_positions",
                       normalize_actions=False,
                       normalize_observations=False)

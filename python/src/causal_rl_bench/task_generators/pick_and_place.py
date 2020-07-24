@@ -4,24 +4,22 @@ from causal_rl_bench.utils.rotation_utils import euler_to_quaternion, quaternion
 
 
 class PickAndPlaceTaskGenerator(BaseTask):
+
     def __init__(self, **kwargs):
         """
 
         :param kwargs:
         """
-        super().__init__(task_name="pick_and_place",
-                         use_train_space_only=kwargs.get(
-                             "use_train_space_only",
-                             False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 0),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([1, 1, 1])))
-        self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+        super().__init__(
+            task_name="pick_and_place",
+            use_train_space_only=kwargs.get("use_train_space_only", False),
+            fractional_reward_weight=kwargs.get("fractional_reward_weight", 0),
+            dense_reward_weights=kwargs.get("dense_reward_weights",
+                                            np.array([1, 1, 1])))
+        self._task_robot_observation_keys = [
+            "time_left_for_task", "joint_positions", "joint_velocities",
+            "end_effector_positions"
+        ]
         # TODO: check for nans when bounds are the same in normalization
         self._task_params["tool_block_mass"] = \
             kwargs.get("tool_block_mass", 0.02)
@@ -45,41 +43,38 @@ class PickAndPlaceTaskGenerator(BaseTask):
 
         :return:
         """
-        creation_dict = {'name': "obstacle",
-                         'shape': "static_cube",
-                         'position': [0, 0, 0.0325],
-                         'color': np.array([0, 0, 0]),
-                         'size': np.array([0.35, 0.015, 0.065])}
+        creation_dict = {
+            'name': "obstacle",
+            'shape': "static_cube",
+            'position': [0, 0, 0.0325],
+            'color': np.array([0, 0, 0]),
+            'size': np.array([0.35, 0.015, 0.065])
+        }
         self._stage.add_rigid_general_object(**creation_dict)
-        creation_dict = {'name': "tool_block",
-                         'shape': "cube",
-                         'initial_position': self._task_params
-                         ["tool_block_position"],
-                         'initial_orientation': self._task_params
-                         ["goal_block_position"],
-                         'mass': self._task_params["tool_block_mass"]}
+        creation_dict = {
+            'name': "tool_block",
+            'shape': "cube",
+            'initial_position': self._task_params["tool_block_position"],
+            'initial_orientation': self._task_params["goal_block_position"],
+            'mass': self._task_params["tool_block_mass"]
+        }
         self._stage.add_rigid_general_object(**creation_dict)
-        creation_dict = {'name': "goal_block",
-                         'shape': "cube",
-                         'position': self._task_params
-                         ["goal_block_position"],
-                         'orientation': self._task_params
-                         ["goal_block_orientation"]}
+        creation_dict = {
+            'name': "goal_block",
+            'shape': "cube",
+            'position': self._task_params["goal_block_position"],
+            'orientation': self._task_params["goal_block_orientation"]
+        }
         self._stage.add_silhoutte_general_object(**creation_dict)
-        self._task_stage_observation_keys = ["tool_block_type",
-                                            "tool_block_size",
-                                            "tool_block_cartesian_position",
-                                            "tool_block_orientation",
-                                            "tool_block_linear_velocity",
-                                            "tool_block_angular_velocity",
-                                            "goal_block_type",
-                                            "goal_block_size",
-                                            "goal_block_cartesian_position",
-                                            "goal_block_orientation",
-                                            "obstacle_type",
-                                            "obstacle_size",
-                                            "obstacle_cartesian_position",
-                                            "obstacle_orientation"]
+        self._task_stage_observation_keys = [
+            "tool_block_type", "tool_block_size",
+            "tool_block_cartesian_position", "tool_block_orientation",
+            "tool_block_linear_velocity", "tool_block_angular_velocity",
+            "goal_block_type", "goal_block_size",
+            "goal_block_cartesian_position", "goal_block_orientation",
+            "obstacle_type", "obstacle_size", "obstacle_cartesian_position",
+            "obstacle_orientation"
+        ]
         return
 
     def _set_training_intervention_spaces(self):
@@ -106,7 +101,8 @@ class PickAndPlaceTaskGenerator(BaseTask):
 
         :return:
         """
-        super(PickAndPlaceTaskGenerator, self)._set_testing_intervention_spaces()
+        super(PickAndPlaceTaskGenerator,
+              self)._set_testing_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
                 = 0.0325
@@ -151,14 +147,15 @@ class PickAndPlaceTaskGenerator(BaseTask):
         """
         rewards = list()
         block_position = self._stage.get_object_state('tool_block',
-                                                     'cartesian_position')
-        block_orientation = self._stage.get_object_state('tool_block',
-                                                        'orientation')
+                                                      'cartesian_position')
+        block_orientation = self._stage.get_object_state(
+            'tool_block', 'orientation')
         goal_position = self._stage.get_object_state('goal_block',
-                                                    'cartesian_position')
+                                                     'cartesian_position')
         goal_orientation = self._stage.get_object_state('goal_block',
-                                                       'orientation')
-        end_effector_positions = self._robot.get_latest_full_state()['end_effector_positions']
+                                                        'orientation')
+        end_effector_positions = self._robot.get_latest_full_state(
+        )['end_effector_positions']
         end_effector_positions = end_effector_positions.reshape(-1, 3)
 
         # calculate first reward term
@@ -175,23 +172,23 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                                self.previous_object_position)
         current_dist_to_goal = np.linalg.norm(goal_position - block_position)
         rewards.append(previous_dist_to_goal - current_dist_to_goal)
-        quat_diff_old = quaternion_mul(np.expand_dims(goal_orientation, 0),
-                                       quaternion_conjugate(np.expand_dims(
-                                           self.previous_object_orientation,
-                                           0)))
+        quat_diff_old = quaternion_mul(
+            np.expand_dims(goal_orientation, 0),
+            quaternion_conjugate(
+                np.expand_dims(self.previous_object_orientation, 0)))
         angle_diff_old = 2 * np.arccos(np.clip(quat_diff_old[:, 3], -1., 1.))
 
-        quat_diff = quaternion_mul(np.expand_dims(goal_orientation, 0),
-                                   quaternion_conjugate(np.expand_dims(
-                                       block_orientation,
-                                       0)))
+        quat_diff = quaternion_mul(
+            np.expand_dims(goal_orientation, 0),
+            quaternion_conjugate(np.expand_dims(block_orientation, 0)))
         current_angle_diff = 2 * np.arccos(np.clip(quat_diff[:, 3], -1., 1.))
 
-        rewards.append(angle_diff_old[0] -
-                       current_angle_diff[0])
-        update_task_info = {'current_end_effector_positions': end_effector_positions,
-                            'current_tool_block_position': block_position,
-                            'current_tool_block_orientation': block_orientation}
+        rewards.append(angle_diff_old[0] - current_angle_diff[0])
+        update_task_info = {
+            'current_end_effector_positions': end_effector_positions,
+            'current_tool_block_position': block_position,
+            'current_tool_block_orientation': block_orientation
+        }
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
@@ -237,14 +234,14 @@ class PickAndPlaceTaskGenerator(BaseTask):
         """
         if side == 0:
             return self._stage.random_position(height_limits=0.0325,
-                                               allowed_section=
-                                              np.array([[-0.5, -0.5, 0],
-                                                        [0.5, -0.065, 0.5]]))
+                                               allowed_section=np.array(
+                                                   [[-0.5, -0.5, 0],
+                                                    [0.5, -0.065, 0.5]]))
         else:
             return self._stage.random_position(height_limits=0.0325,
-                                               allowed_section=
-                                              np.array([[-0.5, 0.065, 0],
-                                                        [0.5, 0.5, 0.5]]))
+                                               allowed_section=np.array(
+                                                   [[-0.5, 0.065, 0],
+                                                    [0.5, 0.5, 0.5]]))
 
     def sample_new_goal(self, training=True, level=None):
         """
@@ -264,4 +261,3 @@ class PickAndPlaceTaskGenerator(BaseTask):
         intervention_dict['goal_block']['cylindrical_position'] = \
             self._get_random_block_position_on_side(goal_block_side)
         return intervention_dict
-

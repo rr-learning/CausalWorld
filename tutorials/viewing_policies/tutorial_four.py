@@ -25,13 +25,13 @@ def example():
                                   policy_fn=policy_fn,
                                   file_name="pushing_video",
                                   number_of_resets=10,
-                                  max_time_steps=10*100)
+                                  max_time_steps=10 * 100)
 
     # Similarly for interactive visualization in the GUI
     viewer.view_policy(task=task,
                        world_params=world_params,
                        policy_fn=policy_fn,
-                       max_time_steps=40*600,
+                       max_time_steps=40 * 600,
                        number_of_resets=40)
 
 

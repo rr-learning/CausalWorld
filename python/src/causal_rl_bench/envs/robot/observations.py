@@ -5,7 +5,9 @@ from gym import spaces
 
 
 class TriFingerObservations(object):
-    def __init__(self, observation_mode="structured",
+
+    def __init__(self,
+                 observation_mode="structured",
                  normalize_observations=True,
                  observation_keys=None,
                  cameras=None,
@@ -62,8 +64,10 @@ class TriFingerObservations(object):
 
         if observation_mode == "cameras":
             self._observations_keys = ["cameras"]
-            self._low = np.zeros(shape=(num_of_cameras, 128, 128, 3), dtype=np.float64)
-            self._high = np.full(shape=(num_of_cameras, 128, 128, 3), fill_value=255,
+            self._low = np.zeros(shape=(num_of_cameras, 128, 128, 3),
+                                 dtype=np.float64)
+            self._high = np.full(shape=(num_of_cameras, 128, 128, 3),
+                                 fill_value=255,
                                  dtype=np.float64)
             self._low_norm = 0
             self._high_norm = 1
@@ -79,7 +83,8 @@ class TriFingerObservations(object):
                 raise ValueError("One of the provided observation_"
                                  "keys is unknown")
             if self._observation_mode == "structured":
-                self._observation_is_not_normalized = np.array([], dtype=np.bool)
+                self._observation_is_not_normalized = np.array([],
+                                                               dtype=np.bool)
             self._low = np.array([])
             self._high = np.array([])
             self.set_observation_spaces()
@@ -119,8 +124,10 @@ class TriFingerObservations(object):
             self._high = np.array(self._lower_bounds['cameras'])
         else:
             for key in self._observations_keys:
-                self._low = np.append(self._low, np.array(self._lower_bounds[key]))
-                self._high = np.append(self._high, np.array(self._upper_bounds[key]))
+                self._low = np.append(self._low,
+                                      np.array(self._lower_bounds[key]))
+                self._high = np.append(self._high,
+                                       np.array(self._upper_bounds[key]))
                 if np.array_equal(self._lower_bounds[key],
                                   self._upper_bounds[key]):
                     self._observation_is_not_normalized = \
@@ -182,8 +189,11 @@ class TriFingerObservations(object):
         else:
             return np.clip(observation, self._low, self._high)
 
-    def add_observation(self, observation_key, lower_bound=None,
-                        upper_bound=None, observation_fn=None):
+    def add_observation(self,
+                        observation_key,
+                        lower_bound=None,
+                        upper_bound=None,
+                        observation_fn=None):
         if observation_key not in self._lower_bounds.keys() and \
                 (lower_bound is None or upper_bound is None):
             raise Exception("Observation key {} is not known please specify "
@@ -227,9 +237,10 @@ class TriFingerObservations(object):
                 observations_dict["end_effector_positions"] = \
                     robot_state['end_effector_positions']
             elif observation == "cameras":
-                camera_obs = np.stack((self._cameras[0].get_image(),
-                                       self._cameras[1].get_image(),
-                                       self._cameras[2].get_image()), axis=0)
+                camera_obs = np.stack(
+                    (self._cameras[0].get_image(), self._cameras[1].get_image(),
+                     self._cameras[2].get_image()),
+                    axis=0)
                 observations_dict["cameras"] = camera_obs
             elif observation in self._observation_functions:
                 observations_dict[observation] = \
@@ -277,10 +288,6 @@ class TriFingerObservations(object):
             images.append(self._cameras[i].get_image())
         camera_obs = np.stack(images, axis=0)
         if self._normalized_observations:
-            camera_obs = self.normalize_observation_for_key(camera_obs,
-                                                            "cameras")
+            camera_obs = self.normalize_observation_for_key(
+                camera_obs, "cameras")
         return camera_obs
-
-
-
-
