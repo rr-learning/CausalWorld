@@ -73,10 +73,8 @@ class EvaluationPipeline(object):
 
     def run_episode(self, policy_fn):
         obs = self.evaluation_env.reset()
-        desired_action = None
-        reward = None
         for _ in range(self.time_steps_for_evaluation):
-            desired_action = policy_fn(obs, prev_action=desired_action, prev_reward=reward)
+            desired_action = policy_fn(obs)
             obs, rew, done, info = self.evaluation_env.step(desired_action)
         return self.data_recorder.get_current_episode()
 

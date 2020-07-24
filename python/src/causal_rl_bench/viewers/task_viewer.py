@@ -57,11 +57,9 @@ def view_policy(task, world_params, policy_fn, max_time_steps,
                     env_wrappers_args=env_wrappers_args)
     for reset_idx in range(number_of_resets):
         obs = env.reset()
-        desired_action = None
-        reward = None
         for time in range(int(max_time_steps/number_of_resets)):
-            # compute next action
-            desired_action = policy_fn(obs, prev_action=desired_action, prev_reward=reward)
+            #compute next action
+            desired_action = policy_fn(obs)
             for _ in range(actual_skip_frame):
                 obs, reward, done, info = env.step(action=desired_action)
     env.close()
@@ -83,10 +81,8 @@ def record_video_of_policy(task, world_params, policy_fn, file_name,
     for reset_idx in range(number_of_resets):
         obs = env.reset()
         recorder.capture_frame()
-        desired_action = None
-        reward = None
         for i in range(max_time_steps):
-            desired_action = policy_fn(obs, prev_action=desired_action, prev_reward=reward)
+            desired_action = policy_fn(obs)
             for _ in range(actual_skip_frame):
                 obs, reward, done, info = env.step(action=desired_action)
                 recorder.capture_frame()

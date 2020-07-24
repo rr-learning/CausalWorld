@@ -98,11 +98,19 @@ class PickAndPlaceTaskGenerator(BaseTask):
                 = 0.0325
             self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
                 = 0.0325
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][0] \
+                = 0
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][0] \
+                = 0.11
         for visual_object in self._stage.get_visual_objects():
             self._training_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
                 = 0.0325
             self._training_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
                 = 0.0325
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][0][0] \
+                = 0
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][1][0] \
+                = 0.11
         return
 
     def _set_testing_intervention_spaces(self):
@@ -116,11 +124,19 @@ class PickAndPlaceTaskGenerator(BaseTask):
                 = 0.0325
             self._testing_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
                 = 0.0325
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][0] \
+                = 0.11
+            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][0] \
+                = 0.14
         for visual_object in self._stage.get_visual_objects():
             self._testing_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
                 = 0.0325
             self._testing_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
                 = 0.0325
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][0][0] \
+                = 0.11
+            self._training_intervention_spaces[visual_object]['cylindrical_position'][1][0] \
+                = 0.14
         return
 
     def _set_task_state(self):
