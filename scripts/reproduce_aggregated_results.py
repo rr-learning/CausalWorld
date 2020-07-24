@@ -19,7 +19,6 @@ NUM_RANDOM_SEEDS = 5
 NET_LAYERS = [256, 256]
 
 
-
 def load_model_settings(file_path):
     with open(file_path, 'r') as fin:
         model_settings = json.load(fin)
@@ -29,7 +28,8 @@ def load_model_settings(file_path):
 def load_model_from_settings(model_settings, model_path, time_steps):
     algorithm = model_settings['algorithm']
     model = None
-    policy_path = os.path.join(model_path, 'model_' + str(time_steps) + '_steps')
+    policy_path = os.path.join(model_path,
+                               'model_' + str(time_steps) + '_steps')
     if algorithm == 'PPO':
         model = PPO2.load(policy_path)
     elif algorithm == 'SAC':
@@ -61,33 +61,29 @@ def get_mean_scores(scores_list):
     for key in scores_list[0].keys():
         scores_mean[key] = {}
         for sub_key in scores_list[0][key].keys():
-            scores_mean[key][sub_key] = np.mean([scores_list[i][key][sub_key] for i in range(num_scores)])
+            scores_mean[key][sub_key] = np.mean(
+                [scores_list[i][key][sub_key] for i in range(num_scores)])
     return scores_mean
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_path", required=True,
-                        help="output path")
-    parser.add_argument("--models_path", required=True,
-                        help="models path")
-    parser.add_argument("--benchmark", required=True,
-                        help="models path")
+    parser.add_argument("--output_path", required=True, help="output path")
+    parser.add_argument("--models_path", required=True, help="models path")
+    parser.add_argument("--benchmark", required=True, help="models path")
 
     args = vars(parser.parse_args())
     output_path = str(args['output_path'])
     models_path = str(args['models_path'])
     benchmark = str(args['benchmark'])
 
-    algorithm_list = ['PPO',
-                      'SAC',
-                      'TD3']
+    algorithm_list = ['PPO', 'SAC', 'TD3']
 
     num_algorithms = len(algorithm_list)
 
-    training_curriculum = ['no_intervention',
-                           'goal_intervention',
-                           'random_intervention']
+    training_curriculum = [
+        'no_intervention', 'goal_intervention', 'random_intervention'
+    ]
     num_curriculum = len(training_curriculum)
 
     experiments = dict()
@@ -101,7 +97,8 @@ if __name__ == '__main__':
                 model_num = algorithm_index * (num_curriculum * NUM_RANDOM_SEEDS) \
                             + curriculum_index * NUM_RANDOM_SEEDS \
                             + random_seed
-                scores_path = os.path.join(models_path, str(model_num), 'evaluation', 'scores.json')
+                scores_path = os.path.join(models_path, str(model_num),
+                                           'evaluation', 'scores.json')
                 if os.path.exists(scores_path):
                     with open(scores_path, 'r') as fin:
                         scores = json.load(fin)

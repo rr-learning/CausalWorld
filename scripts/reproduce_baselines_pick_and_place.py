@@ -34,39 +34,42 @@ def save_model_settings(file_path, model_settings):
 
 def baseline_model(model_num):
     benchmarks = sweep('benchmarks', [PICK_AND_PLACE_BENCHMARK])
-    task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'fractional_reward_weight': 1,
-                                      'dense_reward_weights': [750,
-                                                               50,
-                                                               250,
-                                                               0,
-                                                               0.005]}}]
+    task_configs = [{
+        'task_configs': {
+            'use_train_space_only': True,
+            'fractional_reward_weight': 1,
+            'dense_reward_weights': [750, 50, 250, 0, 0.005]
+        }
+    }]
 
-    world_params = [{'world_params': {'skip_frame': 3,
-                                      'enable_visualization': False,
-                                      'observation_mode': 'structured',
-                                      'normalize_observations': True,
-                                      'action_mode': 'joint_positions'}}]
+    world_params = [{
+        'world_params': {
+            'skip_frame': 3,
+            'enable_visualization': False,
+            'observation_mode': 'structured',
+            'normalize_observations': True,
+            'action_mode': 'joint_positions'
+        }
+    }]
 
     random_seeds = sweep('seed', list(range(NUM_RANDOM_SEEDS)))
-    algorithms = sweep('algorithm', ['PPO',
-                                     'SAC',
-                                     'TD3'])
+    algorithms = sweep('algorithm', ['PPO', 'SAC', 'TD3'])
 
-    curriculum_kwargs_1 = {'intervention_actors': [],
-                           'actives': []}
-    curriculum_kwargs_2 = {'intervention_actors': [GoalInterventionActorPolicy()],
-                           'actives': [(0, 1e9, 2, 0)]}
-    curriculum_kwargs_3 = {'intervention_actors': [RandomInterventionActorPolicy()],
-                           'actives': [(0, 1e9, 2, 0)]}
+    curriculum_kwargs_1 = {'intervention_actors': [], 'actives': []}
+    curriculum_kwargs_2 = {
+        'intervention_actors': [GoalInterventionActorPolicy()],
+        'actives': [(0, 1e9, 2, 0)]
+    }
+    curriculum_kwargs_3 = {
+        'intervention_actors': [RandomInterventionActorPolicy()],
+        'actives': [(0, 1e9, 2, 0)]
+    }
     curriculum_kwargs = [curriculum_kwargs_2]
 
-    return outer_product([benchmarks,
-                          world_params,
-                          task_configs,
-                          algorithms,
-                          curriculum_kwargs,
-                          random_seeds])[model_num]
+    return outer_product([
+        benchmarks, world_params, task_configs, algorithms, curriculum_kwargs,
+        random_seeds
+    ])[model_num]
 
 
 def sweep(key, values):
@@ -89,26 +92,33 @@ def outer_product(list_of_settings):
 
 
 def get_single_process_env(model_settings):
-    task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
+    task = task_generator(model_settings['benchmarks']['task_generator_id'],
+                          **model_settings['task_configs'])
     env = CausalWorld(task=task,
                       **model_settings['world_params'],
                       seed=world_seed)
-    env = CurriculumWrapper(env,
-                            intervention_actors=model_settings["intervention_actors"],
-                            actives=model_settings["actives"])
+    env = CurriculumWrapper(
+        env,
+        intervention_actors=model_settings["intervention_actors"],
+        actives=model_settings["actives"])
     return env
 
 
 def get_multi_process_env(model_settings):
+
     def _make_env(rank):
+
         def _init():
-            task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
+            task = task_generator(
+                model_settings['benchmarks']['task_generator_id'],
+                **model_settings['task_configs'])
             env = CausalWorld(task=task,
                               **model_settings['world_params'],
                               seed=world_seed + rank)
-            env = CurriculumWrapper(env,
-                                    intervention_actors=model_settings["intervention_actors"],
-                                    actives=model_settings["actives"])
+            env = CurriculumWrapper(
+                env,
+                intervention_actors=model_settings["intervention_actors"],
+                actives=model_settings["actives"])
             return env
 
         return _init
@@ -119,61 +129,82 @@ def get_multi_process_env(model_settings):
 def get_TD3_model(model_settings, model_path):
     model_settings['train_configs'] = {}
     policy_kwargs = dict(layers=NET_LAYERS)
-    td3_config = {"gamma": 0.98,
-                  "tau": 0.01,
-                  "learning_rate": 0.00025,
-                  "buffer_size": 1000000,
-                  "learning_starts": 1000,
-                  "batch_size": 256}
+    td3_config = {
+        "gamma": 0.98,
+        "tau": 0.01,
+        "learning_rate": 0.00025,
+        "buffer_size": 1000000,
+        "learning_starts": 1000,
+        "batch_size": 256
+    }
     model_settings['train_configs'] = td3_config
     save_model_settings(os.path.join(model_path, 'model_settings.json'),
                         model_settings)
     env = get_single_process_env(model_settings)
     n_actions = env.action_space.shape[-1]
-    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
-    model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
-                policy_kwargs=policy_kwargs, **td3_config,
-                verbose=1, tensorboard_log=model_path)
+    action_noise = NormalActionNoise(mean=np.zeros(n_actions),
+                                     sigma=0.1 * np.ones(n_actions))
+    model = TD3(TD3MlpPolicy,
+                env,
+                action_noise=action_noise,
+                _init_setup_model=True,
+                policy_kwargs=policy_kwargs,
+                **td3_config,
+                verbose=1,
+                tensorboard_log=model_path)
     return model, env
 
 
 def get_SAC_model(model_settings, model_path):
     policy_kwargs = dict(layers=NET_LAYERS)
-    sac_config = {"gamma": 0.98,
-                  "tau": 0.01,
-                  "ent_coef": 'auto',
-                  "target_entropy": -9,
-                  "learning_rate": 0.00025,
-                  "buffer_size": 1000000,
-                  "learning_starts": 1000,
-                  "batch_size": 256}
+    sac_config = {
+        "gamma": 0.98,
+        "tau": 0.01,
+        "ent_coef": 'auto',
+        "target_entropy": -9,
+        "learning_rate": 0.00025,
+        "buffer_size": 1000000,
+        "learning_starts": 1000,
+        "batch_size": 256
+    }
     model_settings['train_configs'] = sac_config
     save_model_settings(os.path.join(model_path, 'model_settings.json'),
                         model_settings)
     env = get_single_process_env(model_settings)
-    model = SAC(SACMlpPolicy, env, _init_setup_model=True,
-                policy_kwargs=policy_kwargs, **sac_config,
-                verbose=1, tensorboard_log=model_path)
+    model = SAC(SACMlpPolicy,
+                env,
+                _init_setup_model=True,
+                policy_kwargs=policy_kwargs,
+                **sac_config,
+                verbose=1,
+                tensorboard_log=model_path)
     return model, env
 
 
 def get_PPO_model(model_settings, model_path):
     number_of_time_steps_per_iteration = 120000
-    ppo_config = {"gamma": 0.99,
-                  "n_steps": int(number_of_time_steps_per_iteration / num_of_envs),
-                  "ent_coef": 0.01,
-                  "learning_rate": 0.00025,
-                  "vf_coef": 0.5,
-                  "max_grad_norm": 0.5,
-                  "nminibatches": 40,
-                  "noptepochs": 4}
+    ppo_config = {
+        "gamma": 0.99,
+        "n_steps": int(number_of_time_steps_per_iteration / num_of_envs),
+        "ent_coef": 0.01,
+        "learning_rate": 0.00025,
+        "vf_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "nminibatches": 40,
+        "noptepochs": 4
+    }
     model_settings['train_configs'] = ppo_config
     save_model_settings(os.path.join(model_path, 'model_settings.json'),
                         model_settings)
     env = get_multi_process_env(model_settings)
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=NET_LAYERS)
-    model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
-                 verbose=1, **ppo_config, tensorboard_log=model_path)
+    model = PPO2(MlpPolicy,
+                 env,
+                 _init_setup_model=True,
+                 policy_kwargs=policy_kwargs,
+                 verbose=1,
+                 **ppo_config,
+                 tensorboard_log=model_path)
     return model, env
 
 
@@ -198,7 +229,8 @@ def train_model_num(model_settings, output_path):
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
 
-    checkpoint_callback = CheckpointCallback(save_freq=int(validate_every_timesteps / num_of_active_envs),
+    checkpoint_callback = CheckpointCallback(save_freq=int(
+        validate_every_timesteps / num_of_active_envs),
                                              save_path=model_path,
                                              name_prefix='model')
 
@@ -214,10 +246,11 @@ def train_model_num(model_settings, output_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_num", required=True, default=0,
+    parser.add_argument("--model_num",
+                        required=True,
+                        default=0,
                         help="model number")
-    parser.add_argument("--output_path", required=True,
-                        help="output path")
+    parser.add_argument("--output_path", required=True, help="output path")
 
     args = vars(parser.parse_args())
     model_num = int(args['model_num'])
@@ -230,30 +263,28 @@ if __name__ == '__main__':
 
     model = train_model_num(model_settings, output_path)
 
-
     # define a method for the policy fn of your trained model
     def policy_fn(obs, prev_action=None, prev_reward=None):
         return model.predict(obs, deterministic=True)[0]
 
-
     animation_path = os.path.join(output_path, 'animation')
     os.makedirs(animation_path)
     # Record a video of the policy is done in one line
-    viewer.record_video_of_policy(
-        task=task_generator(task_generator_id=model_settings['benchmarks']['task_generator_id'],
-                            **model_settings['task_configs']),
-        world_params=model_settings['world_params'],
-        policy_fn=policy_fn,
-        file_name=os.path.join(animation_path, "policy"),
-        number_of_resets=1,
-        max_time_steps=600)
+    viewer.record_video_of_policy(task=task_generator(
+        task_generator_id=model_settings['benchmarks']['task_generator_id'],
+        **model_settings['task_configs']),
+                                  world_params=model_settings['world_params'],
+                                  policy_fn=policy_fn,
+                                  file_name=os.path.join(
+                                      animation_path, "policy"),
+                                  number_of_resets=1,
+                                  max_time_steps=600)
     evaluation_path = os.path.join(output_path, 'evaluation')
     os.makedirs(evaluation_path)
 
     evaluation_protocols = model_settings['benchmarks']['evaluation_protocols']
 
-    evaluator = EvaluationPipeline(evaluation_protocols=
-                                   evaluation_protocols,
+    evaluator = EvaluationPipeline(evaluation_protocols=evaluation_protocols,
                                    tracker_path=output_path,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)

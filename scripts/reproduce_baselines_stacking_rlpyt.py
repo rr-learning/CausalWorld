@@ -27,7 +27,6 @@ from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 from causal_rl_bench.benchmark.benchmarks import TOWER_2_BENCHMARK
 import psutil
 
-
 world_seed = 0
 num_of_envs = 20
 
@@ -42,37 +41,42 @@ def save_model_settings(file_path, model_settings):
 
 def baseline_model(model_num):
     benchmarks = sweep('benchmarks', [TOWER_2_BENCHMARK])
-    task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'fractional_reward_weight': 0.0,
-                                      'dense_reward_weights': [750,
-                                                               50,
-                                                               250,
-                                                               125,
-                                                               0.005]}}]
+    task_configs = [{
+        'task_configs': {
+            'use_train_space_only': True,
+            'fractional_reward_weight': 0.0,
+            'dense_reward_weights': [750, 50, 250, 125, 0.005]
+        }
+    }]
 
-    world_params = [{'world_params': {'skip_frame': 3,
-                                      'enable_visualization': False,
-                                      'observation_mode': 'structured',
-                                      'normalize_observations': True,
-                                      'action_mode': 'joint_positions'}}]
+    world_params = [{
+        'world_params': {
+            'skip_frame': 3,
+            'enable_visualization': False,
+            'observation_mode': 'structured',
+            'normalize_observations': True,
+            'action_mode': 'joint_positions'
+        }
+    }]
 
     random_seeds = sweep('seed', list(range(NUM_RANDOM_SEEDS)))
     algorithms = sweep('algorithm', ['PPO'])
 
-    curriculum_kwargs_1 = {'intervention_actors': [],
-                           'actives': []}
-    curriculum_kwargs_2 = {'intervention_actors': [GoalInterventionActorPolicy()],
-                           'actives': [(0, 1e9, 2, 0)]}
-    curriculum_kwargs_3 = {'intervention_actors': [RandomInterventionActorPolicy()],
-                           'actives': [(0, 1e9, 2, 0)]}
+    curriculum_kwargs_1 = {'intervention_actors': [], 'actives': []}
+    curriculum_kwargs_2 = {
+        'intervention_actors': [GoalInterventionActorPolicy()],
+        'actives': [(0, 1e9, 2, 0)]
+    }
+    curriculum_kwargs_3 = {
+        'intervention_actors': [RandomInterventionActorPolicy()],
+        'actives': [(0, 1e9, 2, 0)]
+    }
     curriculum_kwargs = [curriculum_kwargs_1]
 
-    return outer_product([benchmarks,
-                          world_params,
-                          task_configs,
-                          algorithms,
-                          curriculum_kwargs,
-                          random_seeds])[model_num]
+    return outer_product([
+        benchmarks, world_params, task_configs, algorithms, curriculum_kwargs,
+        random_seeds
+    ])[model_num]
 
 
 def sweep(key, values):
@@ -95,13 +99,15 @@ def outer_product(list_of_settings):
 
 
 def _make_env(rank, model_settings):
-    task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
+    task = task_generator(model_settings['benchmarks']['task_generator_id'],
+                          **model_settings['task_configs'])
     env = CausalWorld(task=task,
                       **model_settings['world_params'],
                       seed=0 + rank)
-    env = CurriculumWrapper(env,
-                            intervention_actors=model_settings["intervention_actors"],
-                            actives=model_settings["actives"])
+    env = CurriculumWrapper(
+        env,
+        intervention_actors=model_settings["intervention_actors"],
+        actives=model_settings["actives"])
     env.save_world(output_path)
     env = GymEnvWrapper(env)
     return env
@@ -121,7 +127,8 @@ def train_model_num(model_settings, output_path):
         cuda_idx=None,  # whichever one you have
         master_cpus=cpus,
         workers_cpus=list([x] for x in cpus),  # If just one cpu per worker
-        set_affinity=True,  # can set to False if you want to turn off rlpyt assigning the psutil cpu_affinity
+        set_affinity=
+        True,  # can set to False if you want to turn off rlpyt assigning the psutil cpu_affinity
     )
     sampler = CpuSampler(
         EnvCls=_make_env,
@@ -132,15 +139,17 @@ def train_model_num(model_settings, output_path):
     )
     model_kwargs = dict(model_kwargs=dict(hidden_sizes=[256, 256, 256]))
     if model_settings['algorithm'] == 'PPO':
-        ppo_config = {"discount": 0.98,
-                      "entropy_loss_coeff": 1e-4,
-                      "learning_rate": 0.00045,
-                      "value_loss_coeff": 0.5,
-                      "clip_grad_norm": 0.45,
-                      "minibatches": 40,
-                      "gae_lambda": 0.9,
-                      "ratio_clip": 0.4,
-                      "epochs": 4}
+        ppo_config = {
+            "discount": 0.98,
+            "entropy_loss_coeff": 1e-4,
+            "learning_rate": 0.00045,
+            "value_loss_coeff": 0.5,
+            "clip_grad_norm": 0.45,
+            "minibatches": 40,
+            "gae_lambda": 0.9,
+            "ratio_clip": 0.4,
+            "epochs": 4
+        }
 
         algo = PPO(**ppo_config)
         # model_kwargs['model_kwargs'].update({'observation_shape': observation_shape})
@@ -158,8 +167,14 @@ def train_model_num(model_settings, output_path):
             affinity=affinity,
         )
         config = dict(rank=0, model_settings=model_settings)
-        log_dir = os.path.join(os.path.dirname(__file__), '..', '..', output_path)
-        with logger_context(log_dir, 0, name, config, use_summary_writer=True, snapshot_mode='all'):
+        log_dir = os.path.join(os.path.dirname(__file__), '..', '..',
+                               output_path)
+        with logger_context(log_dir,
+                            0,
+                            name,
+                            config,
+                            use_summary_writer=True,
+                            snapshot_mode='all'):
             runner.train()
         n_itr = runner.get_n_itr()
         return agent, n_itr
@@ -167,10 +182,11 @@ def train_model_num(model_settings, output_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_num", required=True, default=0,
+    parser.add_argument("--model_num",
+                        required=True,
+                        default=0,
                         help="model number")
-    parser.add_argument("--output_path", required=True,
-                        help="output path")
+    parser.add_argument("--output_path", required=True, help="output path")
 
     args = vars(parser.parse_args())
     model_num = int(args['model_num'])
@@ -185,8 +201,8 @@ if __name__ == '__main__':
     agent.eval_mode(n_itr)
     agent.reset()
 
-
     # define a method for the policy fn of your trained model
+
 
     def policy_fn(obs, prev_action=None, prev_reward=None):
         if prev_reward is None:
@@ -198,30 +214,30 @@ if __name__ == '__main__':
         else:
             prev_action = prev_action.astype('float32')
         obs = obs.astype('float32')
-        obs_pyt, act_pyt, rew_pyt = torchify_buffer((obs, prev_action, prev_reward))
+        obs_pyt, act_pyt, rew_pyt = torchify_buffer(
+            (obs, prev_action, prev_reward))
         act_pyt, agent_info = agent.step(obs_pyt, act_pyt, rew_pyt)
         action = numpify_buffer(act_pyt)
         return action
 
-
     animation_path = os.path.join(output_path, 'animation')
     os.makedirs(animation_path)
     # Record a video of the policy is done in one line
-    viewer.record_video_of_policy(
-        task=task_generator(task_generator_id=model_settings['benchmarks']['task_generator_id'],
-                            **model_settings['task_configs']),
-        world_params=model_settings['world_params'],
-        policy_fn=policy_fn,
-        file_name=os.path.join(animation_path, "policy"),
-        number_of_resets=1,
-        max_time_steps=600)
+    viewer.record_video_of_policy(task=task_generator(
+        task_generator_id=model_settings['benchmarks']['task_generator_id'],
+        **model_settings['task_configs']),
+                                  world_params=model_settings['world_params'],
+                                  policy_fn=policy_fn,
+                                  file_name=os.path.join(
+                                      animation_path, "policy"),
+                                  number_of_resets=1,
+                                  max_time_steps=600)
     evaluation_path = os.path.join(output_path, 'evaluation')
     os.makedirs(evaluation_path)
 
     evaluation_protocols = model_settings['benchmarks']['evaluation_protocols']
 
-    evaluator = EvaluationPipeline(evaluation_protocols=
-                                   evaluation_protocols,
+    evaluator = EvaluationPipeline(evaluation_protocols=evaluation_protocols,
                                    tracker_path=output_path,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)

@@ -3,25 +3,23 @@ import numpy as np
 
 
 class PickingTaskGenerator(BaseTask):
+
     def __init__(self, **kwargs):
         """
 
         :param kwargs:
         """
-        super().__init__(task_name="picking",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                         False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([250, 0, 125,
-                                              0, 750, 0, 0,
-                                              0.005])))
-        self._task_robot_observation_keys = ["time_left_for_task",
-                                             "joint_positions",
-                                             "joint_velocities",
-                                             "end_effector_positions"]
+        super().__init__(
+            task_name="picking",
+            use_train_space_only=kwargs.get("use_train_space_only", False),
+            fractional_reward_weight=kwargs.get("fractional_reward_weight", 1),
+            dense_reward_weights=kwargs.get(
+                "dense_reward_weights",
+                np.array([250, 0, 125, 0, 750, 0, 0, 0.005])))
+        self._task_robot_observation_keys = [
+            "time_left_for_task", "joint_positions", "joint_velocities",
+            "end_effector_positions"
+        ]
         # TODO: check for nans when bounds are the same in normalization
         self._task_params["goal_height"] = \
             kwargs.get("goal_height", 0.15)
@@ -50,33 +48,30 @@ class PickingTaskGenerator(BaseTask):
 
         :return:
         """
-        creation_dict = {'name': "tool_block",
-                         'shape': "cube",
-                         'initial_position': self._task_params
-                         ["tool_block_position"],
-                         'initial_orientation': self._task_params
-                         ["tool_block_orientation"],
-                         'mass': self._task_params["tool_block_mass"]}
+        creation_dict = {
+            'name': "tool_block",
+            'shape': "cube",
+            'initial_position': self._task_params["tool_block_position"],
+            'initial_orientation': self._task_params["tool_block_orientation"],
+            'mass': self._task_params["tool_block_mass"]
+        }
         self._stage.add_rigid_general_object(**creation_dict)
-        goal_block_position = np.array(
-            self._task_params["tool_block_position"])
+        goal_block_position = np.array(self._task_params["tool_block_position"])
         goal_block_position[-1] = self._task_params["goal_height"]
-        creation_dict = {'name': "goal_block",
-                         'shape': "cube",
-                         'position': goal_block_position,
-                         'orientation': self._task_params
-                         ["tool_block_orientation"]}
+        creation_dict = {
+            'name': "goal_block",
+            'shape': "cube",
+            'position': goal_block_position,
+            'orientation': self._task_params["tool_block_orientation"]
+        }
         self._stage.add_silhoutte_general_object(**creation_dict)
-        self._task_stage_observation_keys = ["tool_block_type",
-                                             "tool_block_size",
-                                             "tool_block_cartesian_position",
-                                             "tool_block_orientation",
-                                             "tool_block_linear_velocity",
-                                             "tool_block_angular_velocity",
-                                             "goal_block_type",
-                                             "goal_block_size",
-                                             "goal_block_cartesian_position",
-                                             "goal_block_orientation"]
+        self._task_stage_observation_keys = [
+            "tool_block_type", "tool_block_size",
+            "tool_block_cartesian_position", "tool_block_orientation",
+            "tool_block_linear_velocity", "tool_block_angular_velocity",
+            "goal_block_type", "goal_block_size",
+            "goal_block_cartesian_position", "goal_block_orientation"
+        ]
 
         return
 
@@ -152,12 +147,12 @@ class PickingTaskGenerator(BaseTask):
         rewards.append(previous_block_to_goal - current_block_to_goal)
         rewards.append(-current_block_to_goal)
         previous_block_to_center = np.sqrt(
-            (self.previous_object_position[0] ** 2 +
-             self.previous_object_position[1] ** 2))
-        current_block_to_center = np.sqrt((block_position[0] ** 2 +
-                                           block_position[1] ** 2))
+            (self.previous_object_position[0]**2 +
+             self.previous_object_position[1]**2))
+        current_block_to_center = np.sqrt(
+            (block_position[0]**2 + block_position[1]**2))
         rewards.append(previous_block_to_center - current_block_to_center)
-        rewards.append(- current_block_to_center)
+        rewards.append(-current_block_to_center)
 
         end_effector_positions = \
             self._robot.get_latest_full_state()['end_effector_positions']
@@ -171,24 +166,24 @@ class PickingTaskGenerator(BaseTask):
             self.previous_object_position)
         rewards.append(previous_distance_from_block -
                        current_distance_from_block)
-        rewards.append(- current_distance_from_block)
+        rewards.append(-current_distance_from_block)
         # check for all the fingers if they are inside the sphere or not
-        object_size = self._stage.get_object_state('tool_block',
-                                                   'size')
-        dist_outside_bounding_ellipsoid = np.copy(np.abs(end_effector_positions
-                                                         - block_position))
-        dist_outside_bounding_ellipsoid[dist_outside_bounding_ellipsoid <
-                                        object_size] = 0
+        object_size = self._stage.get_object_state('tool_block', 'size')
+        dist_outside_bounding_ellipsoid = np.copy(
+            np.abs(end_effector_positions - block_position))
+        dist_outside_bounding_ellipsoid[
+            dist_outside_bounding_ellipsoid < object_size] = 0
         dist_outside_bounding_ellipsoid = \
             np.mean(dist_outside_bounding_ellipsoid, axis=1)
         dist_outside_bounding_ellipsoid.sort()
-        rewards.append(- np.sum(dist_outside_bounding_ellipsoid[:2]))
-        rewards.append(- np.linalg.norm(
-            joint_velocities - self.previous_joint_velocities))
+        rewards.append(-np.sum(dist_outside_bounding_ellipsoid[:2]))
+        rewards.append(-np.linalg.norm(joint_velocities -
+                                       self.previous_joint_velocities))
         update_task_info = {
             'current_end_effector_positions': end_effector_positions,
             'current_tool_block_position': block_position,
-            'current_velocity': joint_velocities}
+            'current_velocity': joint_velocities
+        }
         return rewards, update_task_info
 
     def _update_task_state(self, update_task_info):
