@@ -7,12 +7,13 @@ from causal_rl_bench.task_generators.task import task_generator
 import causal_rl_bench.viewers.task_viewer as viewer
 
 
-
-
 def simulate_policy():
     task = task_generator(task_generator_id='picking')
-    env = CausalWorld(task=task, enable_visualization=True, skip_frame=3,
-                      seed=0, max_episode_length=600)
+    env = CausalWorld(task=task,
+                      enable_visualization=True,
+                      skip_frame=3,
+                      seed=0,
+                      max_episode_length=600)
     file = './model_600000_steps.zip'
     model = SAC.load(file)
 
@@ -28,6 +29,7 @@ def simulate_policy():
             total_reward += reward
         print("total reward is :", total_reward)
     env.close()
+
 
 if __name__ == "__main__":
     simulate_policy()

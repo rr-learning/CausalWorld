@@ -22,14 +22,14 @@ def cart2cyl(position):
     x = position[0]
     y = position[1]
     z = position[2]
-    rho = np.sqrt(x ** 2 + y ** 2)
+    rho = np.sqrt(x**2 + y**2)
     phi = np.arctan2(y, x)
     return np.array([rho, phi, z])
 
 
 def cyl2cart(position):
-    x = position[0]*np.cos(position[1])
-    y = position[0]*np.sin(position[1])
+    x = position[0] * np.cos(position[1])
+    y = position[0] * np.sin(position[1])
     z = position[2]
     return np.array([x, y, z])
 
@@ -55,8 +55,7 @@ def quaternion_mul(q0, q1):
 
 def rotate_points(points_batch, r_quaternion):
     r = R.from_quat(r_quaternion)
-    return np.transpose(np.matmul(r.as_matrix(),
-                                  np.transpose(points_batch)))
+    return np.transpose(np.matmul(r.as_matrix(), np.transpose(points_batch)))
 
 
 def get_transformation_matrix(translation, r_quaternion):
@@ -71,6 +70,3 @@ def get_transformation_matrix(translation, r_quaternion):
 def get_rotation_matrix(r_quaternion):
     r = R.from_quat(r_quaternion)
     return r.as_matrix()
-
-
-

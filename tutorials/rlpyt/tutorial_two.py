@@ -11,8 +11,11 @@ from rlpyt.utils.buffer import torchify_buffer
 
 def simulate_policy():
     task = task_generator(task_generator_id='picking')
-    env = CausalWorld(task=task, enable_visualization=True, skip_frame=3,
-                      seed=0, max_episode_length=600)
+    env = CausalWorld(task=task,
+                      enable_visualization=True,
+                      skip_frame=3,
+                      seed=0,
+                      max_episode_length=600)
     env = GymEnvWrapper(env)
     file = './itr_1097499.pkl'
     data = torch.load(file)
@@ -23,8 +26,11 @@ def simulate_policy():
 
     def policy_func(obs):
         # new_obs = np.hstack((obs['observation'], obs['desired_goal']))
-        agent_info = agent.step(torchify_buffer(obs), prev_action=None, prev_reward=None)
+        agent_info = agent.step(torchify_buffer(obs),
+                                prev_action=None,
+                                prev_reward=None)
         return agent_info.action.numpy()
+
     # env = HERGoalEnvWrapper(env)
     for _ in range(100):
         total_reward = 0

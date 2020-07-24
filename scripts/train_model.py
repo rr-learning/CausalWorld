@@ -35,41 +35,46 @@ def save_model_settings(file_path, model_settings):
 
 
 def baseline_model(model_num):
-    benchmarks = sweep('benchmarks', [REACHING_BENCHMARK,
-                                      PUSHING_BENCHMARK,
-                                      PICKING_BENCHMARK,
-                                      PICK_AND_PLACE_BENCHMARK,
-                                      TOWER_2_BENCHMARK])
-    task_configs = [{'task_configs': {'use_train_space_only': True,
-                                      'fractional_reward_weight': 1}}]
+    benchmarks = sweep('benchmarks', [
+        REACHING_BENCHMARK, PUSHING_BENCHMARK, PICKING_BENCHMARK,
+        PICK_AND_PLACE_BENCHMARK, TOWER_2_BENCHMARK
+    ])
+    task_configs = [{
+        'task_configs': {
+            'use_train_space_only': True,
+            'fractional_reward_weight': 1
+        }
+    }]
 
-    world_params = [{'world_params': {'skip_frame': 3,
-                                      'enable_visualization': False,
-                                      'observation_mode': 'structured',
-                                      'normalize_observations': True,
-                                      'action_mode': 'joint_positions'}}]
+    world_params = [{
+        'world_params': {
+            'skip_frame': 3,
+            'enable_visualization': False,
+            'observation_mode': 'structured',
+            'normalize_observations': True,
+            'action_mode': 'joint_positions'
+        }
+    }]
 
     random_seeds = sweep('seed', list(range(NUM_RANDOM_SEEDS)))
-    algorithms = sweep('algorithm', ['PPO',
-                                     'SAC',
-                                     'TD3',
-                                     'SAC_HER'])
-    curriculum_kwargs_1 = {'intervention_actors': [],
-                           'actives': []}
-    curriculum_kwargs_2 = {'intervention_actors': [GoalInterventionActorPolicy()],
-                           'actives': [(0, 1e9, 2, 0)]}
-    curriculum_kwargs_3 = {'intervention_actors': [RandomInterventionActorPolicy()],
-                           'actives': [(0, 1e9, 2, 0)]}
-    curriculum_kwargs = [curriculum_kwargs_1,
-                         curriculum_kwargs_2,
-                         curriculum_kwargs_3]
+    algorithms = sweep('algorithm', ['PPO', 'SAC', 'TD3', 'SAC_HER'])
+    curriculum_kwargs_1 = {'intervention_actors': [], 'actives': []}
+    curriculum_kwargs_2 = {
+        'intervention_actors': [GoalInterventionActorPolicy()],
+        'actives': [(0, 1e9, 2, 0)]
+    }
+    curriculum_kwargs_3 = {
+        'intervention_actors': [RandomInterventionActorPolicy()],
+        'actives': [(0, 1e9, 2, 0)]
+    }
+    curriculum_kwargs = [
+        curriculum_kwargs_1, curriculum_kwargs_2, curriculum_kwargs_3
+    ]
 
-    return outer_product([benchmarks,
-                          world_params,
-                          task_configs,
-                          algorithms,
-                          curriculum_kwargs,
-                          random_seeds])[model_num]
+    return outer_product([
+        benchmarks, world_params, task_configs, algorithms, curriculum_kwargs,
+        random_seeds
+    ])[model_num]
 
 
 def sweep(key, values):
@@ -92,27 +97,35 @@ def outer_product(list_of_settings):
 
 
 def get_single_process_env(model_settings):
-    task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
+    task = task_generator(model_settings['benchmarks']['task_generator_id'],
+                          **model_settings['task_configs'])
     env = CausalWorld(task=task,
                       **model_settings['world_params'],
                       seed=world_seed)
-    env = CurriculumWrapper(env,
-                            intervention_actors=model_settings["intervention_actors"],
-                            actives=model_settings["actives"])
+    env = CurriculumWrapper(
+        env,
+        intervention_actors=model_settings["intervention_actors"],
+        actives=model_settings["actives"])
     return env
 
 
 def get_multi_process_env(model_settings):
+
     def _make_env(rank):
+
         def _init():
-            task = task_generator(model_settings['benchmarks']['task_generator_id'], **model_settings['task_configs'])
+            task = task_generator(
+                model_settings['benchmarks']['task_generator_id'],
+                **model_settings['task_configs'])
             env = CausalWorld(task=task,
                               **model_settings['world_params'],
                               seed=world_seed + rank)
-            env = CurriculumWrapper(env,
-                                    intervention_actors=model_settings["intervention_actors"],
-                                    actives=model_settings["actives"])
+            env = CurriculumWrapper(
+                env,
+                intervention_actors=model_settings["intervention_actors"],
+                actives=model_settings["actives"])
             return env
+
         return _init
 
     return SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
@@ -121,30 +134,41 @@ def get_multi_process_env(model_settings):
 def get_TD3_model(model_settings, model_path):
     env = get_single_process_env(model_settings)
     n_actions = env.action_space.shape[-1]
-    action_noise = NormalActionNoise(mean=np.zeros(n_actions), sigma=0.1 * np.ones(n_actions))
+    action_noise = NormalActionNoise(mean=np.zeros(n_actions),
+                                     sigma=0.1 * np.ones(n_actions))
     policy_kwargs = dict(layers=NET_LAYERS)
     model_settings['train_configs'] = {}
-    model = TD3(TD3MlpPolicy, env, action_noise=action_noise, _init_setup_model=True,
+    model = TD3(TD3MlpPolicy,
+                env,
+                action_noise=action_noise,
+                _init_setup_model=True,
                 policy_kwargs=policy_kwargs,
-                verbose=1, tensorboard_log=model_path)
+                verbose=1,
+                tensorboard_log=model_path)
     return model, env
 
 
 def get_SAC_model(model_settings, model_path):
     env = get_single_process_env(model_settings)
     policy_kwargs = dict(layers=NET_LAYERS)
-    sac_config = {"gamma": 0.98,
-                  "tau": 0.01,
-                  "ent_coef": 'auto',
-                  "target_entropy": -9,
-                  "learning_rate": 0.00025,
-                  "buffer_size": 1000000,
-                  "learning_starts": 1000,
-                  "batch_size": 256}
+    sac_config = {
+        "gamma": 0.98,
+        "tau": 0.01,
+        "ent_coef": 'auto',
+        "target_entropy": -9,
+        "learning_rate": 0.00025,
+        "buffer_size": 1000000,
+        "learning_starts": 1000,
+        "batch_size": 256
+    }
     model_settings['train_configs'] = sac_config
-    model = SAC(SACMlpPolicy, env, _init_setup_model=True,
-                policy_kwargs=policy_kwargs, **sac_config,
-                verbose=1, tensorboard_log=model_path)
+    model = SAC(SACMlpPolicy,
+                env,
+                _init_setup_model=True,
+                policy_kwargs=policy_kwargs,
+                **sac_config,
+                verbose=1,
+                tensorboard_log=model_path)
     return model, env
 
 
@@ -153,26 +177,38 @@ def get_SAC_HER_model(model_settings, model_path):
     env = HERGoalEnvWrapper(env)
     model_class = SAC
     policy_kwargs = dict(layers=NET_LAYERS)
-    model = HER('MlpPolicy', env, model_class, _init_setup_model=True,
+    model = HER('MlpPolicy',
+                env,
+                model_class,
+                _init_setup_model=True,
                 policy_kwargs=policy_kwargs,
-                n_sampled_goal=4, verbose=1, tensorboard_log=model_path)
+                n_sampled_goal=4,
+                verbose=1,
+                tensorboard_log=model_path)
     return model, env
 
 
 def get_PPO_model(model_settings, model_path):
     env = get_multi_process_env(model_settings)
-    ppo_config = {"gamma": 0.99,
-                  "n_steps": 600,
-                  "ent_coef": 0.01,
-                  "learning_rate": 0.00025,
-                  "vf_coef": 0.5,
-                  "max_grad_norm": 0.5,
-                  "nminibatches": 4,
-                  "noptepochs": 4}
+    ppo_config = {
+        "gamma": 0.99,
+        "n_steps": 600,
+        "ent_coef": 0.01,
+        "learning_rate": 0.00025,
+        "vf_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "nminibatches": 4,
+        "noptepochs": 4
+    }
     model_settings['train_configs'] = ppo_config
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=NET_LAYERS)
-    model = PPO2(MlpPolicy, env, _init_setup_model=True, policy_kwargs=policy_kwargs,
-                 verbose=1, **ppo_config, tensorboard_log=model_path)
+    model = PPO2(MlpPolicy,
+                 env,
+                 _init_setup_model=True,
+                 policy_kwargs=policy_kwargs,
+                 verbose=1,
+                 **ppo_config,
+                 tensorboard_log=model_path)
     return model, env
 
 
@@ -203,7 +239,8 @@ def train_model_num(model_settings, output_path):
     save_model_settings(os.path.join(model_path, 'model_settings.json'),
                         model_settings)
 
-    checkpoint_callback = CheckpointCallback(save_freq=int(validate_every_timesteps / num_of_active_envs),
+    checkpoint_callback = CheckpointCallback(save_freq=int(
+        validate_every_timesteps / num_of_active_envs),
                                              save_path=model_path,
                                              name_prefix='model')
 
@@ -219,10 +256,11 @@ def train_model_num(model_settings, output_path):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_num", required=True, default=0,
+    parser.add_argument("--model_num",
+                        required=True,
+                        default=0,
                         help="model number")
-    parser.add_argument("--output_path", required=True,
-                        help="output path")
+    parser.add_argument("--output_path", required=True, help="output path")
 
     args = vars(parser.parse_args())
     model_num = int(args['model_num'])

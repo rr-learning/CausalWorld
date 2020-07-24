@@ -11,7 +11,8 @@ def get_intersection(bb1, bb2):
     if x_right < x_left or y_bottom < y_top or z_down < z_up:
         return 0.0
 
-    intersection_area = (x_right - x_left) * (y_bottom - y_top) * (z_down - z_up)
+    intersection_area = (x_right - x_left) * (y_bottom - y_top) * (z_down -
+                                                                   z_up)
 
     return intersection_area
 

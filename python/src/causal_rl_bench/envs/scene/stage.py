@@ -10,13 +10,10 @@ from collections import OrderedDict
 
 
 class Stage(object):
-    def __init__(self, observation_mode,
-                 normalize_observations,
-                 pybullet_client_full_id,
-                 pybullet_client_w_goal_id,
-                 pybullet_client_w_o_goal_id,
-                 cameras,
-                 camera_indicies):
+
+    def __init__(self, observation_mode, normalize_observations,
+                 pybullet_client_full_id, pybullet_client_w_goal_id,
+                 pybullet_client_w_o_goal_id, cameras, camera_indicies):
         """
 
         :param observation_mode:
@@ -59,7 +56,7 @@ class Stage(object):
         return WorldConstants.FLOOR_HEIGHT
 
     def get_arena_bb(self):
-        return  WorldConstants.ARENA_BB
+        return WorldConstants.ARENA_BB
 
     def get_rigid_objects(self):
         return self._rigid_objects
@@ -72,37 +69,40 @@ class Stage(object):
         env_state['rigid_objects'] = []
         for rigid_object_key in self._rigid_objects:
             if isinstance(self._rigid_objects[rigid_object_key], Cuboid):
-                env_state['rigid_objects'].append(['cube',
-                                                   self._rigid_objects
-                                                   [rigid_object_key].
-                                                   get_recreation_params()])
+                env_state['rigid_objects'].append([
+                    'cube',
+                    self._rigid_objects[rigid_object_key].get_recreation_params(
+                    )
+                ])
             if isinstance(self._rigid_objects[rigid_object_key], StaticCuboid):
-                env_state['rigid_objects'].append(['static_cube',
-                                                   self._rigid_objects
-                                                   [rigid_object_key].
-                                                   get_recreation_params()])
+                env_state['rigid_objects'].append([
+                    'static_cube',
+                    self._rigid_objects[rigid_object_key].get_recreation_params(
+                    )
+                ])
             if isinstance(self._rigid_objects[rigid_object_key], MeshObject):
-                env_state['rigid_objects'].append(['mesh',
-                                                   self._rigid_objects
-                                                   [rigid_object_key].
-                                                   get_recreation_params()])
+                env_state['rigid_objects'].append([
+                    'mesh',
+                    self._rigid_objects[rigid_object_key].get_recreation_params(
+                    )
+                ])
         env_state['visual_objects'] = []
         for visual_object_key in self._visual_objects:
             if isinstance(self._visual_objects[visual_object_key], SCuboid):
-                env_state['visual_objects'].append(['cube',
-                                                   self._visual_objects
-                                                   [visual_object_key].
-                                                   get_recreation_params()])
+                env_state['visual_objects'].append([
+                    'cube', self._visual_objects[visual_object_key].
+                    get_recreation_params()
+                ])
             if isinstance(self._visual_objects[visual_object_key], SSphere):
-                env_state['visual_objects'].append(['sphere',
-                                                    self._visual_objects
-                                                    [visual_object_key].
-                                                    get_recreation_params()])
+                env_state['visual_objects'].append([
+                    'sphere', self._visual_objects[visual_object_key].
+                    get_recreation_params()
+                ])
             if isinstance(self._visual_objects[visual_object_key], SMeshObject):
-                env_state['visual_objects'].append(['mesh',
-                                                    self._visual_objects
-                                                    [visual_object_key].
-                                                    get_recreation_params()])
+                env_state['visual_objects'].append([
+                    'mesh', self._visual_objects[visual_object_key].
+                    get_recreation_params()
+                ])
         env_state['arena_scm_values'] = self.get_current_scm_values_for_arena()
         return env_state
 
@@ -139,15 +139,11 @@ class Stage(object):
         else:
             self._name_keys.append(name)
         if shape == "cube":
-            self._rigid_objects[name] = Cuboid(self.
-                                               _rigid_objects_client_instances,
-                                               name,
-                                               **object_params)
+            self._rigid_objects[name] = Cuboid(
+                self._rigid_objects_client_instances, name, **object_params)
         elif shape == "static_cube":
-            self._rigid_objects[name] = StaticCuboid(self.
-                                                     _rigid_objects_client_instances,
-                                                     name,
-                                                     **object_params)
+            self._rigid_objects[name] = StaticCuboid(
+                self._rigid_objects_client_instances, name, **object_params)
         else:
             raise Exception("shape is not yet implemented")
         return
@@ -164,7 +160,7 @@ class Stage(object):
             self._name_keys.remove(name)
         if name in self._rigid_objects.keys():
             self._rigid_objects[name].remove()
-            
+
             del self._rigid_objects[name]
         elif name in self._visual_objects.keys():
             self._visual_objects[name].remove()
@@ -194,9 +190,9 @@ class Stage(object):
             raise Exception("name already exists as key for scene objects")
         else:
             self._name_keys.append(name)
-        self._rigid_objects[name] = MeshObject(self._rigid_objects_client_instances,
-                                               name,
-                                               filename, **object_params)
+        self._rigid_objects[name] = MeshObject(
+            self._rigid_objects_client_instances, name, filename,
+            **object_params)
         return
 
     def add_silhoutte_general_object(self, name, shape, **object_params):
@@ -233,9 +229,9 @@ class Stage(object):
             raise Exception("name already exists as key for scene objects")
         else:
             self._name_keys.append(name)
-        self._visual_objects[name] = SMeshObject(self._visual_object_client_instances,
-                                                 name,
-                                                 filename, **object_params)
+        self._visual_objects[name] = SMeshObject(
+            self._visual_object_client_instances, name, filename,
+            **object_params)
         return
 
     def finalize_stage(self):
@@ -244,18 +240,18 @@ class Stage(object):
         :return:
         """
         if self._observation_mode == "cameras":
-            self._stage_observations = StageObservations(self._rigid_objects,
-                                                         self._visual_objects,
-                                                         self._observation_mode,
-                                                         self._normalize_observations,
-                                                         cameras=self._cameras,
-                                                         camera_indicies=self._camera_indicies)
+            self._stage_observations = StageObservations(
+                self._rigid_objects,
+                self._visual_objects,
+                self._observation_mode,
+                self._normalize_observations,
+                cameras=self._cameras,
+                camera_indicies=self._camera_indicies)
             self.update_goal_image()
         else:
-            self._stage_observations = StageObservations(self._rigid_objects,
-                                                         self._visual_objects,
-                                                         self._observation_mode,
-                                                         self._normalize_observations)
+            self._stage_observations = StageObservations(
+                self._rigid_objects, self._visual_objects,
+                self._observation_mode, self._normalize_observations)
         return
 
     def select_observations(self, observation_keys):
@@ -354,7 +350,8 @@ class Stage(object):
         """
         return self._stage_observations.get_observation_spaces()
 
-    def random_position(self, height_limits=(0.05, 0.15),
+    def random_position(self,
+                        height_limits=(0.05, 0.15),
                         angle_limits=(-2 * math.pi, 2 * math.pi),
                         radius_limits=(0.0, 0.15),
                         allowed_section=np.array([[-0.5, -0.5, 0],
@@ -371,8 +368,8 @@ class Stage(object):
         while not satisfying_constraints:
             angle = np.random.uniform(*angle_limits)
             # for uniform sampling with respect to the disc area use scaling
-            radial_distance = np.sqrt(np.random.uniform(radius_limits[0]**2,
-                                                        radius_limits[1]**2))
+            radial_distance = np.sqrt(
+                np.random.uniform(radius_limits[0]**2, radius_limits[1]**2))
 
             if isinstance(height_limits, (int, float)):
                 height_z = height_limits
@@ -411,8 +408,8 @@ class Stage(object):
         elif key in self._visual_objects:
             object = self._visual_objects[key]
         else:
-            raise Exception("The key {} passed doesn't exist in the stage yet"
-                            .format(key))
+            raise Exception(
+                "The key {} passed doesn't exist in the stage yet".format(key))
         # save the old state of the object before intervention
         object.apply_interventions(interventions_dict)
         if self._observation_mode == "cameras":
@@ -465,29 +462,36 @@ class Stage(object):
         for intervention in interventions_dict:
             if isinstance(interventions_dict[intervention], dict):
                 self.object_intervention(intervention,
-                                             interventions_dict[intervention])
+                                         interventions_dict[intervention])
             elif intervention == "floor_color":
                 for client in self._visual_object_client_instances:
                     pybullet.changeVisualShape(
-                        WorldConstants.FLOOR_ID, -1, rgbaColor=np.append(
-                            interventions_dict[intervention], 1),
-                        physicsClientId=client
-                        )
+                        WorldConstants.FLOOR_ID,
+                        -1,
+                        rgbaColor=np.append(interventions_dict[intervention],
+                                            1),
+                        physicsClientId=client)
                 for client in self._rigid_objects_client_instances:
                     pybullet.changeVisualShape(
-                        WorldConstants.FLOOR_ID, -1, rgbaColor=np.append(
-                            interventions_dict[intervention], 1),
+                        WorldConstants.FLOOR_ID,
+                        -1,
+                        rgbaColor=np.append(interventions_dict[intervention],
+                                            1),
                         physicsClientId=client)
             elif intervention == "stage_color":
                 for client in self._visual_object_client_instances:
                     pybullet.changeVisualShape(
-                        WorldConstants.STAGE_ID, -1, rgbaColor=np.append(
-                            interventions_dict[intervention], 1),
+                        WorldConstants.STAGE_ID,
+                        -1,
+                        rgbaColor=np.append(interventions_dict[intervention],
+                                            1),
                         physicsClientId=client)
                 for client in self._rigid_objects_client_instances:
                     pybullet.changeVisualShape(
-                        WorldConstants.STAGE_ID, -1, rgbaColor=np.append(
-                            interventions_dict[intervention], 1),
+                        WorldConstants.STAGE_ID,
+                        -1,
+                        rgbaColor=np.append(interventions_dict[intervention],
+                                            1),
                         physicsClientId=client)
             elif intervention == "stage_friction":
                 for client in self._rigid_objects_client_instances:
@@ -505,12 +509,9 @@ class Stage(object):
                         physicsClientId=client)
             elif intervention == "gravity":
                 for client in self._rigid_objects_client_instances:
-                    pybullet.setGravity(interventions_dict[
-                                        intervention][0],
-                                      interventions_dict[
-                                        intervention][1],
-                                       interventions_dict[
-                                        intervention][2],
+                    pybullet.setGravity(interventions_dict[intervention][0],
+                                        interventions_dict[intervention][1],
+                                        interventions_dict[intervention][2],
                                         physicsClientId=client)
                 self._current_gravity = interventions_dict[intervention]
             else:
@@ -526,19 +527,19 @@ class Stage(object):
         elif key in self._visual_objects:
             return self._visual_objects[key].get_state('dict')
         else:
-            raise Exception("The key {} passed doesn't exist in the stage yet"
-                            .format(key))
+            raise Exception(
+                "The key {} passed doesn't exist in the stage yet".format(key))
 
     def get_object_state(self, key, state_variable):
         if key in self._rigid_objects:
-            return np.array(self._rigid_objects[key].get_variable_state(
-                state_variable))
+            return np.array(
+                self._rigid_objects[key].get_variable_state(state_variable))
         elif key in self._visual_objects:
-            return np.array(self._visual_objects[key].get_variable_state(
-                state_variable))
+            return np.array(
+                self._visual_objects[key].get_variable_state(state_variable))
         else:
-            raise Exception("The key {} passed doesn't exist in the stage yet"
-                            .format(key))
+            raise Exception(
+                "The key {} passed doesn't exist in the stage yet".format(key))
 
     def get_object(self, key):
         if key in self._rigid_objects:
@@ -546,8 +547,8 @@ class Stage(object):
         elif key in self._visual_objects:
             return self._visual_objects[key]
         else:
-            raise Exception("The key {} passed doesn't exist in the stage yet"
-                            .format(key))
+            raise Exception(
+                "The key {} passed doesn't exist in the stage yet".format(key))
 
     def are_blocks_colliding(self, block1, block2):
         for contact in pybullet.getContactPoints(
@@ -593,21 +594,23 @@ class Stage(object):
                 block2._block_ids[0]) or \
                     (contact[2] == block1._block_ids[0] and contact[1] ==
                      block2._block_ids[0]):
-                return contact[9]*np.array(contact[7])
+                return contact[9] * np.array(contact[7])
         return None
 
-    def add_observation(self, observation_key, lower_bound=None,
+    def add_observation(self,
+                        observation_key,
+                        lower_bound=None,
                         upper_bound=None):
         self._stage_observations.add_observation(observation_key, lower_bound,
                                                  upper_bound)
 
     def normalize_observation_for_key(self, observation, key):
-        return self._stage_observations.normalize_observation_for_key(observation,
-                                                                      key)
+        return self._stage_observations.normalize_observation_for_key(
+            observation, key)
 
     def denormalize_observation_for_key(self, observation, key):
-        return self._stage_observations.denormalize_observation_for_key(observation,
-                                                                        key)
+        return self._stage_observations.denormalize_observation_for_key(
+            observation, key)
 
     def get_current_goal_image(self):
         return self._goal_image

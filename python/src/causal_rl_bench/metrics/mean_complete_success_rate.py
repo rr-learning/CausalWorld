@@ -2,8 +2,10 @@ from causal_rl_bench.metrics.metric_base import BaseMetric
 
 
 class MeanCompleteSuccessRate(BaseMetric):
+
     def __init__(self):
-        super(MeanCompleteSuccessRate, self).__init__(name='mean_complete_success_rate')
+        super(MeanCompleteSuccessRate,
+              self).__init__(name='mean_complete_success_rate')
         self.success_times = 0
         self.total_number_of_episodes = 0
         return

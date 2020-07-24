@@ -16,33 +16,39 @@ log_relative_path = './pushing_policy_tutorial_3'
 
 
 def _make_env(rank):
+
     def _init():
         task = task_generator(task_generator_id="pushing")
-        env = CausalWorld(task=task, enable_visualization=False,
-                          seed=rank)
+        env = CausalWorld(task=task, enable_visualization=False, seed=rank)
         return env
+
     set_global_seeds(0)
     return _init
 
 
 def train_policy():
-    ppo_config = {"gamma": 0.9988,
-                  "n_steps": 200,
-                  "ent_coef": 0,
-                  "learning_rate": 0.001,
-                  "vf_coef": 0.99,
-                  "max_grad_norm": 0.1,
-                  "lam": 0.95,
-                  "nminibatches": 5,
-                  "noptepochs": 100,
-                  "cliprange": 0.2,
-                  "tensorboard_log": log_relative_path}
+    ppo_config = {
+        "gamma": 0.9988,
+        "n_steps": 200,
+        "ent_coef": 0,
+        "learning_rate": 0.001,
+        "vf_coef": 0.99,
+        "max_grad_norm": 0.1,
+        "lam": 0.95,
+        "nminibatches": 5,
+        "noptepochs": 100,
+        "cliprange": 0.2,
+        "tensorboard_log": log_relative_path
+    }
     os.makedirs(log_relative_path)
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 128])
     env = SubprocVecEnv([_make_env(rank=i) for i in range(5)])
-    model = PPO2(MlpPolicy, env, _init_setup_model=True,
+    model = PPO2(MlpPolicy,
+                 env,
+                 _init_setup_model=True,
                  policy_kwargs=policy_kwargs,
-                 verbose=1, **ppo_config)
+                 verbose=1,
+                 **ppo_config)
     model.learn(total_timesteps=1000,
                 tb_log_name="ppo2",
                 reset_num_timesteps=False)
@@ -55,6 +61,7 @@ def train_policy():
 def evaluate_model():
     # Load the PPO2 policy trained on the pushing task
     model = PPO2.load(os.path.join(log_relative_path, 'model.zip'))
+
     # define a method for the policy fn of your trained model
 
     def policy_fn(obs):
@@ -63,8 +70,7 @@ def evaluate_model():
     # Let's evaluate the policy on some default evaluation protocols for reaching task
     evaluation_protocols = PUSHING_BENCHMARK['evaluation_protocols']
 
-    evaluator = EvaluationPipeline(evaluation_protocols=
-                                   evaluation_protocols,
+    evaluator = EvaluationPipeline(evaluation_protocols=evaluation_protocols,
                                    tracker_path=log_relative_path,
                                    initial_seed=0)
 

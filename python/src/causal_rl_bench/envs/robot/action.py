@@ -5,6 +5,7 @@ from gym import spaces
 
 
 class TriFingerAction(object):
+
     def __init__(self, action_mode="joint_positions", normalize_actions=True):
         self.normalize_actions = normalize_actions
         self.max_motor_torque = 0.36
@@ -12,12 +13,10 @@ class TriFingerAction(object):
         self.high = None
         num_fingers = 3
         self.action_mode = action_mode
-        self.joint_positions_lower_bounds = np.array([-math.radians(70),
-                                                      -math.radians(70),
-                                                      -math.radians(160)] * 3)
-        self.joint_positions_upper_bounds = np.array([math.radians(70),
-                                                      0,
-                                                      math.radians(-2)] * 3)
+        self.joint_positions_lower_bounds = np.array(
+            [-math.radians(70), -math.radians(70), -math.radians(160)] * 3)
+        self.joint_positions_upper_bounds = np.array(
+            [math.radians(70), 0, math.radians(-2)] * 3)
         if action_mode == "joint_positions":
             lower_bounds = self.joint_positions_lower_bounds
             upper_bounds = self.joint_positions_upper_bounds
@@ -31,8 +30,8 @@ class TriFingerAction(object):
             upper_bounds = np.array([0.5, 0.5, 0.5] * 3)
 
         else:
-            raise ValueError("No valid action_mode specified: {}".
-                             format(action_mode))
+            raise ValueError(
+                "No valid action_mode specified: {}".format(action_mode))
         self.set_action_space(lower_bounds, upper_bounds)
 
     def set_action_space(self, lower_bounds, upper_bounds):
@@ -46,9 +45,7 @@ class TriFingerAction(object):
                               high=np.ones(len(self.high)),
                               dtype=np.float64)
         else:
-            return spaces.Box(low=self.low,
-                              high=self.high,
-                              dtype=np.float64)
+            return spaces.Box(low=self.low, high=self.high, dtype=np.float64)
 
     def is_normalized(self):
         return self.normalize_actions

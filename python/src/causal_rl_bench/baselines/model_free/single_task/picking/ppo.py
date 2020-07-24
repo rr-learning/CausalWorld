@@ -14,16 +14,18 @@ import numpy as np
 def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                  skip_frame, seed_num, ppo_config, total_time_steps,
                  validate_every_timesteps, task_name):
+
     def _make_env(rank):
+
         def _init():
             task = task_generator(task_generator_id=task_name,
-                                  dense_reward_weights=np.array([250, 0, 125,
-                                                                 0, 750, 0, 0,
-                                                                 0.005]),
+                                  dense_reward_weights=np.array(
+                                      [250, 0, 125, 0, 750, 0, 0, 0.005]),
                                   fractional_reward_weight=1,
                                   goal_height=0.15,
                                   tool_block_mass=0.02)
-            env = CausalWorld(task=task, skip_frame=skip_frame,
+            env = CausalWorld(task=task,
+                              skip_frame=skip_frame,
                               enable_visualization=False,
                               seed=seed_num + rank,
                               max_episode_length=maximum_episode_length)
@@ -34,13 +36,16 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
 
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=[256, 256])
     env = SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
-    checkpoint_callback = CheckpointCallback(
-        save_freq=int(validate_every_timesteps/num_of_envs),
-        save_path=log_relative_path,
-        name_prefix='model')
-    model = PPO2(MlpPolicy, env, _init_setup_model=True,
+    checkpoint_callback = CheckpointCallback(save_freq=int(
+        validate_every_timesteps / num_of_envs),
+                                             save_path=log_relative_path,
+                                             name_prefix='model')
+    model = PPO2(MlpPolicy,
+                 env,
+                 _init_setup_model=True,
                  policy_kwargs=policy_kwargs,
-                 verbose=1, **ppo_config)
+                 verbose=1,
+                 **ppo_config)
     model.learn(total_timesteps=total_time_steps,
                 tb_log_name="ppo2",
                 callback=checkpoint_callback)
@@ -57,16 +62,17 @@ if __name__ == '__main__':
     skip_frame = 3
     seed_num = 0
     task_name = 'picking'
-    ppo_config = {"gamma": 0.99,
-                  "n_steps":
-                      int(number_of_time_steps_per_iteration / num_of_envs),
-                  "ent_coef": 0.01,
-                  "learning_rate": 0.00025,
-                  "vf_coef": 0.5,
-                  "max_grad_norm": 0.5,
-                  "nminibatches": 40,
-                  "noptepochs": 4,
-                  "tensorboard_log": log_relative_path}
+    ppo_config = {
+        "gamma": 0.99,
+        "n_steps": int(number_of_time_steps_per_iteration / num_of_envs),
+        "ent_coef": 0.01,
+        "learning_rate": 0.00025,
+        "vf_coef": 0.5,
+        "max_grad_norm": 0.5,
+        "nminibatches": 40,
+        "noptepochs": 4,
+        "tensorboard_log": log_relative_path
+    }
     train_policy(num_of_envs=num_of_envs,
                  log_relative_path=log_relative_path,
                  maximum_episode_length=maximum_episode_length,
@@ -76,4 +82,3 @@ if __name__ == '__main__':
                  total_time_steps=total_time_steps,
                  validate_every_timesteps=total_time_steps_per_update,
                  task_name=task_name)
-

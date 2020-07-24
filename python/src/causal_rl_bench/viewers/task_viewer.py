@@ -4,8 +4,11 @@ from causal_rl_bench.task_generators.task import task_generator
 import numpy as np
 
 
-def get_world(task_generator_id, task_params, world_params,
-              enable_visualization=False, env_wrappers=np.array([]),
+def get_world(task_generator_id,
+              task_params,
+              world_params,
+              enable_visualization=False,
+              env_wrappers=np.array([]),
               env_wrappers_args=np.array([])):
     world_params["skip_frame"] = 1
     if task_params is None:
@@ -16,15 +19,20 @@ def get_world(task_generator_id, task_params, world_params,
     if "enable_visualization" in world_params.keys():
         world_params_temp = dict(world_params)
         del world_params_temp["enable_visualization"]
-        env = CausalWorld(task, **world_params_temp, enable_visualization=enable_visualization)
+        env = CausalWorld(task,
+                          **world_params_temp,
+                          enable_visualization=enable_visualization)
     else:
-        env = CausalWorld(task, **world_params, enable_visualization=enable_visualization)
+        env = CausalWorld(task,
+                          **world_params,
+                          enable_visualization=enable_visualization)
     for i in range(len(env_wrappers)):
         env = env_wrappers[i](env, **env_wrappers_args[i])
     return env
 
 
-def view_episode(episode, env_wrappers=np.array([]),
+def view_episode(episode,
+                 env_wrappers=np.array([]),
                  env_wrappers_args=np.array([])):
     actual_skip_frame = episode.world_params["skip_frame"]
     env = get_world(episode.get_task_name(),
@@ -45,8 +53,12 @@ def view_episode(episode, env_wrappers=np.array([]),
     env.close()
 
 
-def view_policy(task, world_params, policy_fn, max_time_steps,
-                number_of_resets, env_wrappers=np.array([]),
+def view_policy(task,
+                world_params,
+                policy_fn,
+                max_time_steps,
+                number_of_resets,
+                env_wrappers=np.array([]),
                 env_wrappers_args=np.array([])):
     actual_skip_frame = world_params["skip_frame"]
     env = get_world(task.get_task_name(),
@@ -57,7 +69,7 @@ def view_policy(task, world_params, policy_fn, max_time_steps,
                     env_wrappers_args=env_wrappers_args)
     for reset_idx in range(number_of_resets):
         obs = env.reset()
-        for time in range(int(max_time_steps/number_of_resets)):
+        for time in range(int(max_time_steps / number_of_resets)):
             #compute next action
             desired_action = policy_fn(obs)
             for _ in range(actual_skip_frame):
@@ -65,8 +77,12 @@ def view_policy(task, world_params, policy_fn, max_time_steps,
     env.close()
 
 
-def record_video_of_policy(task, world_params, policy_fn, file_name,
-                           number_of_resets, max_time_steps=100,
+def record_video_of_policy(task,
+                           world_params,
+                           policy_fn,
+                           file_name,
+                           number_of_resets,
+                           max_time_steps=100,
                            env_wrappers=np.array([]),
                            env_wrappers_args=np.array([])):
     #TODO: discuss the speed of the current render method since it takes a long time to render a frame
@@ -90,8 +106,11 @@ def record_video_of_policy(task, world_params, policy_fn, file_name,
     env.close()
 
 
-def record_video_of_random_policy(task, world_params, file_name,
-                                  number_of_resets, max_time_steps=100,
+def record_video_of_random_policy(task,
+                                  world_params,
+                                  file_name,
+                                  number_of_resets,
+                                  max_time_steps=100,
                                   env_wrappers=np.array([]),
                                   env_wrappers_args=np.array([])):
     #TODO: discuss the speed of the current render method since it takes a
@@ -115,7 +134,9 @@ def record_video_of_random_policy(task, world_params, file_name,
     env.close()
 
 
-def record_video_of_episode(episode, file_name, env_wrappers=np.array([]),
+def record_video_of_episode(episode,
+                            file_name,
+                            env_wrappers=np.array([]),
                             env_wrappers_args=np.array([])):
     actual_skip_frame = episode.world_params["skip_frame"]
     env = get_world(episode.get_task_name(),
@@ -138,4 +159,3 @@ def record_video_of_episode(episode, file_name, env_wrappers=np.array([]),
 
     recorder.close()
     env.close()
-

@@ -3,6 +3,7 @@ import numpy as np
 
 
 class InEpisodePosesChange(Protocol):
+
     def __init__(self):
         super().__init__('in_episode_poses_change')
 

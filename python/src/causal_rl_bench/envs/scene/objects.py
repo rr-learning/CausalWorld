@@ -7,14 +7,11 @@ from causal_rl_bench.configs.world_constants import WorldConstants
 
 
 class RigidObject(object):
-    def __init__(self, pybullet_client_ids, name,
-                 size, initial_position,
-                 initial_orientation, mass,
-                 color, lateral_friction,
-                 spinning_friction, restitution,
-                 initial_linear_velocity,
-                 initial_angular_velocity,
-                 fixed_bool):
+
+    def __init__(self, pybullet_client_ids, name, size, initial_position,
+                 initial_orientation, mass, color, lateral_friction,
+                 spinning_friction, restitution, initial_linear_velocity,
+                 initial_angular_velocity, fixed_bool):
         """
 
         :param pybullet_clients:
@@ -94,16 +91,16 @@ class RigidObject(object):
         self._state_variable_names = []
 
         if self.is_not_fixed():
-            self._state_variable_names = ['type', 'cartesian_position',
-                                          'cylindrical_position',
-                                           'orientation', 'linear_velocity',
-                                           'angular_velocity', 'mass',
-                                           'size', 'color', 'friction', 'type']
+            self._state_variable_names = [
+                'type', 'cartesian_position', 'cylindrical_position',
+                'orientation', 'linear_velocity', 'angular_velocity', 'mass',
+                'size', 'color', 'friction', 'type'
+            ]
         else:
-            self._state_variable_names = ['type', 'cartesian_position',
-                                          'cylindrical_position',
-                                           'orientation',
-                                           'size', 'color', 'friction', 'type']
+            self._state_variable_names = [
+                'type', 'cartesian_position', 'cylindrical_position',
+                'orientation', 'size', 'color', 'friction', 'type'
+            ]
 
         self._state_variable_sizes = []
         self._state_size = 0
@@ -129,10 +126,8 @@ class RigidObject(object):
     def _add_state_variables(self):
         return
 
-    def _create_object(self, pybullet_client_id,
-                       **kwargs):
-        raise NotImplementedError("the creation function is not defined "
-                                  "yet")
+    def _create_object(self, pybullet_client_id, **kwargs):
+        raise NotImplementedError("the creation function is not defined " "yet")
 
     def _define_type_id(self):
         raise NotImplementedError("the define type id function "
@@ -164,8 +159,8 @@ class RigidObject(object):
             return self._type_id
         elif variable_name == 'cartesian_position':
             position, orientation = pybullet.getBasePositionAndOrientation(
-                self._block_ids[0], physicsClientId=self._pybullet_client_ids[0]
-            )
+                self._block_ids[0],
+                physicsClientId=self._pybullet_client_ids[0])
             position = np.array(position)
             position[-1] -= WorldConstants.FLOOR_HEIGHT
             return position
@@ -173,8 +168,7 @@ class RigidObject(object):
         elif variable_name == 'orientation':
             position, orientation = pybullet.getBasePositionAndOrientation(
                 self._block_ids[0],
-                physicsClientId=self._pybullet_client_ids[0]
-            )
+                physicsClientId=self._pybullet_client_ids[0])
             position = np.array(position)
             position[-1] -= WorldConstants.FLOOR_HEIGHT
             return orientation
@@ -207,58 +201,51 @@ class RigidObject(object):
     def remove(self):
         for i in range(0, len(self._pybullet_client_ids)):
             pybullet.removeBody(self._block_ids[i],
-                                 physicsClientId=
-                                 self._pybullet_client_ids[i]
-                                 )
+                                physicsClientId=self._pybullet_client_ids[i])
         self._block_ids = []
         self._shape_ids = []
         return
 
     def _set_color(self, color):
         for i in range(len(self._pybullet_client_ids)):
-            pybullet.changeVisualShape(self._block_ids[i],
-                                        -1,
-                                        rgbaColor=np.append(
-                                        color, 1),
-                                       physicsClientId=
-                                       self._pybullet_client_ids[i]
-                                       )
+            pybullet.changeVisualShape(
+                self._block_ids[i],
+                -1,
+                rgbaColor=np.append(color, 1),
+                physicsClientId=self._pybullet_client_ids[i])
         return
 
     def _set_lateral_friction(self, lateral_friction):
         for i in range(len(self._pybullet_client_ids)):
-            pybullet.changeDynamics(bodyUniqueId=self._block_ids[i],
-                                    linkIndex=-1,
-                                    lateralFriction=lateral_friction,
-                                    physicsClientId=
-                                    self._pybullet_client_ids[i]
-                                    )
+            pybullet.changeDynamics(
+                bodyUniqueId=self._block_ids[i],
+                linkIndex=-1,
+                lateralFriction=lateral_friction,
+                physicsClientId=self._pybullet_client_ids[i])
 
-    def _set_restitution(self,restitution):
+    def _set_restitution(self, restitution):
         for i in range(len(self._pybullet_client_ids)):
-            pybullet.changeDynamics(bodyUniqueId=self._block_ids[i],
-                                    linkIndex=-1,
-                                    restitution=restitution,
-                                    physicsClientId=
-                                    self._pybullet_client_ids[i]
-                                    )
+            pybullet.changeDynamics(
+                bodyUniqueId=self._block_ids[i],
+                linkIndex=-1,
+                restitution=restitution,
+                physicsClientId=self._pybullet_client_ids[i])
 
     def _set_spinning_friction(self, spinning_friction):
         for i in range(len(self._pybullet_client_ids)):
-            pybullet.changeDynamics(bodyUniqueId=self._block_ids[i],
-                                    linkIndex=-1,
-                                    spinningFriction=spinning_friction,
-                                    physicsClientId=
-                                    self._pybullet_client_ids[i]
-                                    )
+            pybullet.changeDynamics(
+                bodyUniqueId=self._block_ids[i],
+                linkIndex=-1,
+                spinningFriction=spinning_friction,
+                physicsClientId=self._pybullet_client_ids[i])
 
     def _set_velocities(self):
         for i in range(0, len(self._pybullet_client_ids)):
-            pybullet.resetBaseVelocity(self._block_ids[i],
-                                       self._initial_linear_velocity,
-                                       self._initial_angular_velocity,
-                                       physicsClientId=
-                                       self._pybullet_client_ids[i])
+            pybullet.resetBaseVelocity(
+                self._block_ids[i],
+                self._initial_linear_velocity,
+                self._initial_angular_velocity,
+                physicsClientId=self._pybullet_client_ids[i])
 
     def set_pose(self, position, orientation):
         """
@@ -270,9 +257,10 @@ class RigidObject(object):
         for i in range(0, len(self._pybullet_client_ids)):
             position[-1] += WorldConstants.FLOOR_HEIGHT
             pybullet.resetBasePositionAndOrientation(
-                self._block_ids[i], position, orientation,
-                physicsClientId=self._pybullet_client_ids[i]
-            )
+                self._block_ids[i],
+                position,
+                orientation,
+                physicsClientId=self._pybullet_client_ids[i])
         return
 
     def get_state(self, state_type='dict'):
@@ -375,7 +363,8 @@ class RigidObject(object):
         """
         #TODO: Add frictions to apply interventions
         if 'cylindrical_position' in interventions_dict:
-            interventions_dict['cartesian_position'] = cyl2cart(interventions_dict['cylindrical_position'])
+            interventions_dict['cartesian_position'] = cyl2cart(
+                interventions_dict['cylindrical_position'])
         if 'cartesian_position' not in interventions_dict or \
                 'orientation' not in interventions_dict:
             position, orientation = pybullet.\
@@ -401,15 +390,17 @@ class RigidObject(object):
             for i in range(0, len(self._pybullet_client_ids)):
                 position[-1] += WorldConstants.FLOOR_HEIGHT
                 pybullet.resetBasePositionAndOrientation(
-                    self._block_ids[i], position, orientation,
-                    physicsClientId=
-                    self._pybullet_client_ids[i])
+                    self._block_ids[i],
+                    position,
+                    orientation,
+                    physicsClientId=self._pybullet_client_ids[i])
         elif 'mass' in interventions_dict:
             for i in range(0, len(self._pybullet_client_ids)):
                 pybullet.changeDynamics(
-                    self._block_ids[i], -1, mass=self._mass,
-                    physicsClientId=
-                    self._pybullet_client_ids[i])
+                    self._block_ids[i],
+                    -1,
+                    mass=self._mass,
+                    physicsClientId=self._pybullet_client_ids[i])
         elif 'friction' in interventions_dict:
             self._set_lateral_friction(self._lateral_friction)
 
@@ -431,11 +422,11 @@ class RigidObject(object):
         if 'angular_velocity' in interventions_dict or 'linear_velocity' in \
                 interventions_dict:
             for i in range(0, len(self._pybullet_client_ids)):
-                pybullet.resetBaseVelocity(self._block_ids[i],
-                                           linear_velocity,
-                                           angular_velocity,
-                                           physicsClientId=
-                                           self._pybullet_client_ids[i])
+                pybullet.resetBaseVelocity(
+                    self._block_ids[i],
+                    linear_velocity,
+                    angular_velocity,
+                    physicsClientId=self._pybullet_client_ids[i])
         return
 
     def get_state_variable_names(self):
@@ -473,9 +464,7 @@ class RigidObject(object):
         """
         #should be the same in both
         bb = pybullet.getAABB(self._block_ids[0],
-                                physicsClientId=
-                                self._pybullet_client_ids[0]
-                                )
+                              physicsClientId=self._pybullet_client_ids[0])
         bb = np.array(bb)
         bb[0][-1] -= WorldConstants.FLOOR_HEIGHT
         bb[1][-1] -= WorldConstants.FLOOR_HEIGHT
@@ -494,16 +483,9 @@ class RigidObject(object):
         )
         position = np.array(position)
         position[-1] -= WorldConstants.FLOOR_HEIGHT
-        vertices = [[1, 1, -1],
-                    [1, -1, -1],
-                    [-1, 1, -1],
-                    [-1, -1, -1],
-                    [1, 1, 1],
-                    [1, -1, 1],
-                    [-1, 1, 1],
-                    [-1, -1, 1]]
-        vertices = [position + (point * self._size / 2)
-                    for point in vertices]
+        vertices = [[1, 1, -1], [1, -1, -1], [-1, 1, -1], [-1, -1, -1],
+                    [1, 1, 1], [1, -1, 1], [-1, 1, 1], [-1, -1, 1]]
+        vertices = [position + (point * self._size / 2) for point in vertices]
         return rotate_points(np.array(vertices), orientation)
 
     def world_to_cube_r_matrix(self):
@@ -568,17 +550,19 @@ class RigidObject(object):
 
 
 class Cuboid(RigidObject):
+
     def __init__(
-        self,
-        pybullet_client_ids, name,
-        size=np.array([0.065, 0.065, 0.065]),
-        initial_position=np.array([0.0, 0.0, 0.0425]),
-        initial_orientation=np.array([0, 0, 0, 1]),
-        mass=0.08,
-        color=np.array([1, 0, 0]),
-        initial_linear_velocity=np.array([0, 0, 0]),
-        initial_angular_velocity=np.array([0, 0, 0]),
-        lateral_friction=1,
+            self,
+            pybullet_client_ids,
+            name,
+            size=np.array([0.065, 0.065, 0.065]),
+            initial_position=np.array([0.0, 0.0, 0.0425]),
+            initial_orientation=np.array([0, 0, 0, 1]),
+            mass=0.08,
+            color=np.array([1, 0, 0]),
+            initial_linear_velocity=np.array([0, 0, 0]),
+            initial_angular_velocity=np.array([0, 0, 0]),
+            lateral_friction=1,
     ):
         """
 
@@ -591,24 +575,22 @@ class Cuboid(RigidObject):
         :param color:
         """
         #TODO: intervene on friction as well
-        super(Cuboid, self).__init__(pybullet_client_ids=pybullet_client_ids,
-                                     name=name,
-                                     size=size,
-                                     initial_position=initial_position,
-                                     initial_orientation=initial_orientation,
-                                     mass=mass,
-                                     color=color,
-                                     fixed_bool=False,
-                                     lateral_friction=lateral_friction,
-                                     spinning_friction=0.001,
-                                     restitution=0,
-                                     initial_linear_velocity=
-                                     initial_linear_velocity,
-                                     initial_angular_velocity=
-                                     initial_angular_velocity)
+        super(Cuboid,
+              self).__init__(pybullet_client_ids=pybullet_client_ids,
+                             name=name,
+                             size=size,
+                             initial_position=initial_position,
+                             initial_orientation=initial_orientation,
+                             mass=mass,
+                             color=color,
+                             fixed_bool=False,
+                             lateral_friction=lateral_friction,
+                             spinning_friction=0.001,
+                             restitution=0,
+                             initial_linear_velocity=initial_linear_velocity,
+                             initial_angular_velocity=initial_angular_velocity)
 
-    def _create_object(self, pybullet_client_id,
-                       **kwargs):
+    def _create_object(self, pybullet_client_id, **kwargs):
         shape_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_BOX,
             halfExtents=np.array(self._size) / 2,
@@ -620,8 +602,7 @@ class Cuboid(RigidObject):
             basePosition=position,
             baseOrientation=self._initial_orientation,
             baseMass=self._mass,
-            physicsClientId=pybullet_client_id
-        )
+            physicsClientId=pybullet_client_id)
         return shape_id, block_id
 
     def _define_type_id(self):
@@ -656,15 +637,15 @@ class Cuboid(RigidObject):
 
 
 class StaticCuboid(RigidObject):
-    def __init__(
-        self,
-        pybullet_client_ids, name,
-        size=np.array([0.065, 0.065, 0.065]),
-        position=np.array([0.0, 0.0, 0.0425]),
-        orientation=np.array([0, 0, 0, 1]),
-        color=np.array([1, 0, 0]),
-        lateral_friction=1
-    ):
+
+    def __init__(self,
+                 pybullet_client_ids,
+                 name,
+                 size=np.array([0.065, 0.065, 0.065]),
+                 position=np.array([0.0, 0.0, 0.0425]),
+                 orientation=np.array([0, 0, 0, 1]),
+                 color=np.array([1, 0, 0]),
+                 lateral_friction=1):
         """
 
         :param pybullet_client:
@@ -676,25 +657,22 @@ class StaticCuboid(RigidObject):
         :param color:
         """
         #TODO: intervene on friction as well
-        super(StaticCuboid, self).__init__(pybullet_client_ids=
-                                           pybullet_client_ids,
-                                           name=name,
-                                           size=size,
-                                           initial_position=position,
-                                           initial_orientation=orientation,
-                                           mass=0,
-                                           color=color,
-                                           fixed_bool=False,
-                                           lateral_friction=lateral_friction,
-                                           spinning_friction=0.001,
-                                           restitution=0,
-                                           initial_linear_velocity=
-                                           [0, 0, 0],
-                                           initial_angular_velocity=
-                                           [0, 0, 0])
+        super(StaticCuboid,
+              self).__init__(pybullet_client_ids=pybullet_client_ids,
+                             name=name,
+                             size=size,
+                             initial_position=position,
+                             initial_orientation=orientation,
+                             mass=0,
+                             color=color,
+                             fixed_bool=False,
+                             lateral_friction=lateral_friction,
+                             spinning_friction=0.001,
+                             restitution=0,
+                             initial_linear_velocity=[0, 0, 0],
+                             initial_angular_velocity=[0, 0, 0])
 
-    def _create_object(self, pybullet_client_id,
-                       **kwargs):
+    def _create_object(self, pybullet_client_id, **kwargs):
         position = np.array(self._initial_position)
         position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createCollisionShape(
@@ -706,8 +684,7 @@ class StaticCuboid(RigidObject):
             basePosition=position,
             baseOrientation=self._initial_orientation,
             baseMass=self._mass,
-            physicsClientId=pybullet_client_id
-        )
+            physicsClientId=pybullet_client_id)
         return shape_id, block_id
 
     def _define_type_id(self):
@@ -732,19 +709,19 @@ class StaticCuboid(RigidObject):
 
 
 class MeshObject(RigidObject):
-    def __init__(
-        self,
-        pybullet_client_ids, name,
-        filename,
-        scale=np.array([0.01, 0.01, 0.01]),
-        initial_position=np.array([0.0, 0.0, 0.0425]),
-        initial_orientation=np.array([0, 0, 0, 1]),
-        color=np.array([1, 0, 0]),
-        mass=0.08,
-        initial_linear_velocity=np.array([0, 0, 0]),
-        initial_angular_velocity=np.array([0, 0, 0]),
-        lateral_friction=1
-    ):
+
+    def __init__(self,
+                 pybullet_client_ids,
+                 name,
+                 filename,
+                 scale=np.array([0.01, 0.01, 0.01]),
+                 initial_position=np.array([0.0, 0.0, 0.0425]),
+                 initial_orientation=np.array([0, 0, 0, 1]),
+                 color=np.array([1, 0, 0]),
+                 mass=0.08,
+                 initial_linear_velocity=np.array([0, 0, 0]),
+                 initial_angular_velocity=np.array([0, 0, 0]),
+                 lateral_friction=1):
         """
 
         :param pybullet_client:
@@ -758,28 +735,25 @@ class MeshObject(RigidObject):
         #TODO: intervene on friction as well
         self._scale = scale
         self._filename = filename
-        super(MeshObject, self).__init__(pybullet_client_ids=
-                                           pybullet_client_ids,
-                                           name=name,
-                                           size=[0, 0, 0],
-                                           initial_position=initial_position,
-                                           initial_orientation=initial_orientation,
-                                           mass=mass,
-                                           color=color,
-                                           fixed_bool=False,
-                                           lateral_friction=lateral_friction,
-                                           spinning_friction=0.001,
-                                           restitution=0,
-                                           initial_linear_velocity=
-                                           initial_linear_velocity,
-                                           initial_angular_velocity=
-                                           initial_angular_velocity)
+        super(MeshObject,
+              self).__init__(pybullet_client_ids=pybullet_client_ids,
+                             name=name,
+                             size=[0, 0, 0],
+                             initial_position=initial_position,
+                             initial_orientation=initial_orientation,
+                             mass=mass,
+                             color=color,
+                             fixed_bool=False,
+                             lateral_friction=lateral_friction,
+                             spinning_friction=0.001,
+                             restitution=0,
+                             initial_linear_velocity=initial_linear_velocity,
+                             initial_angular_velocity=initial_angular_velocity)
         bb = self.get_bounding_box()
         self._size = np.array([(bb[1][0] - bb[0][0]), (bb[1][1] - bb[0][1]),
                                (bb[1][2] - bb[0][2])])
 
-    def _create_object(self, pybullet_client_id,
-                       **kwargs):
+    def _create_object(self, pybullet_client_id, **kwargs):
         position = np.array(self._initial_position)
         position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createCollisionShape(

@@ -17,9 +17,14 @@ import json
 
 
 class EvaluationPipeline(object):
-    def __init__(self, evaluation_protocols, tracker_path=None,
-                 world_params=None, task_params=None,
-                 visualize_evaluation=False, initial_seed=0):
+
+    def __init__(self,
+                 evaluation_protocols,
+                 tracker_path=None,
+                 world_params=None,
+                 task_params=None,
+                 visualize_evaluation=False,
+                 initial_seed=0):
         self.initial_seed = initial_seed
         self.data_recorder = DataRecorder(output_directory=None)
         if tracker_path is not None:
@@ -49,17 +54,20 @@ class EvaluationPipeline(object):
             if world_params is not None:
                 if 'seed' in world_params:
                     del world_params['seed']
-                self.env = CausalWorld(self.task,
-                                       **world_params,
-                                       seed=self.initial_seed,
-                                       data_recorder=self.data_recorder,
-                                       enable_visualization=visualize_evaluation)
+                self.env = CausalWorld(
+                    self.task,
+                    **world_params,
+                    seed=self.initial_seed,
+                    data_recorder=self.data_recorder,
+                    enable_visualization=visualize_evaluation)
             else:
-                self.env = CausalWorld(self.task,
-                                       seed=self.initial_seed,
-                                       data_recorder=self.data_recorder,
-                                       enable_visualization=visualize_evaluation)
-        evaluation_episode_length_in_secs = self.task.get_default_max_episode_length()
+                self.env = CausalWorld(
+                    self.task,
+                    seed=self.initial_seed,
+                    data_recorder=self.data_recorder,
+                    enable_visualization=visualize_evaluation)
+        evaluation_episode_length_in_secs = self.task.get_default_max_episode_length(
+        )
         self.time_steps_for_evaluation = \
             int(evaluation_episode_length_in_secs / self.env.dt)
 
@@ -124,7 +132,7 @@ class EvaluationPipeline(object):
         if prefix is None:
             file_path = os.path.join(evaluation_path, 'scores.json')
         else:
-            file_path = os.path.join(evaluation_path, '{}_scores.json'.format(prefix))
+            file_path = os.path.join(evaluation_path,
+                                     '{}_scores.json'.format(prefix))
         with open(file_path, "w") as json_file:
             json.dump(self.pipeline_scores, json_file, indent=4)
-

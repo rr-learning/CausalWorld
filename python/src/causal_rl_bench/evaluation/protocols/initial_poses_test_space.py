@@ -3,6 +3,7 @@ import numpy as np
 
 
 class InitialPosesTestSpace(Protocol):
+
     def __init__(self):
         super().__init__('initial_poses_test_space')
 

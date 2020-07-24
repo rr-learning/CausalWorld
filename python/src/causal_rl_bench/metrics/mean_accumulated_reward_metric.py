@@ -2,8 +2,10 @@ from causal_rl_bench.metrics.metric_base import BaseMetric
 
 
 class MeanAccumulatedRewardMetric(BaseMetric):
+
     def __init__(self):
-        super(MeanAccumulatedRewardMetric, self).__init__(name='mean_accumulated_reward_rate')
+        super(MeanAccumulatedRewardMetric,
+              self).__init__(name='mean_accumulated_reward_rate')
         self.accumulated_reward = 0
         self.total_number_of_episodes = 0
         return

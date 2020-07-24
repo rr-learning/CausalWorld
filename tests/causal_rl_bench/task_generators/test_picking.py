@@ -7,6 +7,7 @@ import unittest
 
 
 class TestPicking(unittest.TestCase):
+
     def setUp(self):
         self.task = task_generator(task_generator_id="picking")
         self.env = CausalWorld(task=self.task,
@@ -57,8 +58,10 @@ class TestPicking(unittest.TestCase):
         return desired_action
 
     def grip_block(self):
-        grip_locations = get_suggested_grip_locations(self.env._task._stage.get_object('tool_block').get_size(),
-                                                      self.env._task._stage.get_object('tool_block').world_to_cube_r_matrix())
+        grip_locations = get_suggested_grip_locations(
+            self.env._task._stage.get_object('tool_block').get_size(),
+            self.env._task._stage.get_object(
+                'tool_block').world_to_cube_r_matrix())
         desired_action = np.zeros(9)
         desired_action[6:] = [-0, -0.08, 0.4]
         desired_action[:3] = grip_locations[0]
@@ -85,9 +88,11 @@ class TestPicking(unittest.TestCase):
             obs = self.env.reset()
             self.lift_last_finger_first(obs)
             desired_grip = self.grip_block()
-            self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
+            self.assertEqual(self.env.get_robot().get_tip_contact_states(),
+                             [1, 1, 0], "contact states are not closed")
             final_obs = self.lift_block(desired_grip)
-            self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
+            self.assertGreater(final_obs[-22], 0.2,
+                               "the block didn't get lifted")
 
     def test_08_mass(self):
         self.env.set_action_mode('end_effector_positions')
@@ -97,9 +102,11 @@ class TestPicking(unittest.TestCase):
             obs = self.env.reset()
             self.lift_last_finger_first(obs)
             desired_grip = self.grip_block()
-            self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
+            self.assertEqual(self.env.get_robot().get_tip_contact_states(),
+                             [1, 1, 0], "contact states are not closed")
             final_obs = self.lift_block(desired_grip)
-            self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
+            self.assertGreater(final_obs[-22], 0.2,
+                               "the block didn't get lifted")
 
     def test_1_mass(self):
         self.env.set_action_mode('end_effector_positions')
@@ -109,9 +116,11 @@ class TestPicking(unittest.TestCase):
             obs = self.env.reset()
             self.lift_last_finger_first(obs)
             desired_grip = self.grip_block()
-            self.assertEqual(self.env.get_robot().get_tip_contact_states(), [1, 1, 0], "contact states are not closed")
+            self.assertEqual(self.env.get_robot().get_tip_contact_states(),
+                             [1, 1, 0], "contact states are not closed")
             final_obs = self.lift_block(desired_grip)
-            self.assertGreater(final_obs[-22], 0.2, "the block didn't get lifted")
+            self.assertGreater(final_obs[-22], 0.2,
+                               "the block didn't get lifted")
 
     def test_determinism_w_interventions(self):
         self.env.set_action_mode('joint_positions')
@@ -156,10 +165,10 @@ class TestPicking(unittest.TestCase):
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             if i == 50:
-                success_signal = self.env.do_intervention({'tool_block':
-                                                               {'cartesian_position':
-                                                                    [0.1, 0.1,
-                                                                     0.0425]}})
+                success_signal = self.env.do_intervention(
+                    {'tool_block': {
+                        'cartesian_position': [0.1, 0.1, 0.0425]
+                    }})
         observations_2 = []
         rewards_2 = []
         self.env.reset()
@@ -174,23 +183,27 @@ class TestPicking(unittest.TestCase):
 
     def test_goal_intervention(self):
         task = task_generator(task_generator_id='picking')
-        env = CausalWorld(task=task, enable_visualization=False, normalize_observations=False)
+        env = CausalWorld(task=task,
+                          enable_visualization=False,
+                          normalize_observations=False)
         for _ in range(10):
-            invalid_interventions_before = env.get_tracker().invalid_intervention_steps
+            invalid_interventions_before = env.get_tracker(
+            ).invalid_intervention_steps
             new_goal = env.sample_new_goal()
             env.set_starting_state(interventions_dict=new_goal)
             env.reset()
-            invalid_interventions_after = env.get_tracker().invalid_intervention_steps
+            invalid_interventions_after = env.get_tracker(
+            ).invalid_intervention_steps
             for _ in range(2):
                 for _ in range(100):
                     obs, reward, done, info = env.step(env.action_space.low)
                     #TODO: this shouldnt be the case when the benchmark is complete
                     #Its a hack for now
                     if invalid_interventions_before == invalid_interventions_after:
-                        assert np.array_equal(cyl2cart(new_goal['goal_block']
-                                              ['cylindrical_position']),
-                                              obs[-7:-4])
+                        assert np.array_equal(
+                            cyl2cart(
+                                new_goal['goal_block']['cylindrical_position']),
+                            obs[-7:-4])
                 env.reset()
 
         env.close()
-

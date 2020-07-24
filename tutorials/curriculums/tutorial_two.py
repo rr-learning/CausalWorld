@@ -8,8 +8,7 @@ from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
 def example():
     #initialize env
     task_gen = task_generator(task_generator_id='pushing')
-    env = CausalWorld(task_gen, skip_frame=10,
-                      enable_visualization=True)
+    env = CausalWorld(task_gen, skip_frame=10, enable_visualization=True)
 
     # define a custom curriculum of interventions:
 
@@ -20,14 +19,14 @@ def example():
     # Goal intervention actor from episode number 25 to 30 each at time step 50
 
     env = CurriculumWrapper(env,
-                            intervention_actors=[GoalInterventionActorPolicy(),
-                                                 VisualInterventionActorPolicy(),
-                                                 RandomInterventionActorPolicy(),
-                                                 GoalInterventionActorPolicy()],
-                            actives=[(5, 10, 1, 0),
-                                     (10, 20, 2, 0),
-                                     (20, 25, 1, 0),
-                                     (25, 30, 1, 50)])
+                            intervention_actors=[
+                                GoalInterventionActorPolicy(),
+                                VisualInterventionActorPolicy(),
+                                RandomInterventionActorPolicy(),
+                                GoalInterventionActorPolicy()
+                            ],
+                            actives=[(5, 10, 1, 0), (10, 20, 2, 0),
+                                     (20, 25, 1, 0), (25, 30, 1, 50)])
 
     for reset_idx in range(30):
         obs = env.reset()

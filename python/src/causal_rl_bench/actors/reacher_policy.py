@@ -7,6 +7,7 @@ import torch
 
 
 class ReacherActorPolicy(BaseActorPolicy):
+
     def __init__(self):
         """
         This policy is expected to run @250 Hz the inputs order to the policy
@@ -17,10 +18,8 @@ class ReacherActorPolicy(BaseActorPolicy):
         """
         #TODO: replace with find catkin
         super(ReacherActorPolicy, self).__init__()
-        file = os.path.join(
-            os.path.dirname(os.path.
-                            realpath(__file__)),
-            "../../../assets/reacher_model.pkl")
+        file = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                            "../../../assets/reacher_model.pkl")
         data = torch.load(file)
         self.policy = data['evaluation/policy']
         self.policy.reset()

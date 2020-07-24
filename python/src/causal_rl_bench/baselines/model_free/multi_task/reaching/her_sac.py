@@ -17,24 +17,29 @@ def train_policy(num_of_envs, log_relative_path, maximum_episode_length,
                  skip_frame, seed_num, her_config, total_time_steps,
                  validate_every_timesteps, task_name):
     task = task_generator(task_generator_id=task_name,
-                          dense_reward_weights=np.array([100000,0, 0, 0]),
+                          dense_reward_weights=np.array([100000, 0, 0, 0]),
                           fractional_reward_weight=0)
-    env = CausalWorld(task=task, skip_frame=skip_frame,
+    env = CausalWorld(task=task,
+                      skip_frame=skip_frame,
                       enable_visualization=False,
-                      seed=seed_num, max_episode_length=
-                      maximum_episode_length)
+                      seed=seed_num,
+                      max_episode_length=maximum_episode_length)
     env = HERGoalEnvWrapper(env)
     env = CurriculumWrapper(env,
                             intervention_actors=[GoalInterventionActorPolicy()],
                             actives=[(0, 1000000000, 1, 0)])
     set_global_seeds(seed_num)
-    checkpoint_callback = CheckpointCallback(
-        save_freq=int(validate_every_timesteps/num_of_envs),
-        save_path=log_relative_path,
-        name_prefix='model')
-    model = HER(MlpPolicy, env, SAC,
-                verbose=1, policy_kwargs=dict(layers=[256, 256, 256]),
-                **her_config, seed=seed_num)
+    checkpoint_callback = CheckpointCallback(save_freq=int(
+        validate_every_timesteps / num_of_envs),
+                                             save_path=log_relative_path,
+                                             name_prefix='model')
+    model = HER(MlpPolicy,
+                env,
+                SAC,
+                verbose=1,
+                policy_kwargs=dict(layers=[256, 256, 256]),
+                **her_config,
+                seed=seed_num)
     model.learn(total_timesteps=total_time_steps,
                 tb_log_name="her_sac",
                 callback=checkpoint_callback)
@@ -50,17 +55,19 @@ if __name__ == '__main__':
     skip_frame = 3
     seed_num = 0
     task_name = 'reaching'
-    her_config = {"n_sampled_goal": 4,
-                  "goal_selection_strategy": 'future',
-                  "gamma": 0.98,
-                  "tau": 0.01,
-                  "ent_coef": 'auto',
-                  "target_entropy": -9,
-                  "learning_rate": 0.00025,
-                  "buffer_size": 1000000,
-                  "learning_starts": 1000,
-                  "batch_size": 256,
-                  "tensorboard_log": log_relative_path}
+    her_config = {
+        "n_sampled_goal": 4,
+        "goal_selection_strategy": 'future',
+        "gamma": 0.98,
+        "tau": 0.01,
+        "ent_coef": 'auto',
+        "target_entropy": -9,
+        "learning_rate": 0.00025,
+        "buffer_size": 1000000,
+        "learning_starts": 1000,
+        "batch_size": 256,
+        "tensorboard_log": log_relative_path
+    }
     train_policy(num_of_envs=num_of_envs,
                  log_relative_path=log_relative_path,
                  maximum_episode_length=maximum_episode_length,

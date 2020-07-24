@@ -3,6 +3,7 @@ import numpy as np
 
 
 class ObjectSizeTrainSpace(Protocol):
+
     def __init__(self):
         super().__init__('object_sizes_train_space')
 

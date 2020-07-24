@@ -1,4 +1,5 @@
 class Curriculum(object):
+
     def __init__(self, intervention_actors, actives):
         self.intervention_actors = intervention_actors
         self.actives = actives
@@ -11,7 +12,8 @@ class Curriculum(object):
             time_step_hold = time_step == active[3]
             if in_episode and episode_hold and time_step_hold:
                 interventions_dict.update(
-                    self.intervention_actors[actor_index].act(current_task_params))
+                    self.intervention_actors[actor_index].act(
+                        current_task_params))
         if len(interventions_dict) == 0:
             interventions_dict = None
         return interventions_dict

@@ -3,16 +3,17 @@ from causal_rl_bench.curriculum import Curriculum
 
 
 class CurriculumWrapper(gym.Wrapper):
+
     def __init__(self, env, intervention_actors, actives):
         # TODO: this wrapper can't be loaded at the moment or saved
         super(CurriculumWrapper, self).__init__(env)
         self.interventions_curriculum = Curriculum(
-            intervention_actors=intervention_actors,
-            actives=actives)
+            intervention_actors=intervention_actors, actives=actives)
         self.interventions_curriculum.initialize_actors(env=env)
-        self.env.add_wrapper_info({'curriculum_environment':
-                                       self.interventions_curriculum.
-                                  get_params()})
+        self.env.add_wrapper_info({
+            'curriculum_environment':
+                self.interventions_curriculum.get_params()
+        })
         self._elapsed_episodes = -1
         self._elapsed_timesteps = 0
         return

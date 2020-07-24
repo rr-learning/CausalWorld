@@ -4,6 +4,7 @@ import numpy as np
 
 
 class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
+
     def __init__(self, **kwargs):
         """
 

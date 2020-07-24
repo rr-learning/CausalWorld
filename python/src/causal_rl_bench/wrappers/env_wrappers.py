@@ -4,8 +4,8 @@ import gym
 
 
 class HERGoalEnvWrapper(gym.GoalEnv):
-    def __init__(self, env,
-                 activate_sparse_reward=False):
+
+    def __init__(self, env, activate_sparse_reward=False):
         super(HERGoalEnvWrapper, self).__init__()
         self.env = env
         self.metadata = self.env.metadata
@@ -16,22 +16,28 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         self.action_space = self.env.action_space
         if activate_sparse_reward:
             self.env.get_task().activate_sparse_reward()
-        self.observation_space = spaces.Dict(dict(desired_goal=spaces.Box(-np.inf,
-                                                                          np.inf,
-                                                                          shape=goal_space_shape,
-                                                                          dtype=np.float64),
-                                                  achieved_goal=spaces.Box(-np.inf,
-                                                                          np.inf,
-                                                                          shape=goal_space_shape,
-                                                                          dtype=np.float64),
-                                                  observation=self.env.observation_space))
+        self.observation_space = spaces.Dict(
+            dict(desired_goal=spaces.Box(-np.inf,
+                                         np.inf,
+                                         shape=goal_space_shape,
+                                         dtype=np.float64),
+                 achieved_goal=spaces.Box(-np.inf,
+                                          np.inf,
+                                          shape=goal_space_shape,
+                                          dtype=np.float64),
+                 observation=self.env.observation_space))
         self.reward_range = self.env.reward_range
         self.metadata = self.env.metadata
-        self.env.add_wrapper_info({'her_environment': {'activate_sparse_reward': activate_sparse_reward}})
+        self.env.add_wrapper_info({
+            'her_environment': {
+                'activate_sparse_reward': activate_sparse_reward
+            }
+        })
 
     def __getattr__(self, name):
         if name.startswith('_'):
-            raise AttributeError("attempted to get missing private attribute '{}'".format(name))
+            raise AttributeError(
+                "attempted to get missing private attribute '{}'".format(name))
         return getattr(self.env, name)
 
     @property
@@ -54,8 +60,10 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         obs_dict = dict()
         normal_obs = self.env.reset()
         obs_dict['observation'] = normal_obs
-        obs_dict['achieved_goal'] = self.env.get_task().get_achieved_goal().flatten()
-        obs_dict['desired_goal'] = self.env.get_task().get_desired_goal().flatten()
+        obs_dict['achieved_goal'] = self.env.get_task().get_achieved_goal(
+        ).flatten()
+        obs_dict['desired_goal'] = self.env.get_task().get_desired_goal(
+        ).flatten()
         return obs_dict
 
     def render(self, mode='human', **kwargs):
@@ -68,8 +76,7 @@ class HERGoalEnvWrapper(gym.GoalEnv):
         return self.env.seed(seed)
 
     def compute_reward(self, achieved_goal, desired_goal, info):
-        return self.env.get_task().compute_reward(achieved_goal,
-                                                  desired_goal,
+        return self.env.get_task().compute_reward(achieved_goal, desired_goal,
                                                   info)
 
     def __str__(self):

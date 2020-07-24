@@ -35,14 +35,14 @@ def read_config_file(file_path):
 
 
 def load_world(tracker_relative_path, enable_visualization=False):
-    tracker = Tracker(file_path=os.path.join(tracker_relative_path,
-                                             'tracker'))
+    tracker = Tracker(file_path=os.path.join(tracker_relative_path, 'tracker'))
     task_stats = tracker.task_stats_log[0]
     wrapper_dict = copy.deepcopy(tracker.world_params['wrappers'])
     del tracker.world_params['wrappers']
     task = task_generator(task_generator_id=task_stats.task_name,
                           **task_stats.task_params)
-    env = CausalWorld(task, **tracker.world_params,
+    env = CausalWorld(task,
+                      **tracker.world_params,
                       enable_visualization=enable_visualization)
     for wrapper in wrapper_dict:
         if wrapper == 'object_selector':
@@ -60,9 +60,7 @@ def load_world(tracker_relative_path, enable_visualization=False):
             #initialize intervention curriculum
             env = CurriculumWrapper(env,
                                     intervention_actors=intervention_actors,
-                                    actives=
-                                    wrapper_dict[wrapper][
-                                        'actives'])
+                                    actives=wrapper_dict[wrapper]['actives'])
         else:
             raise Exception("wrapper is not known to be loaded")
     return env

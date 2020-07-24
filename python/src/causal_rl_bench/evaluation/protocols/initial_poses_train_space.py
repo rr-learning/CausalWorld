@@ -3,6 +3,7 @@ import numpy as np
 
 
 class InitialPosesTrainSpace(Protocol):
+
     def __init__(self):
         super().__init__('initial_poses_train_space')
 
