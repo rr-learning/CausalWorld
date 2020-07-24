@@ -131,6 +131,7 @@ def record_video_of_random_policy(task,
                 obs, reward, done, info = \
                     env.step(action=env.action_space.sample())
                 recorder.capture_frame()
+    recorder.close()
     env.close()
 
 
@@ -156,6 +157,5 @@ def record_video_of_episode(episode,
         for _ in range(actual_skip_frame):
             env.step(action)
             recorder.capture_frame()
-
     recorder.close()
     env.close()
