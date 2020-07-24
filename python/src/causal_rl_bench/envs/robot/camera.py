@@ -42,5 +42,7 @@ class Camera(object):
             renderer=pybullet.ER_BULLET_HARDWARE_OPENGL,
             physicsClientId=self._pybullet_client_id)
         rgb_array = np.array(px)
+        if rgb_array.ndim == 1:
+            rgb_array = rgb_array.reshape((self._width, self._height, 4))
         rgb_array = rgb_array[::-1, :, :3]
         return rgb_array
