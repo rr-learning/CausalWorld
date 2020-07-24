@@ -76,6 +76,7 @@ if __name__ == '__main__':
 
     evaluator = EvaluationPipeline(evaluation_protocols=
                                    evaluation_protocols,
+                                   visualize_evaluation=False,
                                    tracker_path=output_path,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)
