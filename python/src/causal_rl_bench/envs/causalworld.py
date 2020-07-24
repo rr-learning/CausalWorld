@@ -392,6 +392,9 @@ class CausalWorld(gym.Env):
             renderer=pybullet.ER_BULLET_HARDWARE_OPENGL,
             physicsClientId=client)
         rgb_array = np.array(px)
+        if rgb_array.ndim == 1:
+            rgb_array = rgb_array.reshape((self._render_height, self._render_width, 4))
+        rgb_array = np.asarray(rgb_array, dtype='uint8')
         rgb_array = rgb_array[:, :, :3]
         return rgb_array
 
