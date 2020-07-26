@@ -55,7 +55,7 @@ class PushingTaskGenerator(BaseTask):
             'name': "tool_block",
             'shape': "cube",
             'initial_position': self._task_params["tool_block_position"],
-            'initial_orientation': self._task_params["goal_block_position"],
+            'initial_orientation': self._task_params["tool_block_orientation"],
             'mass': self._task_params["tool_block_mass"]
         }
         self._stage.add_rigid_general_object(**creation_dict)
