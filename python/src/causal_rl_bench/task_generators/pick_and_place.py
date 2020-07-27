@@ -298,14 +298,9 @@ class PickAndPlaceTaskGenerator(BaseTask):
         goal_block_side = not rigid_block_side
         intervention_dict = dict()
         intervention_dict['tool_block'] = dict()
-        if rigid_block_side == 0:
-            intervention_dict['tool_block']['cartesian_position'] = np.array(
-                [0, -0.1, 0.0325])
-        else:
-            intervention_dict['tool_block']['cartesian_position'] = np.array(
-                [0, 0.1, 0.0325])
-
         intervention_dict['goal_block'] = dict()
-        intervention_dict['goal_block']['cartesian_position'] = \
+        intervention_dict['tool_block']['cylindrical_position'] = \
+            self._get_random_block_position_on_side(rigid_block_side)
+        intervention_dict['goal_block']['cylindrical_position'] = \
             self._get_random_block_position_on_side(goal_block_side)
         return intervention_dict
