@@ -77,11 +77,11 @@ or used in a catkin workspace.
 
 
 
-## Try out the package
+## Getting Started With Couple Of Lines
 
   ```python
-    from causal_world.envs.causalworld import CausalWorld
-    from causal_world.task_generators.task import task_generator
+    from causal_world import CausalWorld
+    from causal_world import task_generator
     task = task_generator(task_generator_id='general')
     env = CausalWorld(task=task, enable_visualization=True)
     for _ in range(10):
@@ -90,3 +90,23 @@ or used in a catkin workspace.
             obs, reward, done, info = env.step(env.action_space.sample())
     env.close()
   ```
+  
+## Announcements
+
+## Why would you use CausalWorld for your research?
+
+## Main Features
+
+## Meta-Learning
+
+## Imitation-Learning
+
+## Sim2Real
+
+## Curriculum Through Interventions
+
+## Test How Your Agent Generalizes
+
+## Contributing
+
+## Contact
