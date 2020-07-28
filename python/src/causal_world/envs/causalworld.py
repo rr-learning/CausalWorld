@@ -187,6 +187,19 @@ class CausalWorld(gym.Env):
         # self.reset()
         return
 
+    def set_skip_frame(self, new_skip_frame):
+        """
+
+        :param new_skip_frame:
+        :return:
+        """
+        self._skip_frame = new_skip_frame
+        self.dt = self._simulation_time * self._skip_frame
+        self.metadata['video.frames_per_second'] = \
+            (1 / self._simulation_time) / self._skip_frame
+        self._robot._skip_frame = new_skip_frame
+        self._robot._dt = self._simulation_time * self._robot._skip_frame
+
     def expose_potential_partial_solution(self):
         """
         Adds the partial solution field in the info dict returned after stepping

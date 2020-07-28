@@ -103,9 +103,10 @@ class ObjectSelectorWrapper(gym.Wrapper):
         """
         super(ObjectSelectorWrapper, self).__init__(env)
         self.env = env
+        self.env.set_skip_frame(2)
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
-        self.env._disable_actions()
+        # self.env._disable_actions()
         self.observation_space = gym.spaces.Box(
             self.env.observation_space.low[28:],
             self.env.observation_space.high[28:],
