@@ -81,6 +81,7 @@ step using the fractional volumetric overlap of the tool_blocks with the 3D goal
    * - Creative Stacked Blocks
      - The goal is to fill provided goal shapes from a set of smaller cuboids  The additional difficulty is that the goal shape is partial which forces the agent to use some sort of imagination to solve the task.
    * - General constellation
+
      - The goal is to restore a stable constellation of cuboids in the arena.
    * - Reaching
      - The goal is to reach three different positions in space. Note: This task does not fit into the target shape formulation from all the tasks above but is intended as a starter environment for testing your agent.
