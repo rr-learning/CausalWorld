@@ -5,17 +5,17 @@ from stable_baselines import TD3, PPO2, SAC, HER
 from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
 from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.common.policies import MlpPolicy
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
 import argparse
 import os
 import json
 import numpy as np
 from stable_baselines.common.callbacks import CheckpointCallback
-from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
-from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
-from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
+from causal_world.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
+from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_world.wrappers.env_wrappers import HERGoalEnvWrapper
+from causal_world.benchmark.benchmarks import REACHING_BENCHMARK, \
     PUSHING_BENCHMARK, \
     PICKING_BENCHMARK, \
     PICK_AND_PLACE_BENCHMARK, \

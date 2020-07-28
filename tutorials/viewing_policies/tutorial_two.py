@@ -1,5 +1,5 @@
-import causal_rl_bench.viewers.task_viewer as viewer
-from causal_rl_bench.loggers.data_loader import DataLoader
+import causal_world.viewers.task_viewer as viewer
+from causal_world.loggers.data_loader import DataLoader
 
 
 def example():

@@ -4,9 +4,9 @@
 Getting Started
 ===============
 
-Welcome to CausalRlBench!
+Welcome to Causal World!
 
-CausalRlBench is a package that is designed to develop, test and benchmark your RL agents within robotics manipulation
+Causal World is a package that is designed to develop, test and benchmark your RL agents within robotics manipulation
 environments - from simple to extremely challenging. Each environments comprises a simulation
 version of the "TriFinger robot" that has three fingers - each with 3 joints - to learn dexterous object
 manipulation skills with rigid bodies available in a stage. We provide benchmark tasks like reaching, pushing, picking

@@ -1,6 +1,6 @@
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.wrappers.planning_wrappers import ObjectSelectorWrapper
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.wrappers.planning_wrappers import ObjectSelectorWrapper
 
 
 def example():

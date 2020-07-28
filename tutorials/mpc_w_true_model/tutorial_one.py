@@ -1,11 +1,11 @@
 from stable_baselines.common import set_global_seeds
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.baselines.model_based.true_model import TrueModel
-from causal_rl_bench.baselines.model_based.optimizers.cem import \
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.baselines.model_based.true_model import TrueModel
+from causal_world.baselines.model_based.optimizers.cem import \
     CrossEntropyMethod
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 import numpy as np
-from causal_rl_bench.task_generators.task import task_generator
+from causal_world.task_generators.task import task_generator
 
 seed = 0
 skip_frame = 35

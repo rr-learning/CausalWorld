@@ -13,19 +13,19 @@ from rlpyt.models.pg.mujoco_ff_model import MujocoFfModel
 from rlpyt.agents.pg.mujoco import MujocoFfAgent
 from rlpyt.utils.buffer import buffer_from_example, torchify_buffer, numpify_buffer
 
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-import causal_rl_bench.viewers.task_viewer as viewer
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+import causal_world.viewers.task_viewer as viewer
 import argparse
 import psutil
 import os
 import json
 import numpy as np
-from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-import causal_rl_bench.evaluation.visualization.visualiser as vis
-from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
-from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
+from causal_world.evaluation.evaluation import EvaluationPipeline
+import causal_world.evaluation.visualization.visualiser as vis
+from causal_world.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
+from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_world.benchmark.benchmarks import REACHING_BENCHMARK, \
     PUSHING_BENCHMARK, \
     PICKING_BENCHMARK, \
     PICK_AND_PLACE_BENCHMARK, \

@@ -1,11 +1,11 @@
 from stable_baselines import TD3, PPO2, SAC, HER
-from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
+from causal_world.evaluation.evaluation import EvaluationPipeline
+from causal_world.benchmark.benchmarks import REACHING_BENCHMARK, \
     PUSHING_BENCHMARK, \
     PICKING_BENCHMARK, \
     PICK_AND_PLACE_BENCHMARK, \
     TOWER_2_BENCHMARK
-import causal_rl_bench.evaluation.visualization.visualiser as vis
+import causal_world.evaluation.visualization.visualiser as vis
 
 import argparse
 import os

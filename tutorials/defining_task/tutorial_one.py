@@ -1,5 +1,5 @@
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.base_task import BaseTask
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.base_task import BaseTask
 import numpy as np
 
 

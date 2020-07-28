@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(causal_rl_bench)
+project(causal_world)
 
 find_package(catkin REQUIRED COMPONENTS
     mpi_cmake_modules

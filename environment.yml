@@ -1,4 +1,4 @@
-name: causal_rl_bench
+name: causal_world
 channels:
 - conda-forge
 dependencies:
@@ -8,9 +8,7 @@ dependencies:
 - pip:
   - pybullet==2.8.2
   - gym
-  - pandas
   - catkin_pkg
   - sphinx_rtd_theme
   - pytest
-  - mpi4py
   - psutil

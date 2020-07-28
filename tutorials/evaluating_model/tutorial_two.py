@@ -1,8 +1,8 @@
-from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.causalworld import CausalWorld
-import causal_rl_bench.evaluation.visualization.visualiser as vis
+from causal_world.evaluation.evaluation import EvaluationPipeline
+from causal_world.benchmark.benchmarks import REACHING_BENCHMARK
+from causal_world.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
+import causal_world.evaluation.visualization.visualiser as vis
 
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy

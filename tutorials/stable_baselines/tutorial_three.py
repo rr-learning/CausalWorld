@@ -1,10 +1,10 @@
-from causal_rl_bench.task_generators.task import task_generator
+from causal_world.task_generators.task import task_generator
 from stable_baselines import SAC
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-import causal_rl_bench.viewers.task_viewer as viewer
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+import causal_world.viewers.task_viewer as viewer
 
 
 def simulate_policy():

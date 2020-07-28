@@ -4,18 +4,18 @@ from stable_baselines.common.vec_env import SubprocVecEnv
 from stable_baselines import PPO2, DQN
 from stable_baselines.deepq.policies import MlpPolicy as DQNMlpPolicy
 from stable_baselines.common.policies import MlpPolicy
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-import causal_rl_bench.viewers.task_viewer as viewer
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+import causal_world.viewers.task_viewer as viewer
 import argparse
 import os
 import json
 from stable_baselines.common.callbacks import CheckpointCallback
-from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-import causal_rl_bench.evaluation.visualization.visualiser as vis
-from causal_rl_bench.wrappers.planning_wrappers import ObjectSelectorWrapper
-from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.benchmark.benchmarks import TOWER_2_BENCHMARK
+from causal_world.evaluation.evaluation import EvaluationPipeline
+import causal_world.evaluation.visualization.visualiser as vis
+from causal_world.wrappers.planning_wrappers import ObjectSelectorWrapper
+from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_world.benchmark.benchmarks import TOWER_2_BENCHMARK
 
 world_seed = 0
 num_of_envs = 20

@@ -1,5 +1,5 @@
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
 from stable_baselines import PPO2
 from stable_baselines.common.policies import MlpPolicy
 import tensorflow as tf
@@ -7,8 +7,8 @@ tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 import os
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
-from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-import causal_rl_bench.evaluation.protocols as protocols
+from causal_world.evaluation.evaluation import EvaluationPipeline
+import causal_world.evaluation.protocols as protocols
 
 log_relative_path = './pushing_policy_tutorial_1'
 

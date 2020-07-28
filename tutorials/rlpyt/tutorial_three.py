@@ -4,8 +4,8 @@ from rlpyt.algos.qpg.sac import SAC
 from rlpyt.agents.qpg.sac_agent import SacAgent
 from rlpyt.runners.async_rl import AsyncRl
 from rlpyt.utils.logging.context import logger_context
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
 from rlpyt.envs.gym import GymEnvWrapper
 from rlpyt.utils.collections import AttrDict
 import os

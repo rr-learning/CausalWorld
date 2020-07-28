@@ -9,8 +9,8 @@ dist/
 tutorials/output/*
 docs/_build/
 python/src/__pycache__/
-python/src/causal_rl_bench/envs/__pycache__/
-python/src/causal_rl_bench/baselines/model_free/trainers/__pycache__/
-python/src/causal_rl_bench/envs/robot/__pycache__/
-python/src/causal_rl_bench/tasks/__pycache__/
-python/src/causal_rl_bench/envs/scene/__pycache__/
+python/src/causal_world/envs/__pycache__/
+python/src/causal_world/baselines/model_free/trainers/__pycache__/
+python/src/causal_world/envs/robot/__pycache__/
+python/src/causal_world/tasks/__pycache__/
+python/src/causal_world/envs/scene/__pycache__/

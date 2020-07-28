@@ -1,9 +1,9 @@
 import torch
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.intervention_actors import GoalInterventionActorPolicy
-from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_world.intervention_actors import GoalInterventionActorPolicy
+from causal_world.wrappers.env_wrappers import HERGoalEnvWrapper
 import numpy as np
 
 

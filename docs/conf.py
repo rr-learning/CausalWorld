@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('../src'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'causal_rl_bench'
+project = 'causal_world'
 copyright = '2020, Ossama Ahmed and Frederik Trauble'
 author = 'Ossama Ahmed and Frederik Trauble'
 

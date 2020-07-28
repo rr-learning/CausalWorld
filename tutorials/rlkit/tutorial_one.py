@@ -9,15 +9,15 @@ from rlkit.torch.networks import FlattenMlp
 from rlkit.torch.sac.policies import MakeDeterministic, TanhGaussianPolicy
 from rlkit.torch.sac.sac import SACTrainer
 from rlkit.torch.torch_rl_algorithm import TorchBatchRLAlgorithm
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
+from causal_world.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.wrappers.env_wrappers import HERGoalEnvWrapper
 from rlkit.data_management.env_replay_buffer import EnvReplayBuffer
 from rlkit.envs.wrappers import NormalizedBoxEnv
 from rlkit.launchers.launcher_util import setup_logger
 from rlkit.samplers.data_collector import MdpPathCollector
-from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.intervention_actors.goal_actor import GoalInterventionActorPolicy
+from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_world.intervention_actors.goal_actor import GoalInterventionActorPolicy
 import os
 import numpy as np
 

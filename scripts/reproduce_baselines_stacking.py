@@ -5,19 +5,19 @@ from stable_baselines import TD3, PPO2, SAC
 from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
 from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.common.policies import MlpPolicy
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-import causal_rl_bench.viewers.task_viewer as viewer
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+import causal_world.viewers.task_viewer as viewer
 import argparse
 import os
 import json
 import numpy as np
 from stable_baselines.common.callbacks import CheckpointCallback
-from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
-import causal_rl_bench.evaluation.visualization.visualiser as vis
-from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
-from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.benchmark.benchmarks import TOWER_2_BENCHMARK
+from causal_world.evaluation.evaluation import EvaluationPipeline
+import causal_world.evaluation.visualization.visualiser as vis
+from causal_world.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
+from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_world.benchmark.benchmarks import TOWER_2_BENCHMARK
 from stable_baselines.ddpg.noise import NormalActionNoise
 
 world_seed = 0

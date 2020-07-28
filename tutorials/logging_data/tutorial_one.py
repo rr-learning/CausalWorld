@@ -1,10 +1,10 @@
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
 
-from causal_rl_bench.loggers.data_recorder import DataRecorder
-from causal_rl_bench.loggers.data_loader import DataLoader
+from causal_world.loggers.data_recorder import DataRecorder
+from causal_world.loggers.data_loader import DataLoader
 
-import causal_rl_bench.viewers.task_viewer as viewer
+import causal_world.viewers.task_viewer as viewer
 
 
 def example():

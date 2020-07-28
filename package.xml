@@ -1,9 +1,9 @@
 <?xml version="1.0.0"?>
 <package format="2">
-  <name>causal_rl_bench</name>
-  <version>0.0.1</version>
+  <name>causal_world</name>
+  <version>1.0.0</version>
   <description>
-      Causal RL Benchmark.
+      Causal World.
   </description>
 
   <maintainer email="ossama.ahmed@tue.mpg.de">Ossama Ahmed</maintainer>

@@ -1,5 +1,5 @@
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
 from stable_baselines import HER, SAC
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
@@ -7,7 +7,7 @@ import os
 import json
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
-from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
+from causal_world.wrappers.env_wrappers import HERGoalEnvWrapper
 import argparse
 
 

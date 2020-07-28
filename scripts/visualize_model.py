@@ -1,6 +1,6 @@
 from stable_baselines import TD3, PPO2, SAC, HER
-from causal_rl_bench.task_generators.task import task_generator
-import causal_rl_bench.viewers.task_viewer as viewer
+from causal_world.task_generators.task import task_generator
+import causal_world.viewers.task_viewer as viewer
 import argparse
 import os
 import json

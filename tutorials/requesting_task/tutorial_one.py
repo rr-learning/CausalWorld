@@ -1,6 +1,5 @@
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.sim2real_tools.utils import RealisticRobotWrapper
+from causal_world import CausalWorld
+from causal_world import task_generator
 
 
 def example():
