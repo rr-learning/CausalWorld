@@ -6,6 +6,10 @@ import json
 class DataLoader:
 
     def __init__(self, episode_directory):
+        """
+
+        :param episode_directory:
+        """
         if os.path.isdir(episode_directory):
             self.episode_directory = episode_directory
             info_path = os.path.join(self.episode_directory, "info.json")
@@ -17,6 +21,11 @@ class DataLoader:
             raise ValueError("data_path does not exist")
 
     def get_episodes(self, indices):
+        """
+
+        :param indices:
+        :return:
+        """
         episodes = []
         for index in indices:
             episodes.append(self.get_episode(index))
@@ -24,6 +33,11 @@ class DataLoader:
         return episodes
 
     def get_episode(self, index):
+        """
+
+        :param index:
+        :return:
+        """
         if index > self.max_episode_index:
             raise Exception("Episode doesnt exist")
         infile_index_episode = index % self.dumb_frequency

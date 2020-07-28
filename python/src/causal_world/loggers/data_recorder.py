@@ -6,11 +6,13 @@ import os
 
 
 class DataRecorder:
-    """
-    This class logs the full histories of a world across multiple episodes
-    """
-
     def __init__(self, output_directory=None, rec_dumb_frequency=100):
+        """
+        This class logs the full histories of a world across multiple episodes
+
+        :param output_directory:
+        :param rec_dumb_frequency:
+        """
         self.rec_dumb_frequency = rec_dumb_frequency
         # if output_directory is None:
         #     self.path = os.path.join("output", "logs")
@@ -30,6 +32,14 @@ class DataRecorder:
                     task_name,
                     task_params=None,
                     world_params=None):
+        """
+
+        :param initial_full_state:
+        :param task_name:
+        :param task_params:
+        :param world_params:
+        :return:
+        """
         if self._curr:
             self.episodes.append(self._curr)
         self._curr = Episode(task_name,
@@ -41,10 +51,25 @@ class DataRecorder:
             self.save()
 
     def append(self, robot_action, observation, reward, info, done, timestamp):
+        """
+
+        :param robot_action:
+        :param observation:
+        :param reward:
+        :param info:
+        :param done:
+        :param timestamp:
+
+        :return:
+        """
         self._curr.append(robot_action, observation, reward, info, done,
                           timestamp)
 
     def save(self):
+        """
+
+        :return:
+        """
         if self.path is None:
             return
         if len(self._curr.observations):
@@ -69,10 +94,22 @@ class DataRecorder:
             json.dump(info_dict, json_file)
 
     def get_number_of_logged_episodes(self):
+        """
+
+        :return:
+        """
         return self.last_episode_number_dumbed + len(self.episodes) + 1
 
     def get_current_episode(self):
+        """
+
+        :return:
+        """
         return self._curr
 
     def clear_recorder(self):
+        """
+
+        :return:
+        """
         self.episodes = []

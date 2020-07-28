@@ -1,6 +1,23 @@
 Welcome to Causal World's documentation!
 ===========================================
 
+.. image:: ./media/realistic_wrapper.gif
+   :scale: 50 %
+   :alt: Realistic Wrapper
+   :align: left
+
+.. image:: ./media/real_platform.png
+   :scale: 43 %
+   :alt: Real Robot
+   :align: left
+
+.. |br| raw:: html
+
+   <br />
+
+|br| |br| |br| |br| |br| |br| |br| |br| |br| |br|
+
+
 
 Reinforcement learning (RL) is an attractive solution for learning controllers
 in high dimensional continuous domains. Despite the impressive results so far,
@@ -19,10 +36,11 @@ the environment and to systematically test the generalization capabilities
 of learned policies
 
 
+
 .. code-block:: python
 
-    from causal_world.envs.causalworld import CausalWorld
-    from causal_world.task_generators.task import task_generator
+    from causal_world import CausalWorld
+    from causal_world import task_generator
 
     task = task_generator(task_generator_id='stacked_blocks')
     env = CausalWorld(task=task)
@@ -30,6 +48,11 @@ of learned policies
     for _ in range(2000):
         obs, reward, done, info = env.step(env.action_space.sample())
     env.close()
+
+
+
+
+
 
 
 .. toctree::

@@ -20,8 +20,8 @@ Setting up an environment can be as simple as two lines of codes
 
 .. code-block:: python
 
-    from causal_rl_bench.envs.causalworld import CausalWorld
-    from causal_rl_bench.task_generators.task import task_generator
+    from causal_world import CausalWorld
+    from causal_world import task_generator
 
     task = task_generator(task_generator_id='stacked_blocks')
     env = CausalWorld(task=task)
@@ -34,9 +34,9 @@ By default you are getting an task that has a feature observation space, takes 9
 spaces and allows you to solve the task within the number of objects in the arena times 10 seconds. All of this is
 easy customizable as you will learn in one of the many tutorials provided.
 
----------------
+------------------------------------------------------
 Basics: Setting up an environment with different tasks
----------------
+------------------------------------------------------
 
 .. literalinclude:: ../../tutorials/requesting_task/tutorial_one.py
    :language: python
@@ -47,9 +47,9 @@ Basics: Setting up an environment with different tasks
 .. literalinclude:: ../../tutorials/requesting_task/tutorial_three.py
    :language: python
 
----------------
+-----------------------------------------------------------
 Changing the environment instance: Performing interventions
----------------
+-----------------------------------------------------------
 
 .. literalinclude:: ../../tutorials/interventions/tutorial_one.py
    :language: python
@@ -63,9 +63,9 @@ Changing the environment instance: Performing interventions
 .. literalinclude:: ../../tutorials/interventions/tutorial_four.py
    :language: python
 
----------------
+--------------------------------------
 Training agents using stable-baselines
----------------
+--------------------------------------
 
 .. literalinclude:: ../../tutorials/stable_baselines/tutorial_one.py
    :language: python
@@ -73,9 +73,9 @@ Training agents using stable-baselines
 .. literalinclude:: ../../tutorials/stable_baselines/tutorial_two.py
    :language: python
 
----------------
+---------------------------------------------
 Viewing and recording policies or logged data
----------------
+---------------------------------------------
 
 .. literalinclude:: ../../tutorials/viewing_policies/tutorial_one.py
    :language: python
@@ -89,16 +89,16 @@ Viewing and recording policies or logged data
 .. literalinclude:: ../../tutorials/viewing_policies/tutorial_four.py
    :language: python
 
----------------
+-------------------------------------------------
 Defining a training curriculum of task variations
----------------
+-------------------------------------------------
 
 .. literalinclude:: ../../tutorials/curriculums/tutorial_one.py
    :language: python
 
----------------
+--------------------------------------
 Changing the action space of the robot
----------------
+--------------------------------------
 
 .. literalinclude:: ../../tutorials/change_action_space/tutorial_one.py
    :language: python
@@ -109,9 +109,9 @@ Changing the action space of the robot
 .. literalinclude:: ../../tutorials/change_action_space/tutorial_three.py
    :language: python
 
----------------
+-------------------------------------------------------------------------------------
 Other Utilities: Model Predictive Control, Logging data, loading wrapped environments
----------------
+-------------------------------------------------------------------------------------
 
 .. literalinclude:: ../../tutorials/mpc_w_true_model/tutorial_one.py
    :language: python
