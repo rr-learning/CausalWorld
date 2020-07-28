@@ -6,6 +6,8 @@ import numpy as np
 class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, **kwargs):
         """
+        This class indicates the joint intervention actor which intervenes on
+        the joints of the robot in a random fashion.
 
         :param kwargs:
         """
@@ -34,8 +36,8 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         interventions_dict = dict()
         interventions_dict['joint_positions'] = \
-            np.random.uniform(variables_dict['joint_positions'][0],
-                              variables_dict['joint_positions'][1])
+            np.random.uniform(self.task_intervention_space['joint_positions'][0],
+                              self.task_intervention_space['joint_positions'][1])
         return interventions_dict
 
     def get_params(self):

@@ -8,6 +8,18 @@ class StageObservations(object):
                  normalize_observations=True,
                  cameras=None,
                  camera_indicies=np.array([0, 1, 2])):
+        """
+
+        :param rigid_objects: (list) list of rigid objects in the arena.
+        :param visual_objects: (list) list of visual objects in the arena.
+        :param observation_mode: (str) specifies the observation mode
+                                       if structured or cameras.
+        :param normalize_observations: (bool) specifies if the observations are
+                                              normalized or not.
+        :param cameras: (list) a list of cameras mounted on the stage.
+        :param camera_indicies: (list) specifies the indicies of the cameras
+                                       to be specified.
+        """
         self._normalized_observations = normalize_observations
         self._observation_mode = observation_mode
         self._camera_indicies = camera_indicies
@@ -39,6 +51,10 @@ class StageObservations(object):
         return
 
     def get_observation_spaces(self):
+        """
+
+        :return:
+        """
         if self._normalized_observations:
             observations_low_values = np.full(shape=self._low.shape,
                                               fill_value=self._low_norm,
@@ -64,6 +80,10 @@ class StageObservations(object):
                                   dtype=np.uint8)
 
     def initialize_observations(self):
+        """
+
+        :return:
+        """
         for rigid_object in self._rigid_objects.values():
             state_keys = rigid_object.get_state().keys()
             object_lower_bounds, object_upper_bounds = \
@@ -90,17 +110,31 @@ class StageObservations(object):
         return
 
     def reset_observation_keys(self):
+        """
+
+        :return:
+        """
         self._observations_keys = []
         self._low = np.array([])
         self._high = np.array([])
 
     def _is_observation_key_known(self, observation_key):
+        """
+
+        :param observation_key:
+
+        :return:
+        """
         if observation_key not in self._lower_bounds.keys():
             return False
         else:
             return True
 
     def set_observation_spaces(self):
+        """
+
+        :return:
+        """
         self._low = np.array([])
         self._high = np.array([])
         self._observation_is_not_normalized = np.array([], dtype=np.bool)
@@ -132,17 +166,40 @@ class StageObservations(object):
                                           dtype=np.bool))
 
     def is_normalized(self):
+        """
+
+        :return:
+        """
         return self._normalized_observations
 
     def normalize_observation(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         return (self._high_norm - self._low_norm) * \
                (observation - self._low) / (self._high - self._low) \
                + self._low_norm
 
     def denormalize_observation(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         return self._low + (observation - self._low_norm) / (self._high_norm - self._low_norm) * (self._high - self._low)
 
     def normalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
         if np.array(lower_key == higher_key).all():
@@ -150,6 +207,13 @@ class StageObservations(object):
         return (self._high_norm - self._low_norm) * (observation - lower_key) / (higher_key - lower_key) + self._low_norm
 
     def denormalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
         if np.array(lower_key == higher_key).all():
@@ -157,6 +221,12 @@ class StageObservations(object):
         return lower_key + (observation - self._low_norm) / (self._high_norm - self._low_norm) * (higher_key - lower_key)
 
     def satisfy_constraints(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         if self._normalized_observations:
             return (observation > self._low_norm).all() and (observation < self._high_norm).all()
         else:
@@ -164,12 +234,24 @@ class StageObservations(object):
                    (observation < self._high).all()
 
     def clip_observation(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         if self._normalized_observations:
             return np.clip(observation, self._low_norm, self._high_norm)
         else:
             return np.clip(observation, self._low, self._high)
 
     def get_current_observations(self, helper_keys):
+        """
+
+        :param helper_keys:
+
+        :return:
+        """
         observations_dict = dict()
         for rigid_object in self._rigid_objects.values():
             observations_dict.update({rigid_object.get_name() +'_'+
@@ -193,6 +275,12 @@ class StageObservations(object):
         return observations_dict
 
     def remove_observations(self, observations):
+        """
+
+        :param observations:
+
+        :return:
+        """
         for observation in observations:
             if observation not in self._observations_keys:
                 raise Exception(
@@ -202,6 +290,14 @@ class StageObservations(object):
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None):
+        """
+
+        :param observation_key:
+        :param lower_bound:
+        :param upper_bound:
+
+        :return:
+        """
         if observation_key not in self._lower_bounds.keys() and \
                 (lower_bound is None or upper_bound is None):
             raise Exception("Observation key {} is not known please specify "
@@ -213,6 +309,10 @@ class StageObservations(object):
         self.set_observation_spaces()
 
     def get_current_goal_image(self):
+        """
+
+        :return:
+        """
         images = []
         for i in self._camera_indicies:
             images.append(self._goal_cameras[i].get_image())

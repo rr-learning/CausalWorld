@@ -16,10 +16,29 @@ class RigidObject(object):
                  initial_angular_velocity,
                  fixed_bool):
         """
+        This is the base class of any rigid object whether it is fixed or not.
 
-        :param pybullet_clients:
-        :param name:
-        :param block_id:
+        :param pybullet_client_ids: (list) specifies the pybullet client ids
+                                           where this object will be in.
+        :param name: (str) specifies the name of the object, needs to be unique.
+        :param size: (float list) 3 dimensional list specifies the size
+        :param initial_position: (float list) specifies the x,y,z position in
+                                              the arena.
+        :param initial_orientation: (float list) specifies the quaternion
+                                                 orientation.
+        :param mass: (float) specifies the mass of the object itself.
+                             0 if fixed.
+        :param color: (float list) specifies the RGB values of the object.
+        :param lateral_friction: (float) specifies the lateral friction of the
+                                         object.
+        :param spinning_friction: (float) specifies the spinning friction of the
+                                          object.
+        :param restitution: (float) specifies the restitution of the object.
+        :param initial_linear_velocity: (float list) specifies the velocity in
+                                                     the x,y,z directions.
+        :param initial_angular_velocity: (float list) specifies the velocity in
+                                                      the yaw, roll, pitch values.
+        :param fixed_bool: (bool) specifies if the object is fixed or not.
         """
         self._pybullet_client_ids = pybullet_client_ids
         self._name = name
@@ -116,6 +135,10 @@ class RigidObject(object):
         return
 
     def get_initial_position(self):
+        """
+
+        :return:
+        """
         return self._initial_position
 
     def _set_volume(self):
@@ -127,22 +150,44 @@ class RigidObject(object):
         return
 
     def _add_state_variables(self):
+        """
+
+        :return:
+        """
         return
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+        :return:
+        """
         raise NotImplementedError("the creation function is not defined "
                                   "yet")
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         raise NotImplementedError("the define type id function "
                                   "is not defined yet")
 
     def get_recreation_params(self):
+        """
+
+        :return:
+        """
         raise NotImplementedError("the define type id function "
                                   "is not defined yet")
 
     def _init_object(self):
+        """
+
+        :return:
+        """
         for pybullet_client_id in self._pybullet_client_ids:
             shape_id, block_id =\
                 self._create_object(pybullet_client_id)
@@ -200,11 +245,19 @@ class RigidObject(object):
             return self._lateral_friction
 
     def reinit_object(self):
+        """
+
+        :return:
+        """
         self.remove()
         self._init_object()
         return
 
     def remove(self):
+        """
+
+        :return:
+        """
         for i in range(0, len(self._pybullet_client_ids)):
             pybullet.removeBody(self._block_ids[i],
                                  physicsClientId=
@@ -215,6 +268,11 @@ class RigidObject(object):
         return
 
     def _set_color(self, color):
+        """
+
+        :param color:
+        :return:
+        """
         for i in range(len(self._pybullet_client_ids)):
             pybullet.changeVisualShape(self._block_ids[i],
                                         -1,
@@ -226,6 +284,11 @@ class RigidObject(object):
         return
 
     def _set_lateral_friction(self, lateral_friction):
+        """
+
+        :param lateral_friction:
+        :return:
+        """
         for i in range(len(self._pybullet_client_ids)):
             pybullet.changeDynamics(bodyUniqueId=self._block_ids[i],
                                     linkIndex=-1,
@@ -235,6 +298,11 @@ class RigidObject(object):
                                     )
 
     def _set_restitution(self,restitution):
+        """
+
+        :param restitution:
+        :return:
+        """
         for i in range(len(self._pybullet_client_ids)):
             pybullet.changeDynamics(bodyUniqueId=self._block_ids[i],
                                     linkIndex=-1,
@@ -244,6 +312,11 @@ class RigidObject(object):
                                     )
 
     def _set_spinning_friction(self, spinning_friction):
+        """
+
+        :param spinning_friction:
+        :return:
+        """
         for i in range(len(self._pybullet_client_ids)):
             pybullet.changeDynamics(bodyUniqueId=self._block_ids[i],
                                     linkIndex=-1,
@@ -253,6 +326,10 @@ class RigidObject(object):
                                     )
 
     def _set_velocities(self):
+        """
+
+        :return:
+        """
         for i in range(0, len(self._pybullet_client_ids)):
             pybullet.resetBaseVelocity(self._block_ids[i],
                                        self._initial_linear_velocity,
@@ -581,15 +658,23 @@ class Cuboid(RigidObject):
         lateral_friction=1,
     ):
         """
+        This specifies the moving cuboid object in the arena.
 
-        :param pybullet_client:
-        :param name:
-        :param size:
-        :param position:
-        :param orientation:
-        :param mass:
-        :param color:
+        :param pybullet_client_ids: (list) specifies the
+        :param name: (str) specifies the name of the object.
+        :param size: (list float) specifies the size in the three directions.
+        :param initial_position: (list float) specifies the position in x,y,z.
+        :param initial_orientation: (list float) specifies the quaternion of
+                                                 the object.
+        :param mass: (float) specifies the mass of the object.
+        :param color: (list float) specifies the RGB values of the cuboid.
+        :param initial_linear_velocity: (list float) specifies the initial
+                                                     linear velocity vx, vy, vz.
+        :param initial_angular_velocity: (list float) specifies the initial
+                                                      angular velocities.
+        :param lateral_friction: (float) specifies the lateral friction.
         """
+
         #TODO: intervene on friction as well
         super(Cuboid, self).__init__(pybullet_client_ids=pybullet_client_ids,
                                      name=name,
@@ -609,6 +694,13 @@ class Cuboid(RigidObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+
+        :return:
+        """
         shape_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_BOX,
             halfExtents=np.array(self._size) / 2,
@@ -625,10 +717,18 @@ class Cuboid(RigidObject):
         return shape_id, block_id
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         self._type_id = 1
         return
 
     def get_recreation_params(self):
+        """
+
+        :return:
+        """
         recreation_params = dict()
         recreation_params['name'] = self._name
         recreation_params['size'] = self._size
@@ -667,13 +767,14 @@ class StaticCuboid(RigidObject):
     ):
         """
 
-        :param pybullet_client:
-        :param name:
-        :param size:
-        :param position:
-        :param orientation:
-        :param mass:
-        :param color:
+        :param pybullet_client_ids: (list) specifies the pybullet clients.
+        :param name: (str) specifies the name of the object.
+        :param size: (list float) specifies the size in the three directions.
+        :param position: (list float) specifies the position in x,y,z.
+        :param orientation: (list float) specifies the quaternion of
+                                                        the object.
+        :param color: (list float) specifies the RGB values of the cuboid.
+        :param lateral_friction: (float) specifies the lateral friction.
         """
         #TODO: intervene on friction as well
         super(StaticCuboid, self).__init__(pybullet_client_ids=
@@ -695,6 +796,13 @@ class StaticCuboid(RigidObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+
+        :return:
+        """
         position = np.array(self._initial_position)
         position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createCollisionShape(
@@ -711,10 +819,18 @@ class StaticCuboid(RigidObject):
         return shape_id, block_id
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         self._type_id = 10
         return
 
     def get_recreation_params(self):
+        """
+
+        :return:
+        """
         recreation_params = dict()
         recreation_params['name'] = self._name
         recreation_params['size'] = self._size
@@ -747,13 +863,17 @@ class MeshObject(RigidObject):
     ):
         """
 
-        :param pybullet_client:
-        :param name:
-        :param size:
-        :param position:
-        :param orientation:
-        :param mass:
-        :param color:
+        :param pybullet_client_ids: (list) specifies the pybullet clients.
+        :param name: (str) specifies the name of the object.
+        :param filename: (str) specifies the name of the file itself.
+        :param scale: (list float) specifies the scale of the mesh object.
+        :param initial_position: (list float) specifies the positions in x,y,z
+        :param initial_orientation: (list float) specifies the quaternion of the object.
+        :param color: (list float) specifies the RGB values.
+        :param mass: (float) specifies the object mass.
+        :param initial_linear_velocity: (list float) specifies the velocity in vx, vy, vz.
+        :param initial_angular_velocity: (list float) specifies the velocity in yaw, roll, pitch.
+        :param lateral_friction: (float) specifies the lateral friction.
         """
         #TODO: intervene on friction as well
         self._scale = scale
@@ -780,6 +900,13 @@ class MeshObject(RigidObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+
+        :return:
+        """
         position = np.array(self._initial_position)
         position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createCollisionShape(
@@ -796,10 +923,18 @@ class MeshObject(RigidObject):
         return shape_id, block_id
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         self._type_id = 2
         return
 
     def get_recreation_params(self):
+        """
+
+        :return:
+        """
         recreation_params = dict()
         recreation_params['name'] = self._name
         recreation_params['filename'] = self._filename

@@ -12,6 +12,18 @@ class ReachingTaskGenerator(BaseTask):
                  default_goal_300= np.array([0, 0, 0.16]),
                  joint_positions=None,
                  activate_sparse_reward=False):
+        """
+        This task generator will generate a task for reaching.
+
+        :param use_train_space_only:
+        :param fractional_reward_weight:
+        :param dense_reward_weights:
+        :param default_goal_60:
+        :param default_goal_120:
+        :param default_goal_300:
+        :param joint_positions:
+        :param activate_sparse_reward:
+        """
         super().__init__(task_name="reaching",
                          use_train_space_only=use_train_space_only,
                          fractional_reward_weight=fractional_reward_weight,
@@ -69,6 +81,7 @@ class ReachingTaskGenerator(BaseTask):
 
         :param desired_goal:
         :param achieved_goal:
+
         :return:
         """
         end_effector_positions_goal = desired_goal
@@ -95,6 +108,7 @@ class ReachingTaskGenerator(BaseTask):
         """
 
         :param update_task_info:
+
         :return:
         """
         self.previous_end_effector_positions = \
@@ -145,6 +159,7 @@ class ReachingTaskGenerator(BaseTask):
 
         :param achieved_goal:
         :param desired_goal:
+
         :return:
         """
         current_end_effector_positions = achieved_goal
@@ -157,6 +172,7 @@ class ReachingTaskGenerator(BaseTask):
         """
 
         :param goal_distance:
+
         :return:
         """
         if goal_distance < 0.01:
@@ -293,6 +309,7 @@ class ReachingTaskGenerator(BaseTask):
         """
 
         :param interventions_dict:
+
         :return:
         """
         # TODO: support level removal intervention

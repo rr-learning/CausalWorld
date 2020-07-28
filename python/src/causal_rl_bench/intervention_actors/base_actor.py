@@ -1,34 +1,33 @@
 class BaseInterventionActorPolicy(object):
-    """This class indicates the interface of a meta actor"""
     def __init__(self, **kwargs):
+        """
+        This class indicates the interface of an intervention actor
+
+        :param kwargs:
+        """
         return
 
     def initialize(self, env):
         """
         This functions allows the intervention actor to query things from the env, such
         as intervention spaces or to have access to sampling funcs for goals..etc
-        Parameters
-        ---------
-            env: Env
-        Returns
-        -------
+
+        :param env:
+
+        :return:
         """
         return
 
     def act(self, variables_dict):
         """
-        This functions enables the meta actor to decide on specific
+        This functions enables the intervention actor to decide on specific
         interventions.
-        Parameters
-        ---------
-            variables_dict: dict
-                The current dict of variables that it can intervene on with
-                their current values. (this can be a two level dict)
-        Returns
-        -------
-            interventions_dict: dict
-               Dict of variables that the meta actor decided to intervene on
-               with the corresponding values.
+
+        :param variables_dict: (dict) The current dict of variables that it
+                                      can intervene on with their current
+                                      values. (this can be a two level dict)
+
+        :return:
         """
         interventions_dict = self._act(variables_dict)
         self.__validate_intervention_dict(variables_dict, interventions_dict)
@@ -38,6 +37,7 @@ class BaseInterventionActorPolicy(object):
         """
 
         :param variables_dict:
+
         :return:
         """
         return {}
@@ -47,6 +47,7 @@ class BaseInterventionActorPolicy(object):
 
         :param variables_dict:
         :param intervention_dict:
+
         :return:
         """
         for intervention in intervention_dict:

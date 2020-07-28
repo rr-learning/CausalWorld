@@ -5,21 +5,36 @@ import copy
 
 
 class CreativeStackedBlocksGeneratorTask(BaseTask):
-    def __init__(self, **kwargs):
+    def __init__(self, use_train_space_only=False,
+                 fractional_reward_weight=1,
+                 dense_reward_weights=np.array([]),
+                 activate_sparse_reward=False,
+                 tool_block_mass=0.08,
+                 joint_positions=None,
+                 blocks_min_size=0.035,
+                 num_of_levels=8,
+                 max_level_width=0.12):
         """
-        This task generator
-        will most probably deal with camera data if u want to use the
-        sample goal function
-        :param kwargs:
+        This task generator generates a task in the family of create stacked
+         blocks which generate a random configuration of stacked blocks,
+         however only the first level and the last level are shown explicitly,
+         the rest is left for the "imagination" of the agent itself.
+
+        :param use_train_space_only:
+        :param fractional_reward_weight:
+        :param dense_reward_weights:
+        :param activate_sparse_reward:
+        :param tool_block_mass:
+        :param joint_positions:
+        :param blocks_min_size:
+        :param num_of_levels:
+        :param max_level_width:
         """
-        super().__init__(task_name="stacked_blocks",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                         False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([])))
+        super().__init__(task_name="creative_stacked_blocks",
+                         use_train_space_only=use_train_space_only,
+                         fractional_reward_weight=fractional_reward_weight,
+                         dense_reward_weights=dense_reward_weights,
+                         activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
@@ -27,16 +42,11 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
 
         #for this task the stage observation keys will be set with the
         #goal/structure building
-        self._task_params["tool_block_mass"] = \
-            kwargs.get("tool_block_mass", 0.08)
-        self._task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
-        self._task_params["blocks_min_size"] = \
-            kwargs.get("blocks_min_size", 0.035)
-        self._task_params["num_of_levels"] = \
-            kwargs.get("num_of_levels", 8)
-        self._task_params["max_level_width"] = \
-            kwargs.get("max_level_width", 0.12)
+        self._task_params["tool_block_mass"] = tool_block_mass
+        self._task_params["joint_positions"] = joint_positions
+        self._task_params["blocks_min_size"] = blocks_min_size
+        self._task_params["num_of_levels"] = num_of_levels
+        self._task_params["max_level_width"] = max_level_width
         self.current_stack_levels = self._task_params["num_of_levels"]
         self.current_blocks_mass = self._task_params["tool_block_mass"]
         self.current_blocks_min_size = self._task_params["blocks_min_size"]
@@ -303,6 +313,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         :param blocks_min_size:
         :param blocks_mass:
         :param max_level_width:
+
         :return:
         """
         self.current_number_of_obstacles = 0
@@ -401,9 +412,11 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         """
         This function will return a random position and size of a block
         while respecting the allowed boundaries passed
+
         :param allowed_boundaries:
         :param start_z:
         :param min_size:
+
         :return:
         """
         allowed_boundaries[0][0] = max(self._stage.get_arena_bb()[0][0]
@@ -438,8 +451,10 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         """
         This function generated a sampled target, should be modified to new
         sample goal
+
         :param levels_num:
         :param min_size:
+
         :return:
         """
         level_blocks = []
@@ -489,6 +504,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
 
         :param level_blocks:
         :param min_size:
+
         :return:
         """
         new_level_blocks = list(level_blocks)
@@ -524,6 +540,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         """
 
         :param level_blocks:
+
         :return:
         """
         # [[[width, center][width, center]]]
@@ -549,6 +566,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
 
         :param level_blocks:
         :param min_size:
+
         :return:
         """
         block_sizes = []

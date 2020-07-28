@@ -5,21 +5,34 @@ import math
 
 
 class GeneralGeneratorTask(BaseTask):
-    def __init__(self, **kwargs):
+    def __init__(self, use_train_space_only=False,
+                 fractional_reward_weight=1,
+                 dense_reward_weights=np.array([]),
+                 activate_sparse_reward=False,
+                 tool_block_mass=0.08,
+                 joint_positions=None,
+                 tool_block_size=0.05,
+                 nums_objects=5):
         """
-        This task generator
-        will most probably deal with camera data if u want to use the
-        sample goal function
-        :param kwargs:
+        This task generator generates a general/ random configuration of the
+        blocks by dropping random blocks from the air and waiting till it comes
+        to a rest position and then this becomes the new shape/goal that the
+        actor needs to achieve.
+
+        :param use_train_space_only:
+        :param fractional_reward_weight:
+        :param dense_reward_weights:
+        :param activate_sparse_reward:
+        :param tool_block_mass:
+        :param joint_positions:
+        :param tool_block_size:
+        :param nums_objects:
         """
         super().__init__(task_name="general",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                         False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([])))
+                         use_train_space_only=use_train_space_only,
+                         fractional_reward_weight=fractional_reward_weight,
+                         dense_reward_weights=dense_reward_weights,
+                         activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
@@ -27,13 +40,10 @@ class GeneralGeneratorTask(BaseTask):
 
         #for this task the stage observation keys will be set with the
         #goal/structure building
-        self._task_params["tool_block_mass"] = \
-            kwargs.get("tool_block_mass", 0.08)
-        self._task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
-        self._task_params["nums_objects"] = kwargs.get("nums_objects", 5)
-        self._task_params["tool_block_size"] = \
-            kwargs.get("tool_block_size", 0.05)
+        self._task_params["tool_block_mass"] = tool_block_mass
+        self._task_params["joint_positions"] = joint_positions
+        self._task_params["nums_objects"] = nums_objects
+        self._task_params["tool_block_size"] = tool_block_size
         self.default_drop_positions = [[0.1, 0.1, 0.2],
                                        [0, 0, 0.2],
                                        [0.05, 0.05, 0.3],
@@ -105,6 +115,7 @@ class GeneralGeneratorTask(BaseTask):
 
         :param training:
         :param level:
+
         :return:
         """
         intervention_dict = dict()
@@ -136,6 +147,7 @@ class GeneralGeneratorTask(BaseTask):
         """
 
         :param interventions_dict:
+
         :return:
         """
         # TODO: support level removal intervention
@@ -170,6 +182,7 @@ class GeneralGeneratorTask(BaseTask):
         """
 
         :param default_bool:
+
         :return:
         """
         #raise the fingers

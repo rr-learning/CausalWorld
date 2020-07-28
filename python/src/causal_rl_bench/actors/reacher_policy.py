@@ -1,4 +1,3 @@
-from stable_baselines import PPO2
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 from causal_rl_bench.actors.base_policy import BaseActorPolicy
@@ -11,9 +10,10 @@ class ReacherActorPolicy(BaseActorPolicy):
         """
         This policy is expected to run @250 Hz the inputs order to the policy
         are as follows:
-       =["joint_positions", "joint_velocities", "end_effector_positions",
-         "action_joint_positions", "end_effector_positions_goal"]
+       =["time left for task", "joint_positions", "joint_velocities",
+       "end_effector_positions", "end_effector_positions_goal"]
          -> desired absolute joint actions
+
         """
         #TODO: replace with find catkin
         super(ReacherActorPolicy, self).__init__()
@@ -28,9 +28,12 @@ class ReacherActorPolicy(BaseActorPolicy):
 
     def act(self, obs):
         """
+        The function is called for the agent to act in the world.
 
-        :param obs:
-        :return:
+        :param obs: (nd.array) defines the observations received by the agent
+                               at time step t
+
+        :return: (nd.array) defines the action to be executed at time step t
         """
         a, agent_info = self.policy.get_action(obs)
         return a

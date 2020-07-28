@@ -13,14 +13,24 @@ class BaseTask(object):
                  dense_reward_weights=np.array([]),
                  activate_sparse_reward=False):
         """
+        This class represents the base task generator which includes all the
+        common functionalities of the task generators.
 
-        :param task_name:
-        :param use_train_space_only:
-        :param training:
-        :param fractional_reward_weight:
-        :param dense_reward_weights:
-        :param is_goal_distance_dense:
-        :param calculate_additional_dense_rewards:
+        :param task_name: (str) the task name
+        :param use_train_space_only: (bool) true if the space of interventions
+                                            allowed is space A only.
+        :param fractional_reward_weight: (float) weight multiplied by the
+                                                fractional volumetric
+                                                overlap in the reward.
+        :param dense_reward_weights: (list float) specifies the reward weights
+                                                  for all the other reward
+                                                  terms calculated in the
+                                                  calculate_dense_rewards
+                                                  function.
+        :param activate_sparse_reward: (bool) specified if you want to
+                                              sparsify the reward by having
+                                              +1 or 0 if the volumetric
+                                              fraction overlap more than 90%.
         """
         self._robot = None
         self._stage = None
@@ -59,6 +69,10 @@ class BaseTask(object):
         return
 
     def _save_pybullet_state(self):
+        """
+
+        :return:
+        """
         pybullet_state = dict()
         if self._stage._pybullet_client_full_id is not None:
                 pybullet_state['full'] = pybullet.\
@@ -72,6 +86,12 @@ class BaseTask(object):
         return pybullet_state
 
     def _restore_pybullet_state(self, pybullet_state):
+        """
+
+        :param pybullet_state:
+
+        :return:
+        """
         if self._stage._pybullet_client_full_id is not None:
                 pybullet.\
                     restoreState(pybullet_state['full'],
@@ -87,6 +107,12 @@ class BaseTask(object):
         return
 
     def _remove_pybullet_state(self, pybullet_state):
+        """
+
+        :param pybullet_state:
+
+        :return:
+        """
         if self._stage._pybullet_client_full_id is not None:
                 pybullet. \
                     removeState(pybullet_state['full'],
@@ -102,6 +128,10 @@ class BaseTask(object):
         return
 
     def save_state(self):
+        """
+
+        :return:
+        """
         state = dict()
         # state['pybullet_states'] = \
         #     self._save_pybullet_state()
@@ -114,6 +144,12 @@ class BaseTask(object):
         return state
 
     def restore_state(self, state_dict):
+        """
+
+        :param state_dict:
+
+        :return:
+        """
         old_number_of_rigid_objects = len(self._stage.get_rigid_objects())
         old_number_of_visual_objects = len(self._stage.get_visual_objects())
         reset_observation_space = False
@@ -179,6 +215,7 @@ class BaseTask(object):
         """
 
         :param interventions_dict:
+
         :return:
         """
         # handle the contradictory intervention
@@ -211,6 +248,7 @@ class BaseTask(object):
         """
 
         :param interventions_dict:
+
         :return:
         """
         return True, False
@@ -242,10 +280,20 @@ class BaseTask(object):
         return info
 
     def expose_potential_partial_solution(self):
+        """
+        Specified to add the potential partial solution to the info dict.
+
+        :return:
+        """
         self._is_partial_solution_exposed = True
         return
 
     def add_ground_truth_state_to_info(self):
+        """
+        Specified to add the full ground truth state to the info dict.
+
+        :return:
+        """
         self._is_ground_truth_state_exposed = True
         return
 
@@ -253,15 +301,18 @@ class BaseTask(object):
         """
 
         :param update_task_state_dict:
+
         :return:
         """
         return
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
         """
+        Specified by the task generator itself.
 
         :param desired_goal:
         :param achieved_goal:
+
         :return:
         """
         return np.array([]), None
@@ -271,6 +322,7 @@ class BaseTask(object):
 
         :param training:
         :param level:
+
         :return:
         """
         #TODO: for now we just vary position as a new goal
@@ -447,9 +499,9 @@ class BaseTask(object):
 
     def _goal_distance(self, achieved_goal, desired_goal):
         """
-
         :param achieved_goal:
         :param desired_goal:
+
         :return:
         """
         # intersection areas / union of all visual_objects
@@ -475,6 +527,7 @@ class BaseTask(object):
         """
 
         :param goal_distance:
+
         :return:
         """
         preliminary_success = self._check_preliminary_success(goal_distance)
@@ -488,6 +541,7 @@ class BaseTask(object):
         """
 
         :param goal_distance:
+
         :return:
         """
         if goal_distance > 0.9:
@@ -529,6 +583,7 @@ class BaseTask(object):
         :param achieved_goal:
         :param desired_goal:
         :param info:
+
         :return:
         """
         goal_distance = self._goal_distance(desired_goal=desired_goal,
@@ -549,6 +604,7 @@ class BaseTask(object):
 
         :param robot:
         :param stage:
+
         :return:
         """
         self._create_world_func = create_world_func
@@ -586,6 +642,10 @@ class BaseTask(object):
         return
 
     def _calculate_time_left(self):
+        """
+
+        :return:
+        """
         current_control_index = self._robot.get_control_index()
         time_spent = (current_control_index + 1) * self._robot.get_dt()
         return self._max_episode_length - time_spent
@@ -599,6 +659,7 @@ class BaseTask(object):
         :param observation_function:
         :param lower_bound:
         :param upper_bound:
+
         :return:
         """
         self._robot.add_observation(observation_key, lower_bound=lower_bound,
@@ -616,6 +677,7 @@ class BaseTask(object):
         :param observation_function:
         :param lower_bound:
         :param upper_bound:
+
         :return:
         """
         self._stage.add_observation(observation_key, lower_bound=lower_bound,
@@ -629,6 +691,7 @@ class BaseTask(object):
         TODO: NOTE: With the current implementation, no contact points are saved
         when resetting task
         :param interventions_dict:
+
         :return:
         """
         self._robot.clear()
@@ -808,8 +871,8 @@ class BaseTask(object):
 
     def is_intervention_in_bounds(self, interventions_dict):
         """
-
         :param interventions_dict:
+
         :return:
         """
         if self._task_params['use_train_space_only']:
@@ -840,6 +903,7 @@ class BaseTask(object):
         """
 
         :param interventions_dict:
+
         :return:
         """
         #TODO: for now a heuristic for naming conventions
@@ -872,6 +936,7 @@ class BaseTask(object):
 
         :param interventions_dict:
         :param check_bounds:
+
         :return:
         """
         interventions_info = {'out_bounds': False,
@@ -938,6 +1003,7 @@ class BaseTask(object):
 
         :param interventions_dict:
         :param check_bounds:
+
         :return:
         """
         if check_bounds is None:
@@ -950,6 +1016,10 @@ class BaseTask(object):
                reset_observation_space_signal
 
     def get_default_max_episode_length(self):
+        """
+
+        :return:
+        """
         if self._task_params["task_name"] == 'reaching':
             episode_length = 5
         else:
@@ -957,4 +1027,8 @@ class BaseTask(object):
         return episode_length
 
     def get_task_name(self):
+        """
+
+        :return:
+        """
         return self._task_name

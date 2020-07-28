@@ -5,6 +5,8 @@ from causal_rl_bench.intervention_actors.base_actor import \
 class GoalInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, **kwargs):
         """
+        This class indicates the goal intervention actor, which an
+        intervention actor that intervenes by sampling a new goal.
 
         :param kwargs:
         """

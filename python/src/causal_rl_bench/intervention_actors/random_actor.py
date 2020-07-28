@@ -6,6 +6,8 @@ import numpy as np
 class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, **kwargs):
         """
+        This is a random intervention actor which intervenes randomly on
+        all available state variables.
 
         :param kwargs:
         """
@@ -20,10 +22,10 @@ class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         if env.is_in_training_mode():
             self.task_intervention_space =\
-                env._task.get_testing_intervention_spaces()
+                env._task.get_training_intervention_spaces()
         else:
             self.task_intervention_space = \
-                env._task.get_training_intervention_spaces()
+                env._task.get_testing_intervention_spaces()
         return
 
     def _act(self, variables_dict):

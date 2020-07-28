@@ -1,6 +1,9 @@
 from causal_rl_bench.task_generators.creative_stacked_blocks import \
     CreativeStackedBlocksGeneratorTask
 
+from causal_rl_bench.task_generators.stacked_blocks import \
+    StackedBlocksGeneratorTask
+
 from causal_rl_bench.task_generators.general import \
     GeneralGeneratorTask
 

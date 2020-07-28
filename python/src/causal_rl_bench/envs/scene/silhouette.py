@@ -11,10 +11,14 @@ class SilhouetteObject(object):
                  size, position,
                  orientation, color):
         """
+        This is the base object for a silhouette in the arena.
 
-        :param pybullet_clients:
-        :param name:
-        :param block_id:
+        :param pybullet_client_ids: (list) list of pybullet client ids.
+        :param name: (str) specifies the name of the silhouette object
+        :param size: (list float) specifies the size of the object.
+        :param position: (list float) x, y, z position.
+        :param orientation: (list float) quaternion.
+        :param color: (list float) RGB values.
         """
         self._pybullet_client_ids = pybullet_client_ids
         self._name = name
@@ -83,18 +87,37 @@ class SilhouetteObject(object):
         return
 
     def _add_state_variables(self):
+        """
+
+        :return:
+        """
         return
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+
+        :return:
+        """
         raise NotImplementedError("the creation function is not defined "
                                   "yet")
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         raise NotImplementedError("the define type id function "
                                   "is not defined yet")
 
     def _init_object(self):
+        """
+
+        :return:
+        """
         for pybullet_client_id in self._pybullet_client_ids:
             shape_id, block_id =\
                 self._create_object(pybullet_client_id)
@@ -104,11 +127,19 @@ class SilhouetteObject(object):
         return
 
     def reinit_object(self):
+        """
+
+        :return:
+        """
         self.remove()
         self._init_object()
         return
 
     def remove(self):
+        """
+
+        :return:
+        """
         for i in range(0, len(self._pybullet_client_ids)):
             pybullet.removeBody(self._block_ids[i],
                                  physicsClientId=
@@ -119,6 +150,12 @@ class SilhouetteObject(object):
         return
 
     def _set_color(self, color):
+        """
+
+        :param color:
+
+        :return:
+        """
         for i in range(len(self._pybullet_client_ids)):
             pybullet.changeVisualShape(self._block_ids[i],
                                         -1,
@@ -134,6 +171,7 @@ class SilhouetteObject(object):
 
         :param position:
         :param orientation:
+
         :return:
         """
         position[-1] += WorldConstants.FLOOR_HEIGHT
@@ -148,6 +186,7 @@ class SilhouetteObject(object):
         """
 
         :param state_type:
+
         :return:
         """
         if state_type == 'dict':
@@ -192,6 +231,7 @@ class SilhouetteObject(object):
         """
 
         :param variable_name:
+
         :return:
         """
         if variable_name == 'type':
@@ -221,6 +261,7 @@ class SilhouetteObject(object):
         """
 
         :param new_state:
+
         :return:
         """
         #form dict first
@@ -245,6 +286,7 @@ class SilhouetteObject(object):
         """
 
         :param state_dict:
+
         :return:
         """
         #TODO: Add frictions to apply interventions
@@ -379,6 +421,7 @@ class SCuboid(SilhouetteObject):
             color=np.array([0, 1, 0])
     ):
         """
+        This is the silhoutte cuboid object.
 
         :param pybullet_clients:
         :param name:
@@ -397,6 +440,13 @@ class SCuboid(SilhouetteObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+
+        :return:
+        """
         position = np.array(self._position)
         position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createVisualShape(
@@ -414,10 +464,18 @@ class SCuboid(SilhouetteObject):
         return shape_id, block_id
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         self._type_id = 20
         return
 
     def get_recreation_params(self):
+        """
+
+        :return:
+        """
         recreation_params = dict()
         recreation_params['name'] = self._name
         recreation_params['size'] = self._size
@@ -442,12 +500,11 @@ class SSphere(SilhouetteObject):
             color=np.array([0, 1, 0])
     ):
         """
-        :param pybullet_clients:
+
+        :param pybullet_client_ids:
         :param name:
-        :param size:
+        :param radius:
         :param position:
-        :param orientation:
-        :param alpha:
         :param color:
         """
         self._radius = radius
@@ -461,6 +518,13 @@ class SSphere(SilhouetteObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+
+        :return:
+        """
         position = np.array(self._position)
         position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createVisualShape(
@@ -478,10 +542,20 @@ class SSphere(SilhouetteObject):
         return shape_id, block_id
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         self._type_id = 21
         return
 
     def apply_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+
+        :return:
+        """
         if 'size' in interventions_dict:
             raise Exception("can't apply intervention on size")
         if 'orientation' in interventions_dict:
@@ -491,6 +565,10 @@ class SSphere(SilhouetteObject):
         return
 
     def get_recreation_params(self):
+        """
+
+        :return:
+        """
         recreation_params = dict()
         recreation_params['name'] = self._name
         recreation_params['radius'] = self._radius
@@ -517,12 +595,12 @@ class SMeshObject(SilhouetteObject):
     ):
         """
 
-        :param pybullet_client:
+        :param pybullet_client_ids:
         :param name:
-        :param size:
+        :param filename:
+        :param scale:
         :param position:
         :param orientation:
-        :param mass:
         :param color:
         """
         #TODO: intervene on friction as well
@@ -540,7 +618,10 @@ class SMeshObject(SilhouetteObject):
     def _set_size(self, pybullet_client_ids, position, orientation):
         """
 
-        :param pybullet_client:
+        :param pybullet_client_ids:
+        :param position:
+        :param orientation:
+
         :return:
         """
         temp_shape_id = pybullet.createCollisionShape(
@@ -568,6 +649,13 @@ class SMeshObject(SilhouetteObject):
 
     def _create_object(self, pybullet_client_id,
                        **kwargs):
+        """
+
+        :param pybullet_client_id:
+        :param kwargs:
+
+        :return:
+        """
         position = np.array(self._position)
         position[-1] += WorldConstants.FLOOR_HEIGHT
         shape_id = pybullet.createVisualShape(
@@ -584,10 +672,18 @@ class SMeshObject(SilhouetteObject):
         return shape_id, block_id
 
     def _define_type_id(self):
+        """
+
+        :return:
+        """
         self._type_id = 23
         return
 
     def get_recreation_params(self):
+        """
+
+        :return:
+        """
         recreation_params = dict()
         recreation_params['name'] = self._name
         recreation_params['filename'] = self._filename

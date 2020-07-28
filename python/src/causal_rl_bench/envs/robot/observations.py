@@ -10,6 +10,16 @@ class TriFingerObservations(object):
                  observation_keys=None,
                  cameras=None,
                  camera_indicies=np.array([0, 1, 2])):
+        """
+        This class represents the observations limits of the robot and takes
+        care of the normalization of the observation values.
+
+        :param observation_mode:
+        :param normalize_observations:
+        :param observation_keys:
+        :param cameras:
+        :param camera_indicies:
+        """
 
         num_fingers = 3
         self._normalized_observations = normalize_observations
@@ -85,6 +95,10 @@ class TriFingerObservations(object):
             self.set_observation_spaces()
 
     def get_observation_spaces(self):
+        """
+
+        :return:
+        """
         if self._normalized_observations:
             observations_low_values = np.full(shape=self._low.shape,
                                               fill_value=self._low_norm,
@@ -111,6 +125,10 @@ class TriFingerObservations(object):
                                   dtype=np.uint8)
 
     def set_observation_spaces(self):
+        """
+
+        :return:
+        """
         self._low = np.array([])
         self._high = np.array([])
         self._observation_is_not_normalized = np.array([], dtype=np.bool)
@@ -141,34 +159,74 @@ class TriFingerObservations(object):
         return
 
     def is_normalized(self):
+        """
+
+        :return:
+        """
         return self._normalized_observations
 
     def reset_observation_keys(self):
+        """
+
+        :return:
+        """
         self._observations_keys = []
         self.set_observation_spaces()
 
     def normalize_observation(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         return (self._high_norm - self._low_norm) * (observation - self._low) / \
                (self._high - self._low) \
                + self._low_norm
 
     def normalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
         return (self._high_norm - self._low_norm) * (observation - lower_key) / \
                (higher_key - lower_key) + self._low_norm
 
     def denormalize_observation(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         return self._low + (observation - self._low_norm) / \
                (self._high_norm - self._low_norm) * (self._high - self._low)
 
     def denormalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
         return lower_key + (observation - self._low_norm) / \
                (self._high_norm - self._low_norm) * (higher_key - lower_key)
 
     def satisfy_constraints(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         if self._normalized_observations:
             return (observation > self._low_norm).all() and \
                    (observation < self._high_norm).all()
@@ -177,6 +235,12 @@ class TriFingerObservations(object):
                    (observation < self._high).all()
 
     def clip_observation(self, observation):
+        """
+
+        :param observation:
+
+        :return:
+        """
         if self._normalized_observations:
             return np.clip(observation, self._low_norm, self._high_norm)
         else:
@@ -184,6 +248,15 @@ class TriFingerObservations(object):
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):
+        """
+
+        :param observation_key:
+        :param lower_bound:
+        :param upper_bound:
+        :param observation_fn:
+
+        :return:
+        """
         if observation_key not in self._lower_bounds.keys() and \
                 (lower_bound is None or upper_bound is None):
             raise Exception("Observation key {} is not known please specify "
@@ -197,12 +270,24 @@ class TriFingerObservations(object):
         self.set_observation_spaces()
 
     def is_observation_key_known(self, observation_key):
+        """
+
+        :param observation_key:
+
+        :return:
+        """
         if observation_key not in self._lower_bounds.keys():
             return False
         else:
             return True
 
     def remove_observations(self, observations):
+        """
+
+        :param observations:
+
+        :return:
+        """
         for observation in observations:
             if observation not in self._observations_keys:
                 raise Exception(
@@ -212,6 +297,13 @@ class TriFingerObservations(object):
 
     #since task might need access to state elements that are not in the observation leys
     def get_current_observations(self, robot_state, helper_keys):
+        """
+
+        :param robot_state:
+        :param helper_keys:
+
+        :return:
+        """
         observations_dict = dict()
         for observation in self._observations_keys:
             if observation == "joint_positions":
@@ -272,6 +364,10 @@ class TriFingerObservations(object):
         return observations_dict
 
     def get_current_camera_observations(self):
+        """
+
+        :return:
+        """
         images = []
         for i in self._camera_indicies:
             images.append(self._cameras[i].get_image())

@@ -1,39 +1,49 @@
 from causal_rl_bench.task_generators.base_task import BaseTask
 from causal_rl_bench.utils.rotation_utils import quaternion_conjugate, \
-    quaternion_mul, euler_to_quaternion
+    quaternion_mul
 import numpy as np
 
 
 class PushingTaskGenerator(BaseTask):
-    def __init__(self, **kwargs):
+    def __init__(self, use_train_space_only=False,
+                 fractional_reward_weight=1,
+                 dense_reward_weights=np.array([750, 250, 100]),
+                 activate_sparse_reward=False,
+                 tool_block_mass=0.08,
+                 joint_positions=None,
+                 tool_block_position=np.array([0, -0.08, 0.0325]),
+                 tool_block_orientation=np.array([0, 0, 0, 1]),
+                 goal_block_position=np.array([0, 0.08, 0.0325]),
+                 goal_block_orientation=np.array([0, 0, 0, 1])):
         """
+        This task generates a task for pushing an object on the arena's floor.
 
-        :param kwargs:
+        :param use_train_space_only:
+        :param fractional_reward_weight:
+        :param dense_reward_weights:
+        :param activate_sparse_reward:
+        :param tool_block_mass:
+        :param joint_positions:
+        :param tool_block_position:
+        :param tool_block_orientation:
+        :param goal_block_position:
+        :param goal_block_orientation:
         """
         super().__init__(task_name="pushing",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                        False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([750, 250, 100])))
+                         use_train_space_only=use_train_space_only,
+                         fractional_reward_weight=fractional_reward_weight,
+                         dense_reward_weights=dense_reward_weights,
+                         activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "end_effector_positions"]
-        self._task_params["tool_block_mass"] = \
-            kwargs.get("tool_block_mass", 0.08)
-        self._task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
-        self._task_params["tool_block_position"] = \
-            kwargs.get("tool_block_position", np.array([0, -0.08, 0.0325]))
-        self._task_params["tool_block_orientation"] = \
-            kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
-        self._task_params["goal_block_position"] = \
-            kwargs.get("goal_block_position", np.array([0, 0.08, 0.0325]))
-        self._task_params["goal_block_orientation"] = \
-            kwargs.get("goal_block_orientation", np.array([0, 0, 0, 1]))
+        self._task_params["tool_block_mass"] = tool_block_mass
+        self._task_params["joint_positions"] = joint_positions
+        self._task_params["tool_block_position"] = tool_block_position
+        self._task_params["tool_block_orientation"] = tool_block_orientation
+        self._task_params["goal_block_position"] = goal_block_position
+        self._task_params["goal_block_orientation"] = goal_block_orientation
         self.previous_end_effector_positions = None
         self.previous_object_position = None
         self.previous_object_orientation = None
@@ -121,6 +131,7 @@ class PushingTaskGenerator(BaseTask):
 
         :param desired_goal:
         :param achieved_goal:
+
         :return:
         """
         # rewards order
@@ -186,6 +197,7 @@ class PushingTaskGenerator(BaseTask):
         """
 
         :param update_task_info:
+
         :return:
         """
         self.previous_end_effector_positions = \
@@ -215,6 +227,7 @@ class PushingTaskGenerator(BaseTask):
         """
 
         :param interventions_dict:
+
         :return:
         """
         #for example size on goal_or tool should be propagated to the other

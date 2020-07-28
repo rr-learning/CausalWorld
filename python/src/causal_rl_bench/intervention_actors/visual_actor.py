@@ -6,6 +6,8 @@ import numpy as np
 class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, **kwargs):
         """
+        This intervention actor intervenes on all visual components of the
+        robot, (i.e: colors).
 
         :param kwargs:
         """
@@ -20,16 +22,17 @@ class VisualInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         if env.is_in_training_mode():
             self.task_intervention_space =\
-                env.get_task().get_testing_intervention_spaces()
+                env.get_task().get_training_intervention_spaces()
         else:
             self.task_intervention_space = \
-                env.get_task().get_training_intervention_spaces()
+                env.get_task().get_testing_intervention_spaces()
         return
 
     def _act(self, variables_dict):
         """
 
         :param variables_dict:
+
         :return:
         """
         interventions_dict = dict()

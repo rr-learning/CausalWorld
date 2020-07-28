@@ -6,9 +6,11 @@ from causal_rl_bench.intervention_actors.base_actor import \
 class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, positions=True, orientations=True, **kwargs):
         """
+        This intervention actor intervenes on the pose of the blocks
+        available in the arena.
 
-        :param positions:
-        :param orientations:
+        :param positions: (bool)
+        :param orientations: (bool)
         :param kwargs:
         """
         super(RigidPoseInterventionActorPolicy, self).__init__()
@@ -22,10 +24,12 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
         :param env:
         :return:
         """
-        self.task_intervention_space =\
-            env._task.get_testing_intervention_spaces()
-        self.task_intervention_space.\
-            update(env._task.get_training_intervention_spaces())
+        if env.is_in_training_mode():
+            self.task_intervention_space =\
+                env._task.get_training_intervention_spaces()
+        else:
+            self.task_intervention_space = \
+                env._task.get_testing_intervention_spaces()
         return
 
     def _act(self, variables_dict):

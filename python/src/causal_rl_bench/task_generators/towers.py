@@ -4,21 +4,32 @@ import copy
 
 
 class TowersGeneratorTask(BaseTask):
-    def __init__(self, **kwargs):
+    def __init__(self, use_train_space_only=False,
+                 fractional_reward_weight=1,
+                 dense_reward_weights=np.array([]),
+                 activate_sparse_reward=False,
+                 tool_block_mass=0.08,
+                 number_of_blocks_in_tower=np.array([1, 1, 5]),
+                 tower_dims=np.array([0.035, 0.035, 0.175]),
+                 tower_center=np.array([0, 0])):
         """
-        This task generator
-        will most probably deal with camera data if u want to use the
-        sample goal function
-        :param kwargs:
+        This task generator will generate a task for stacking blocks into
+        towers.
+
+        :param use_train_space_only:
+        :param fractional_reward_weight:
+        :param dense_reward_weights:
+        :param activate_sparse_reward:
+        :param tool_block_mass:
+        :param number_of_blocks_in_tower:
+        :param tower_dims:
+        :param tower_center:
         """
         super().__init__(task_name="towers",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                         False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([])))
+                         use_train_space_only=use_train_space_only,
+                         fractional_reward_weight=fractional_reward_weight,
+                         dense_reward_weights=dense_reward_weights,
+                         activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
@@ -26,16 +37,11 @@ class TowersGeneratorTask(BaseTask):
 
         #for this task the stage observation keys will be set with the
         #goal/structure building
-        self._task_params["tool_block_mass"] = \
-            kwargs.get("tool_block_mass", 0.08)
-        self._task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
+        self._task_params["tower_dims"] = tower_dims
+        self._task_params["tower_center"] = tower_center
+        self._task_params["tool_block_mass"] = tool_block_mass
         self._task_params["number_of_blocks_in_tower"] = \
-            kwargs.get("number_of_blocks_in_tower", np.array([1, 1, 5]))
-        self._task_params["tower_dims"] = \
-            kwargs.get("tower_dims", np.array([0.035, 0.035, 0.175]))
-        self._task_params["tower_center"] = \
-            kwargs.get("tower_center", np.array([0, 0]))
+            number_of_blocks_in_tower
         self.current_tower_dims = np.array(self._task_params["tower_dims"])
         self.current_number_of_blocks_in_tower = \
             np.array(self._task_params["number_of_blocks_in_tower"])
@@ -67,6 +73,7 @@ class TowersGeneratorTask(BaseTask):
         :param tower_dims:
         :param number_of_blocks_in_tower:
         :param center_position:
+
         :return:
         """
         self._stage.remove_everything()
@@ -192,6 +199,7 @@ class TowersGeneratorTask(BaseTask):
 
         :param training:
         :param level:
+
         :return:
         """
         intervention_dict = dict()

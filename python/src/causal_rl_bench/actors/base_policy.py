@@ -1,28 +1,30 @@
 class BaseActorPolicy(object):
     """
-    This is a policy wrapper template class whose methods needs to
-    be implemented to record and view a trained policy using the
-    TaskViewer class
+    This is a policy wrapper for an actor, its functions need to be filled
+    to load the policy such that it can be used by the robot to act in the
+    environment.
     """
     def __init__(self, identifier=None):
         """
 
-        :param identifier:
+        :param identifier: (string) defines the name of the actor policy
         """
         self.identifier = identifier
         return
 
     def get_identifier(self):
         """
-
-        :return:
+        :return: (string) defines the name of the actor policy
         """
         return self.identifier
 
     def act(self, obs):
         """
+        The function is called for the agent to act in the world.
 
-        :param obs:
-        :return:
+        :param obs: (nd.array) defines the observations received by the agent
+                               at time step t
+
+        :return: (nd.array) defines the action to be executed at time step t
         """
         raise NotImplementedError()

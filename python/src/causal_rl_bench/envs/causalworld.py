@@ -25,19 +25,56 @@ class CausalWorld(gym.Env):
                  camera_indicies=np.array([0, 1, 2]),
                  wrappers=None):
         """
+        The causal world encapsulates the environment of the agent, where you
+        can perform actions, intervene, reset the state..etc
 
-        :param task:
-        :param skip_frame:
-        :param enable_visualization:
-        :param seed:
-        :param action_mode:
-        :param observation_mode:
-        :param normalize_actions:
-        :param normalize_observations:
-        :param max_episode_length:
-        :param data_recorder:
-        :param enable_goal_image:
-        :param kwargs:
+        :param task: (causal_rl_bench.BaseTask) this is the task produced by one of
+                                            the available task generators or the
+                                            custom task created.
+        :param skip_frame: (int) the low level controller is running @250Hz
+                           which corresponds to skip frame of 1, a skip frame
+                           of 250 corresponds to frequency of 1Hz
+        :param enable_visualization: (bool) this is a boolean which indicates
+                                     if a GUI is enabled or the environment
+                                     should operate in a headless mode.
+        :param seed: (int) this is the random seed used in the environment.
+        :param action_mode: (string) action_modes available are "joint_positions",
+                                     "end_effector_positions" which is non
+                                     deterministic at the moment since it uses
+                                     IK of pybullet and lastly "joint_torques".
+        :param observation_mode: (string) observation modes available are
+                                          "structured" or "cameras" modes.
+                                          The structured observations are
+                                          specified in the task generator
+                                          itself. For the "cameras" mode
+                                          you will get maximum 6 images
+                                          concatenated where the first half
+                                          are the current images rendered in
+                                          the platform and the second half are
+                                          the goal images rendered from the
+                                          same point of view.
+        :param normalize_actions: (bool) this is a boolean which specifies
+                                         whether the actions passed to the step
+                                         function are normalized or not.
+        :param normalize_observations: (bool) this is a boolean which specifies
+                                              whether the observations returned
+                                              should be normalized or not.
+        :param max_episode_length: (int) it specifies what is the episode length
+                                         of the task, by default this will be
+                                         calculated according to how many
+                                         objects are in the arena
+                                         (5 secs * number of objects).
+        :param data_recorder: (causal_rl_bench.DataRecorder) passed only when
+                                                            you want to log and
+                                                            record the episodes
+                                                            which can be used
+                                                            further in imitation
+                                                            learning for instance.
+        :param camera_indicies: (list) maximum of 3 elements where each element
+                                       is from 0 to , specifies which cameras
+                                       to return in the observations and the
+                                       order as well.
+        :param wrappers: (causal_rl_bench.wrappers) should not be used for now.
         """
         self._observation_mode = observation_mode
         self._action_mode = action_mode
@@ -157,24 +194,39 @@ class CausalWorld(gym.Env):
         return
 
     def expose_potential_partial_solution(self):
+        """
+        Adds the partial solution field in the info dict returned after stepping
+        Through the environment.
+
+        :return: None
+        """
         self._task.expose_potential_partial_solution()
         return
 
     def add_ground_truth_state_to_info(self):
+        """
+        Adds the ground truth state variables in the info dict returned after
+        stepping through the environment, can be used in representation
+        learning.
+
+        :return: None
+        """
         self._task.add_ground_truth_state_to_info()
         return
 
     def are_actions_normalized(self):
+        """
+        :return: (bool) whether the actions are normalized or not.
+        """
         return self._normalize_actions
 
     def are_observations_normalized(self):
+        """
+        :return: (bool) whether the observations are normalized or not.
+        """
         return self._normalize_observations
 
     def _reset_observations_space(self):
-        """
-
-        :return:
-        """
         if self._observation_mode == "cameras" and self.observation_space is None:
             self._stage.select_observations(["goal_image"])
             self.observation_space = combine_spaces(
@@ -192,9 +244,15 @@ class CausalWorld(gym.Env):
 
     def step(self, action):
         """
+        Used to step through the enviroment.
 
-        :param action:
-        :return:
+        :param action: (nd.array) specifies which action should be taken by
+                                  the robot, should follow the same action
+                                  mode specified.
+
+        :return: (nd.array) specifies the observations returned after stepping
+                            through the environment. Again, it follows the
+                            observation_mode specified.
         """
         self._episode_length += 1
         if not self._disabled_actions:
@@ -225,18 +283,27 @@ class CausalWorld(gym.Env):
 
     def reset_default_state(self):
         """
+        Used to reset the environment starting state to the default starting
+        state specified by the task generator. Can be used if an intervention
+        on the starting state was performed and its needed to go back to the
+        default starting state that was specified before.
 
-        :return:
+        :return: None
         """
         self._task.reset_default_state()
         return
 
     def sample_new_goal(self, training=True, level=None):
         """
+        Used to sample a new goal in the task subspace, the environment is
+        operating in, so goals are still restricted depends on the task
+        generator that was used.
 
-        :param training:
-        :param level:
-        :return:
+        :param training: (bool) specifies if you want a goal that is sampled
+                                from space A or space B.
+        :param level: (int) this is not used at the moment.
+
+        :return: None
         """
         return self._task.sample_new_goal(training, level)
 
@@ -248,9 +315,12 @@ class CausalWorld(gym.Env):
 
     def seed(self, seed=None):
         """
+        Used to set the seed of the environment,
+        to reproduce the same randomness.
 
-        :param seed:
-        :return:
+        :param seed: (int) specifies the seed number
+
+        :return: (int in list) the numpy seed that you can use further.
         """
         self.np_random, seed = gym.utils.seeding.np_random(seed)
         np.random.seed(seed)
@@ -258,9 +328,11 @@ class CausalWorld(gym.Env):
 
     def reset(self):
         """
+        Resets the environment to the current starting state of the environment.
 
-        :param interventions_dict:
-        :return:
+        :return: (nd.array) specifies the observations returned after resetting
+                            the environment. Again, it follows the
+                            observation_mode specified.
         """
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
@@ -285,6 +357,15 @@ class CausalWorld(gym.Env):
             return self._task.filter_structured_observations()
 
     def set_starting_state(self, interventions_dict=None):
+        """
+        Used to intervene on the starting state of the environment.
+
+        :param interventions_dict: (dict) specifies the state variables that
+                                          you want to intervene on as well as
+                                          values of the interventions.
+
+        :return: (bool) indicating if an intervention was successful or not.
+        """
         interventions_dict = copy.deepcopy(interventions_dict)
         self._tracker.do_intervention(self._task, interventions_dict)
         success_signal, interventions_info, reset_observation_space_signal = \
@@ -298,8 +379,10 @@ class CausalWorld(gym.Env):
 
     def close(self):
         """
+        closes the environment in a safe manner should be called at the
+        end of the program.
 
-        :return:
+        :return: None
         """
         if self._data_recorder:
             self._data_recorder.save()
@@ -316,8 +399,13 @@ class CausalWorld(gym.Env):
 
     def do_single_random_intervention(self):
         """
+        Performs a single random intervention on one of the available variables
+        to intervene on, which are the variables included in space A or space B.
+        Depending if the env is using train_space_only or not.
 
-        :return:
+        :return: (dict) The intervention that was performed.
+        :return: (bool) indicating if an intervention was successful or not.
+        :return: (nd.array) the observations after performing the intervention.
         """
         success_signal, interventions_info, interventions_dict, reset_observation_space_signal = \
             self._task.do_single_random_intervention()
@@ -339,10 +427,17 @@ class CausalWorld(gym.Env):
     def do_intervention(self, interventions_dict,
                         check_bounds=None):
         """
+        Performs interventions on variables specified by the intervention dict
+        to intervene on.
 
-        :param interventions_dict:
-        :param check_bounds:
-        :return:
+        :param interventions_dict: (dict) The variables to intervene on and the
+                                          values of the intervention.
+        :param check_bounds: (bool) specified when not in train mode and a
+                                    check for the intervention if its allowed
+                                    or not is needed.
+
+        :return: (bool) indicating if an intervention was successful or not.
+        :return: (nd.array) the observations after performing the intervention.
         """
         success_signal, interventions_info, reset_observation_space_signal = \
             self._task.do_intervention(interventions_dict,
@@ -363,8 +458,13 @@ class CausalWorld(gym.Env):
 
     def get_state(self):
         """
-        Note: Setting state and getting state doesnt work when there is an intermediate intervention
-        :return:
+        Returns the current state of the environment, can be used to save the
+        state.
+
+        Note: Setting state and getting state doesnt work when there is an
+        intermediate intervention
+
+        :return: (dict) specifying the state elements as a snapshot.
         """
         state = dict()
         state['pybullet_state'] = self._task._save_pybullet_state()
@@ -374,9 +474,14 @@ class CausalWorld(gym.Env):
 
     def set_state(self, new_full_state):
         """
+        Restores the state of the environment which is passed as an argument.
 
-        :param new_full_state:
-        :return:
+        Note: Setting state and getting state doesnt work when there is an
+        intermediate intervention
+
+        :param new_full_state: (dict) specifying the state elements as a snapshot.
+
+        :return: None
         """
         self._task._restore_pybullet_state(new_full_state['pybullet_state'])
         self._robot._control_index = new_full_state['control_index']
@@ -385,9 +490,11 @@ class CausalWorld(gym.Env):
 
     def render(self, mode="human"):
         """
+        Returns an RGB image taken from above the platform.
 
-        :param mode:
-        :return:
+        :param mode: (string) not taken in account now.
+
+        :return: (nd.array) an RGB image taken from above the platform.
         """
         if self._pybullet_client_w_o_goal_id is not None:
             client = self._pybullet_client_w_o_goal_id
@@ -436,15 +543,20 @@ class CausalWorld(gym.Env):
 
     def get_current_state_variables(self):
         """
+        Returns a snapshot of the world at that point in time, includes all
+        variables that can be intervened on and exposed in the environment.
 
-        :return:
+        :return: (dict) specifying all state variables along with their values.
         """
         return self._task.get_current_state_variables()
 
     def get_world_params(self):
         """
+        Returns the current params of the world that were supposed to be passed
+        to the CausalWorld object or manipulated in a further function.
 
-        :return:
+        :return: (dict) describing the params that can be used to recreate the
+                        CausalWorld object not including the task.
         """
         world_params = dict()
         world_params["skip_frame"] = self._robot.get_skip_frame()
@@ -460,18 +572,25 @@ class CausalWorld(gym.Env):
 
     def add_wrapper_info(self, wrapper_dict):
         """
+        Adds wrapper info to the wrappers property such that the world can
+        be saved with the wrappers and loaded afterwards.
 
-        :param wrapper_dict:
-        :return:
+        :param wrapper_dict: (dict) a dict specifying the wrapper info.
+
+        :return: None
         """
         self._wrappers_dict.update(wrapper_dict)
         return
 
     def save_world(self, log_relative_path):
         """
+        saves the tracker object of the world that tracks different aspects of
+        the current running world.
 
-        :param log_relative_path:
-        :return:
+        :param log_relative_path: (string) relative path to save the tracker
+                                           object in
+
+        :return: None
         """
         if not os.path.exists(log_relative_path):
             os.makedirs(log_relative_path)
@@ -482,37 +601,77 @@ class CausalWorld(gym.Env):
 
     def is_in_training_mode(self):
         """
+        Returns whether the world is in training mode or not.
 
-        :return:
+        :return: (bool) specifying whether the world is operating on
+                        space A only.
         """
         return self._task.is_in_training_mode()
 
     def get_joint_positions_lower_bound(self):
+        """
+        Returns the absolute lower bound of the actions space.
+
+        :return: (nd.array) specifying the 9 joint positions of the
+                            low bound of the joints.
+        """
         return self._robot._robot_actions.\
             joint_positions_lower_bounds
 
     def get_action_mode(self):
+        """
+        :return: (string) returns which action mode the causal_world is operating in.
+        """
         return self._action_mode
 
     def set_action_mode(self, action_mode):
+        """
+        used to set or change the action mode.
+
+        :param action_mode: (string) action mode to operate in.
+
+        :return: None
+        """
         self._action_mode = action_mode
         self._robot.set_action_mode(action_mode)
+        return
 
     def get_robot(self):
+        """
+
+        :return: (causal_rl_bench.TriFingerRobot) returns the robot object of
+                                                  the causal_world.
+        """
         return self._robot
 
     def get_task(self):
+        """
+
+        :return: (causal_rl_bench.BaseTask) returns the task object of
+                                            the causal_world.
+        """
         return self._task
 
     def get_stage(self):
+        """
+
+        :return: (causal_rl_bench.Stage) returns the stage object of
+                                         the causal_world.
+        """
         return self._stage
 
     def get_tracker(self):
+        """
+
+        :return: (causal_rl_bench.Tracker) returns the tracker
+                                           object of the causal_world.
+        """
         return self._tracker
 
     def _create_world(self, initialize_goal_image=False):
         """
         This function loads the urdfs of the robot in all the pybullet clients
+
         :return:
         """
         self._reset_world()

@@ -19,16 +19,34 @@ class TriFingerRobot(object):
                  cameras=None,
                  camera_indicies=np.array([0, 1, 2])):
         """
+        This class provides the functionalities of the robot itself
 
-        :param action_mode:
-        :param observation_mode:
-        :param skip_frame:
-        :param normalize_actions:
-        :param normalize_observations:
-        :param simulation_time:
-        :param pybullet_client_full:
-        :param pybullet_client_w_goal:
-        :param pybullet_client_w_o_goal:
+        :param action_mode: (str) defines the action mode of the robot whether
+                                  its joint_positions, end_effector_positions
+                                  or joint_torques.
+        :param observation_mode: (str) defines the observation mode of the robot
+                                       if cameras or structured.
+        :param skip_frame: (int) the low level controller is running @250Hz
+                           which corresponds to skip frame of 1, a skip frame
+                           of 250 corresponds to frequency of 1Hz
+        :param normalize_actions: (bool) this is a boolean which specifies
+                                         whether the actions passed to the step
+                                         function are normalized or not.
+        :param normalize_observations: (bool) this is a boolean which specifies
+                                              whether the observations returned
+                                              should be normalized or not.
+        :param simulation_time: (float) the time for one action step in the pybullet
+                                        simulation.
+        :param pybullet_client_full_id: (int) pybullet client full mode id
+        :param pybullet_client_w_goal_id: (int) pybullet client with goal mode id
+        :param pybullet_client_w_o_goal_id: (int) pybullet client without goal mode id
+        :param revolute_joint_ids: (list) joint ids in the urdf
+        :param finger_tip_ids: (list) finger tip ids in the urdf
+        :param cameras: (list) Camera objects list
+        :param camera_indicies: (list) maximum of 3 elements where each element
+                                       is from 0 to , specifies which cameras
+                                       to return in the observations and the
+                                       order as well.
         """
         self._pybullet_client_full_id = pybullet_client_full_id
         self._pybullet_client_w_goal_id = pybullet_client_w_goal_id
@@ -72,7 +90,6 @@ class TriFingerRobot(object):
         if action_mode != "joint_torques":
             self._last_applied_joint_positions = None
         self._latest_full_state = None
-        self._latest_camera_observations = None
         #TODO: repeated
         self._state_size = 18
         #TODO: move this to pybullet_fingers repo maybe?
@@ -81,19 +98,46 @@ class TriFingerRobot(object):
         return
 
     def get_link_names(self):
+        """
+        :return: (list) returns the link names in the urdf
+        """
         return WorldConstants.LINK_IDS
 
     def get_control_index(self):
+        """
+
+        :return: (int) returns the current control index
+        """
         return self._control_index
 
     def get_full_env_state(self):
+        """
+
+        :return: returns the current state variables and their values in the
+                 environment wrt to the robot.
+        """
         return self.get_current_scm_values()
 
     def set_full_env_state(self, env_state):
+        """
+        This function is used to set the env state through interventions on
+        the environment itself
+
+        :param env_state: (dict) specifies the state variables and its values
+                                 to intervene on.
+
+        :return: None
+        """
         self.apply_interventions(env_state)
-        return env_state
+        return
 
     def update_latest_full_state(self):
+        """
+        Updates the latest full state in terms of joint positions, velocities,
+        torques..etc
+
+        :return: None
+        """
         if self._pybullet_client_full_id is not None:
             current_joint_states = pybullet.\
                 getJointStates(
@@ -124,22 +168,14 @@ class TriFingerRobot(object):
 
         return
 
-    def update_images(self):
-        #TODO: this is just a sekelton for now
-        observations = []
-        observations.append(self._tool_cameras[0].get_image())
-        self._latest_camera_observations = observations
-
     def compute_pd_control_torques(self, joint_positions):
         """
         Compute torque command to reach given target position using a PD
         controller.
 
-        Args:
-            joint_positions (array-like, shape=(n,)):  Desired joint positions.
+        :param joint_positions: (list) Desired joint positions.
 
-        Returns:
-            List of torques to be sent to the joints of the finger in order to
+        :return: (list) torques to be sent to the joints of the finger in order to
             reach the specified joint_positions.
         """
         position_error = joint_positions - self._latest_full_state['positions']
@@ -152,39 +188,76 @@ class TriFingerRobot(object):
         return joint_torques
 
     def set_action_mode(self, action_mode):
+        """
+        Sets the action mode
+
+        :param action_mode: (str) specifies the action mode of the robot.
+
+        :return: None
+        """
         self._action_mode = action_mode
         self._robot_actions = TriFingerAction(action_mode,
                                               self._normalize_actions)
 
     def get_upper_joint_positions(self):
+        """
+        :return: (list) returns the upper joint positions limit.
+        """
         return self._robot_actions.joint_positions_upper_bounds
 
     def get_action_mode(self):
+        """
+
+        :return: (str) returns the current action mode.
+        """
         return self._action_mode
 
     def set_observation_mode(self, observation_mode):
+        """
+        Sets the observation mode
+
+        :param observation_mode: (str) sets the observation mode of the robot
+                                       itself.
+
+        :return: None
+        """
         self._observation_mode = observation_mode
         self._robot_observations = \
             TriFingerObservations(observation_mode,
                                   self._normalize_observations,
                                   cameras=self._tool_cameras,
                                   camera_indicies=self._camera_indicies)
+        return
 
     def get_observation_mode(self):
+        """
+
+        :return: (str) returns the observation mode of the robot.
+        """
         return self._observation_mode
 
-    def set_skip_frame(self, skip_frame):
-        self._skip_frame = skip_frame
-
     def get_skip_frame(self):
+        """
+
+        :return:
+        """
         return self._skip_frame
 
     def get_full_state(self):
+        """
+
+        :return:
+        """
         self.update_latest_full_state()
         return np.append(self._latest_full_state['positions'],
                          self._latest_full_state['velocities'])
 
     def set_full_state(self, state):
+        """
+
+        :param state:
+        :return:
+        """
         self._set_finger_state(state[:9], state[9:])
         # here the previous actions will all be zeros to
         # avoid dealing with different action modes for now
@@ -195,24 +268,52 @@ class TriFingerRobot(object):
         return
 
     def get_last_action(self):
+        """
+
+        :return:
+        """
         return self._last_action
 
     def get_last_clipped_action(self):
+        """
+
+        :return:
+        """
         return self._last_clipped_action
 
     def get_last_applied_joint_positions(self):
+        """
+
+        :return:
+        """
         return self._last_applied_joint_positions
 
     def get_observation_spaces(self):
+        """
+
+        :return:
+        """
         return self._robot_observations.get_observation_spaces()
 
     def get_action_spaces(self):
+        """
+
+        :return:
+        """
         return self._robot_actions.get_action_space()
 
     def get_state_size(self):
+        """
+
+        :return:
+        """
         return self._state_size
 
     def step_simulation(self):
+        """
+
+        :return:
+        """
         if self._pybullet_client_full_id is not None:
             pybullet.stepSimulation(
                 physicsClientId=self._pybullet_client_full_id)
@@ -222,6 +323,12 @@ class TriFingerRobot(object):
         return
 
     def apply_action(self, action):
+        """
+
+        :param action:
+
+        :return:
+        """
         self._control_index += 1
         clipped_action = self._robot_actions.clip_action(action)
         action_to_apply = clipped_action
@@ -255,23 +362,29 @@ class TriFingerRobot(object):
         else:
             raise Exception("The action mode {} is not supported".
                             format(self._action_mode))
-        #now we get the observations
-        if self._observation_mode == "cameras":
-            self.update_images()
         self._last_action = action
         self._last_clipped_action = clipped_action
         return
 
     def get_dt(self):
+        """
+
+        :return:
+        """
         return self._dt
 
     def get_latest_full_state(self):
+        """
+
+        :return:
+        """
         return self._latest_full_state
 
     def send_torque_commands(self, desired_torque_commands):
         """
 
         :param desired_torque_commands:
+
         :return:
         """
         torque_commands = self._safety_torque_check(desired_torque_commands)
@@ -297,6 +410,7 @@ class TriFingerRobot(object):
         """
 
         :param desired_torques:
+
         :return:
         """
         applied_torques = np.clip(
@@ -321,6 +435,7 @@ class TriFingerRobot(object):
 
         :param desired_tip_positions:
         :param rest_pose:
+
         :return:
         """
         desired = np.array(desired_tip_positions)
@@ -370,6 +485,13 @@ class TriFingerRobot(object):
 
     def get_joint_positions_from_tip_positions(self, tip_positions,
                                                default_pose=None):
+        """
+
+        :param tip_positions:
+        :param default_pose:
+
+        :return:
+        """
         tip_positions[2] += WorldConstants.FLOOR_HEIGHT
         tip_positions[5] += WorldConstants.FLOOR_HEIGHT
         tip_positions[8] += WorldConstants.FLOOR_HEIGHT
@@ -382,9 +504,17 @@ class TriFingerRobot(object):
         return positions
 
     def get_current_camera_observations(self):
+        """
+
+        :return:
+        """
         return self._robot_observations.get_current_camera_observations()
 
     def get_rest_pose(self):
+        """
+
+        :return:
+        """
         deg45 = np.pi / 4
         positions = [0, -deg45, -deg45]
         joint_positions = positions * 3
@@ -394,10 +524,18 @@ class TriFingerRobot(object):
         return joint_positions, end_effector_positions
 
     def get_default_state(self):
+        """
+
+        :return:
+        """
         return np.append(self.get_rest_pose()[0],
                          np.zeros(9))
 
     def get_current_scm_values(self):
+        """
+
+        :return:
+        """
         # TODO: not a complete list yet of what we want to expose
         variable_params = dict()
         self.update_latest_full_state()
@@ -426,10 +564,22 @@ class TriFingerRobot(object):
         return variable_params
 
     def get_current_observations(self, helper_keys):
+        """
+
+        :param helper_keys:
+
+        :return:
+        """
         return self._robot_observations.get_current_observations(
             self._latest_full_state, helper_keys)
 
     def _compute_end_effector_positions(self, joint_positions):
+        """
+
+        :param joint_positions:
+
+        :return:
+        """
         result = np.array([])
         if self._pybullet_client_full_id is not None:
             position_1 = pybullet.getLinkState(
@@ -491,6 +641,10 @@ class TriFingerRobot(object):
         return last_joints_action_applied
 
     def clear(self):
+        """
+
+        :return:
+        """
         self._last_action = np.zeros(9, )
         self._last_clipped_action = np.zeros(9, )
         self.update_latest_full_state()
@@ -502,6 +656,14 @@ class TriFingerRobot(object):
     def reset_state(self, joint_positions=None,
                     joint_velocities=None,
                     end_effector_positions=None):
+        """
+
+        :param joint_positions:
+        :param joint_velocities:
+        :param end_effector_positions:
+
+        :return:
+        """
         self._latest_full_state = None
         self._control_index = -1
         if end_effector_positions is not None:
@@ -520,6 +682,12 @@ class TriFingerRobot(object):
         return
 
     def sample_joint_positions(self, sampling_strategy="separated"):
+        """
+
+        :param sampling_strategy:
+
+        :return:
+        """
         if sampling_strategy == "uniform":
             #TODO: need to check for collisions here and if its feasible or not
             positions = np.random.uniform(self._robot_actions.
@@ -531,6 +699,12 @@ class TriFingerRobot(object):
         return positions
 
     def sample_end_effector_positions(self, sampling_strategy="from_joints"):
+        """
+
+        :param sampling_strategy:
+
+        :return:
+        """
         if sampling_strategy == "middle_stage":
             tip_positions = np.random.uniform(
                 [0.1, 0.1, 0.15, 0.1, -0.15, 0.15, -0.15, -0.15, 0.15],
@@ -544,6 +718,12 @@ class TriFingerRobot(object):
         return tip_positions
 
     def forward_simulation(self, time=1):
+        """
+
+        :param time:
+
+        :return:
+        """
         n_steps = int(time / self._simulation_time)
         if self._pybullet_client_w_o_goal_id is not None:
             for _ in range(n_steps):
@@ -558,6 +738,12 @@ class TriFingerRobot(object):
         return
 
     def select_observations(self, observation_keys):
+        """
+
+        :param observation_keys:
+
+        :return:
+        """
         self._robot_observations.reset_observation_keys()
         for key in observation_keys:
             if key == "action_joint_positions":
@@ -569,6 +755,10 @@ class TriFingerRobot(object):
         return
 
     def close(self):
+        """
+
+        :return:
+        """
         if self._pybullet_client_full_id is not None:
             pybullet.disconnect(
                 physicsClientId=self._pybullet_client_full_id)
@@ -584,20 +774,49 @@ class TriFingerRobot(object):
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):
+        """
+
+        :param observation_key:
+        :param lower_bound:
+        :param upper_bound:
+        :param observation_fn:
+
+        :return:
+        """
         self._robot_observations.add_observation(observation_key,
                                                  lower_bound,
                                                  upper_bound,
                                                  observation_fn)
 
     def normalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         return self._robot_observations.normalize_observation_for_key(
             observation, key)
 
     def denormalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         return self._robot_observations.denormalize_observation_for_key(
             observation, key)
 
     def apply_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+
+        :return:
+        """
         #TODO: add friction of each link
         old_state = self.get_full_state()
         if "joint_positions" in interventions_dict:
@@ -699,13 +918,8 @@ class TriFingerRobot(object):
         """
         This function checks the feasibility of the current state of the robot
         (i.e checks if its in penetration with anything now
-        Parameters
-        ---------
 
-        Returns
-        -------
-            feasibility_flag: bool
-                A boolean indicating whether the stage is in a collision state
+        :return: (bool) A boolean indicating whether the stage is in a collision state
                 or not.
         """
         if self._pybullet_client_full_id is not None:
@@ -720,6 +934,10 @@ class TriFingerRobot(object):
         return True
 
     def is_self_colliding(self):
+        """
+
+        :return:
+        """
         if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
         else:
@@ -731,6 +949,10 @@ class TriFingerRobot(object):
         return False
 
     def is_colliding_with_stage(self):
+        """
+
+        :return:
+        """
         if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
         else:
@@ -744,6 +966,12 @@ class TriFingerRobot(object):
         return False
 
     def is_in_contact_with_block(self, block):
+        """
+
+        :param block:
+
+        :return:
+        """
         if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
         else:
@@ -758,6 +986,13 @@ class TriFingerRobot(object):
 
     def get_normal_interaction_force_with_block(self, block,
                                                 finger_tip_number):
+        """
+
+        :param block:
+        :param finger_tip_number:
+
+        :return:
+        """
         # TODO: doesnt account for several contacts per body
         if self._pybullet_client_full_id is not None:
             client = self._pybullet_client_full_id
@@ -789,6 +1024,10 @@ class TriFingerRobot(object):
         return None
 
     def get_tip_contact_states(self):
+        """
+
+        :return:
+        """
         #TODO: only support open and closed states (should support slipping too)
         if self._pybullet_client_w_o_goal_id is not None:
             client = self._pybullet_client_w_o_goal_id is not None
@@ -839,6 +1078,13 @@ class TriFingerRobot(object):
 
     def _set_finger_state(self, joint_positions,
                          joint_velocities=None):
+        """
+
+        :param joint_positions:
+        :param joint_velocities:
+
+        :return:
+        """
         if self._pybullet_client_full_id is not None:
             if joint_velocities is None:
                 for i, joint_id in enumerate(self._revolute_joint_ids):
@@ -872,6 +1118,10 @@ class TriFingerRobot(object):
         return
 
     def _set_finger_state_in_goal_image(self):
+        """
+
+        :return:
+        """
         joint_positions = \
             self._robot_actions.joint_positions_lower_bounds
         for i, joint_id in enumerate(self._revolute_joint_ids):

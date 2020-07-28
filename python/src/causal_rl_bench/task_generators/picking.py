@@ -3,36 +3,45 @@ import numpy as np
 
 
 class PickingTaskGenerator(BaseTask):
-    def __init__(self, **kwargs):
+    def __init__(self, use_train_space_only=False,
+                 fractional_reward_weight=1,
+                 dense_reward_weights=np.array([250, 0, 125,
+                                              0, 750, 0, 0,
+                                              0.005]),
+                 activate_sparse_reward=False,
+                 tool_block_mass=0.02,
+                 joint_positions=None,
+                 tool_block_position= np.array([0, 0, 0.0325]),
+                 tool_block_orientation=np.array([0, 0, 0, 1]),
+                 goal_height=0.15):
         """
+        This task generates a task for picking an object in the air.
 
-        :param kwargs:
+        :param use_train_space_only:
+        :param fractional_reward_weight:
+        :param dense_reward_weights:
+        :param activate_sparse_reward:
+        :param tool_block_mass:
+        :param joint_positions:
+        :param tool_block_position:
+        :param tool_block_orientation:
+        :param goal_height:
         """
         super().__init__(task_name="picking",
-                         use_train_space_only=kwargs.get("use_train_space_only",
-                                                         False),
-                         fractional_reward_weight=
-                         kwargs.get("fractional_reward_weight", 1),
-                         dense_reward_weights=
-                         kwargs.get("dense_reward_weights",
-                                    np.array([250, 0, 125,
-                                              0, 750, 0, 0,
-                                              0.005])))
+                         use_train_space_only=use_train_space_only,
+                         fractional_reward_weight=fractional_reward_weight,
+                         dense_reward_weights=dense_reward_weights,
+                         activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
                                             "joint_positions",
                                             "joint_velocities",
                                             "end_effector_positions"]
         # TODO: check for nans when bounds are the same in normalization
-        self._task_params["goal_height"] = \
-            kwargs.get("goal_height", 0.15)
-        self._task_params["tool_block_mass"] = \
-            kwargs.get("tool_block_mass", 0.02)
-        self._task_params["joint_positions"] = \
-            kwargs.get("joint_positions", None)
-        self._task_params["tool_block_position"] = \
-            kwargs.get("tool_block_position", np.array([0, 0, 0.0325]))
-        self._task_params["tool_block_orientation"] = \
-            kwargs.get("tool_block_orientation", np.array([0, 0, 0, 1]))
+        self._task_params["goal_height"] = goal_height
+        self._task_params["tool_block_mass"] = tool_block_mass
+        self._task_params["joint_positions"] = joint_positions
+        self._task_params["tool_block_position"] = tool_block_position
+        self._task_params["tool_block_orientation"] = tool_block_orientation
         self.previous_object_position = None
         self.previous_end_effector_positions = None
         self.previous_joint_velocities = None
@@ -129,6 +138,7 @@ class PickingTaskGenerator(BaseTask):
 
         :param desired_goal:
         :param achieved_goal:
+
         :return:
         """
         #rewards order
@@ -195,6 +205,7 @@ class PickingTaskGenerator(BaseTask):
         """
 
         :param update_task_info:
+
         :return:
         """
         self.previous_end_effector_positions = \
@@ -224,6 +235,7 @@ class PickingTaskGenerator(BaseTask):
         """
 
         :param interventions_dict:
+
         :return:
         """
         # for example size on goal_or tool should be propagated to the other
@@ -246,6 +258,7 @@ class PickingTaskGenerator(BaseTask):
 
         :param training:
         :param level:
+
         :return:
         """
         # TODO: make sure its feasible goal by

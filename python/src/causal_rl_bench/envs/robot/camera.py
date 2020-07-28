@@ -4,6 +4,13 @@ import numpy as np
 
 class Camera(object):
     def __init__(self, camera_position, camera_orientation, pybullet_client_id):
+        """
+        This class represents the camera object for the robot platform.
+
+        :param camera_position:
+        :param camera_orientation:
+        :param pybullet_client_id:
+        """
         self._translation = camera_position
         self._camera_orientation = camera_orientation
         self._pybullet_client_id = pybullet_client_id
@@ -29,6 +36,10 @@ class Camera(object):
                             physicsClientId=self._pybullet_client_id)
 
     def get_image(self):
+        """
+
+        :return:
+        """
         (_, _, px, _, _) = pybullet.getCameraImage(
                             width=self._width, height=self._height,
                             viewMatrix=self._view_matrix,

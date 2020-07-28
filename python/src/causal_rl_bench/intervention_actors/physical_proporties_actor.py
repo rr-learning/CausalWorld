@@ -6,8 +6,11 @@ import numpy as np
 class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
     def __init__(self, group, **kwargs):
         """
+        This intervention actor intervenes on physcial proporties such as
+        friction, mass...etc
 
-        :param group:
+        :param group: (str) the object that the actor will intervene on.
+                            floor, stage, robot..etc
         :param kwargs:
         """
         #group can be robot stage floor or tool
@@ -19,6 +22,7 @@ class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
         """
 
         :param env:
+
         :return:
         """
         if env.is_in_training_mode():
@@ -33,6 +37,7 @@ class PhysicalPropertiesInterventionActorPolicy(BaseInterventionActorPolicy):
         """
 
         :param variables_dict:
+
         :return:
         """
         interventions_dict = dict()

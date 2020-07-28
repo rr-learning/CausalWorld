@@ -18,12 +18,17 @@ class Stage(object):
                  cameras,
                  camera_indicies):
         """
+        This class represents the stage object, where it handles all the arena
+        functionalities including the objects and silhouettes existing in
+        the arena.
 
         :param observation_mode:
         :param normalize_observations:
-        :param pybullet_client_full:
-        :param pybullet_client_w_goal:
-        :param pybullet_client_w_o_goal:
+        :param pybullet_client_full_id:
+        :param pybullet_client_w_goal_id:
+        :param pybullet_client_w_o_goal_id:
+        :param cameras:
+        :param camera_indicies:
         """
         self._rigid_objects = OrderedDict()
         self._visual_objects = OrderedDict()
@@ -56,18 +61,38 @@ class Stage(object):
         return
 
     def get_floor_height(self):
+        """
+
+        :return:
+        """
         return WorldConstants.FLOOR_HEIGHT
 
     def get_arena_bb(self):
+        """
+
+        :return:
+        """
         return  WorldConstants.ARENA_BB
 
     def get_rigid_objects(self):
+        """
+
+        :return:
+        """
         return self._rigid_objects
 
     def get_visual_objects(self):
+        """
+
+        :return:
+        """
         return self._visual_objects
 
     def get_full_env_state(self):
+        """
+
+        :return:
+        """
         env_state = {}
         env_state['rigid_objects'] = []
         for rigid_object_key in self._rigid_objects:
@@ -107,6 +132,12 @@ class Stage(object):
         return env_state
 
     def set_full_env_state(self, env_state):
+        """
+
+        :param env_state:
+
+        :return:
+        """
         self.remove_everything()
         for rigid_object_info in env_state['rigid_objects']:
             if rigid_object_info[0] == 'mesh':
@@ -132,6 +163,7 @@ class Stage(object):
         :param name:
         :param shape:
         :param object_params:
+
         :return:
         """
         if name in self._name_keys:
@@ -156,6 +188,7 @@ class Stage(object):
         """
 
         :param name:
+
         :return:
         """
         if name not in self._name_keys:
@@ -188,6 +221,7 @@ class Stage(object):
         :param name:
         :param filename:
         :param object_params:
+
         :return:
         """
         if name in self._name_keys:
@@ -205,6 +239,7 @@ class Stage(object):
         :param name:
         :param shape:
         :param object_params:
+
         :return:
         """
         if name in self._name_keys:
@@ -227,6 +262,7 @@ class Stage(object):
         :param name:
         :param filename:
         :param object_params:
+
         :return:
         """
         if name in self._name_keys:
@@ -262,6 +298,7 @@ class Stage(object):
         """
 
         :param observation_keys:
+
         :return:
         """
         self._stage_observations.reset_observation_keys()
@@ -274,6 +311,7 @@ class Stage(object):
         """
 
         :param state_type:
+
         :return:
         """
         if state_type == 'list':
@@ -299,6 +337,7 @@ class Stage(object):
         """
 
         :param new_state:
+
         :return:
         """
         #TODO: under the assumption that the new state has the same number of objects
@@ -323,6 +362,7 @@ class Stage(object):
         :param names:
         :param positions:
         :param orientations:
+
         :return:
         """
         for i in range(len(names)):
@@ -343,6 +383,7 @@ class Stage(object):
         """
 
         :param helper_keys:
+
         :return:
         """
         return self._stage_observations.get_current_observations(helper_keys)
@@ -365,6 +406,7 @@ class Stage(object):
         :param angle_limits:
         :param radius_limits:
         :param allowed_section:
+
         :return:
         """
         satisfying_constraints = False
@@ -404,6 +446,7 @@ class Stage(object):
 
         :param key:
         :param interventions_dict:
+
         :return:
         """
         if key in self._rigid_objects:
@@ -460,6 +503,7 @@ class Stage(object):
         """
 
         :param interventions_dict:
+
         :return:
         """
         for intervention in interventions_dict:
@@ -521,6 +565,12 @@ class Stage(object):
         return
 
     def get_object_full_state(self, key):
+        """
+
+        :param key:
+
+        :return:
+        """
         if key in self._rigid_objects:
             return self._rigid_objects[key].get_state('dict')
         elif key in self._visual_objects:
@@ -530,6 +580,13 @@ class Stage(object):
                             .format(key))
 
     def get_object_state(self, key, state_variable):
+        """
+
+        :param key:
+        :param state_variable:
+
+        :return:
+        """
         if key in self._rigid_objects:
             return np.array(self._rigid_objects[key].get_variable_state(
                 state_variable))
@@ -541,6 +598,12 @@ class Stage(object):
                             .format(key))
 
     def get_object(self, key):
+        """
+
+        :param key:
+
+        :return:
+        """
         if key in self._rigid_objects:
             return self._rigid_objects[key]
         elif key in self._visual_objects:
@@ -550,6 +613,13 @@ class Stage(object):
                             .format(key))
 
     def are_blocks_colliding(self, block1, block2):
+        """
+
+        :param block1:
+        :param block2:
+
+        :return:
+        """
         for contact in pybullet.getContactPoints(
                 physicsClientId=self._rigid_objects_client_instances[0]):
             if (contact[1] == block1._block_ids[0] and
@@ -560,6 +630,10 @@ class Stage(object):
         return False
 
     def check_stage_free_of_colliding_blocks(self):
+        """
+
+        :return:
+        """
         for contact in pybullet.getContactPoints(
                 physicsClientId=self._rigid_objects_client_instances[0]):
             if contact[1] > 3 and contact[2] > 3:
@@ -567,6 +641,12 @@ class Stage(object):
         return True
 
     def is_colliding_with_stage(self, block1):
+        """
+
+        :param block1:
+
+        :return:
+        """
         for contact in pybullet.getContactPoints(
                 physicsClientId=self._rigid_objects_client_instances[0]):
             if (contact[1] == block1._block_ids[0] and contact[2] ==
@@ -577,6 +657,12 @@ class Stage(object):
         return False
 
     def is_colliding_with_floor(self, block1):
+        """
+
+        :param block1:
+
+        :return:
+        """
         for contact in pybullet.getContactPoints(
                 physicsClientId=self._rigid_objects_client_instances[0]):
             if (contact[1] == block1._block_ids[0] and contact[2] ==
@@ -587,6 +673,13 @@ class Stage(object):
         return False
 
     def get_normal_interaction_force_between_blocks(self, block1, block2):
+        """
+
+        :param block1:
+        :param block2:
+
+        :return:
+        """
         for contact in pybullet.getContactPoints(
                 physicsClientId=self._rigid_objects_client_instances[0]):
             if (contact[1] == block1._block_ids[0] and contact[2] ==
@@ -598,21 +691,51 @@ class Stage(object):
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None):
+        """
+
+        :param observation_key:
+        :param lower_bound:
+        :param upper_bound:
+
+        :return:
+        """
         self._stage_observations.add_observation(observation_key, lower_bound,
                                                  upper_bound)
 
     def normalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         return self._stage_observations.normalize_observation_for_key(observation,
                                                                       key)
 
     def denormalize_observation_for_key(self, observation, key):
+        """
+
+        :param observation:
+        :param key:
+
+        :return:
+        """
         return self._stage_observations.denormalize_observation_for_key(observation,
                                                                         key)
 
     def get_current_goal_image(self):
+        """
+
+        :return:
+        """
         return self._goal_image
 
     def update_goal_image(self):
+        """
+
+        :return:
+        """
         self._goal_image = self._stage_observations.get_current_goal_image()
         return
 
@@ -621,13 +744,8 @@ class Stage(object):
         This function checks the feasibility of the current state of the stage
         (i.e checks if any of the bodies in the simulation are in a penetration
         mode)
-        Parameters
-        ---------
 
-        Returns
-        -------
-            feasibility_flag: bool
-                A boolean indicating whether the stage is in a collision state
+        :return: (bool) A boolean indicating whether the stage is in a collision state
                 or not.
         """
         for contact in pybullet.getContactPoints(
@@ -644,5 +762,9 @@ class Stage(object):
         return True
 
     def _get_stage_bb(self):
+        """
+
+        :return:
+        """
         return (tuple(WorldConstants.ARENA_BB[0]),
                 tuple(WorldConstants.ARENA_BB[1]))
