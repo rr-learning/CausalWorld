@@ -10,3 +10,6 @@ CausalWorld
     metrics/metrics
     evaluation/evaluation
     wrappers/wrappers
+    loggers/loggers
+    sim2real/sim2real
+    viewers/viewers

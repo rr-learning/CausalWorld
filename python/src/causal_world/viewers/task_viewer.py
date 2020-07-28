@@ -10,6 +10,16 @@ def get_world(task_generator_id,
               enable_visualization=False,
               env_wrappers=np.array([]),
               env_wrappers_args=np.array([])):
+    """
+
+    :param task_generator_id:
+    :param task_params:
+    :param world_params:
+    :param enable_visualization:
+    :param env_wrappers:
+    :param env_wrappers_args:
+    :return:
+    """
     world_params["skip_frame"] = 1
     if task_params is None:
         task = task_generator(task_generator_id)
@@ -34,6 +44,13 @@ def get_world(task_generator_id,
 def view_episode(episode,
                  env_wrappers=np.array([]),
                  env_wrappers_args=np.array([])):
+    """
+
+    :param episode:
+    :param env_wrappers:
+    :param env_wrappers_args:
+    :return:
+    """
     actual_skip_frame = episode.world_params["skip_frame"]
     env = get_world(episode.get_task_name(),
                     episode.task_params,
@@ -60,6 +77,17 @@ def view_policy(task,
                 number_of_resets,
                 env_wrappers=np.array([]),
                 env_wrappers_args=np.array([])):
+    """
+
+    :param task:
+    :param world_params:
+    :param policy_fn:
+    :param max_time_steps:
+    :param number_of_resets:
+    :param env_wrappers:
+    :param env_wrappers_args:
+    :return:
+    """
     actual_skip_frame = world_params["skip_frame"]
     env = get_world(task.get_task_name(),
                     task.get_task_params(),
@@ -85,6 +113,18 @@ def record_video_of_policy(task,
                            max_time_steps=100,
                            env_wrappers=np.array([]),
                            env_wrappers_args=np.array([])):
+    """
+
+    :param task:
+    :param world_params:
+    :param policy_fn:
+    :param file_name:
+    :param number_of_resets:
+    :param max_time_steps:
+    :param env_wrappers:
+    :param env_wrappers_args:
+    :return:
+    """
     #TODO: discuss the speed of the current render method since it takes a long time to render a frame
     actual_skip_frame = world_params["skip_frame"]
     env = get_world(task.get_task_name(),
@@ -113,6 +153,17 @@ def record_video_of_random_policy(task,
                                   max_time_steps=100,
                                   env_wrappers=np.array([]),
                                   env_wrappers_args=np.array([])):
+    """
+
+    :param task:
+    :param world_params:
+    :param file_name:
+    :param number_of_resets:
+    :param max_time_steps:
+    :param env_wrappers:
+    :param env_wrappers_args:
+    :return:
+    """
     #TODO: discuss the speed of the current render method since it takes a
     # long time to render a frame
     actual_skip_frame = world_params["skip_frame"]
@@ -139,6 +190,14 @@ def record_video_of_episode(episode,
                             file_name,
                             env_wrappers=np.array([]),
                             env_wrappers_args=np.array([])):
+    """
+
+    :param episode:
+    :param file_name:
+    :param env_wrappers:
+    :param env_wrappers_args:
+    :return:
+    """
     actual_skip_frame = episode.world_params["skip_frame"]
     env = get_world(episode.get_task_name(),
                     episode._task_params,

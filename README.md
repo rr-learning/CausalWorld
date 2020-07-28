@@ -39,7 +39,14 @@ or used in a catkin workspace.
   (causal_world) python -m unittest discover tests/causal_world/
   ```
   
-5. Install other packages for rlkit (optional)
+5. Install other packages for stable baselines (optional)
+```bash
+(causal_world) pip install mpi4py
+(causal_world) pip install tensorflow==1.14.0
+(causal_world) pip install stable-baselines==2.10.0
+```
+  
+6. Install other packages for rlkit (optional)
 
   ```bash
   (causal_world) cd ..
@@ -50,7 +57,7 @@ or used in a catkin workspace.
   (causal_world) pip install gtimer
   ```
 
-6. Install other packages for viskit (optional)
+7. Install other packages for viskit (optional)
   ```bash
   (causal_world) cd ..
   (causal_world) git clone https://github.com/vitchyr/viskit.git
@@ -59,7 +66,7 @@ or used in a catkin workspace.
   (causal_world) python viskit/frontend.py path/to/dir/exp*
   ```
   
-7. Install other packages for rlpyt (optional)
+8. Install other packages for rlpyt (optional)
  ```bash
   (causal_world) cd ..
   (causal_world) git clone https://github.com/astooke/rlpyt.git
@@ -68,12 +75,7 @@ or used in a catkin workspace.
   (causal_world) pip install pyprind
   ```
 
-8. Install other packages for stable baselines (optional)
- ```bash
-  (causal_world) pip install mpi4py
-  (causal_world) pip install tensorflow==1.14.0
-  (causal_world) pip install stable-baselines==2.10.0
-  ```
+
 
 ## Try out the package
 

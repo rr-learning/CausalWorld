@@ -5,6 +5,10 @@ from causal_world.curriculum import Curriculum
 class RealisticRobotWrapper(gym.Wrapper):
 
     def __init__(self, env):
+        """
+
+        :param env:
+        """
         # TODO: this wrapper can't be loaded at the moment or saved
         super(RealisticRobotWrapper, self).__init__(env)
         self.env.set_starting_state({
