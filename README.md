@@ -1,6 +1,4 @@
-# CausalWorld {#mainpage}
-
-[TOC]
+# CausalWorld
 
 This package provides the causal rl benchmark. It can be either 
 [pip-installed](#install-as-a-pip-package-in-a-conda-env),
