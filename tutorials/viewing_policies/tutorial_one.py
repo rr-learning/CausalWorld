@@ -1,3 +1,6 @@
+"""
+This tutorial shows you how to view a policy acting in the world
+"""
 from causal_world.task_generators.task import task_generator
 from causal_world.actors.reacher_policy import ReacherActorPolicy
 import tensorflow as tf

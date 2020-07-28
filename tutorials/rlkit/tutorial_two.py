@@ -1,3 +1,6 @@
+"""
+This tutorial shows you how to load a picking policy trained with rlkit.
+"""
 import torch
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator

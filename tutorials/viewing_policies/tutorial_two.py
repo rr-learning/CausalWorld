@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to record a video of a saved episode after loading it.
+"""
+
 import causal_world.viewers.task_viewer as viewer
 from causal_world.loggers.data_loader import DataLoader
 

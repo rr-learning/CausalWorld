@@ -1,3 +1,8 @@
+"""
+This tutorial shows you how to perform a random intervention on one of the
+variables in the environment.
+"""
+
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 

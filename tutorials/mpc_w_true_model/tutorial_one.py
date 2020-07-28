@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to use Model Predictive Control
+with the true model.
+"""
 from stable_baselines.common import set_global_seeds
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.baselines.model_based.true_model import TrueModel
@@ -23,8 +27,10 @@ def _make_env():
             task_generator_id='picking',
             joint_positions=[0., -0.5, -0.6, 0., -0.4, -0.7, 0., -0.4, -0.7],
             tool_block_position=[0.0, -0.02, 0.035],
-            fractional_reward_weight=0,
-            dense_reward_weights=np.array([0, 1000, 0, 0, 0, 0, 0, 0]))
+            fractional_reward_weight=1,
+            dense_reward_weights=np.array([0, 10, 0,
+                                           1, 1, 0, 0,
+                                           0]))
         env = CausalWorld(task=task,
                           skip_frame=skip_frame,
                           enable_visualization=False,
@@ -40,8 +46,10 @@ def run_mpc():
         task_generator_id='picking',
         joint_positions=[0., -0.5, -0.6, 0., -0.4, -0.7, 0., -0.4, -0.7],
         tool_block_position=[0.0, -0.02, 0.035],
-        fractional_reward_weight=0,
-        dense_reward_weights=np.array([0, 1000, 0, 0, 0, 0, 0, 0]))
+        fractional_reward_weight=1,
+        dense_reward_weights=np.array([0, 10, 0,
+                                       1, 1, 0, 0,
+                                       0]))
     env = CausalWorld(task=task,
                       skip_frame=1,
                       enable_visualization=False,

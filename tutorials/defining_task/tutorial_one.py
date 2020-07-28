@@ -1,3 +1,8 @@
+"""
+This tutorial shows you how to create a customized task and use all the
+underlying functionalities of CausalWorld as is including reward calculation..etc
+"""
+
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.base_task import BaseTask
 import numpy as np

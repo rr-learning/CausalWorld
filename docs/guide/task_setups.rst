@@ -38,6 +38,12 @@ Task distributions
    :scale: 32 %
    :alt: Creative Stacked Blocks - multiple cuboids
    :align: left
+
+.. image:: ../media/question_mark.png
+   :scale: 12 %
+   :alt: Build Your Own Task.
+   :align: left
+
 .. |br| raw:: html
 
    <br />
@@ -126,7 +132,7 @@ quaternion_orientation (4), linear_velocity (3), angular_velocity (3). For each 
 11-dimesnions are used representing: type (1), size (3), cartesian_position (3) and orientation (4).
 
 .. image:: ../media/structured_observation_space.png
-   :scale: 30 %
+   :scale: 100 %
    :alt: layout of structured observation space
    :align: left
 

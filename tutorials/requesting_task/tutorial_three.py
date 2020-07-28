@@ -1,3 +1,8 @@
+"""
+This tutorial shows you how to solve reaching task using inverse kinemetics
+provided in the package internally.
+"""
+
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 

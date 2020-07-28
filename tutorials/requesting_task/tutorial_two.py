@@ -1,3 +1,9 @@
+"""
+This tutorial shows you how to generate a task using one of the task generators
+and then using it with the CausalWorld environment but having camera observations
+instead of the default structured observations.
+"""
+
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 import matplotlib.pyplot as plt

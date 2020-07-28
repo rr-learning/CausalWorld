@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to save the world and load it again with all
+its wrappers as well.
+"""
 from causal_world.utils.config_utils import load_world
 from causal_world.task_generators.task import task_generator
 from causal_world.envs.causalworld import CausalWorld

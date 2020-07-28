@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to to view policies of trained actors.
+"""
+
 from causal_world.task_generators.task import task_generator
 from stable_baselines import SAC
 import tensorflow as tf

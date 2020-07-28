@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to control the allowed space for interventions
+"""
+
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 import numpy as np
@@ -7,7 +11,7 @@ def without_intervention_split():
     task = task_generator(task_generator_id='pushing')
     env = CausalWorld(task=task, enable_visualization=True)
     env.reset()
-    for _ in range(10):
+    for _ in range(2):
         for i in range(200):
             obs, reward, done, info = env.step(env.action_space.sample())
         success_signal, obs = env.do_intervention(
@@ -20,14 +24,13 @@ def without_intervention_split():
 
 def with_intervention_split_1():
     task = task_generator(task_generator_id='pushing',
-                          intervention_split=True,
-                          training=True)
+                          use_train_space_only=True)
     env = CausalWorld(task=task, enable_visualization=False)
     env.reset()
-    for _ in range(10):
+    for _ in range(2):
         for i in range(200):
             obs, reward, done, info = env.step(env.action_space.sample())
-        success_signal = env.do_intervention(
+        success_signal, obs = env.do_intervention(
             {'stage_color': np.random.uniform(0, 1, [
                 3,
             ])})
@@ -37,15 +40,14 @@ def with_intervention_split_1():
 
 def with_intervention_split_2():
     task = task_generator(task_generator_id='pushing',
-                          intervention_split=True,
-                          training=True)
+                          use_train_space_only=True)
     env = CausalWorld(task=task, enable_visualization=False)
     interventions_space = task.get_training_intervention_spaces()
     env.reset()
-    for _ in range(10):
+    for _ in range(2):
         for i in range(200):
             obs, reward, done, info = env.step(env.action_space.sample())
-        success_signal = env.do_intervention({
+        success_signal, obs = env.do_intervention({
             'stage_color':
                 np.random.uniform(interventions_space['stage_color'][0],
                                   interventions_space['stage_color'][1])
@@ -56,5 +58,5 @@ def with_intervention_split_2():
 
 if __name__ == '__main__':
     without_intervention_split()
-    # with_intervention_split_1()
-    # with_intervention_split_2()
+    with_intervention_split_1()
+    with_intervention_split_2()

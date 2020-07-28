@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to generate a task using one of the task generators
+and then using it with the CausalWorld environment.
+"""
 from causal_world import CausalWorld
 from causal_world import task_generator
 

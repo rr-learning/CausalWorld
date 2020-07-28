@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to sample new goals by intervening
+on the environment.
+"""
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 
