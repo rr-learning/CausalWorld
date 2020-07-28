@@ -2,10 +2,10 @@ image: "python:3.7.4"
 
 before_script:
   - conda env create -f environment.yml
-  - conda activate causal_rl_bench
+  - conda activate causal_world
   - python -m pip install .
 
 tests:
   script:
-    - python -m tests.causal_rl_bench.envs.test_world
+    - python -m tests.causal_world.envs.test_world
 

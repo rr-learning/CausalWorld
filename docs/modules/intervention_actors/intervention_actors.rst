@@ -1,7 +1,7 @@
 Intervention Actors
 ===================
 
-.. automodule:: causal_rl_bench.intervention_actors
+.. automodule:: causal_world.intervention_actors
 
 BaseInterventionActorPolicy
 ---------------------------
@@ -27,13 +27,6 @@ GoalInterventionActorPolicy
 JointsInterventionActorPolicy
 -----------------------------
 .. autoclass:: JointsInterventionActorPolicy
-    :members:
-
-    .. automethod:: __init__
-
-ReacherInterventionActorPolicy
--------------------------------
-.. autoclass:: ReacherInterventionActorPolicy
     :members:
 
     .. automethod:: __init__

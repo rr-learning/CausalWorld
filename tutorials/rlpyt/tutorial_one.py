@@ -1,21 +1,22 @@
 from rlpyt.samplers.serial.sampler import SerialSampler
 from rlpyt.samplers.parallel.cpu.sampler import CpuSampler
-from rlpyt.envs.gym import make as gym_make
 from rlpyt.algos.qpg.sac import SAC
 from rlpyt.agents.qpg.sac_agent import SacAgent
 from rlpyt.runners.minibatch_rl import MinibatchRl
 from rlpyt.utils.logging.context import logger_context
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
 from rlpyt.envs.gym import GymEnvWrapper
 import os
 
 
 def _make_env(rank):
     task = task_generator(task_generator_id='reaching')
-    env = CausalWorld(task=task, skip_frame=10,
+    env = CausalWorld(task=task,
+                      skip_frame=10,
                       enable_visualization=False,
-                      seed=0 + rank, max_episode_length=600)
+                      seed=0 + rank,
+                      max_episode_length=600)
     env = GymEnvWrapper(env)
     return env
 

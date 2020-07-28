@@ -1,7 +1,12 @@
 Task Generators
 ===============
 
-.. automodule:: causal_rl_bench.task_generators
+Task
+----
+.. automodule:: causal_world.task_generators.task
+    :members: task_generator
+
+.. automodule:: causal_world.task_generators
 
 BaseTask
 --------

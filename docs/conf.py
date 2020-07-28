@@ -20,16 +20,14 @@ import sphinx_rtd_theme
 
 sys.path.insert(0, os.path.abspath('../src'))
 
-
 # -- Project information -----------------------------------------------------
 
-project = 'causal_rl_bench'
+project = 'causal_world'
 copyright = '2020, Ossama Ahmed and Frederik Trauble'
 author = 'Ossama Ahmed and Frederik Trauble'
 
 # The full version, including alpha/beta/rc tags
 release = '1.0.0'
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -42,10 +40,9 @@ extensions = [
     'sphinx.ext.coverage',
     'sphinx.ext.mathjax',
     'sphinx.ext.viewcode',
-#     'sphinx.ext.githubpages',
+    #     'sphinx.ext.githubpages',
     'sphinx.ext.napoleon'
 ]
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -65,7 +62,6 @@ master_doc = 'index'
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
-
 
 # -- Options for HTML output -------------------------------------------------
 

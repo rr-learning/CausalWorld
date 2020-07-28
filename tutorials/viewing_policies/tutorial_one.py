@@ -1,8 +1,8 @@
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.actors.reacher_policy import ReacherActorPolicy
+from causal_world.task_generators.task import task_generator
+from causal_world.actors.reacher_policy import ReacherActorPolicy
 import tensorflow as tf
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
-import causal_rl_bench.viewers.task_viewer as viewer
+import causal_world.viewers.task_viewer as viewer
 
 
 def example():
@@ -21,7 +21,7 @@ def example():
     viewer.view_policy(task=task,
                        world_params=world_params,
                        policy_fn=policy_fn,
-                       max_time_steps=40*960,
+                       max_time_steps=40 * 960,
                        number_of_resets=40)
 
 

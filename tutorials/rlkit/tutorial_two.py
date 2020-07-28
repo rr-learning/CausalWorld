@@ -1,9 +1,9 @@
 import torch
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.intervention_actors import GoalInterventionActorPolicy
-from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
+from causal_world.intervention_actors import GoalInterventionActorPolicy
+from causal_world.wrappers.env_wrappers import HERGoalEnvWrapper
 import numpy as np
 
 
@@ -19,8 +19,11 @@ def simulate_policy():
         return a
 
     task = task_generator(task_generator_id='reaching')
-    env = CausalWorld(task=task, enable_visualization=True, skip_frame=1,
-                      seed=0, max_episode_length=2500)
+    env = CausalWorld(task=task,
+                      enable_visualization=True,
+                      skip_frame=1,
+                      seed=0,
+                      max_episode_length=2500)
     env = CurriculumWrapper(env,
                             intervention_actors=[GoalInterventionActorPolicy()],
                             actives=[(0, 1000000000, 1, 0)])
@@ -34,6 +37,7 @@ def simulate_policy():
             total_reward += reward
         print("total reward is :", total_reward)
     env.close()
+
 
 if __name__ == "__main__":
     simulate_policy()

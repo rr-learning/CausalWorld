@@ -4,8 +4,8 @@ from rlpyt.algos.qpg.sac import SAC
 from rlpyt.agents.qpg.sac_agent import SacAgent
 from rlpyt.runners.async_rl import AsyncRl
 from rlpyt.utils.logging.context import logger_context
-from causal_rl_bench.task_generators.task import task_generator
-from causal_rl_bench.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
 from rlpyt.envs.gym import GymEnvWrapper
 from rlpyt.utils.collections import AttrDict
 import os
@@ -15,23 +15,26 @@ from rlpyt import utils as utils_rlpyt
 
 def _make_env(rank):
     task = task_generator(task_generator_id='picking',
-                          dense_reward_weights=np.array([250, 0, 125,
-                                                         0, 750, 0, 0,
-                                                         0.005]),
+                          dense_reward_weights=np.array(
+                              [250, 0, 125, 0, 750, 0, 0, 0.005]),
                           fractional_reward_weight=1,
                           goal_height=0.15,
                           tool_block_mass=0.02)
-    env = CausalWorld(task=task, skip_frame=3,
+    env = CausalWorld(task=task,
+                      skip_frame=3,
                       enable_visualization=False,
-                      seed=0, max_episode_length=600)
+                      seed=0,
+                      max_episode_length=600)
     env = GymEnvWrapper(env)
     return env
 
 
 def build_and_train():
     opt_affinities = list()
-    opt_affinity = dict(cpus=[0], cuda_idx=None,
-                        torch_threads=1, set_affinity=True)
+    opt_affinity = dict(cpus=[0],
+                        cuda_idx=None,
+                        torch_threads=1,
+                        set_affinity=True)
     opt_affinities.append(opt_affinity)
     smp_affinity = AttrDict(
         all_cpus=[0, 1],
@@ -49,14 +52,12 @@ def build_and_train():
         sampler=smp_affinity,
         set_affinity=True,
     )
-    sampler = AsyncCpuSampler(
-        EnvCls=_make_env,
-        env_kwargs=dict(rank=0),
-        batch_T=600,
-        batch_B=3,
-        max_decorrelation_steps=0,
-        CollectorCls=DbCpuResetCollector
-    )
+    sampler = AsyncCpuSampler(EnvCls=_make_env,
+                              env_kwargs=dict(rank=0),
+                              batch_T=600,
+                              batch_B=3,
+                              max_decorrelation_steps=0,
+                              CollectorCls=DbCpuResetCollector)
     algo = SAC(batch_size=256,
                min_steps_learn=10000,
                replay_size=1000000,
@@ -84,7 +85,12 @@ def build_and_train():
     config = dict(env_id='picking')
     name = "sac_rlpyt_picking"
     log_dir = os.path.join(os.path.dirname(__file__), "sac_rlpyt_picking")
-    with logger_context(log_dir, 0, name, config, use_summary_writer=False, snapshot_mode='all'):
+    with logger_context(log_dir,
+                        0,
+                        name,
+                        config,
+                        use_summary_writer=False,
+                        snapshot_mode='all'):
         runner.train()
 
 

@@ -1,10 +1,10 @@
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.task import task_generator
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.task import task_generator
 
-from causal_rl_bench.loggers.data_recorder import DataRecorder
-from causal_rl_bench.loggers.data_loader import DataLoader
+from causal_world.loggers.data_recorder import DataRecorder
+from causal_world.loggers.data_loader import DataLoader
 
-import causal_rl_bench.viewers.task_viewer as viewer
+import causal_world.viewers.task_viewer as viewer
 
 
 def example():
@@ -14,7 +14,8 @@ def example():
 
     # Construct a data_recorder that keeps track of every change in the environment
     # We set the recording dumb frequency of episodes into log_files to 11 (default is 100)
-    data_recorder = DataRecorder(output_directory='pushing_episodes', rec_dumb_frequency=11)
+    data_recorder = DataRecorder(output_directory='pushing_episodes',
+                                 rec_dumb_frequency=11)
 
     # Pass the data recorder to the World
     task = task_generator(task_generator_id='pushing')
@@ -35,9 +36,7 @@ def example():
 
     # Initialize a new environment according a specific episode and replay it
     task = task_generator(episode.task_name, **episode.task_params)
-    env = CausalWorld(task,
-                      **episode.world_params,
-                      enable_visualization=True)
+    env = CausalWorld(task, **episode.world_params, enable_visualization=True)
     env.set_starting_state(episode.initial_full_state)
     env.reset()
     for action in episode.robot_actions:

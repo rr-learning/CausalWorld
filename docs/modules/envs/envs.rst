@@ -1,10 +1,10 @@
 Envs
 ====
 
-.. automodule:: causal_rl_bench.envs
+.. automodule:: causal_world.envs
 
 CausalWorld
------
+-----------
 .. autoclass:: CausalWorld
     :members:
 

@@ -1,40 +1,42 @@
-from causal_rl_bench.envs.causalworld import CausalWorld
-from causal_rl_bench.task_generators.base_task import BaseTask
+from causal_world.envs.causalworld import CausalWorld
+from causal_world.task_generators.base_task import BaseTask
 import numpy as np
 
 
 class MyOwnTask(BaseTask):
+
     def __init__(self, **kwargs):
         super().__init__(task_name="new_task",
                          use_train_space_only=False,
                          fractional_reward_weight=1,
                          dense_reward_weights=np.array([]))
-        self._task_robot_observation_keys = ["time_left_for_task",
-                                             "joint_positions",
-                                             "joint_velocities",
-                                             "end_effector_positions"]
+        self._task_robot_observation_keys = [
+            "time_left_for_task", "joint_positions", "joint_velocities",
+            "end_effector_positions"
+        ]
 
     #This is not even needed, it will just be an empty stage
     def _set_up_stage_arena(self):
         #NOTE: you need to add rigid objects before silhouettes for determinism (pybullet limitation)
-        creation_dict = {'name': "tool_block",
-                         'filename': './assets/719.obj',
-                         'initial_position': [0, 0, 0.1]}
+        creation_dict = {
+            'name': "tool_block",
+            'filename': './assets/719.obj',
+            'initial_position': [0, 0, 0.1]
+        }
         self._stage.add_rigid_mesh_object(**creation_dict)
-        creation_dict = {'name': "goal_block",
-                         'filename': './assets/719.obj',
-                         'position': [0, 0, 0.1]}
+        creation_dict = {
+            'name': "goal_block",
+            'filename': './assets/719.obj',
+            'position': [0, 0, 0.1]
+        }
         self._stage.add_silhoutte_mesh_object(**creation_dict)
-        self._task_stage_observation_keys = ["tool_block_type",
-                                             "tool_block_size",
-                                             "tool_block_cartesian_position",
-                                             "tool_block_orientation",
-                                             "tool_block_linear_velocity",
-                                             "tool_block_angular_velocity",
-                                             "goal_block_type",
-                                             "goal_block_size",
-                                             "goal_block_cylindrical_position",
-                                             "goal_block_orientation"]
+        self._task_stage_observation_keys = [
+            "tool_block_type", "tool_block_size",
+            "tool_block_cartesian_position", "tool_block_orientation",
+            "tool_block_linear_velocity", "tool_block_angular_velocity",
+            "goal_block_type", "goal_block_size",
+            "goal_block_cylindrical_position", "goal_block_orientation"
+        ]
         return
 
 

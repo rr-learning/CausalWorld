@@ -1,7 +1,7 @@
 Actors
 ======
 
-.. automodule:: causal_rl_bench.actors
+.. automodule:: causal_world.actors
 
 ReacherActorPolicy
 ------------------

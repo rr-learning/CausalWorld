@@ -1,4 +1,4 @@
-# CausalRLBenchmark {#mainpage}
+# CausalWorld {#mainpage}
 
 [TOC]
 
@@ -15,70 +15,71 @@ or used in a catkin workspace.
 1. Clone this repo and then create it's conda environment to install all dependencies.
 
   ```bash
-  git clone https://github.com/rr-learning/CausalRLBench
-  cd CausalRLBench
+  git clone https://github.com/rr-learning/CausalWorld
+  cd CausalWorld
   conda env create -f environment.yml OR conda env update --prefix ./env --file environment.yml  --prune
   ```
 
 2. Install the causal_rl_bench package inside the (causal_rl_bench) conda env.
 
   ```bash
-  conda activate causal_rl_bench
-  (causal_rl_bench) pip install -e .
+  conda activate causal_world
+  (causal_world) pip install -e .
   ```
 
 3. Make the docs.
 
   ```bash
-  (causal_rl_bench) cd docs
-  (causal_rl_bench) make html
+  (causal_world) cd docs
+  (causal_world) make html
   ```
 4. Run the tests.
 
   ```bash
-  (causal_rl_bench) python -m unittest discover tests/causal_rl_bench/
+  (causal_world) python -m unittest discover tests/causal_world/
   ```
   
 5. Install other packages for rlkit (optional)
 
   ```bash
-  (causal_rl_bench) cd ..
-  (causal_rl_bench) git clone https://github.com/vitchyr/rlkit.git
-  (causal_rl_bench) cd rlkit 
-  (causal_rl_bench) pip install -e .
-  (causal_rl_bench) pip install torch==1.2.0
-  (causal_rl_bench) pip install gtimer
+  (causal_world) cd ..
+  (causal_world) git clone https://github.com/vitchyr/rlkit.git
+  (causal_world) cd rlkit 
+  (causal_world) pip install -e .
+  (causal_world) pip install torch==1.2.0
+  (causal_world) pip install gtimer
   ```
 
 6. Install other packages for viskit (optional)
   ```bash
-  (causal_rl_bench) cd ..
-  (causal_rl_bench) git clone https://github.com/vitchyr/viskit.git
-  (causal_rl_bench) cd viskit 
-  (causal_rl_bench) pip install -e .
-  (causal_rl_bench) python viskit/frontend.py path/to/dir/exp*
+  (causal_world) cd ..
+  (causal_world) git clone https://github.com/vitchyr/viskit.git
+  (causal_world) cd viskit 
+  (causal_world) pip install -e .
+  (causal_world) python viskit/frontend.py path/to/dir/exp*
   ```
   
 7. Install other packages for rlpyt (optional)
  ```bash
-  (causal_rl_bench) cd ..
-  (causal_rl_bench) git clone https://github.com/astooke/rlpyt.git
-  (causal_rl_bench) cd rlpyt 
-  (causal_rl_bench) pip install -e .
-  (causal_rl_bench) pip install pyprind
+  (causal_world) cd ..
+  (causal_world) git clone https://github.com/astooke/rlpyt.git
+  (causal_world) cd rlpyt 
+  (causal_world) pip install -e .
+  (causal_world) pip install pyprind
   ```
 
 8. Install other packages for stable baselines (optional)
  ```bash
-  (causal_rl_bench) pip install stable-baselines==2.10.0
-  (causal_rl_bench) pip install tensorflow==1.14.0
+  (causal_world) pip install mpi4py
+  (causal_world) pip install tensorflow==1.14.0
+  (causal_world) pip install stable-baselines==2.10.0
   ```
 
 ## Try out the package
 
   ```python
-    from causal_rl_bench.envs.causalworld import CausalWorld
-    from causal_rl_bench.task_generators.task import task_generator
+    from causal_world.envs.causalworld import CausalWorld
+    from causal_world.task_generators.task import task_generator
     task = task_generator(task_generator_id='general')
     env = CausalWorld(task=task, enable_visualization=True)
     for _ in range(10):

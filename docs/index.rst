@@ -1,30 +1,28 @@
-Welcome to Causal RL Bench's documentation!
+Welcome to Causal World's documentation!
 ===========================================
 
 
-Existing benchmarks in reinforcement learning cover a rich and diverse set of
-environments and it has been shown that agents can be trained to
-solve very challenging tasks. Nevertheless, it is a common problem in RL
-that agents are poor at transferring their learned skills to different but
-related environments that share a lot of common structure as agents are usually
-evaluated on the training distribution itself and similarities to other
-environments are ambiguous. We propose a novel benchmark by releasing
-various fully parameterized training environments in a robotics setting
-which are equipped with unique
-sets of testing environments. These environments facilitate a precise evaluation
-protocol to test generalisation and robustness capabilities of the acting agents
-due to a reformulation of switching between environments through an intervention
-on the generative causal model of the environments that allows to quantify the
-amount of common shared structure. The skills to learn range from simple to
-extremely challenging although the compositional nature of the environments
-should allow to reuse previously learned more primitive skills along a
-naturally emerging curriculum of tasks.
+Reinforcement learning (RL) is an attractive solution for learning controllers
+in high dimensional continuous domains. Despite the impressive results so far,
+it is a common problem in RL that these agents fail to transfer their learned
+skills to different but related environments, such as generalizing to different
+goals. Due to the unavailability of benchmarks for explicitly testing
+generalization capabilities, it is hard to draw sound conclusions of what the
+agent actually learned, and to which degree it understands the meaning of cause
+and effect.We propose a novel benchmark, CausalWorld, for causal structure
+learning and parametric generalization for RL in a robotic manipulation environment.
+Within this benchmark,tasks circle around constructing 3D shape goals from a
+given set of available building blocks. The benchmark allows to investigate
+the understanding of actions and their effect on the properties of the different
+objects themselves, referred to as object affordances, when interacting with
+the environment and to systematically test the generalization capabilities
+of learned policies
 
 
 .. code-block:: python
 
-    from causal_rl_bench.envs.causalworld import CausalWorld
-    from causal_rl_bench.task_generators.task import task_generator
+    from causal_world.envs.causalworld import CausalWorld
+    from causal_world.task_generators.task import task_generator
 
     task = task_generator(task_generator_id='stacked_blocks')
     env = CausalWorld(task=task)
@@ -47,7 +45,7 @@ naturally emerging curriculum of tasks.
    :maxdepth: 3
    :caption: Contents
 
-   modules/causal_rl_bench.rst
+   modules/causal_world.rst
 
 Indices and tables
 ==================
