@@ -1,3 +1,8 @@
+"""
+This tutorial shows you how to save the state and load it again.
+Note this is not supported accross environments or with interventions
+that changes the scenery.
+"""
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 import numpy as np

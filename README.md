@@ -41,9 +41,9 @@ or used in a catkin workspace.
   
 5. Install other packages for stable baselines (optional)
 ```bash
-(causal_world) pip install mpi4py
 (causal_world) pip install tensorflow==1.14.0
 (causal_world) pip install stable-baselines==2.10.0
+(causal_world) conda install mpi4py
 ```
   
 6. Install other packages for rlkit (optional)

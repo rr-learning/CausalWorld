@@ -1,3 +1,6 @@
+"""
+This tutorial shows you how to train a reaching policy using rlpyt with SAC.
+"""
 from rlpyt.samplers.serial.sampler import SerialSampler
 from rlpyt.samplers.parallel.cpu.sampler import CpuSampler
 from rlpyt.algos.qpg.sac import SAC

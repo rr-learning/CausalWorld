@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to train a picking policy using rlpyt with SAC
+in an asynchronous fashion.
+"""
 from rlpyt.samplers.async_.cpu_sampler import AsyncCpuSampler
 from rlpyt.samplers.async_.collectors import DbCpuResetCollector
 from rlpyt.algos.qpg.sac import SAC

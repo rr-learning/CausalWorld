@@ -1,7 +1,11 @@
+"""
+This tutorial shows you how to create a curriculum using an intervention actor
+which intervenes on the goal at specific time (start of the episode)
+"""
+
 from causal_world.task_generators.task import task_generator
 from causal_world.envs.causalworld import CausalWorld
-from causal_world.intervention_actors import GoalInterventionActorPolicy, VisualInterventionActorPolicy, \
-    RandomInterventionActorPolicy
+from causal_world.intervention_actors import GoalInterventionActorPolicy
 from causal_world.wrappers.curriculum_wrappers import CurriculumWrapper
 
 

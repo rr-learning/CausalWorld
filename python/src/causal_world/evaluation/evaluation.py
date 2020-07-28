@@ -43,11 +43,13 @@ class EvaluationPipeline(object):
                 file_path=os.path.join(tracker_path, 'tracker'))
             task_stats = self.tracker.task_stats_log[0]
             del task_stats.task_params['use_train_space_only']
+            del task_stats.task_params['task_name']
             self.task = task_generator(task_generator_id=task_stats.task_name,
                                        **task_stats.task_params,
                                        use_train_space_only=False)
         else:
             if 'use_train_space_only' in task_params:
+                del task_params['task_name']
                 del task_params['use_train_space_only']
             self.task = task_generator(**task_params,
                                        use_train_space_only=False)

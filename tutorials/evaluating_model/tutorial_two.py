@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to train a policy and evaluate it afterwards using
+one of the default evaluation benchmarks.
+"""
 from causal_world.evaluation.evaluation import EvaluationPipeline
 from causal_world.benchmark.benchmarks import REACHING_BENCHMARK
 from causal_world.task_generators.task import task_generator

@@ -45,9 +45,9 @@ Install other packages for stable baselines (optional)
 
 .. code-block:: shell
 
-  (causal_world) pip install mpi4py
   (causal_world) pip install tensorflow==1.14.0
   (causal_world) pip install stable-baselines==2.10.0
+  (causal_world) conda install mpi4py
 
 
 Install other packages for rlkit (optional)

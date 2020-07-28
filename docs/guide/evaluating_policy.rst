@@ -1,8 +1,8 @@
 .. _evaluating_policy:
 
-===============
+====================
 Evaluation Protocols
-===============
+====================
 
 A central feature of CausalWorld is the explicit parametric formulation of environments
 that allow for a precise evaluation of generalisation capabilities with respect to any of the
@@ -30,9 +30,9 @@ Training on multiple points of this space can be achieved by the help of a Curri
 Having an explicit split between spaces A and B allows to test generalisation capabilities towards values
 that are more in line with the notions of interpolating (space A) and extrapolating (space B) generalisation.
 
-----------------------
+--------
 Example
-----------------------
+--------
 
 As an introductory example we want to show you how you can quantify different generalisation aspects depending
 on the curriculum exposed during training using the pushing task.

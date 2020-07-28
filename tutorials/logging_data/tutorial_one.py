@@ -1,3 +1,8 @@
+"""
+This tutorial shows you how to use a data recorder to record some data for
+imitation learning for instance and how to load the data again. Or replay some
+episodes.
+"""
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 

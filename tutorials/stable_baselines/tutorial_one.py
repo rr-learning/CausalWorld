@@ -1,3 +1,6 @@
+"""
+This tutorial shows you how to train a policy using stable baselines with PPO
+"""
 from causal_world.task_generators.task import task_generator
 from causal_world.envs.causalworld import CausalWorld
 from stable_baselines import PPO2

@@ -1,3 +1,8 @@
+"""
+This tutorial shows you how to change the action space of the robot by using
+a Moving Average wrapper to smooth the actions further
+, which can be used with joint positions or end effector positions as well.
+"""
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 from causal_world.wrappers.action_wrappers import MovingAverageActionEnvWrapper

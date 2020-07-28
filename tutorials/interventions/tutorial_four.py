@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to use privileged information to solve the
+task at hand.
+"""
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 

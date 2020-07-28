@@ -1,3 +1,6 @@
+"""
+This tutorial shows you how to visualize a policy trained with stable baselines
+"""
 from causal_world.task_generators.task import task_generator
 from stable_baselines import SAC
 import tensorflow as tf

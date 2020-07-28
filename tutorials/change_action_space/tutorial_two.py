@@ -1,3 +1,10 @@
+"""
+This tutorial shows you how to discretize the action space of the robot itself,
+by using the object selector wrapper, first position chooses the object,
+second position chooses up, down, right, left, up, stay and third position is
+for rotation.
+"""
+
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
 from causal_world.wrappers.planning_wrappers import ObjectSelectorWrapper

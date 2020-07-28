@@ -1,3 +1,7 @@
+"""
+This tutorial shows you how to train a picking policy using
+rlkit with SAC algorithm.
+"""
 import gym
 
 import rlkit.torch.pytorch_util as ptu
