@@ -8,7 +8,7 @@ A central feature of CausalWorld is the explicit parametric formulation of envir
 that allow for a precise evaluation of generalisation capabilities with respect to any of the
 defining environment variables.
 
-In order to evaluate a certain generalisation aspect a evaluation protocol needs to be defined.
+In order to evaluate a certain generalisation aspect an evaluation protocol needs to be defined.
 Each evaluation protocol defines a set of episodes that might differ from each other with respect to the
 generalisation aspect under consideration. If e.g. the agent is evaluated regarding success under different
 masses each episodes is a counterfactual version of the other with the mass of a certain object being the
@@ -16,7 +16,7 @@ only difference. It is straight forward to define protocols for other variables 
 friction coefficients, different goals, different initial positions or even in-episode interventions aspect to
 test robustness aspects. After the given set of environments in a protocol are being evaluated,
 various aggregated success metrics are being computed based on the fractional reward profiles of each episode.
-For now the following metrics are computes:
+For now the following metrics are computed:
 1. mean_last_fractional_success (which is the mean of the last fractional reward along all protocol episodes)
 2. mean_full_integrated_fractional_success (which is the mean of the normalized average fractional reward along all protocol episodes)
 3. mean_last_integrated_fractional_success (which is the mean of the normalized average fractional reward over the last 20 episode time steps along all protocol episodes)
