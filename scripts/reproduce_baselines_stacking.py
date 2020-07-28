@@ -1,7 +1,7 @@
 import tensorflow as tf
 from stable_baselines.common import set_global_seeds
 from stable_baselines.common.vec_env import SubprocVecEnv
-from stable_baselines import TD3, PPO2, SAC, HER
+from stable_baselines import TD3, PPO2, SAC
 from stable_baselines.td3.policies import MlpPolicy as TD3MlpPolicy
 from stable_baselines.sac.policies import MlpPolicy as SACMlpPolicy
 from stable_baselines.common.policies import MlpPolicy
@@ -17,19 +17,14 @@ from causal_rl_bench.evaluation.evaluation import EvaluationPipeline
 import causal_rl_bench.evaluation.visualization.visualiser as vis
 from causal_rl_bench.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_rl_bench.wrappers.curriculum_wrappers import CurriculumWrapper
-from causal_rl_bench.wrappers.env_wrappers import HERGoalEnvWrapper
-from causal_rl_bench.benchmark.benchmarks import REACHING_BENCHMARK, \
-    PUSHING_BENCHMARK, \
-    PICKING_BENCHMARK, \
-    PICK_AND_PLACE_BENCHMARK, \
-    TOWER_2_BENCHMARK
+from causal_rl_bench.benchmark.benchmarks import TOWER_2_BENCHMARK
 from stable_baselines.ddpg.noise import NormalActionNoise
 
 world_seed = 0
 num_of_envs = 20
 
-NUM_RANDOM_SEEDS = 2
-NET_LAYERS = [256, 256]
+NUM_RANDOM_SEEDS = 5
+NET_LAYERS = [256, 256, 256]
 
 
 def save_model_settings(file_path, model_settings):
@@ -38,14 +33,12 @@ def save_model_settings(file_path, model_settings):
 
 
 def baseline_model(model_num):
-    benchmarks = sweep('benchmarks', [
-        REACHING_BENCHMARK, PUSHING_BENCHMARK, PICKING_BENCHMARK,
-        PICK_AND_PLACE_BENCHMARK, TOWER_2_BENCHMARK
-    ])
+    benchmarks = sweep('benchmarks', [TOWER_2_BENCHMARK])
     task_configs = [{
         'task_configs': {
             'use_train_space_only': True,
-            'fractional_reward_weight': 0
+            'fractional_reward_weight': 0.0,
+            'dense_reward_weights': [750, 50, 250, 125, 0.005]
         }
     }]
 
@@ -60,7 +53,8 @@ def baseline_model(model_num):
     }]
 
     random_seeds = sweep('seed', list(range(NUM_RANDOM_SEEDS)))
-    algorithms = sweep('algorithm', ['PPO', 'SAC', 'TD3', 'SAC_HER'])
+    algorithms = sweep('algorithm', ['PPO', 'SAC', 'TD3'])
+
     curriculum_kwargs_1 = {'intervention_actors': [], 'actives': []}
     curriculum_kwargs_2 = {
         'intervention_actors': [GoalInterventionActorPolicy()],
@@ -70,9 +64,7 @@ def baseline_model(model_num):
         'intervention_actors': [RandomInterventionActorPolicy()],
         'actives': [(0, 1e9, 2, 0)]
     }
-    curriculum_kwargs = [
-        curriculum_kwargs_1, curriculum_kwargs_2, curriculum_kwargs_3
-    ]
+    curriculum_kwargs = [curriculum_kwargs_1]
 
     return outer_product([
         benchmarks, world_params, task_configs, algorithms, curriculum_kwargs,
@@ -189,24 +181,6 @@ def get_SAC_model(model_settings, model_path):
     return model, env
 
 
-def get_SAC_HER_model(model_settings, model_path):
-    model_class = SAC
-    policy_kwargs = dict(layers=NET_LAYERS)
-    save_model_settings(os.path.join(model_path, 'model_settings.json'),
-                        model_settings)
-    env = get_single_process_env(model_settings)
-    env = HERGoalEnvWrapper(env)
-    model = HER('MlpPolicy',
-                env,
-                model_class,
-                _init_setup_model=True,
-                policy_kwargs=policy_kwargs,
-                n_sampled_goal=4,
-                verbose=1,
-                tensorboard_log=model_path)
-    return model, env
-
-
 def get_PPO_model(model_settings, model_path):
     number_of_time_steps_per_iteration = 120000
     ppo_config = {
@@ -235,7 +209,7 @@ def get_PPO_model(model_settings, model_path):
 
 
 def train_model_num(model_settings, output_path):
-    total_time_steps = int(3000000)
+    total_time_steps = int(10000001)
     validate_every_timesteps = int(500000)
     model_path = os.path.join(output_path, 'model')
     os.makedirs(model_path)
@@ -243,16 +217,13 @@ def train_model_num(model_settings, output_path):
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path)
         num_of_active_envs = num_of_envs
-        total_time_steps = int(80000000)
+        total_time_steps = int(200000000)
         validate_every_timesteps = int(2000000)
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path)
         num_of_active_envs = 1
     elif model_settings['algorithm'] == 'TD3':
         model, env = get_TD3_model(model_settings, model_path)
-        num_of_active_envs = 1
-    elif model_settings['algorithm'] == 'SAC_HER':
-        model, env = get_SAC_HER_model(model_settings, model_path)
         num_of_active_envs = 1
     else:
         model, env = get_PPO_model(model_settings, model_path)

@@ -126,15 +126,15 @@ class PickingTaskGenerator(BaseTask):
         :param achieved_goal:
         :return:
         """
-        #rewards order
-        #1) delta how much are you getting the block close to the goal
-        #2) absolute how much the block is close to the goal
-        #3) delta how much are you getting the block close to the center
-        #4) absolute how much is the the block is close to the center
-        #5) delta how much the fingers are close to block
-        #6) absolute how much fingers are close to block
-        #7) mean dist_of closest two fingers outside_bounding_ellipsoid
-        #8) delta in joint velocities
+        # rewards order
+        # 1) delta how much are you getting the block close to the goal
+        # 2) absolute how much the block is close to the goal
+        # 3) delta how much are you getting the block close to the center
+        # 4) absolute how much is the the block is close to the center
+        # 5) delta how much the fingers are close to block
+        # 6) absolute how much fingers are close to block
+        # 7) mean dist_of closest two fingers outside_bounding_ellipsoid
+        # 8) delta in joint velocities
         rewards = list()
         block_position = self._stage.get_object_state('tool_block',
                                                       'cartesian_position')
@@ -167,7 +167,7 @@ class PickingTaskGenerator(BaseTask):
         rewards.append(previous_distance_from_block -
                        current_distance_from_block)
         rewards.append(-current_distance_from_block)
-        #check for all the fingers if they are inside the sphere or not
+        # check for all the fingers if they are inside the sphere or not
         object_size = self._stage.get_object_state('tool_block', 'size')
         dist_outside_bounding_ellipsoid = np.copy(
             np.abs(end_effector_positions - block_position))

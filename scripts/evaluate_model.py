@@ -29,8 +29,6 @@ def load_model_from_settings(model_settings, model_path, time_steps):
         model = SAC.load(policy_path)
     elif algorithm == 'TD3':
         model = TD3.load(policy_path)
-    elif algorithm == 'SAC_HER':
-        model = HER.load(policy_path)
     return model
 
 
@@ -66,7 +64,7 @@ if __name__ == '__main__':
     model = load_model_from_settings(model_settings, model_path, time_steps)
 
     # define a method for the policy fn of your trained model
-    def policy_fn(obs):
+    def policy_fn(obs, prev_action=None, prev_reward=None):
         return model.predict(obs, deterministic=True)[0]
 
     evaluation_path = os.path.join(output_path, 'evaluation',
@@ -77,6 +75,7 @@ if __name__ == '__main__':
     evaluation_protocols = protocols_from_settings(model_settings)
 
     evaluator = EvaluationPipeline(evaluation_protocols=evaluation_protocols,
+                                   visualize_evaluation=False,
                                    tracker_path=output_path,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn)

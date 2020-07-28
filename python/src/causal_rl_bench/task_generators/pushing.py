@@ -16,7 +16,7 @@ class PushingTaskGenerator(BaseTask):
             use_train_space_only=kwargs.get("use_train_space_only", False),
             fractional_reward_weight=kwargs.get("fractional_reward_weight", 1),
             dense_reward_weights=kwargs.get("dense_reward_weights",
-                                            np.array([750, 250, 100])))
+                                            np.array([750, 250, 0])))
         self._task_robot_observation_keys = [
             "time_left_for_task", "joint_positions", "joint_velocities",
             "end_effector_positions"
@@ -82,7 +82,7 @@ class PushingTaskGenerator(BaseTask):
         """
         super(PushingTaskGenerator, self)._set_training_intervention_spaces()
         for rigid_object in self._stage.get_rigid_objects():
-            #TODO: make it a function of size
+            # TODO: make it a function of size
             self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
                 = 0.0325
             self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
@@ -213,9 +213,9 @@ class PushingTaskGenerator(BaseTask):
         :param interventions_dict:
         :return:
         """
-        #for example size on goal_or tool should be propagated to the other
-        #TODO:if a goal block intervention would lead to change of sides then
-        #change the other side as well?
+        # for example size on goal_or tool should be propagated to the other
+        # TODO:if a goal block intervention would lead to change of sides then
+        # change the other side as well?
         if 'goal_block' in interventions_dict:
             if 'size' in interventions_dict['goal_block']:
                 if 'tool_block' not in interventions_dict:

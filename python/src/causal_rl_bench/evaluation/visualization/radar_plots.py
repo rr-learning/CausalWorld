@@ -142,6 +142,10 @@ def radar_plots(output_path, experiments):
     spoke_labels = data.pop(0)
 
     colors = ['b', 'r', 'g', 'm', 'y']
+    colors = [
+        '#a6cee3', '#1f78b4', '#b2df8a', '#33a02c', '#fb9a99', '#e31a1c',
+        '#fdbf6f', '#ff7f00', '#cab2d6'
+    ]
     for (title, case_data) in data:
 
         fig, ax = plt.subplots(figsize=(9, 9),
@@ -159,7 +163,7 @@ def radar_plots(output_path, experiments):
                      verticalalignment='center')
         for d, color in zip(case_data, colors):
             ax.plot(theta, d, color=color)
-            ax.fill(theta, d, facecolor=color, alpha=0.25)
+            ax.fill(theta, d, facecolor=color, alpha=0.0)
         ax.set_varlabels(spoke_labels)
         ax.set_ylim(0, 1.0)
 
