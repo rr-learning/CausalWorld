@@ -1,0 +1,19 @@
+version: 2.1
+
+orbs:
+  python: circleci/python@3.7.4
+
+jobs:
+  build-and-test:
+    executor: python/default
+    steps:
+      - checkout
+      - run: conda env create -f environment.yml
+      - run: conda activate causal_world
+      - run: pipi install -e .
+      - run: python -m unittest discover tests/causal_world/
+      
+workflows:
+  main:
+    jobs:
+      - build-and-test
