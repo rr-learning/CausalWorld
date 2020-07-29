@@ -11,9 +11,12 @@ jobs:
       - run: conda env create -f environment.yml
       - run: conda init bash
       - run: source /root/.bashrc
-      - run: source activate causal_world
-      - run: pip install -e .
-      - run: python -m unittest discover tests/causal_world/
+      - run:
+          name: run tests
+          command: |
+            source activate causal_world
+            pip install -e .
+            python -m unittest discover tests/causal_world/
       
 workflows:
   main:
