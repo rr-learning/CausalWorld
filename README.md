@@ -1,6 +1,6 @@
 # CausalWorld
 
-This package provides the causal rl benchmark. It can be either 
+This package provides the causal_world benchmark. It can be either 
 [pip-installed](#install-as-a-pip-package-in-a-conda-env),
 or used in a catkin workspace.
 
@@ -22,7 +22,7 @@ or used in a catkin workspace.
   conda env create -f environment.yml OR conda env update --prefix ./env --file environment.yml  --prune
   ```
 
-2. Install the causal_rl_bench package inside the (causal_rl_bench) conda env.
+2. Install the causal_world package inside the (causal_world) conda env.
 
   ```bash
   conda activate causal_world
