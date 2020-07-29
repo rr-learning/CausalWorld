@@ -5,7 +5,11 @@ This package provides the causal rl benchmark. It can be either
 or used in a catkin workspace.
 
 <p align=center>
-<img src="random_interventions.gif" width=200><img src="random_interventions.gif" width=200>
+<img src="docs/media/real_platform.png" width=200><img src="docs/media/realistic_wrapper.gif" width=200><img src="docs/media/random_interventions.gif" width=200><img src="docs/media/magic_pick_and_place.gif" width=200>
+</p>
+
+<p align=center>
+<img src="docs/media/pushing_randomization.gif" width=200><img src="docs/media/demo_creative_stacked_blocks.gif" width=200><img src="docs/media/radar_plots_mean_last_integrated_fractional_success.png" width=200>
 </p>
 
 ## Install as a pip package in a conda env
