@@ -9,6 +9,7 @@ jobs:
       - run: apt-get update --yes
       - run: apt-get install gcc --yes 
       - run: conda env create -f environment.yml
+      - run: conda init bash
       - run: conda activate causal_world
       - run: pip install -e .
       - run: python -m unittest discover tests/causal_world/
