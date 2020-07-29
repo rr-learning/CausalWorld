@@ -6,6 +6,7 @@ jobs:
       - image: continuumio/miniconda3
     steps:
       - checkout
+      - run: apt-get update --yes
       - run: apt-get install gcc --yes 
       - run: conda env create -f environment.yml
       - run: conda init bash
