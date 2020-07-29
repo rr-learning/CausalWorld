@@ -4,9 +4,9 @@ This package provides the causal rl benchmark. It can be either
 [pip-installed](#install-as-a-pip-package-in-a-conda-env),
 or used in a catkin workspace.
 
-![](random_interventions.gif)
-
-![](magic_pick_and_place.gif)
+<p align=center>
+<img src="random_interventions.gif" width=200><img src="random_interventions.gif" width=200>
+</p>
 
 ## Install as a pip package in a conda env
 
