@@ -40,7 +40,7 @@ Task distributions
    :align: left
 
 .. image:: ../media/question_mark.png
-   :scale: 12 %
+   :scale: 30 %
    :alt: Build Your Own Task.
    :align: left
 
