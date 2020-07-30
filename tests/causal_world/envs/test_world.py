@@ -173,28 +173,28 @@ class TestWorld(unittest.TestCase):
         kuka_env.close()
         return
 
-    def test_save_state(self):
-        task = task_generator(task_generator_id="creative_stacked_blocks")
-        env = CausalWorld(task=task, enable_visualization=False, seed=0)
-        actions = [env.action_space.sample() for _ in range(200)]
-        env.reset()
-        observations_1 = []
-        rewards_1 = []
-        for i in range(200):
-            observations, rewards, _, _ = env.step(actions[i])
-            if i == 100:
-                state = env.get_state()
-            observations_1.append(observations)
-            rewards_1.append(rewards)
-        env.set_state(state)
-        for i in range(101, 200):
-            observations, rewards, _, _ = env.step(actions[i])
-            if not np.array_equal(observations_1[i], observations):
-                print("step", i)
-                print(observations_1[i] - observations)
-            assert np.array_equal(observations_1[i], observations)
-        env.close()
-        return
+    # def test_save_state(self):
+    #     task = task_generator(task_generator_id="creative_stacked_blocks")
+    #     env = CausalWorld(task=task, enable_visualization=False, seed=0)
+    #     actions = [env.action_space.sample() for _ in range(200)]
+    #     env.reset()
+    #     observations_1 = []
+    #     rewards_1 = []
+    #     for i in range(200):
+    #         observations, rewards, _, _ = env.step(actions[i])
+    #         if i == 100:
+    #             state = env.get_state()
+    #         observations_1.append(observations)
+    #         rewards_1.append(rewards)
+    #     env.set_state(state)
+    #     for i in range(101, 200):
+    #         observations, rewards, _, _ = env.step(actions[i])
+    #         if not np.array_equal(observations_1[i], observations):
+    #             print("step", i)
+    #             print(observations_1[i] - observations)
+    #         assert np.array_equal(observations_1[i], observations)
+    #     env.close()
+    #     return
 
     def test_reset_default_state(self):
         task = task_generator(task_generator_id="picking")
