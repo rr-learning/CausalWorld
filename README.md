@@ -4,10 +4,10 @@
 
 
 [![<rr-learning>](https://circleci.com/gh/rr-learning/CausalWorld.svg?style=svg&circle-token=28380a46b1bca6dac49b07e423eac9e4111d3d29)](https://circleci.com/gh/rr-learning/CausalWorld)
+  
+CausalWorld is an open-source framework and benchmark for causal structure learning and testing explicit parameteric generalization in a robotic manipulation environment where tasks range from rather simple to extremely hard, where its crucial to have a deep understanding of the surrounding environment and the meaning of cause and effect. We hope that you find it useful for your own research.  
 
-This package provides the causal_world benchmark. It can be either 
-[pip-installed](#install-as-a-pip-package-in-a-conda-env),
-or used in a catkin workspace.
+This package can be either [pip-installed](#install-as-a-pip-package-in-a-conda-env), or used in a catkin workspace.
 
 <p align=center>
 <img src="docs/media/real_platform.png" width=200><img src="docs/media/realistic_wrapper.gif" width=200><img src="docs/media/random_interventions.gif" width=200><img src="docs/media/magic_pick_and_place.gif" width=200>
