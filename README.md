@@ -1,7 +1,7 @@
 # CausalWorld
 
 # Template:
-[![<rr-learning>](https://circleci.com/gh/learning/CausalWorld.svg?style=svg&circle-token=28380a46b1bca6dac49b07e423eac9e4111d3d29)](https://circleci.com/gh/learning/CausalWorld)
+[![<rr-learning>](https://circleci.com/gh/rr-learning/CausalWorld.svg?style=svg&circle-token=28380a46b1bca6dac49b07e423eac9e4111d3d29)](https://circleci.com/gh/rr-learning/CausalWorld)
 
 # Example:
 
