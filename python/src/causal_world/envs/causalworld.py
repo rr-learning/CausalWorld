@@ -11,6 +11,8 @@ from causal_world.task_generators.task import task_generator
 from causal_world.envs.robot.camera import Camera
 from causal_world.configs.world_constants import WorldConstants
 import copy
+import logging
+logging.getLogger().setLevel(logging.INFO)
 
 
 class CausalWorld(gym.Env):
@@ -300,19 +302,17 @@ class CausalWorld(gym.Env):
         self._task.reset_default_state()
         return
 
-    def sample_new_goal(self, training=True, level=None):
+    def sample_new_goal(self, level=None):
         """
         Used to sample a new goal in the task subspace, the environment is
         operating in, so goals are still restricted depends on the task
         generator that was used.
 
-        :param training: (bool) specifies if you want a goal that is sampled
-                                from space A or space B.
         :param level: (int) this is not used at the moment.
 
         :return: None
         """
-        return self._task.sample_new_goal(training, level)
+        return self._task.sample_new_goal(level)
 
     def _disable_actions(self):
         self._disabled_actions = True
@@ -379,6 +379,7 @@ class CausalWorld(gym.Env):
             self._reset_observations_space()
         if success_signal is not None:
             if not success_signal:
+                logging.warning("Invalid Intervention was just executed!")
                 self._tracker.add_invalid_intervention(interventions_info)
         return success_signal
 
@@ -420,6 +421,7 @@ class CausalWorld(gym.Env):
             self._tracker.do_intervention(self._task, interventions_dict)
             if success_signal is not None:
                 if not success_signal:
+                    logging.warning("Invalid Intervention was just executed!")
                     self._tracker.add_invalid_intervention(interventions_info)
         if self._observation_mode == "cameras":
             current_images = self._robot.get_current_camera_observations()
@@ -451,6 +453,7 @@ class CausalWorld(gym.Env):
             self._reset_observations_space()
         if success_signal is not None:
             if not success_signal:
+                logging.warning("Invalid Intervention was just executed!")
                 self._tracker.add_invalid_intervention(interventions_info)
         if self._observation_mode == "cameras":
             current_images = self._robot.get_current_camera_observations()
@@ -607,14 +610,51 @@ class CausalWorld(gym.Env):
         tracker.save(file_path=tracker_path)
         return
 
-    def is_in_training_mode(self):
+    def get_variable_space_used(self):
         """
         Returns whether the world is in training mode or not.
 
         :return: (bool) specifying whether the world is operating on
                         space A only.
         """
-        return self._task.is_in_training_mode()
+        return self._task.get_variable_space_used()
+
+    def set_intervention_space(self, variables_space):
+        """
+
+        :param variables_space:
+
+        :return:
+        """
+        self._task.set_intervention_space(variables_space)
+        return
+
+    def get_intervention_space_a(self):
+        """
+        Returns whether the world is in training mode or not.
+
+        :return: (bool) specifying whether the world is operating on
+                        space A only.
+        """
+        return self._task.get_intervention_space_a()
+
+    def get_intervention_space_b(self):
+        """
+        Returns whether the world is in training mode or not.
+
+        :return: (bool) specifying whether the world is operating on
+                        space A only.
+        """
+        return self._task.get_intervention_space_b()
+
+    def get_intervention_space_a_b(self):
+        """
+        Returns whether the world is in training mode or not.
+
+        :return: (bool) specifying whether the world is operating on
+                        space A only.
+        """
+        return self._task.get_intervention_space_a_b()
 
     def get_joint_positions_lower_bound(self):
         """

@@ -5,7 +5,7 @@ class WorldConstants:
     ROBOT_ID = 1
     FLOOR_ID = 2
     STAGE_ID = 3
-    FLOOR_HEIGHT = 0.011
+    FLOOR_HEIGHT = 0.01
     ROBOT_HEIGHT = 0.34
     ARENA_BB = np.array([[-0.15, -0.15, 0], [0.15, 0.15, 0.3]])
     LINK_IDS = {

@@ -4,7 +4,7 @@ import copy
 
 
 class TowersGeneratorTask(BaseTask):
-    def __init__(self, use_train_space_only=False,
+    def __init__(self, variables_space='space_a_b',
                  fractional_reward_weight=1,
                  dense_reward_weights=np.array([]),
                  activate_sparse_reward=False,
@@ -16,7 +16,7 @@ class TowersGeneratorTask(BaseTask):
         This task generator will generate a task for stacking blocks into
         towers.
 
-        :param use_train_space_only:
+        :param variables_space: (str) space to be used either 'space_a' or 'space_b' or 'space_a_b'
         :param fractional_reward_weight:
         :param dense_reward_weights:
         :param activate_sparse_reward:
@@ -26,14 +26,14 @@ class TowersGeneratorTask(BaseTask):
         :param tower_center:
         """
         super().__init__(task_name="towers",
-                         use_train_space_only=use_train_space_only,
+                         variables_space=variables_space,
                          fractional_reward_weight=fractional_reward_weight,
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+                                              "joint_positions",
+                                              "joint_velocities",
+                                              "end_effector_positions"]
 
         #for this task the stage observation keys will be set with the
         #goal/structure building
@@ -197,7 +197,7 @@ class TowersGeneratorTask(BaseTask):
                 **silhouettes_creation_dicts[i])
         return
 
-    def _set_training_intervention_spaces(self):
+    def _set_intervention_space_a(self):
         """
 
         :return:
@@ -205,42 +205,42 @@ class TowersGeneratorTask(BaseTask):
         #for now remove all possible interventions on the goal in general
         #intevrntions on size of objects might become tricky to handle
         #contradicting interventions here?
-        super(TowersGeneratorTask, self)._set_training_intervention_spaces()
+        super(TowersGeneratorTask, self)._set_intervention_space_a()
         for visual_object in self._stage.get_visual_objects():
-            del self._training_intervention_spaces[visual_object]
+            del self._intervention_space_a[visual_object]
         for rigid_object in self._stage.get_rigid_objects():
-            del self._training_intervention_spaces[rigid_object]['size']
-        self._training_intervention_spaces['number_of_blocks_in_tower'] = \
-            np.array([[1, 1, 1], [4, 4,4]])
-        self._training_intervention_spaces['blocks_mass'] = \
+            del self._intervention_space_a[rigid_object]['size']
+        self._intervention_space_a['number_of_blocks_in_tower'] = \
+            np.array([[1, 1, 1], [4, 4, 4]])
+        self._intervention_space_a['blocks_mass'] = \
             np.array([0.02, 0.06])
-        self._training_intervention_spaces['tower_dims'] = \
+        self._intervention_space_a['tower_dims'] = \
             np.array([[0.035, 0.035, 0.035], [0.10, 0.10, 0.10]])
-        self._training_intervention_spaces['tower_center'] = \
+        self._intervention_space_a['tower_center'] = \
             np.array([[-0.1, -0.1], [0.05, 0.05]])
         return
 
-    def _set_testing_intervention_spaces(self):
+    def _set_intervention_space_b(self):
         """
 
         :return:
         """
-        super(TowersGeneratorTask, self)._set_testing_intervention_spaces()
+        super(TowersGeneratorTask, self)._set_intervention_space_b()
         for visual_object in self._stage.get_visual_objects():
-            del self._testing_intervention_spaces[visual_object]
+            del self._intervention_space_b[visual_object]
         for rigid_object in self._stage.get_rigid_objects():
-            del self._testing_intervention_spaces[rigid_object]['size']
-        self._testing_intervention_spaces['number_of_blocks_in_tower'] = \
-            np.array([[4, 4, 4], [6, 6, ]])
-        self._testing_intervention_spaces['blocks_mass'] = \
+            del self._intervention_space_b[rigid_object]['size']
+        self._intervention_space_b['number_of_blocks_in_tower'] = \
+            np.array([[4, 4, 4], [6, 6, 6]])
+        self._intervention_space_b['blocks_mass'] = \
             np.array([0.06, 0.08])
-        self._testing_intervention_spaces['tower_dims'] = \
+        self._intervention_space_b['tower_dims'] = \
             np.array([[0.10, 0.10, 0.10], [0.13, 0.13, 0.13]])
-        self._testing_intervention_spaces['tower_center'] = \
+        self._intervention_space_b['tower_center'] = \
             np.array([[0.05, 0.05], [0.1, 0.1]])
         return
 
-    def sample_new_goal(self, training=True, level=None):
+    def sample_new_goal(self, level=None):
         """
 
         :param training:
@@ -249,10 +249,12 @@ class TowersGeneratorTask(BaseTask):
         :return:
         """
         intervention_dict = dict()
-        if training:
-            intervention_space = self._training_intervention_spaces
-        else:
-            intervention_space = self._testing_intervention_spaces
+        if self._task_params['variables_space'] == 'space_a':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_b':
+            intervention_space = self._intervention_space_b
+        elif self._task_params['variables_space'] == 'space_a_b':
+            intervention_space = self._intervention_space_a_b
         intervention_dict['number_of_blocks_in_tower'] = [np. \
             random.randint(intervention_space['number_of_blocks_in_tower'][0][i],
                            intervention_space['number_of_blocks_in_tower'][1][i]) for i in range(3)]
@@ -316,7 +318,8 @@ class TowersGeneratorTask(BaseTask):
         else:
             raise Exception("this task generator variable "
                             "is not yet defined")
-        self._set_testing_intervention_spaces()
-        self._set_training_intervention_spaces()
+        self._set_intervention_space_b()
+        self._set_intervention_space_a()
+        self._set_intervention_space_a_b()
         self._stage.finalize_stage()
         return True, reset_observation_space

@@ -50,7 +50,7 @@ def baseline_model(model_num):
     ])
     task_configs = [{
         'task_configs': {
-            'use_train_space_only': True,
+            'variables_space': 'space_a',
             'fractional_reward_weight': 100
         }
     }]

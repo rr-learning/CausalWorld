@@ -2,13 +2,13 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class FloorFrictionTrainSpace(Protocol):
+class FloorFrictionSpaceA(Protocol):
 
     def __init__(self):
         """
 
         """
-        super().__init__('floor_friction_train_space')
+        super().__init__('floor_friction_space_A')
 
     def get_intervention(self, episode, timestep):
         """
@@ -20,7 +20,7 @@ class FloorFrictionTrainSpace(Protocol):
         """
         if timestep == 0:
             intervention_dict = dict()
-            intervention_space = self.env._task._training_intervention_spaces
+            intervention_space = self.env.get_intervention_space_a()
             floor_friction = np.random.uniform(
                 intervention_space['floor_friction'][0],
                 intervention_space['floor_friction'][1])

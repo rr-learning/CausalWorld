@@ -24,7 +24,7 @@ def without_intervention_split():
 
 def with_intervention_split_1():
     task = task_generator(task_generator_id='pushing',
-                          use_train_space_only=True)
+                          variables_space='space_a')
     env = CausalWorld(task=task, enable_visualization=False)
     env.reset()
     for _ in range(2):
@@ -40,9 +40,9 @@ def with_intervention_split_1():
 
 def with_intervention_split_2():
     task = task_generator(task_generator_id='pushing',
-                          use_train_space_only=True)
+                          variables_space='space_a')
     env = CausalWorld(task=task, enable_visualization=False)
-    interventions_space = task.get_training_intervention_spaces()
+    interventions_space = task.get_intervention_space_a()
     env.reset()
     for _ in range(2):
         for i in range(200):

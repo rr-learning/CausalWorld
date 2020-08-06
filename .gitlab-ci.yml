@@ -8,4 +8,3 @@ before_script:
 tests:
   script:
     - python -m tests.causal_world.envs.test_world
-

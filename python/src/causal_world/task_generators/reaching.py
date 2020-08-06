@@ -4,18 +4,18 @@ from causal_world.configs.world_constants import WorldConstants
 
 
 class ReachingTaskGenerator(BaseTask):
-    def __init__(self, use_train_space_only=False,
+    def __init__(self, variables_space='space_a_b',
                  fractional_reward_weight=1,
                  dense_reward_weights=np.array([100000,0, 0, 0]),
-                 default_goal_60= np.array([0, 0, 0.10]),
-                 default_goal_120= np.array([0, 0, 0.13]),
-                 default_goal_300= np.array([0, 0, 0.16]),
+                 default_goal_60=np.array([0, 0, 0.10]),
+                 default_goal_120=np.array([0, 0, 0.13]),
+                 default_goal_300=np.array([0, 0, 0.16]),
                  joint_positions=None,
                  activate_sparse_reward=False):
         """
         This task generator will generate a task for reaching.
 
-        :param use_train_space_only:
+        :param variables_space: (str) space to be used either 'space_a' or 'space_b' or 'space_a_b'
         :param fractional_reward_weight:
         :param dense_reward_weights:
         :param default_goal_60:
@@ -25,7 +25,7 @@ class ReachingTaskGenerator(BaseTask):
         :param activate_sparse_reward:
         """
         super().__init__(task_name="reaching",
-                         use_train_space_only=use_train_space_only,
+                         variables_space=variables_space,
                          fractional_reward_weight=fractional_reward_weight,
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
@@ -211,13 +211,13 @@ class ReachingTaskGenerator(BaseTask):
         info['fractional_success'] = self._current_goal_distance
         return info
 
-    def _set_training_intervention_spaces(self):
+    def _set_intervention_space_a(self):
         """
 
         :return:
         """
         # you can override these easily
-        super(ReachingTaskGenerator, self)._set_training_intervention_spaces()
+        super(ReachingTaskGenerator, self)._set_intervention_space_a()
         lower_bound = np.array(WorldConstants.ARENA_BB[0])
         upper_bound = (WorldConstants.ARENA_BB[1] -
                        WorldConstants.ARENA_BB[0]) * 1 / 2 + \
@@ -226,7 +226,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[1] = ((WorldConstants.ARENA_BB[1] -
                            WorldConstants.ARENA_BB[0]) * 3 / 4 + \
                           WorldConstants.ARENA_BB[0])[1]
-        self._training_intervention_spaces['goal_60']['cartesian_position'] = \
+        self._intervention_space_a['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound]) #blue is finger 0, green 240
         lower_bound = np.array(WorldConstants.ARENA_BB[0])
@@ -236,7 +236,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[0] = ((WorldConstants.ARENA_BB[1] -
                            WorldConstants.ARENA_BB[0]) * 1 / 4 + \
                           WorldConstants.ARENA_BB[0])[1]
-        self._training_intervention_spaces['goal_120']['cartesian_position'] = \
+        self._intervention_space_a['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])  # blue is finger 0, green 240
         lower_bound = np.array(WorldConstants.ARENA_BB[0])
@@ -246,7 +246,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[1] = (
             (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 4 +
             WorldConstants.ARENA_BB[0])[1]
-        self._training_intervention_spaces['goal_300']['cartesian_position'] = \
+        self._intervention_space_a['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         # self._training_intervention_spaces['number_of_obstacles'] = \
@@ -254,12 +254,12 @@ class ReachingTaskGenerator(BaseTask):
 
         return
 
-    def _set_testing_intervention_spaces(self):
+    def _set_intervention_space_b(self):
         """
 
         :return:
         """
-        super(ReachingTaskGenerator, self)._set_testing_intervention_spaces()
+        super(ReachingTaskGenerator, self)._set_intervention_space_b()
         lower_bound = (WorldConstants.ARENA_BB[1] -
                        WorldConstants.ARENA_BB[0]) * 1 / 2 + \
                       WorldConstants.ARENA_BB[0]
@@ -268,7 +268,7 @@ class ReachingTaskGenerator(BaseTask):
             WorldConstants.ARENA_BB[0])[1]
         upper_bound = np.array(WorldConstants.ARENA_BB[1])
 
-        self._testing_intervention_spaces['goal_60']['cartesian_position'] = \
+        self._intervention_space_b['goal_60']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         lower_bound = (WorldConstants.ARENA_BB[1] -
@@ -281,7 +281,7 @@ class ReachingTaskGenerator(BaseTask):
         upper_bound[0] = (
             (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 2 +
             WorldConstants.ARENA_BB[0])[1]
-        self._testing_intervention_spaces['goal_120']['cartesian_position'] = \
+        self._intervention_space_b['goal_120']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         lower_bound = (WorldConstants.ARENA_BB[1] -
@@ -295,7 +295,7 @@ class ReachingTaskGenerator(BaseTask):
             (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 2 +
             WorldConstants.ARENA_BB[0])[1]
 
-        self._testing_intervention_spaces['goal_300']['cartesian_position'] = \
+        self._intervention_space_b['goal_300']['cartesian_position'] = \
             np.array([lower_bound,
                       upper_bound])
         #TODO:dicuss this!
@@ -353,7 +353,7 @@ class ReachingTaskGenerator(BaseTask):
         else:
             raise Exception("this task generator variable "
                             "is not yet defined")
-        self._set_testing_intervention_spaces()
-        self._set_training_intervention_spaces()
+        self._set_intervention_space_b()
+        self._set_intervention_space_a()
         self._stage.finalize_stage()
         return True, reset_observation_space

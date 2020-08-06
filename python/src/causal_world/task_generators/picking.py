@@ -3,7 +3,7 @@ import numpy as np
 
 
 class PickingTaskGenerator(BaseTask):
-    def __init__(self, use_train_space_only=False,
+    def __init__(self, variables_space='space_a_b',
                  fractional_reward_weight=1,
                  dense_reward_weights=np.array([250, 0, 125,
                                               0, 750, 0, 0,
@@ -17,7 +17,7 @@ class PickingTaskGenerator(BaseTask):
         """
         This task generates a task for picking an object in the air.
 
-        :param use_train_space_only:
+        :param variables_space: (str) space to be used either 'space_a' or 'space_b' or 'space_a_b'
         :param fractional_reward_weight:
         :param dense_reward_weights:
         :param activate_sparse_reward:
@@ -28,7 +28,7 @@ class PickingTaskGenerator(BaseTask):
         :param goal_height:
         """
         super().__init__(task_name="picking",
-                         use_train_space_only=use_train_space_only,
+                         variables_space=variables_space,
                          fractional_reward_weight=fractional_reward_weight,
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
@@ -86,46 +86,46 @@ class PickingTaskGenerator(BaseTask):
 
         return
 
-    def _set_training_intervention_spaces(self):
+    def _set_intervention_space_a(self):
         """
 
         :return:
         """
-        super(PickingTaskGenerator, self)._set_training_intervention_spaces()
+        super(PickingTaskGenerator, self)._set_intervention_space_a()
         for rigid_object in self._stage.get_rigid_objects():
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][
+            self._intervention_space_a[rigid_object]['cylindrical_position'][0][
                 -1] \
                 = 0.0325
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][
+            self._intervention_space_a[rigid_object]['cylindrical_position'][1][
                 -1] \
                 = 0.0325
         for visual_object in self._stage.get_visual_objects():
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][
+            self._intervention_space_a[visual_object]['cylindrical_position'][
                 0][-1] \
                 = 0.08
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][
+            self._intervention_space_a[visual_object]['cylindrical_position'][
                 1][-1] \
                 = 0.20
         return
 
-    def _set_testing_intervention_spaces(self):
+    def _set_intervention_space_b(self):
         """
 
         :return:
         """
-        super(PickingTaskGenerator, self)._set_testing_intervention_spaces()
+        super(PickingTaskGenerator, self)._set_intervention_space_b()
         for rigid_object in self._stage.get_rigid_objects():
-            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][0][
+            self._intervention_space_b[rigid_object]['cylindrical_position'][0][
                 -1] \
                 = 0.0325
-            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][1][
+            self._intervention_space_b[rigid_object]['cylindrical_position'][1][
                 -1] \
                 = 0.0325
         for visual_object in self._stage.get_visual_objects():
-            self._testing_intervention_spaces[visual_object]['cylindrical_position'][0][
+            self._intervention_space_b[visual_object]['cylindrical_position'][0][
                 -1] \
                 = 0.20
-            self._testing_intervention_spaces[visual_object]['cylindrical_position'][1][
+            self._intervention_space_b[visual_object]['cylindrical_position'][1][
                 -1] \
                 = 0.25
         return
@@ -250,10 +250,9 @@ class PickingTaskGenerator(BaseTask):
                     interventions_dict['tool_block']['size']
         return interventions_dict
 
-    def sample_new_goal(self, training=True, level=None):
+    def sample_new_goal(self, level=None):
         """
 
-        :param training:
         :param level:
 
         :return:
@@ -261,10 +260,12 @@ class PickingTaskGenerator(BaseTask):
         # TODO: make sure its feasible goal by
         intervention_dict = dict()
         intervention_dict['goal_block'] = dict()
-        if training:
-            intervention_space = self._training_intervention_spaces
-        else:
-            intervention_space = self._testing_intervention_spaces
+        if self._task_params['variables_space'] == 'space_a':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_b':
+            intervention_space = self._intervention_space_b
+        elif self._task_params['variables_space'] == 'space_a_b':
+            intervention_space = self._intervention_space_a_b
         intervention_dict['goal_block']['cylindrical_position'] = \
             np.array(self._stage.get_rigid_objects()
                      ['tool_block'].get_initial_position())

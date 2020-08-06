@@ -21,12 +21,7 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         :param env:
         :return:
         """
-        if env.is_in_training_mode():
-            self.task_intervention_space = \
-                env._task.get_training_intervention_spaces()
-        else:
-            self.task_intervention_space = \
-                env._task.get_testing_intervention_spaces()
+        self.task_intervention_space = env.get_variable_space_used()
         return
 
     def _act(self, variables_dict):
