@@ -11,7 +11,7 @@ from causal_world.evaluation.protocols.floor_friction_a import FloorFrictionSpac
 from causal_world.evaluation.protocols.initial_poses_b import InitialPosesSpaceB
 from causal_world.evaluation.protocols.initial_poses_a import InitialPosesSpaceA
 
-from causal_world.evaluation.protocols.object_colors_b import ObjectColorsTestSpace
+from causal_world.evaluation.protocols.object_colors_b import ObjectColorsSpaceB
 from causal_world.evaluation.protocols.object_colors_a import ObjectColorsSpaceA
 
 from causal_world.evaluation.protocols.object_masses_b import ObjectMassesSpaceB
