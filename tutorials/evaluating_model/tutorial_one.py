@@ -74,7 +74,7 @@ def evaluate_trained_policy():
     evaluator = EvaluationPipeline(evaluation_protocols=[
         protocols.GoalPosesOOD(),
         protocols.InitialPosesOOD(),
-        protocols.InEpisodePosesChange()
+        protocols.InEpisodePosesChangeSpaceA()
     ],
                                    tracker_path=log_relative_path,
                                    initial_seed=0)

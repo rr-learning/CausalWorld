@@ -29,3 +29,24 @@ def get_suggested_grip_locations(cuboid_size, cuboid_rotation_matrix_w_c):
     #red finger operates in the upper half
     return np.transpose(
         grip_locations_rotated)[[grasp_index_red, grasp_index_green], :3]
+
+
+def combine_intervention_spaces(cont_bound_a, cont_bound_b):
+    if not isinstance(cont_bound_b[0], list) and not isinstance(cont_bound_b[0], np.ndarray):
+        if cont_bound_a[0] < cont_bound_b[0]:
+            return np.array([cont_bound_a[0], cont_bound_b[1]])
+        else:
+            return np.array([cont_bound_b[0], cont_bound_a[1]])
+    else:
+        lb = []
+        ub = []
+        for val_ind in range(len(cont_bound_b[0])):
+            if cont_bound_a[0][val_ind] < cont_bound_b[0][val_ind]:
+                lb.append(cont_bound_a[0][val_ind])
+                ub.append(cont_bound_b[1][val_ind])
+            else:
+                lb.append(cont_bound_b[0][val_ind])
+                ub.append(cont_bound_a[1][val_ind])
+        lb = np.array(lb)
+        ub = np.array(ub)
+        return np.array([lb, ub])

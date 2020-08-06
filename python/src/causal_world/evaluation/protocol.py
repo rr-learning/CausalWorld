@@ -19,14 +19,22 @@ class Protocol(object):
         :return:
         """
         self.env = env
+        self.env.set_intervention_space(variables_space='space_a_b')
         self.tracker = tracker
         if fraction > 0:
             self.num_evaluation_episodes = int(
                 self.num_evaluation_episodes_default * fraction)
+
         else:
             raise ValueError(
                 'fraction of episodes for evaluation needs to be strictly positive'
             )
+
+        self._init_protocol_helper()
+        return
+
+    def _init_protocol_helper(self):
+        return
 
     def get_name(self):
         """

@@ -4,14 +4,16 @@ import copy
 from causal_world.utils.state_utils import get_bounding_box_volume
 from causal_world.utils.state_utils import get_intersection
 from causal_world.utils.rotation_utils import cart2cyl
+from causal_world.utils.task_utils import combine_intervention_spaces
 import pybullet
+import logging
 
 
 class BaseTask(object):
 
     def __init__(self,
                  task_name,
-                 use_train_space_only,
+                 variables_space,
                  fractional_reward_weight=1,
                  dense_reward_weights=np.array([]),
                  activate_sparse_reward=False):
@@ -20,8 +22,7 @@ class BaseTask(object):
         common functionalities of the task generators.
 
         :param task_name: (str) the task name
-        :param use_train_space_only: (bool) true if the space of interventions
-                                            allowed is space A only.
+        :param variables_space: (str) space to be used either 'space_a' or 'space_b' or 'space_a_b'
         :param fractional_reward_weight: (float) weight multiplied by the
                                                 fractional volumetric
                                                 overlap in the reward.
@@ -53,9 +54,10 @@ class BaseTask(object):
         self._task_params["fractional_reward_weight"] = fractional_reward_weight
         self._task_params["dense_reward_weights"] = dense_reward_weights
         self._task_params['activate_sparse_reward'] = activate_sparse_reward
-        self._training_intervention_spaces = dict()
-        self._testing_intervention_spaces = dict()
-        self._task_params['use_train_space_only'] = use_train_space_only
+        self._intervention_space_a = dict()
+        self._intervention_space_b = dict()
+        self._intervention_space_a_b = dict()
+        self._task_params['variables_space'] = variables_space
         self._task_params["joint_positions"] = None
         self._current_starting_state = dict()
         self._default_starting_state = dict()
@@ -69,6 +71,16 @@ class BaseTask(object):
         self._create_world_func = None
         self._is_partial_solution_exposed = False
         self._is_ground_truth_state_exposed = False
+        return
+
+    def set_intervention_space(self, variables_space):
+        """
+
+        :param variables_space:
+
+        :return:
+        """
+        self._task_params['variables_space'] = variables_space
         return
 
     def _save_pybullet_state(self):
@@ -183,12 +195,18 @@ class BaseTask(object):
     #     del state_dict
     #     return
 
-    def is_in_training_mode(self):
+    def get_variable_space_used(self):
         """
 
         :return:
         """
-        return self._task_params['use_train_space_only']
+        if self._task_params['variables_space'] == 'space_a':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_b':
+            intervention_space = self._intervention_space_b
+        elif self._task_params['variables_space'] == 'space_a_b':
+            intervention_space = self._intervention_space_a_b
+        return intervention_space
 
     def activate_sparse_reward(self):
         """
@@ -320,10 +338,9 @@ class BaseTask(object):
         """
         return np.array([]), None
 
-    def sample_new_goal(self, training=True, level=None):
+    def sample_new_goal(self, level=None):
         """
 
-        :param training:
         :param level:
 
         :return:
@@ -331,10 +348,12 @@ class BaseTask(object):
         #TODO: for now we just vary position as a new goal
         #Need to generalize this
         intervention_dict = dict()
-        if training:
-            intervention_space = self._training_intervention_spaces
-        else:
-            intervention_space = self._testing_intervention_spaces
+        if self._task_params['variables_space'] == 'space_a':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_b':
+            intervention_space = self._intervention_space_b
+        elif self._task_params['variables_space'] == 'space_a_b':
+            intervention_space = self._intervention_space_a_b
         for visual_object in self._stage.get_visual_objects():
             if visual_object in intervention_space and \
                     'cylindrical_position' in intervention_space[visual_object]:
@@ -361,14 +380,14 @@ class BaseTask(object):
             (self._default_starting_state)
         return
 
-    def _set_training_intervention_spaces(self):
+    def _set_intervention_space_a(self):
         """
 
         :return:
         """
         #you can override these easily
-        self._training_intervention_spaces = dict()
-        self._training_intervention_spaces['joint_positions'] = \
+        self._intervention_space_a = dict()
+        self._intervention_space_a['joint_positions'] = \
             np.array([[-math.radians(70), -math.radians(70),
                        -math.radians(160)] * 3,
                       [math.radians(40), -math.radians(20),
@@ -376,59 +395,59 @@ class BaseTask(object):
         #any goal or object in arena put the position
         #and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
-            self._training_intervention_spaces[rigid_object] = dict()
+            self._intervention_space_a[rigid_object] = dict()
             # self._training_intervention_spaces[rigid_object]['cartesian_position'] = \
             #     np.array([WorldConstants.ARENA_BB[0],
             #               (WorldConstants.ARENA_BB[1] -
             #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
             #               WorldConstants.ARENA_BB[0]])
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'] = \
+            self._intervention_space_a[rigid_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
             if self._stage.get_rigid_objects(
             )[rigid_object].__class__.__name__ == 'Cuboid':
-                self._training_intervention_spaces[rigid_object]['size'] = \
+                self._intervention_space_a[rigid_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-            self._training_intervention_spaces[rigid_object]['color'] = \
+            self._intervention_space_a[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-            self._training_intervention_spaces[rigid_object]['mass'] = \
+            self._intervention_space_a[rigid_object]['mass'] = \
                 np.array([0.05, 0.1])
         for visual_object in self._stage._visual_objects:
-            self._training_intervention_spaces[visual_object] = dict()
+            self._intervention_space_a[visual_object] = dict()
             # self._training_intervention_spaces[visual_object]['cartesian_position'] = \
             #     np.array([WorldConstants.ARENA_BB[0],
             #               (WorldConstants.ARENA_BB[1] -
             #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
             #               WorldConstants.ARENA_BB[0]])
-            self._training_intervention_spaces[visual_object]['cylindrical_position'] = \
+            self._intervention_space_a[visual_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
             if self._stage.get_visual_objects(
             )[visual_object].__class__.__name__ == 'SCuboid':
-                self._training_intervention_spaces[visual_object]['size'] = \
+                self._intervention_space_a[visual_object]['size'] = \
                     np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
-            self._training_intervention_spaces[visual_object]['color'] = \
+            self._intervention_space_a[visual_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-        self._training_intervention_spaces['floor_color'] = \
+        self._intervention_space_a['floor_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-        self._training_intervention_spaces['stage_color'] = \
+        self._intervention_space_a['stage_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-        self._training_intervention_spaces['floor_friction'] = \
+        self._intervention_space_a['floor_friction'] = \
             np.array([0.3, 0.8])
         for link in self._robot.get_link_names():
-            self._training_intervention_spaces[link] = dict()
-            self._training_intervention_spaces[link]['color'] = \
+            self._intervention_space_a[link] = dict()
+            self._intervention_space_a[link]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-            self._training_intervention_spaces[link]['mass'] = \
+            self._intervention_space_a[link]['mass'] = \
                 np.array([0.2, 0.6])
         return
 
-    def _set_testing_intervention_spaces(self):
+    def _set_intervention_space_b(self):
         """
 
         :return:
         """
         # you can override these easily
-        self._testing_intervention_spaces = dict()
-        self._testing_intervention_spaces['joint_positions'] = \
+        self._intervention_space_b = dict()
+        self._intervention_space_b['joint_positions'] = \
             np.array([[math.radians(40), -math.radians(20),
                        -math.radians(30)] * 3,
                       [math.radians(70), 0,
@@ -436,49 +455,70 @@ class BaseTask(object):
         # any goal or object in arena put the position
         # and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
-            self._testing_intervention_spaces[rigid_object] = dict()
+            self._intervention_space_b[rigid_object] = dict()
             # self._testing_intervention_spaces[rigid_object]['cartesian_position'] = \
             #     np.array([(WorldConstants.ARENA_BB[1] -
             #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
             #               WorldConstants.ARENA_BB[0],
             #               WorldConstants.ARENA_BB[1]])
-            self._testing_intervention_spaces[rigid_object]['cylindrical_position'] = \
+            self._intervention_space_b[rigid_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
             if self._stage.get_rigid_objects(
             )[rigid_object].__class__.__name__ == 'Cuboid':
-                self._testing_intervention_spaces[rigid_object]['size'] = \
+                self._intervention_space_b[rigid_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-            self._testing_intervention_spaces[rigid_object]['color'] = \
+            self._intervention_space_b[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-            self._testing_intervention_spaces[rigid_object]['mass'] = \
+            self._intervention_space_b[rigid_object]['mass'] = \
                 np.array([0.1, 0.2])
         for visual_object in self._stage.get_visual_objects():
-            self._testing_intervention_spaces[visual_object] = dict()
+            self._intervention_space_b[visual_object] = dict()
             # self._testing_intervention_spaces[visual_object]['cartesian_position'] = \
             #     np.array([(WorldConstants.ARENA_BB[1] -
             #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
             #               WorldConstants.ARENA_BB[0],
             #               WorldConstants.ARENA_BB[1]])
-            self._testing_intervention_spaces[visual_object]['cylindrical_position'] = \
+            self._intervention_space_b[visual_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
             if self._stage.get_visual_objects(
             )[visual_object].__class__.__name__ == 'SCuboid':
-                self._testing_intervention_spaces[visual_object]['size'] = \
+                self._intervention_space_b[visual_object]['size'] = \
                     np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
-            self._testing_intervention_spaces[visual_object]['color'] = \
+            self._intervention_space_b[visual_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-        self._testing_intervention_spaces['floor_color'] = \
+        self._intervention_space_b['floor_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-        self._testing_intervention_spaces['stage_color'] = \
+        self._intervention_space_b['stage_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-        self._testing_intervention_spaces['floor_friction'] = \
+        self._intervention_space_b['floor_friction'] = \
             np.array([0.6, 0.8])
         for link in self._robot.get_link_names():
-            self._testing_intervention_spaces[link] = dict()
-            self._testing_intervention_spaces[link]['color'] = \
+            self._intervention_space_b[link] = dict()
+            self._intervention_space_b[link]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-            self._testing_intervention_spaces[link]['mass'] = \
+            self._intervention_space_b[link]['mass'] = \
                 np.array([0.6, 0.8])
+        return
+
+    def _set_intervention_space_a_b(self):
+        """
+
+        :return:
+        """
+        # you can override these easily
+        #iterate over intervention space a and space b and concatenate them
+        self._intervention_space_a_b = dict()
+        for variable in self._intervention_space_a:
+            if isinstance(self._intervention_space_a[variable], dict):
+                self._intervention_space_a_b[variable] = dict()
+                for subvariable_name in self._intervention_space_a[variable]:
+                    self._intervention_space_a_b[variable][subvariable_name] = \
+                        combine_intervention_spaces(self._intervention_space_a[variable][subvariable_name],
+                                                    self._intervention_space_b[variable][subvariable_name])
+            else:
+                self._intervention_space_a_b[variable] = combine_intervention_spaces(
+                    self._intervention_space_a[variable],
+                    self._intervention_space_b[variable])
         return
 
     def get_desired_goal(self):
@@ -649,8 +689,9 @@ class BaseTask(object):
             upper_bound=np.array([self._max_episode_length]))
         self._set_up_non_default_observations()
         # self.task_params.update(self.initial_state)
-        self._set_training_intervention_spaces()
-        self._set_testing_intervention_spaces()
+        self._set_intervention_space_a()
+        self._set_intervention_space_b()
+        self._set_intervention_space_a_b()
         self._set_task_state()
         return
 
@@ -719,8 +760,7 @@ class BaseTask(object):
         if interventions_dict is not None:
             success_signal, interventions_info, reset_observation_space_signal = \
                 self.apply_interventions(interventions_dict,
-                                         check_bounds=
-                                         self._task_params['use_train_space_only'])
+                                         check_bounds=True)
             if success_signal:
                 self._current_starting_state = self.save_state()
         self._set_task_state()
@@ -801,10 +841,12 @@ class BaseTask(object):
         :return:
         """
         interventions_dict = dict()
-        if self._task_params['use_train_space_only']:
-            intervention_space = self._training_intervention_spaces
-        else:
-            intervention_space = self._testing_intervention_spaces
+        if self._task_params['variables_space'] == 'space_a':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_b':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_a_b':
+            intervention_space = self._intervention_space_a_b
         # choose random variable one intervention  only and intervene
         if len(intervention_space) == 0:
             return False, {}, {}
@@ -830,19 +872,26 @@ class BaseTask(object):
         return success_signal, interventions_info, interventions_dict, \
                reset_observation_space_signal
 
-    def get_training_intervention_spaces(self):
+    def get_intervention_space_a(self):
         """
 
         :return:
         """
-        return self._training_intervention_spaces
+        return self._intervention_space_a
 
-    def get_testing_intervention_spaces(self):
+    def get_intervention_space_b(self):
         """
 
         :return:
         """
-        return self._testing_intervention_spaces
+        return self._intervention_space_b
+
+    def get_intervention_space_a_b(self):
+        """
+
+        :return:
+        """
+        return self._intervention_space_a_b
 
     def get_current_scm_values(self):
         """
@@ -862,26 +911,28 @@ class BaseTask(object):
         return variable_params
 
     def get_current_state_variables(self):
+        #TODO: settle this one here
         """
 
         :return:
         """
         #this is all the variables that are availaavailableble and exposed
         current_variables_values = self.get_current_scm_values()
-        if self._task_params['use_train_space_only']:
-            intervention_space = self._training_intervention_spaces
-            state_variables_dict = dict()
-            for variable_name in intervention_space:
-                if isinstance(intervention_space[variable_name], dict):
-                    state_variables_dict[variable_name] = dict()
-                    for subvariable_name in intervention_space[variable_name]:
-                        state_variables_dict[variable_name][subvariable_name] = \
-                            current_variables_values[variable_name][subvariable_name]
-                else:
-                    state_variables_dict[
-                        variable_name] = current_variables_values[variable_name]
-        else:
-            state_variables_dict = dict(current_variables_values)
+        # if self._task_params['use_train_space_only']:
+        #     intervention_space = self._intervention_space_a
+        #     state_variables_dict = dict()
+        #     for variable_name in intervention_space:
+        #         if isinstance(intervention_space[variable_name], dict):
+        #             state_variables_dict[variable_name] = dict()
+        #             for subvariable_name in intervention_space[variable_name]:
+        #                 state_variables_dict[variable_name][subvariable_name] = \
+        #                     current_variables_values[variable_name][subvariable_name]
+        #         else:
+        #             state_variables_dict[
+        #                 variable_name] = current_variables_values[variable_name]
+        # else:
+        #
+        state_variables_dict = dict(current_variables_values)
         # you can add task specific ones after that
         return state_variables_dict
 
@@ -891,10 +942,12 @@ class BaseTask(object):
 
         :return:
         """
-        if self._task_params['use_train_space_only']:
-            intervention_space = self._training_intervention_spaces
-        else:
-            intervention_space = self._testing_intervention_spaces
+        if self._task_params['variables_space'] == 'space_a':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_b':
+            intervention_space = self._intervention_space_b
+        elif self._task_params['variables_space'] == 'space_a_b':
+            intervention_space = self._intervention_space_a_b
         for intervention in interventions_dict:
             if intervention in intervention_space:
                 if not isinstance(interventions_dict[intervention], dict):
@@ -966,12 +1019,14 @@ class BaseTask(object):
         if check_bounds and not self.is_intervention_in_bounds(
                 interventions_dict):
             interventions_info['out_bounds'] = True
+            logging.warning("Applying intervention is out of bounds " + str(interventions_dict))
             return False, interventions_info, False
         interventions_dict = \
             dict(self._handle_contradictory_interventions(interventions_dict))
         if check_bounds and not self.is_intervention_in_bounds(
                 interventions_dict):
             interventions_info['out_bounds'] = True
+            logging.warning("Applying intervention is out of bounds " + str(interventions_dict))
             return False, interventions_info, False
         #now divide the interventions
         robot_interventions_dict, stage_interventions_dict, \
@@ -997,8 +1052,10 @@ class BaseTask(object):
             self._robot.step_simulation()
             if not self._stage.check_feasiblity_of_stage():
                 stage_infeasible = True
+                logging.warning("Applying intervention lead to infeasibility of the stage")
             if not self._robot.check_feasibility_of_robot_state():
                 robot_infeasible = True
+                logging.warning("Applying intervention lead to infeasibility of the robot")
             if stage_infeasible or robot_infeasible:
                 self.restore_state(current_state)
             else:
@@ -1024,7 +1081,7 @@ class BaseTask(object):
         :return:
         """
         if check_bounds is None:
-            check_bounds = self._task_params['use_train_space_only']
+            check_bounds = True
         success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)

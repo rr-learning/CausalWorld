@@ -17,7 +17,7 @@ import psutil
 def _make_env(rank):
     task = task_generator('pushing',
                           dense_reward_weights=np.array([2500, 2500, 0]),
-                          use_train_space_only=True,
+                          variables_space='space_a',
                           fractional_reward_weight=100)
     env = CausalWorld(task=task,
                       skip_frame=3,

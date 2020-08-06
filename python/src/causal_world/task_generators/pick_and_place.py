@@ -5,7 +5,7 @@ from causal_world.utils.rotation_utils import quaternion_conjugate, \
 
 
 class PickAndPlaceTaskGenerator(BaseTask):
-    def __init__(self, use_train_space_only=False,
+    def __init__(self, variables_space='space_a_b',
                  fractional_reward_weight=0,
                  dense_reward_weights=np.array([750, 50, 250, 0, 0.005]),
                  activate_sparse_reward=False,
@@ -19,7 +19,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
         This task generator generates a task of picking and placing an object
         across a fixed block in the middle of the arena.
 
-        :param use_train_space_only:
+        :param variables_space: (str) space to be used either 'space_a' or 'space_b' or 'space_a_b'
         :param fractional_reward_weight:
         :param dense_reward_weights:
         :param activate_sparse_reward:
@@ -31,7 +31,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
         :param goal_block_orientation:
         """
         super().__init__(task_name="pick_and_place",
-                         use_train_space_only=use_train_space_only,
+                         variables_space=variables_space,
                          fractional_reward_weight=fractional_reward_weight,
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
@@ -89,57 +89,57 @@ class PickAndPlaceTaskGenerator(BaseTask):
         ]
         return
 
-    def _set_training_intervention_spaces(self):
+    def _set_intervention_space_a(self):
         """
 
         :return:
         """
         super(PickAndPlaceTaskGenerator, self). \
-            _set_training_intervention_spaces()
+            _set_intervention_space_a()
         for rigid_object in self._stage.get_rigid_objects():
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
+            self._intervention_space_a[rigid_object]['cylindrical_position'][0][-1] \
                 = 0.0325
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
+            self._intervention_space_a[rigid_object]['cylindrical_position'][1][-1] \
                 = 0.0325
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][0] \
+            self._intervention_space_a[rigid_object]['cylindrical_position'][0][0] \
                 = 0
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][0] \
+            self._intervention_space_a[rigid_object]['cylindrical_position'][1][0] \
                 = 0.11
         for visual_object in self._stage.get_visual_objects():
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
+            self._intervention_space_a[visual_object]['cylindrical_position'][0][-1] \
                 = 0.0325
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
+            self._intervention_space_a[visual_object]['cylindrical_position'][1][-1] \
                 = 0.0325
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][0][0] \
+            self._intervention_space_a[visual_object]['cylindrical_position'][0][0] \
                 = 0
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][1][0] \
+            self._intervention_space_a[visual_object]['cylindrical_position'][1][0] \
                 = 0.11
         return
 
-    def _set_testing_intervention_spaces(self):
+    def _set_intervention_space_b(self):
         """
 
         :return:
         """
         super(PickAndPlaceTaskGenerator,
-              self)._set_testing_intervention_spaces()
+              self)._set_intervention_space_b()
         for rigid_object in self._stage.get_rigid_objects():
-            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][0][-1] \
+            self._intervention_space_b[rigid_object]['cylindrical_position'][0][-1] \
                 = 0.0325
-            self._testing_intervention_spaces[rigid_object]['cylindrical_position'][1][-1] \
+            self._intervention_space_b[rigid_object]['cylindrical_position'][1][-1] \
                 = 0.0325
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][0][0] \
+            self._intervention_space_a[rigid_object]['cylindrical_position'][0][0] \
                 = 0.11
-            self._training_intervention_spaces[rigid_object]['cylindrical_position'][1][0] \
+            self._intervention_space_a[rigid_object]['cylindrical_position'][1][0] \
                 = 0.14
         for visual_object in self._stage.get_visual_objects():
-            self._testing_intervention_spaces[visual_object]['cylindrical_position'][0][-1] \
+            self._intervention_space_b[visual_object]['cylindrical_position'][0][-1] \
                 = 0.0325
-            self._testing_intervention_spaces[visual_object]['cylindrical_position'][1][-1] \
+            self._intervention_space_b[visual_object]['cylindrical_position'][1][-1] \
                 = 0.0325
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][0][0] \
+            self._intervention_space_a[visual_object]['cylindrical_position'][0][0] \
                 = 0.11
-            self._training_intervention_spaces[visual_object]['cylindrical_position'][1][0] \
+            self._intervention_space_a[visual_object]['cylindrical_position'][1][0] \
                 = 0.14
         return
 
@@ -302,10 +302,9 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                                    [[-0.5, 0.065, 0],
                                                     [0.5, 0.5, 0.5]]))
 
-    def sample_new_goal(self, training=True, level=None):
+    def sample_new_goal(self, level=None):
         """
 
-        :param training:
         :param level:
 
         :return:

@@ -2,13 +2,13 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class RandomInTrainSet(Protocol):
+class RandomSpaceA(Protocol):
 
     def __init__(self):
         """
 
         """
-        super().__init__('random_in_train_set')
+        super().__init__('random_space_A')
 
     def get_intervention(self, episode, timestep):
         """
@@ -20,7 +20,7 @@ class RandomInTrainSet(Protocol):
         """
         if timestep == 0:
             task_intervention_space = \
-                self.env._task.get_training_intervention_spaces()
+                self.env.get_task().get_intervention_space_a()
             interventions_dict = dict()
             for variable in task_intervention_space:
                 if isinstance(task_intervention_space[variable], dict):

@@ -5,7 +5,7 @@ import math
 
 
 class GeneralGeneratorTask(BaseTask):
-    def __init__(self, use_train_space_only=False,
+    def __init__(self, variables_space='space_a_b',
                  fractional_reward_weight=1,
                  dense_reward_weights=np.array([]),
                  activate_sparse_reward=False,
@@ -19,7 +19,7 @@ class GeneralGeneratorTask(BaseTask):
         to a rest position and then this becomes the new shape/goal that the
         actor needs to achieve.
 
-        :param use_train_space_only:
+        :param variables_space: (str) space to be used either 'space_a' or 'space_b' or 'space_a_b'
         :param fractional_reward_weight:
         :param dense_reward_weights:
         :param activate_sparse_reward:
@@ -29,7 +29,7 @@ class GeneralGeneratorTask(BaseTask):
         :param nums_objects:
         """
         super().__init__(task_name="general",
-                         use_train_space_only=use_train_space_only,
+                         variables_space=variables_space,
                          fractional_reward_weight=fractional_reward_weight,
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
@@ -71,7 +71,7 @@ class GeneralGeneratorTask(BaseTask):
         self.generate_goal_configuration_with_objects(default_bool=True)
         return
 
-    def _set_training_intervention_spaces(self):
+    def _set_intervention_space_a(self):
         """
 
         :return:
@@ -79,50 +79,51 @@ class GeneralGeneratorTask(BaseTask):
         # for now remove all possible interventions on the goal in general
         # intevrntions on size of objects might become tricky to handle
         # contradicting interventions here?
-        super(GeneralGeneratorTask, self)._set_training_intervention_spaces()
+        super(GeneralGeneratorTask, self)._set_intervention_space_a()
         for visual_object in self._stage.get_visual_objects():
-            del self._training_intervention_spaces[visual_object]
+            del self._intervention_space_a[visual_object]
         for rigid_object in self._stage.get_rigid_objects():
-            del self._training_intervention_spaces[rigid_object]['size']
-        self._training_intervention_spaces['nums_objects'] = \
+            del self._intervention_space_a[rigid_object]['size']
+        self._intervention_space_a['nums_objects'] = \
             np.array([1, 5])
-        self._training_intervention_spaces['blocks_mass'] = \
+        self._intervention_space_a['blocks_mass'] = \
             np.array([0.02, 0.06])
-        self._training_intervention_spaces['tool_block_size'] = \
+        self._intervention_space_a['tool_block_size'] = \
             np.array([0.05, 0.07])
         return
 
-    def _set_testing_intervention_spaces(self):
+    def _set_intervention_space_b(self):
         """
 
         :return:
         """
-        super(GeneralGeneratorTask, self)._set_testing_intervention_spaces()
+        super(GeneralGeneratorTask, self)._set_intervention_space_b()
         for visual_object in self._stage.get_visual_objects():
-            del self._testing_intervention_spaces[visual_object]
+            del self._intervention_space_b[visual_object]
         for rigid_object in self._stage.get_rigid_objects():
-            del self._testing_intervention_spaces[rigid_object]['size']
-        self._testing_intervention_spaces['nums_objects'] = \
+            del self._intervention_space_b[rigid_object]['size']
+        self._intervention_space_b['nums_objects'] = \
             np.array([6, 9])
-        self._testing_intervention_spaces['blocks_mass'] = \
+        self._intervention_space_b['blocks_mass'] = \
             np.array([0.06, 0.08])
-        self._testing_intervention_spaces['tool_block_size'] = \
+        self._intervention_space_b['tool_block_size'] = \
             np.array([0.04, 0.05])
         return
 
-    def sample_new_goal(self, training=True, level=None):
+    def sample_new_goal(self, level=None):
         """
 
-        :param training:
         :param level:
 
         :return:
         """
         intervention_dict = dict()
-        if training:
-            intervention_space = self._training_intervention_spaces
-        else:
-            intervention_space = self._testing_intervention_spaces
+        if self._task_params['variables_space'] == 'space_a':
+            intervention_space = self._intervention_space_a
+        elif self._task_params['variables_space'] == 'space_b':
+            intervention_space = self._intervention_space_b
+        elif self._task_params['variables_space'] == 'space_a_b':
+            intervention_space = self._intervention_space_a_b
         intervention_dict['nums_objects'] = np. \
             random.randint(intervention_space['nums_objects'][0],
                            intervention_space['nums_objects'][1])
@@ -175,8 +176,9 @@ class GeneralGeneratorTask(BaseTask):
         else:
             raise Exception("this task generator variable "
                             "is not yet defined")
-        self._set_testing_intervention_spaces()
-        self._set_training_intervention_spaces()
+        self._set_intervention_space_b()
+        self._set_intervention_space_a()
+        self._set_intervention_space_a_b()
         self._stage.finalize_stage()
         return True, reset_observation_space
 

@@ -16,6 +16,7 @@ from causal_world.wrappers.protocol_wrapper \
     import ProtocolWrapper
 from causal_world.loggers.tracker import Tracker
 import json
+import logging
 
 
 class EvaluationPipeline(object):
@@ -42,17 +43,17 @@ class EvaluationPipeline(object):
             self.tracker = Tracker(
                 file_path=os.path.join(tracker_path, 'tracker'))
             task_stats = self.tracker.task_stats_log[0]
-            del task_stats.task_params['use_train_space_only']
+            del task_stats.task_params['variables_space']
             del task_stats.task_params['task_name']
             self.task = task_generator(task_generator_id=task_stats.task_name,
                                        **task_stats.task_params,
-                                       use_train_space_only=False)
+                                       variables_space='space_a_b')
         else:
-            if 'use_train_space_only' in task_params:
+            if 'variables_space' in task_params:
                 del task_params['task_name']
-                del task_params['use_train_space_only']
+                del task_params['variables_space']
             self.task = task_generator(**task_params,
-                                       use_train_space_only=False)
+                                       variables_space='space_a_b')
         if tracker_path:
             if 'seed' in self.tracker.world_params:
                 del self.tracker.world_params['seed']
@@ -144,6 +145,7 @@ class EvaluationPipeline(object):
         """
         pipeline_scores = dict()
         for evaluation_protocol in self.evaluation_protocols:
+            logging.info('Applying the following protocol now, ' + str(evaluation_protocol.get_name()))
             self.evaluation_env = ProtocolWrapper(self.env, evaluation_protocol)
             evaluation_protocol.init_protocol(env=self.env,
                                               tracker=self.env.get_tracker(),

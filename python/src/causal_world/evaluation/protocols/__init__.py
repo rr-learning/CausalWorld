@@ -1,27 +1,21 @@
-from causal_world.evaluation.protocols.goal_poses_ood import GoalPosesOOD
-from causal_world.evaluation.protocols.initial_poses_ood import InitialPosesOOD
-from causal_world.evaluation.protocols.same_masses_ood import SameMassesOOD
-from causal_world.evaluation.protocols.same_colors_ood import SameColorsOOD
-from causal_world.evaluation.protocols.floor_friction_ood import FloorFrictionOOD
-from causal_world.evaluation.protocols.object_sizes_ood import ObjectSizesOOD
-from causal_world.evaluation.protocols.random_in_train_set import RandomInTrainSet
-from causal_world.evaluation.protocols.in_episode_poses_change import InEpisodePosesChange
+from causal_world.evaluation.protocols.random_in_a import RandomSpaceA
+from causal_world.evaluation.protocols.in_episode_poses_change import InEpisodePosesChangeSpaceA
 from causal_world.evaluation.protocols.default_task import DefaultTask
 
-from causal_world.evaluation.protocols.goal_poses_test_space import GoalPosesTestSpace
-from causal_world.evaluation.protocols.goal_poses_train_space import GoalPosesTrainSpace
+from causal_world.evaluation.protocols.goal_poses_b import GoalPosesSpaceB
+from causal_world.evaluation.protocols.goal_poses_a import GoalPosesSpaceA
 
-from causal_world.evaluation.protocols.floor_friction_test_space import FloorFrictionTestSpace
-from causal_world.evaluation.protocols.floor_friction_train_space import FloorFrictionTrainSpace
+from causal_world.evaluation.protocols.floor_friction_b import FloorFrictionSpaceB
+from causal_world.evaluation.protocols.floor_friction_a import FloorFrictionSpaceA
 
-from causal_world.evaluation.protocols.initial_poses_test_space import InitialPosesTestSpace
-from causal_world.evaluation.protocols.initial_poses_train_space import InitialPosesTrainSpace
+from causal_world.evaluation.protocols.initial_poses_b import InitialPosesSpaceB
+from causal_world.evaluation.protocols.initial_poses_a import InitialPosesSpaceA
 
-from causal_world.evaluation.protocols.object_colors_test_space import ObjectColorsTestSpace
-from causal_world.evaluation.protocols.object_colors_train_space import ObjectColorsTrainSpace
+from causal_world.evaluation.protocols.object_colors_b import ObjectColorsSpaceB
+from causal_world.evaluation.protocols.object_colors_a import ObjectColorsSpaceA
 
-from causal_world.evaluation.protocols.object_masses_test_space import ObjectMassesTestSpace
-from causal_world.evaluation.protocols.object_masses_train_space import ObjectMassesTrainSpace
+from causal_world.evaluation.protocols.object_masses_b import ObjectMassesSpaceB
+from causal_world.evaluation.protocols.object_masses_a import ObjectMassesSpaceA
 
-from causal_world.evaluation.protocols.object_sizes_test_space import ObjectSizeTestSpace
-from causal_world.evaluation.protocols.object_sizes_train_space import ObjectSizeTrainSpace
+from causal_world.evaluation.protocols.object_sizes_b import ObjectSizeSpaceB
+from causal_world.evaluation.protocols.object_sizes_a import ObjectSizeSpaceA
