@@ -431,7 +431,7 @@ class CausalWorld(gym.Env):
             obs = self._task.filter_structured_observations()
         return interventions_dict, success_signal, obs
 
-    def do_intervention(self, interventions_dict, check_bounds=None):
+    def do_intervention(self, interventions_dict, check_bounds=True):
         """
         Performs interventions on variables specified by the intervention dict
         to intervene on.
