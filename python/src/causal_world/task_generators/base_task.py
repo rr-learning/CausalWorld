@@ -63,6 +63,7 @@ class BaseTask(object):
         self._default_starting_state = dict()
         self._empty_stage = None
         self._recreation_time = 0
+        #TODO: this should be increased! there might be a bug from pybullet's side.
         self._period_to_clear_memory = 1
         self._current_desired_goal = None
         self._current_achieved_goal = None

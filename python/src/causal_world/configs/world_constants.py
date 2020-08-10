@@ -22,19 +22,34 @@ class WorldConstants:
         'robot_finger_300_link_2': 13,
         'robot_finger_300_link_3': 14
     }
+    # VISUAL_SHAPE_IDS = {
+    #     'robot_finger_60_link_0': 0,
+    #     'robot_finger_60_link_1': 4,
+    #     'robot_finger_60_link_2': 5,
+    #     'robot_finger_60_link_3': 6,
+    #     'robot_finger_120_link_0': 7,
+    #     'robot_finger_120_link_1': 11,
+    #     'robot_finger_120_link_2': 12,
+    #     'robot_finger_120_link_3': 13,
+    #     'robot_finger_300_link_0': 14,
+    #     'robot_finger_300_link_1': 15,
+    #     'robot_finger_300_link_2': 16,
+    #     'robot_finger_300_link_3': 17
+    # }
+
     VISUAL_SHAPE_IDS = {
         'robot_finger_60_link_0': 0,
-        'robot_finger_60_link_1': 4,
-        'robot_finger_60_link_2': 5,
-        'robot_finger_60_link_3': 6,
-        'robot_finger_120_link_0': 7,
-        'robot_finger_120_link_1': 11,
-        'robot_finger_120_link_2': 12,
-        'robot_finger_120_link_3': 13,
-        'robot_finger_300_link_0': 14,
-        'robot_finger_300_link_1': 15,
-        'robot_finger_300_link_2': 16,
-        'robot_finger_300_link_3': 17
+        'robot_finger_60_link_1': 1,
+        'robot_finger_60_link_2': 2,
+        'robot_finger_60_link_3': 3,
+        'robot_finger_120_link_0': 4,
+        'robot_finger_120_link_1': 5,
+        'robot_finger_120_link_2': 6,
+        'robot_finger_120_link_3': 7,
+        'robot_finger_300_link_0': 8,
+        'robot_finger_300_link_1': 9,
+        'robot_finger_300_link_2': 10,
+        'robot_finger_300_link_3': 11
     }
 
     JOINT_NAMES = [

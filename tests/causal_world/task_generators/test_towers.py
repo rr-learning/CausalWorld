@@ -8,7 +8,7 @@ class TestTowers(unittest.TestCase):
 
     def setUp(self):
         self.task = task_generator(task_generator_id="towers")
-        self.env = CausalWorld(task=self.task, enable_visualization=True)
+        self.env = CausalWorld(task=self.task, enable_visualization=False)
         return
 
     def tearDown(self):

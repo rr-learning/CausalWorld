@@ -153,7 +153,7 @@ class Stage(object):
                                                   **visual_object_info[1])
         self.apply_interventions(env_state['arena_scm_values'])
         #update the stage observations with them
-        self._stage_observations.visual_objects = self._rigid_objects
+        self._stage_observations.rigid_objects = self._rigid_objects
         self._stage_observations.visual_objects = self._visual_objects
         return env_state
 

@@ -192,10 +192,9 @@ class GeneralGeneratorTask(BaseTask):
         #raise the fingers
         self._stage.remove_everything()
         self._task_stage_observation_keys = []
-        silhouettes_creation_dicts = []
-        joint_positions = self._robot.get_upper_joint_positions()
-        self._robot.reset_state(joint_positions=joint_positions,
-                                joint_velocities=np.zeros(9))
+        # joint_positions = self._robot.get_upper_joint_positions()
+        # self._robot.reset_state(joint_positions=joint_positions,
+        #                         joint_velocities=np.zeros(9))
         # self.task_params["object_configs_list"] = []
         # self.rigid_objects_names = []
         for object_num in range(self.nums_objects):

@@ -341,6 +341,8 @@ class CausalWorld(gym.Env):
                             the environment. Again, it follows the
                             observation_mode specified.
         """
+        print(len(pybullet.getContactPoints(
+                physicsClientId=self._pybullet_client_full_id)))
         self._tracker.add_episode_experience(self._episode_length)
         self._episode_length = 0
         success_signal, interventions_info, reset_observation_space_signal = \

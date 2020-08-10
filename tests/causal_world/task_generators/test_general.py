@@ -9,6 +9,7 @@ class TestGeneral(unittest.TestCase):
     def setUp(self):
         self.task = task_generator(task_generator_id="general")
         self.env = CausalWorld(task=self.task, enable_visualization=False)
+        self.env.reset()
         return
 
     def tearDown(self):
