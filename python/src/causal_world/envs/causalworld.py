@@ -104,7 +104,7 @@ class CausalWorld(gym.Env):
             os.path.dirname(__file__),
             "../../../assets/robot_properties_fingers")
         self._finger_urdf_path = os.path.join(self._robot_properties_path,
-                                              "urdf", "trifinger.urdf")
+                                              "urdf", "trifinger_edu.urdf")
         self._create_world(initialize_goal_image=True)
         self._tool_cameras = None
         self._goal_cameras = None

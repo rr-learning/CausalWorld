@@ -8,7 +8,7 @@ class TestTowers(unittest.TestCase):
 
     def setUp(self):
         self.task = task_generator(task_generator_id="towers")
-        self.env = CausalWorld(task=self.task, enable_visualization=False)
+        self.env = CausalWorld(task=self.task, enable_visualization=True)
         return
 
     def tearDown(self):
@@ -38,6 +38,7 @@ class TestTowers(unittest.TestCase):
                 observations_2.append(obs)
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
+                    print(i)
                     print(
                         np.array(observations_1[i]) -
                         np.array(observations_2[i]))

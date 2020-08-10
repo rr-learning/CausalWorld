@@ -8,7 +8,7 @@ class TestStackedBlocks(unittest.TestCase):
 
     def setUp(self):
         self.task = task_generator(task_generator_id="stacked_blocks")
-        self.env = CausalWorld(task=self.task, enable_visualization=False)
+        self.env = CausalWorld(task=self.task, enable_visualization=True)
         return
 
     def tearDown(self):

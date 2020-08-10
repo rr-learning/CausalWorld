@@ -508,7 +508,7 @@ class TriFingerRobot(object):
         :return:
         """
         deg45 = np.pi / 4
-        positions = [0, -deg45, -deg45]
+        positions = [0, deg45, -deg45]
         joint_positions = positions * 3
         end_effector_positions = [
             0.05142966, 0.03035857, 0.32112874, 0.00057646, -0.05971867,
