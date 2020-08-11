@@ -1,7 +1,7 @@
 from causal_world.envs.scene.observations import StageObservations
 from causal_world.envs.scene.objects import Cuboid, StaticCuboid, MeshObject
 from causal_world.envs.scene.silhouette import SCuboid, SSphere, SMeshObject
-from causal_world.utils.state_utils import get_intersection
+from causal_world.utils.state_utils import get_intersection, get_bounding_box_volume
 import math
 import numpy as np
 import pybullet
@@ -207,6 +207,7 @@ class Stage(object):
         """
         current_objects = list(self._rigid_objects.keys()) + \
                           list(self._visual_objects.keys())
+        current_objects = current_objects[::-1]
         for name in current_objects:
             self.remove_general_object(name)
         return

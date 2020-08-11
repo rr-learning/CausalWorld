@@ -209,7 +209,9 @@ class RigidObject(object):
                 self._block_ids[0],
                 physicsClientId=self._pybullet_client_ids[0])
             position = np.array(position)
+            # print("raw position", position)
             position[-1] -= WorldConstants.FLOOR_HEIGHT
+            # print("processed position", position)
             return position
 
         elif variable_name == 'orientation':
@@ -563,10 +565,11 @@ class RigidObject(object):
         )
         position = np.array(position)
         position[-1] -= WorldConstants.FLOOR_HEIGHT
-        vertices = [[1, 1, -1], [1, -1, -1], [-1, 1, -1], [-1, -1, -1],
-                    [1, 1, 1], [1, -1, 1], [-1, 1, 1], [-1, -1, 1]]
-        vertices = [position + (point * self._size / 2) for point in vertices]
-        return rotate_points(np.array(vertices), orientation)
+        vertices = [[1, 1, -1, 1], [1, -1, -1, 1], [-1, 1, -1, 1], [-1, -1, -1, 1],
+                    [1, 1, 1, 1], [1, -1, 1, 1], [-1, 1, 1, 1], [-1, -1, 1, 1]]
+        temp_size = np.array([self._size[0], self._size[1], self._size[2], 2])
+        vertices = [(point * temp_size / 2.0) for point in vertices]
+        return rotate_points(np.array(vertices), orientation, position)
 
     def world_to_cube_r_matrix(self):
         """

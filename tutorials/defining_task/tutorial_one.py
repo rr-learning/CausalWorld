@@ -12,7 +12,7 @@ class MyOwnTask(BaseTask):
 
     def __init__(self, **kwargs):
         super().__init__(task_name="new_task",
-                         variables_space=False,
+                         variables_space='space_a_b',
                          fractional_reward_weight=1,
                          dense_reward_weights=np.array([]))
         self._task_robot_observation_keys = [

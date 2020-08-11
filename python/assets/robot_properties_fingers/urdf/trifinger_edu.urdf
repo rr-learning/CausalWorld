@@ -42,7 +42,7 @@
   <!--
         Fixed links for the finger base (parts where the upper link is mounted).
         -->
-  <link name="finger_base_link_0">
+  <link concave="yes" name="finger_base_link_0">
     <visual>
       <origin rpy="0 0 0" xyz="-0.17995 0 0"/>
       <geometry>
@@ -50,12 +50,6 @@
       </geometry>
       <material name="fingeredu_0_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="-0.17995 0 0"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_back.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0 0"/>
       <geometry>
@@ -63,12 +57,6 @@
       </geometry>
       <material name="fingeredu_0_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0 0"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_front.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0.02 0.08"/>
       <geometry>
@@ -76,20 +64,6 @@
       </geometry>
       <material name="fingeredu_0_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0.02 0.08"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_side_left.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
-    <!-- Disable this part.  It is not very relevant for collisions but
-                 would cause trouble in pybullet due to its concavity.
-            <xacro:add_geometry
-                rpy="0 0 0"
-                xyz="${offset_x_base_to_front} -0.02 ${offset_z_base_to_top}"
-                mesh_file="${mesh_dir}/base_side_right.stl"
-                material="${material}" />
-            -->
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0 0.08"/>
       <geometry>
@@ -97,12 +71,6 @@
       </geometry>
       <material name="fingeredu_0_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0 0.08"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_top.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <inertial>
       <origin rpy="0 0 0" xyz="-0.1 0 0.4"/>
       <mass value="1"/>
@@ -215,7 +183,7 @@
   <!--
         Fixed links for the finger base (parts where the upper link is mounted).
         -->
-  <link name="finger_base_link_120">
+  <link concave="yes" name="finger_base_link_120">
     <visual>
       <origin rpy="0 0 0" xyz="-0.17995 0 0"/>
       <geometry>
@@ -223,12 +191,6 @@
       </geometry>
       <material name="fingeredu_120_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="-0.17995 0 0"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_back.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0 0"/>
       <geometry>
@@ -236,12 +198,6 @@
       </geometry>
       <material name="fingeredu_120_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0 0"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_front.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0.02 0.08"/>
       <geometry>
@@ -249,20 +205,6 @@
       </geometry>
       <material name="fingeredu_120_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0.02 0.08"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_side_left.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
-    <!-- Disable this part.  It is not very relevant for collisions but
-                 would cause trouble in pybullet due to its concavity.
-            <xacro:add_geometry
-                rpy="0 0 0"
-                xyz="${offset_x_base_to_front} -0.02 ${offset_z_base_to_top}"
-                mesh_file="${mesh_dir}/base_side_right.stl"
-                material="${material}" />
-            -->
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0 0.08"/>
       <geometry>
@@ -270,12 +212,6 @@
       </geometry>
       <material name="fingeredu_120_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0 0.08"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_top.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <inertial>
       <origin rpy="0 0 0" xyz="-0.1 0 0.4"/>
       <mass value="1"/>
@@ -388,7 +324,7 @@
   <!--
         Fixed links for the finger base (parts where the upper link is mounted).
         -->
-  <link name="finger_base_link_240">
+  <link concave="yes" name="finger_base_link_240">
     <visual>
       <origin rpy="0 0 0" xyz="-0.17995 0 0"/>
       <geometry>
@@ -396,12 +332,6 @@
       </geometry>
       <material name="fingeredu_240_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="-0.17995 0 0"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_back.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0 0"/>
       <geometry>
@@ -409,12 +339,6 @@
       </geometry>
       <material name="fingeredu_240_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0 0"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_front.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0.02 0.08"/>
       <geometry>
@@ -422,20 +346,6 @@
       </geometry>
       <material name="fingeredu_240_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0.02 0.08"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_side_left.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
-    <!-- Disable this part.  It is not very relevant for collisions but
-                 would cause trouble in pybullet due to its concavity.
-            <xacro:add_geometry
-                rpy="0 0 0"
-                xyz="${offset_x_base_to_front} -0.02 ${offset_z_base_to_top}"
-                mesh_file="${mesh_dir}/base_side_right.stl"
-                material="${material}" />
-            -->
     <visual>
       <origin rpy="0 0 0" xyz="0.0255 0 0.08"/>
       <geometry>
@@ -443,12 +353,6 @@
       </geometry>
       <material name="fingeredu_240_material"/>
     </visual>
-    <collision>
-      <origin rpy="0 0 0" xyz="0.0255 0 0.08"/>
-      <geometry>
-        <mesh filename="package://robot_properties_fingers/meshes/stl/edu/base_top.stl" scale="1 1 1"/>
-      </geometry>
-    </collision>
     <inertial>
       <origin rpy="0 0 0" xyz="-0.1 0 0.4"/>
       <mass value="1"/>

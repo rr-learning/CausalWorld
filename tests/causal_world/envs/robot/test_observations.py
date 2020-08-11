@@ -35,10 +35,10 @@ def os_custom_keys_norm():
 
 
 lower_obs_space_structured_full = np.array(
-    [-math.radians(70), -math.radians(70), -math.radians(160)] * 3 +
+    [-1.57, -1.2, -3.0] * 3 +
     [-50] * 3 * 3 + [-0.36, -0.36, -0.36] * 3)
 upper_obs_space_structured_full = np.array(
-    [math.radians(70), 0, math.radians(-2)] * 3 + [50] * 3 * 3 +
+    [1.0, 1.57, 3.0] * 3 + [50] * 3 * 3 +
     [0.36, 0.36, 0.36] * 3)
 
 upper_99_structured_norm = np.array([0.99] * 27)
@@ -51,11 +51,10 @@ lower_101_structured_norm = np.array([-1.01] * 27)
 
 lower_obs_space_custom = np.array(
     [-0.5, -0.5, 0.0] * 3 +
-    [-math.radians(70), -math.radians(70), -math.radians(160)] * 3)
+    [-1.57, -1.2, -3.0] * 3)
 upper_obs_space_custom = np.array(
     [0.5, 0.5, 0.5] * 3 +
-    [math.radians(70), math.radians(0),
-     math.radians(-2)] * 3)
+    [1.0, 1.57, 3.0] * 3)
 
 normalized_struct_obs_to_be_clipped = np.array([1.02, 0.4, -2] * 9)
 normalized_struct_obs_clipped = np.array([1., 0.4, -1.] * 9)

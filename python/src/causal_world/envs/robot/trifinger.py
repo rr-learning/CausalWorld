@@ -198,11 +198,11 @@ class TriFingerRobot(object):
         self._robot_actions = TriFingerAction(action_mode,
                                               self._normalize_actions)
 
-    def get_upper_joint_positions(self):
+    def get_joint_positions_raised(self):
         """
         :return: (list) returns the upper joint positions limit.
         """
-        return self._robot_actions.joint_positions_upper_bounds
+        return self._robot_actions.joint_positions_raised
 
     def get_action_mode(self):
         """
@@ -720,15 +720,15 @@ class TriFingerRobot(object):
 
         :return:
         """
+        old_action_mode = self.get_action_mode()
+        self.set_action_mode('joint_positions')
         n_steps = int(time / self._simulation_time)
-        if self._pybullet_client_w_o_goal_id is not None:
-            for _ in range(n_steps):
-                pybullet.stepSimulation(
-                    physicsClientId=self._pybullet_client_w_o_goal_id)
-        if self._pybullet_client_full_id is not None:
-            for _ in range(n_steps):
-                pybullet.stepSimulation(
-                    physicsClientId=self._pybullet_client_full_id)
+        action_to_apply = self._latest_full_state['positions']
+        for _ in range(n_steps):
+            desired_torques = self.compute_pd_control_torques(action_to_apply)
+            self.send_torque_commands(desired_torque_commands=desired_torques)
+            self.step_simulation()
+        self.set_action_mode(old_action_mode)
         return
 
     def select_observations(self, observation_keys):

@@ -34,7 +34,7 @@ def test_pd_gains():
     task = task_generator(task_generator_id='pushing')
     skip_frame = 1
     env = CausalWorld(task=task,
-                      enable_visualization=False,
+                      enable_visualization=True,
                       skip_frame=skip_frame,
                       normalize_observations=False,
                       normalize_actions=False,
@@ -44,7 +44,7 @@ def test_pd_gains():
     #test bounds first
 
     for _ in range(zero_hold):
-        chosen_action = env.action_space.high
+        chosen_action = np.zeros(9, )
         obs, reward, done, info = env.step(chosen_action)
     current_joint_positions = obs[1:10]
     if (((current_joint_positions - chosen_action) > 0.1).any()):
@@ -53,7 +53,7 @@ def test_pd_gains():
             .format(chosen_action, current_joint_positions))
 
     for _ in range(zero_hold):
-        chosen_action = env.action_space.low
+        chosen_action = env.action_space.high
         obs, reward, done, info = env.step(chosen_action)
     current_joint_positions = obs[1:10]
     if (((current_joint_positions - chosen_action) > 0.1).any()):

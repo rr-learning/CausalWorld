@@ -371,10 +371,11 @@ class SilhouetteObject(object):
                 self._pybullet_client_ids[0])
         position = np.array(position)
         position[-1] -= WorldConstants.FLOOR_HEIGHT
-        vertices = [[1, 1, -1], [1, -1, -1], [-1, 1, -1], [-1, -1, -1],
-                    [1, 1, 1], [1, -1, 1], [-1, 1, 1], [-1, -1, 1]]
-        vertices = [position + (point * self._size / 2) for point in vertices]
-        return rotate_points(np.array(vertices), orientation)
+        vertices = [[1, 1, -1, 1], [1, -1, -1, 1], [-1, 1, -1, 1], [-1, -1, -1, 1],
+                    [1, 1, 1, 1], [1, -1, 1, 1], [-1, 1, 1, 1], [-1, -1, 1, 1]]
+        temp_size = np.array([self._size[0], self._size[1], self._size[2], 2])
+        vertices = [(point * temp_size / 2.0) for point in vertices]
+        return rotate_points(np.array(vertices), orientation, position)
 
     def get_size(self):
         """

@@ -159,10 +159,11 @@ class BaseTask(object):
             copy.deepcopy(self._task_stage_observation_keys)
         return state
 
-    def restore_state(self, state_dict):
+    def restore_state(self, state_dict, avoid_reloading_urdf=False):
         """
 
         :param state_dict:
+        :param avoid_reloading_urdf:
 
         :return:
         """
@@ -170,7 +171,9 @@ class BaseTask(object):
         old_number_of_visual_objects = len(self._stage.get_visual_objects())
         reset_observation_space = False
         self._stage.remove_everything()
-        if self._recreation_time != 0 and self._recreation_time % self._period_to_clear_memory == 0:
+        if not avoid_reloading_urdf and \
+                self._recreation_time != 0 and \
+                self._recreation_time % self._period_to_clear_memory == 0:
             self._create_world_func()
             self._robot._disable_velocity_control()
             self._robot.set_full_env_state(state_dict['robot_object_state'])
@@ -389,10 +392,9 @@ class BaseTask(object):
         #you can override these easily
         self._intervention_space_a = dict()
         self._intervention_space_a['joint_positions'] = \
-            np.array([[-math.radians(70), -math.radians(70),
-                       -math.radians(160)] * 3,
-                      [math.radians(40), -math.radians(20),
-                       -math.radians(30)] * 3])
+            np.array([[-1.57, -1.2, -3.0] * 3,
+                      [-0.69, 0,
+                       0] * 3])
         #any goal or object in arena put the position
         #and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
@@ -449,10 +451,9 @@ class BaseTask(object):
         # you can override these easily
         self._intervention_space_b = dict()
         self._intervention_space_b['joint_positions'] = \
-            np.array([[math.radians(40), -math.radians(20),
-                       -math.radians(30)] * 3,
-                      [math.radians(70), 0,
-                       math.radians(-2)] * 3])
+            np.array([[-0.69, 0,
+                       0] * 3,
+                      [1.0, 1.57, 3.0] * 3])
         # any goal or object in arena put the position
         # and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
@@ -1058,7 +1059,7 @@ class BaseTask(object):
                 robot_infeasible = True
                 logging.warning("Applying intervention lead to infeasibility of the robot")
             if stage_infeasible or robot_infeasible:
-                self.restore_state(current_state)
+                self.restore_state(current_state, avoid_reloading_urdf=True)
             else:
                 self._restore_pybullet_state(pre_contact_check_state)
             self._remove_pybullet_state(pre_contact_check_state)
