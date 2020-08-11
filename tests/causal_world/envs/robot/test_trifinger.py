@@ -34,7 +34,7 @@ def test_pd_gains():
     task = task_generator(task_generator_id='pushing')
     skip_frame = 1
     env = CausalWorld(task=task,
-                      enable_visualization=True,
+                      enable_visualization=False,
                       skip_frame=skip_frame,
                       normalize_observations=False,
                       normalize_actions=False,
