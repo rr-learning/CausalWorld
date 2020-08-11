@@ -23,7 +23,7 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
         :param env:
         :return:
         """
-        self.low_joint_positions = env.get_joint_positions_lower_bound()
+        self.low_joint_positions = env.get_joint_positions_raised()
         return
 
     def add_action(self, action, selected_object):
@@ -46,7 +46,7 @@ class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
         # action 2 is [0, 1, 2, 3, 4, 5, 6] 0 do nothing, 1 yaw clockwise, 2 yaw anticlockwise, 3 roll clockwise,
         # 4 roll anticlockwise, 5 pitch clockwise, 6 pitch anticlockwise
         interventions_dict = dict()
-        interventions_dict['joint_positions'] = self.low_joint_positions
+        # interventions_dict['joint_positions'] = self.low_joint_positions
         interventions_dict[self.selected_object] = dict()
         if self.current_action[1] != 0:
             interventions_dict[self.selected_object]['cartesian_position'] = \
@@ -106,6 +106,7 @@ class ObjectSelectorWrapper(gym.Wrapper):
         self.env.set_skip_frame(2)
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
+
         # self.env._disable_actions()
         self.observation_space = gym.spaces.Box(
             self.env.observation_space.low[28:],
@@ -131,7 +132,14 @@ class ObjectSelectorWrapper(gym.Wrapper):
                                            self.objects_order[action[0]])
         intervention_dict = self.intervention_actor.act(
             self.env.get_current_state_variables())
-        self.env.do_intervention(intervention_dict)
+        self.env.do_intervention(intervention_dict, check_bounds=False)
         obs, reward, done, info = self.env.step(self.env.action_space.low)
         obs = obs[28:]
         return obs, reward, done, info
+
+    def reset(self):
+        result = self.env.reset()
+        interventions_dict = dict()
+        interventions_dict['joint_positions'] = self.intervention_actor.low_joint_positions
+        self.env.do_intervention(interventions_dict, check_bounds=False)
+        return result

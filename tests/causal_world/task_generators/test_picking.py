@@ -57,6 +57,13 @@ class TestPicking(unittest.TestCase):
             obs, reward, done, info = self.env.step(desired_action)
         return desired_action
 
+    def move_first_two_fingers(self, current_obs):
+        desired_action = current_obs[19:19 + 9]
+        desired_action[:6] = [0., 0.15313708, 0.05586292, 0.13262061, -0.07656854, 0.05586292]
+        for _ in range(250):
+            obs, reward, done, info = self.env.step(desired_action)
+        return obs
+
     def grip_block(self):
         grip_locations = get_suggested_grip_locations(
             self.env._task._stage.get_object('tool_block').get_size(),
@@ -73,7 +80,7 @@ class TestPicking(unittest.TestCase):
 
     def lift_block(self, desired_grip):
         desired_action = desired_grip
-        for _ in range(50):
+        for _ in range(40):
             desired_action[2] += 0.005
             desired_action[5] += 0.005
             for _ in range(10):
@@ -86,6 +93,7 @@ class TestPicking(unittest.TestCase):
         self.env.do_intervention(interventions_dict=intervention)
         for _ in range(1):
             obs = self.env.reset()
+            obs = self.move_first_two_fingers(obs)
             self.lift_last_finger_first(obs)
             desired_grip = self.grip_block()
             self.assertEqual(self.env.get_robot().get_tip_contact_states(),
@@ -100,6 +108,7 @@ class TestPicking(unittest.TestCase):
         self.env.do_intervention(interventions_dict=intervention)
         for _ in range(1):
             obs = self.env.reset()
+            obs = self.move_first_two_fingers(obs)
             self.lift_last_finger_first(obs)
             desired_grip = self.grip_block()
             self.assertEqual(self.env.get_robot().get_tip_contact_states(),
@@ -114,6 +123,7 @@ class TestPicking(unittest.TestCase):
         self.env.do_intervention(interventions_dict=intervention)
         for _ in range(1):
             obs = self.env.reset()
+            obs = self.move_first_two_fingers(obs)
             self.lift_last_finger_first(obs)
             desired_grip = self.grip_block()
             self.assertEqual(self.env.get_robot().get_tip_contact_states(),

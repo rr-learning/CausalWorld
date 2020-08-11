@@ -78,7 +78,7 @@ class TowersGeneratorTask(BaseTask):
         :return:
         """
         self._stage.remove_everything()
-        joint_positions = self._robot.get_upper_joint_positions()
+        joint_positions = self._robot.get_joint_positions_raised()
         self._robot.set_full_state(np.append(joint_positions, np.zeros(9)))
         self._task_stage_observation_keys = []
         block_size = tower_dims / number_of_blocks_in_tower

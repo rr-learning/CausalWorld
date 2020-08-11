@@ -1,7 +1,7 @@
 from causal_world.envs.scene.observations import StageObservations
 from causal_world.envs.scene.objects import Cuboid, StaticCuboid, MeshObject
 from causal_world.envs.scene.silhouette import SCuboid, SSphere, SMeshObject
-from causal_world.utils.state_utils import get_intersection
+from causal_world.utils.state_utils import get_intersection, get_bounding_box_volume
 import math
 import numpy as np
 import pybullet
@@ -153,7 +153,7 @@ class Stage(object):
                                                   **visual_object_info[1])
         self.apply_interventions(env_state['arena_scm_values'])
         #update the stage observations with them
-        self._stage_observations.visual_objects = self._rigid_objects
+        self._stage_observations.rigid_objects = self._rigid_objects
         self._stage_observations.visual_objects = self._visual_objects
         return env_state
 
@@ -207,6 +207,7 @@ class Stage(object):
         """
         current_objects = list(self._rigid_objects.keys()) + \
                           list(self._visual_objects.keys())
+        current_objects = current_objects[::-1]
         for name in current_objects:
             self.remove_general_object(name)
         return

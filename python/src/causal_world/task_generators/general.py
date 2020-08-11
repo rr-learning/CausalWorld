@@ -191,13 +191,15 @@ class GeneralGeneratorTask(BaseTask):
         """
         #raise the fingers
         self._stage.remove_everything()
+        stage_low_bound = np.array(self._stage.get_arena_bb()[0])
+        stage_low_bound[:2] += 0.04
+        stage_upper_bound = np.array(self._stage.get_arena_bb()[1])
+        stage_upper_bound[:2] -= 0.04
+        stage_upper_bound[2] -= 0.08
         self._task_stage_observation_keys = []
-        silhouettes_creation_dicts = []
-        joint_positions = self._robot.get_upper_joint_positions()
+        joint_positions = self._robot.get_joint_positions_raised()
         self._robot.reset_state(joint_positions=joint_positions,
                                 joint_velocities=np.zeros(9))
-        # self.task_params["object_configs_list"] = []
-        # self.rigid_objects_names = []
         for object_num in range(self.nums_objects):
             if default_bool:
                 dropping_position = self.default_drop_positions[
@@ -205,8 +207,8 @@ class GeneralGeneratorTask(BaseTask):
                 dropping_orientation = [0, 0, 0, 1]
             else:
                 dropping_position = np.random.uniform(
-                    self._stage.get_arena_bb()[0],
-                    self._stage.get_arena_bb()[1])
+                    stage_low_bound,
+                    stage_upper_bound)
                 dropping_orientation = euler_to_quaternion(
                     np.random.uniform(low=0, high=2 * math.pi, size=3))
             creation_dict = {
@@ -231,7 +233,7 @@ class GeneralGeneratorTask(BaseTask):
             self._task_stage_observation_keys.append("tool_" + str(object_num) +
                                                      '_angular_velocity')
             # turn on simulation for 0.5 seconds
-            self._robot.forward_simulation(time=0.5)
+            self._robot.forward_simulation(time=0.8)
         for rigid_object in self._stage._rigid_objects:
             #search for the rigid object in the creation list
             creation_dict = {
@@ -277,7 +279,7 @@ class GeneralGeneratorTask(BaseTask):
                                              orientations=[block_orientation])
                 self._robot.step_simulation()
                 trial_index += 1
-        self._robot.reset_state(joint_positions=self._robot.get_rest_pose()[0],
+        self._robot.reset_state(joint_positions=joint_positions,
                                 joint_velocities=np.zeros([
                                     9,
                                 ]))

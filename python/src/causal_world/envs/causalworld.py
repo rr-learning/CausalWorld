@@ -104,35 +104,36 @@ class CausalWorld(gym.Env):
             os.path.dirname(__file__),
             "../../../assets/robot_properties_fingers")
         self._finger_urdf_path = os.path.join(self._robot_properties_path,
-                                              "urdf", "trifinger.urdf")
+                                              "urdf", "trifinger_edu.urdf")
         self._create_world(initialize_goal_image=True)
         self._tool_cameras = None
         self._goal_cameras = None
         if observation_mode == 'cameras':
+            #TODO: change camera params after calibration on the real system
             self._tool_cameras = []
             self._tool_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4190],
+                Camera(camera_position=[0.2496, 0.2458, 0.58],
                        camera_orientation=[0.3760, 0.8690, -0.2918, -0.1354],
                        pybullet_client_id=self._pybullet_client_w_o_goal_id))
             self._tool_cameras.append(
-                Camera(camera_position=[0.0047, -0.2834, 0.4558],
+                Camera(camera_position=[0.0047, -0.2834, 0.58],
                        camera_orientation=[0.9655, -0.0098, -0.0065, -0.2603],
                        pybullet_client_id=self._pybullet_client_w_o_goal_id))
             self._tool_cameras.append(
-                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
+                Camera(camera_position=[-0.2470, 0.2513, 0.50],
                        camera_orientation=[-0.3633, 0.8686, -0.3141, 0.1220],
                        pybullet_client_id=self._pybullet_client_w_o_goal_id))
             self._goal_cameras = []
             self._goal_cameras.append(
-                Camera(camera_position=[0.2496, 0.2458, 0.4190],
+                Camera(camera_position=[0.2496, 0.2458, 0.58],
                        camera_orientation=[0.3760, 0.8690, -0.2918, -0.1354],
                        pybullet_client_id=self._pybullet_client_w_goal_id))
             self._goal_cameras.append(
-                Camera(camera_position=[0.0047, -0.2834, 0.4558],
+                Camera(camera_position=[0.0047, -0.2834, 0.58],
                        camera_orientation=[0.9655, -0.0098, -0.0065, -0.2603],
                        pybullet_client_id=self._pybullet_client_w_goal_id))
             self._goal_cameras.append(
-                Camera(camera_position=[-0.2470, 0.2513, 0.3943],
+                Camera(camera_position=[-0.2470, 0.2513, 0.50],
                        camera_orientation=[-0.3633, 0.8686, -0.3141, 0.1220],
                        pybullet_client_id=self._pybullet_client_w_goal_id))
         self._robot = TriFingerRobot(
@@ -656,7 +657,7 @@ class CausalWorld(gym.Env):
         """
         return self._task.get_intervention_space_a_b()
 
-    def get_joint_positions_lower_bound(self):
+    def get_joint_positions_raised(self):
         """
         Returns the absolute lower bound of the actions space.
 
@@ -664,7 +665,7 @@ class CausalWorld(gym.Env):
                             low bound of the joints.
         """
         return self._robot._robot_actions.\
-            joint_positions_lower_bounds
+            joint_positions_raised
 
     def get_action_mode(self):
         """
@@ -841,7 +842,7 @@ class CausalWorld(gym.Env):
 
         stage_id = pybullet.createCollisionShape(
             shapeType=pybullet.GEOM_MESH,
-            fileName=mesh_path("high_table_boundary.stl"),
+            fileName=mesh_path("edu/frame_wall.stl"),
             flags=pybullet.GEOM_FORCE_CONCAVE_TRIMESH,
             physicsClientId=pybullet_client)
         obj = pybullet.createMultiBody(baseCollisionShapeIndex=stage_id,

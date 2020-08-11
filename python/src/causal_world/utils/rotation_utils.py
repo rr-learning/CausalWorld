@@ -53,9 +53,13 @@ def quaternion_mul(q0, q1):
     return q
 
 
-def rotate_points(points_batch, r_quaternion):
+def rotate_points(points_batch, r_quaternion, position):
     r = R.from_quat(r_quaternion)
-    return np.transpose(np.matmul(r.as_matrix(), np.transpose(points_batch)))
+    pose = np.zeros((4, 4))
+    pose[:3, :3] = r.as_matrix()
+    pose[:3, 3] = position
+    pose[3, 3] = 1
+    return np.transpose(np.matmul(pose, points_batch.T))
 
 
 def get_transformation_matrix(translation, r_quaternion):
