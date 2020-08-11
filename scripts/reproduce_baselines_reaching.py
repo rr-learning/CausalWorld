@@ -36,7 +36,7 @@ def baseline_model(model_num):
     benchmarks = sweep('benchmarks', [REACHING_BENCHMARK])
     task_configs = [{
         'task_configs': {
-            'variables_space': 'space_a',
+            'use_train_space_only': True,
             'fractional_reward_weight': 1,
             'dense_reward_weights': [100000, 0, 0, 0]
         }
