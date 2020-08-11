@@ -2,7 +2,7 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class ObjectColorsTestSpace(Protocol):
+class ObjectColorsSpaceB(Protocol):
 
     def __init__(self):
         """

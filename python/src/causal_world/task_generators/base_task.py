@@ -968,6 +968,10 @@ class BaseTask(object):
                                  [sub_variable_name][1] <
                                  interventions_dict[intervention][sub_variable_name]).any()):
                             return False
+                        elif sub_variable_name not in intervention_space[intervention]:
+                            return False
+            else:
+                return False
         return True
 
     def divide_intervention_dict(self, interventions_dict):
@@ -1074,7 +1078,7 @@ class BaseTask(object):
                task_generator_intervention_success_signal, \
                interventions_info, reset_observation_space_signal
 
-    def do_intervention(self, interventions_dict, check_bounds=None):
+    def do_intervention(self, interventions_dict, check_bounds=True):
         """
 
         :param interventions_dict:
@@ -1082,8 +1086,6 @@ class BaseTask(object):
 
         :return:
         """
-        if check_bounds is None:
-            check_bounds = True
         success_signal, interventions_info, reset_observation_space_signal = \
             self.apply_interventions(interventions_dict,
                                      check_bounds=check_bounds)
