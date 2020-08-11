@@ -760,7 +760,7 @@ class Stage(object):
             if get_intersection(self._visual_objects[visual_object].
                                    get_bounding_box(),
                                    self._get_stage_bb())/\
-                    self._visual_objects[visual_object].get_volume() < 0.60:
+                    self._visual_objects[visual_object].get_volume() < 0.50:
                 return False
         return True
 

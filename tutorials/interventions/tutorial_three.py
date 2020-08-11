@@ -7,7 +7,7 @@ from causal_world.task_generators.task import task_generator
 
 
 def goal_interventions():
-    task = task_generator(task_generator_id='picking')
+    task = task_generator(task_generator_id='stacked_blocks')
     env = CausalWorld(task=task, enable_visualization=True)
     env.reset()
     for _ in range(10):

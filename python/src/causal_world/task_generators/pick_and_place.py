@@ -1,7 +1,7 @@
 from causal_world.task_generators.base_task import BaseTask
 import numpy as np
 from causal_world.utils.rotation_utils import quaternion_conjugate, \
-    quaternion_mul
+    quaternion_mul, cart2cyl
 
 
 class PickAndPlaceTaskGenerator(BaseTask):
@@ -291,13 +291,24 @@ class PickAndPlaceTaskGenerator(BaseTask):
 
         :return:
         """
+        intervention_space = self.get_variable_space_used()
         if side == 0:
-            return self._stage.random_position(height_limits=0.0325,
+            return self._stage.random_position(height_limits=intervention_space['goal_block']
+                                                             ['cylindrical_position'][:, 2],
+                                               angle_limits=intervention_space['goal_block']
+                                                            ['cylindrical_position'][:, 1],
+                                               radius_limits=intervention_space['goal_block']
+                                                             ['cylindrical_position'][:, 0],
                                                allowed_section=np.array(
                                                    [[-0.5, -0.5, 0],
                                                     [0.5, -0.065, 0.5]]))
         else:
-            return self._stage.random_position(height_limits=0.0325,
+            return self._stage.random_position(height_limits=intervention_space['goal_block']
+                                                             ['cylindrical_position'][:, 2],
+                                               angle_limits=intervention_space['goal_block']
+                                                             ['cylindrical_position'][:, 1],
+                                               radius_limits=intervention_space['goal_block']
+                                                             ['cylindrical_position'][:, 0],
                                                allowed_section=np.array(
                                                    [[-0.5, 0.065, 0],
                                                     [0.5, 0.5, 0.5]]))
@@ -315,11 +326,11 @@ class PickAndPlaceTaskGenerator(BaseTask):
         intervention_dict['tool_block'] = dict()
         intervention_dict['goal_block'] = dict()
         if rigid_block_side == 0:
-            intervention_dict['tool_block']['cartesian_position'] = np.array(
-                [0, -0.1, 0.0325])
+            intervention_dict['tool_block']['cylindrical_position'] = np.array(
+                [0.09, -np.pi/2, 0.0325])
         else:
-            intervention_dict['tool_block']['cartesian_position'] = np.array(
-                [0, 0.1, 0.0325])
+            intervention_dict['tool_block']['cylindrical_position'] = np.array(
+                [0.09, np.pi/2, 0.0325])
         intervention_dict['goal_block']['cylindrical_position'] = \
-            self._get_random_block_position_on_side(goal_block_side)
+            cart2cyl(self._get_random_block_position_on_side(goal_block_side))
         return intervention_dict
