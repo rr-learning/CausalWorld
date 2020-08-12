@@ -754,7 +754,7 @@ class Stage(object):
         """
         for contact in pybullet.getContactPoints(
                 physicsClientId=self._rigid_objects_client_instances[0]):
-            if contact[8] < -0.08:
+            if contact[8] < -0.03:
                 return False
         #check if all the visual objects are within the bb og the available arena
         for visual_object in self._visual_objects:
