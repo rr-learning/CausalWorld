@@ -403,8 +403,9 @@ class BaseTask(object):
         #and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
             self._intervention_space_a[rigid_object] = dict()
+            height = self._stage.get_object_state(rigid_object, 'size')[-1]
             self._intervention_space_a[rigid_object]['cylindrical_position'] = \
-                np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
+                np.array([[0.0, - math.pi, height/2.0], [0.11, math.pi, 0.15]])
             self._intervention_space_a[rigid_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
@@ -416,9 +417,10 @@ class BaseTask(object):
             self._intervention_space_a[rigid_object]['mass'] = \
                 np.array([0.05, 0.1])
         for visual_object in self._stage._visual_objects:
+            height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_a[visual_object] = dict()
             self._intervention_space_a[visual_object]['cylindrical_position'] = \
-                np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
+                np.array([[0.0, - math.pi, height/2.0], [0.11, math.pi, 0.15]])
             self._intervention_space_a[visual_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_visual_objects(
@@ -455,29 +457,31 @@ class BaseTask(object):
         # any goal or object in arena put the position
         # and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
+            height = self._stage.get_object_state(rigid_object, 'size')[-1]
             self._intervention_space_b[rigid_object] = dict()
             self._intervention_space_b[rigid_object]['cylindrical_position'] = \
-                np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
+                np.array([[0.11, - math.pi, height/2.0], [0.15, math.pi, 0.3]])
             self._intervention_space_b[rigid_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
             )[rigid_object].__class__.__name__ == 'Cuboid':
                 self._intervention_space_b[rigid_object]['size'] = \
-                    np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+                    np.array([[0.065, 0.065, 0.065], [0.085, 0.085, 0.085]])
             self._intervention_space_b[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
             self._intervention_space_b[rigid_object]['mass'] = \
                 np.array([0.1, 0.2])
         for visual_object in self._stage.get_visual_objects():
+            height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_b[visual_object] = dict()
             self._intervention_space_b[visual_object]['cylindrical_position'] = \
-                np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
+                np.array([[0.11, - math.pi, height/2.0], [0.15, math.pi, 0.3]])
             self._intervention_space_b[visual_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_visual_objects(
             )[visual_object].__class__.__name__ == 'SCuboid':
                 self._intervention_space_b[visual_object]['size'] = \
-                    np.array([[0.065, 0.065, 0.065], [0.075, 0.075, 0.075]])
+                    np.array([[0.065, 0.065, 0.065], [0.085, 0.085, 0.085]])
             self._intervention_space_b[visual_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self._intervention_space_b['floor_color'] = \
@@ -1019,22 +1023,16 @@ class BaseTask(object):
             interventions_info['out_bounds'] = True
             logging.warning("Applying intervention is out of bounds " + str(interventions_dict))
             return False, interventions_info, False
-        interventions_dict = \
-            dict(self._handle_contradictory_interventions(interventions_dict))
         if check_bounds and not self.is_intervention_in_bounds(
                 interventions_dict):
             interventions_info['out_bounds'] = True
             logging.warning("Applying intervention is out of bounds " + str(interventions_dict))
             return False, interventions_info, False
-        #now divide the interventions
+        interventions_dict = \
+            dict(self._handle_contradictory_interventions(interventions_dict))
         robot_interventions_dict, stage_interventions_dict, \
         task_generator_interventions_dict = \
             self.divide_intervention_dict(interventions_dict)
-        # current_stage_state = self.stage.get_full_state()
-        # if self.robot.is_initialized():
-        #     current_robot_state = self.robot.get_full_state()
-        # else:
-        #     current_robot_state = self.robot.get_default_state()
         current_state = self.save_state()
         self._robot.apply_interventions(robot_interventions_dict)
         self._stage.apply_interventions(stage_interventions_dict)
@@ -1044,7 +1042,6 @@ class BaseTask(object):
         #TODO: this is a hack for now to not check feasibility when adding/removing objects since
         #The stage state is quite different afterwards and it will be hard to restore its exact state
         #we dont handle this
-
         if len(task_generator_interventions_dict) == 0:
             pre_contact_check_state = self._save_pybullet_state()
             self._robot.step_simulation()
@@ -1065,9 +1062,18 @@ class BaseTask(object):
             stage_infeasible
         interventions_info['task_generator_infeasible'] = \
             not task_generator_intervention_success_signal
-        return not robot_infeasible and \
+        success = not robot_infeasible and \
                not stage_infeasible and \
-               task_generator_intervention_success_signal, \
+               task_generator_intervention_success_signal
+        if success:
+            for intervention in interventions_dict:
+                if isinstance(interventions_dict[intervention], dict):
+                    if 'size' in interventions_dict[intervention]:
+                        height = self._stage.get_object_state(intervention, 'size')[-1]
+                        self._intervention_space_a[intervention]['cylindrical_position'][0][-1] = height / 2.0
+                        self._intervention_space_b[intervention]['cylindrical_position'][0][-1] = height / 2.0
+                        self._intervention_space_a_b[intervention]['cylindrical_position'][0][-1] = height / 2.0
+        return success, \
                interventions_info, reset_observation_space_signal
 
     def do_intervention(self, interventions_dict, check_bounds=True):

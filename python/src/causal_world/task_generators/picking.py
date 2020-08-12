@@ -92,13 +92,6 @@ class PickingTaskGenerator(BaseTask):
         :return:
         """
         super(PickingTaskGenerator, self)._set_intervention_space_a()
-        for rigid_object in self._stage.get_rigid_objects():
-            self._intervention_space_a[rigid_object]['cylindrical_position'][0][
-                -1] \
-                = 0.0325
-            self._intervention_space_a[rigid_object]['cylindrical_position'][1][
-                -1] \
-                = 0.0325
         for visual_object in self._stage.get_visual_objects():
             self._intervention_space_a[visual_object]['cylindrical_position'][
                 0][-1] \
@@ -114,13 +107,6 @@ class PickingTaskGenerator(BaseTask):
         :return:
         """
         super(PickingTaskGenerator, self)._set_intervention_space_b()
-        for rigid_object in self._stage.get_rigid_objects():
-            self._intervention_space_b[rigid_object]['cylindrical_position'][0][
-                -1] \
-                = 0.0325
-            self._intervention_space_b[rigid_object]['cylindrical_position'][1][
-                -1] \
-                = 0.0325
         for visual_object in self._stage.get_visual_objects():
             self._intervention_space_b[visual_object]['cylindrical_position'][0][
                 -1] \
@@ -171,8 +157,6 @@ class PickingTaskGenerator(BaseTask):
         end_effector_positions = end_effector_positions.reshape(-1, 3)
         current_distance_from_block = np.linalg.norm(end_effector_positions -
                                                      block_position)
-        # print("block position is ", block_position)
-        # print("end effector positions ", end_effector_positions)
         previous_distance_from_block = np.linalg.norm(
             self.previous_end_effector_positions -
             self.previous_object_position)

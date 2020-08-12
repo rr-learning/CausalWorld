@@ -241,6 +241,14 @@ class SilhouetteObject(object):
             position[-1] -= WorldConstants.FLOOR_HEIGHT
             return position
 
+        elif variable_name == 'cylindrical_position':
+            position, orientation = pybullet.getBasePositionAndOrientation(
+                self._block_ids[0],
+                physicsClientId=self._pybullet_client_ids[0])
+            position = np.array(position)
+            position[-1] -= WorldConstants.FLOOR_HEIGHT
+            return cart2cyl(position)
+
         elif variable_name == 'orientation':
             position, orientation = pybullet.getBasePositionAndOrientation(
                 self._block_ids[0],
@@ -308,7 +316,7 @@ class SilhouetteObject(object):
             self._size = interventions_dict['size']
             self._set_volume()
             self.reinit_object()
-        elif 'cartesian_position' in interventions_dict or 'orientation' in \
+        if 'cartesian_position' in interventions_dict or 'orientation' in \
                 interventions_dict:
             for i in range(0, len(self._pybullet_client_ids)):
                 position[-1] += WorldConstants.FLOOR_HEIGHT

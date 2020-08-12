@@ -86,42 +86,27 @@ class PushingTaskGenerator(BaseTask):
         ]
         return
 
-    def _set_intervention_space_a(self):
+    def sample_new_goal(self, level=None):
         """
+
+        :param level:
 
         :return:
         """
-        super(PushingTaskGenerator, self)._set_intervention_space_a()
-        for rigid_object in self._stage.get_rigid_objects():
-            # TODO: make it a function of size
-            self._intervention_space_a[rigid_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_a[rigid_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-        for visual_object in self._stage.get_visual_objects():
-            self._intervention_space_a[visual_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_a[visual_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-        return
-
-    def _set_intervention_space_b(self):
-        """
-
-        :return:
-        """
-        super(PushingTaskGenerator, self)._set_intervention_space_b()
-        for rigid_object in self._stage.get_rigid_objects():
-            self._intervention_space_b[rigid_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_b[rigid_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-        for visual_object in self._stage.get_visual_objects():
-            self._intervention_space_b[visual_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_b[visual_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-        return
+        intervention_space = self.get_variable_space_used()
+        pos_low_bound = np.array(intervention_space['goal_block']['cylindrical_position'][0])
+        pos_low_bound[-1] = self._stage.get_object_state('tool_block', 'size')[-1]/2.0
+        pos_upper_bound = np.array(intervention_space['goal_block']['cylindrical_position'][1])
+        pos_upper_bound[-1] = self._stage.get_object_state('tool_block', 'size')[-1]/2.0
+        intervention_dict = dict()
+        intervention_dict['goal_block'] = dict()
+        intervention_dict['goal_block']['cylindrical_position'] = \
+            np.random.uniform(pos_low_bound,
+                              pos_upper_bound)
+        intervention_dict['goal_block']['euler_orientation'] = \
+            np.random.uniform(intervention_space['goal_block']['euler_orientation'][0],
+                              intervention_space['goal_block']['euler_orientation'][1])
+        return intervention_dict
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
         """
@@ -227,19 +212,36 @@ class PushingTaskGenerator(BaseTask):
 
         :return:
         """
-        # for example size on goal_or tool should be propagated to the other
-        # TODO:if a goal block intervention would lead to change of sides then
-        # change the other side as well?
         if 'goal_block' in interventions_dict:
             if 'size' in interventions_dict['goal_block']:
                 if 'tool_block' not in interventions_dict:
                     interventions_dict['tool_block'] = dict()
                 interventions_dict['tool_block']['size'] = \
                     interventions_dict['goal_block']['size']
+                if 'cartesian_position' not in interventions_dict['tool_block'] and \
+                        'cylindrical_position' not in interventions_dict['tool_block']:
+                    cyl_pos_tool = self._stage.get_object_state('tool_block', 'cylindrical_position')
+                    cyl_pos_tool[-1] = interventions_dict['goal_block']['size'][-1] / 2.0
+                    interventions_dict['tool_block']['cylindrical_position'] = cyl_pos_tool
+                if 'cartesian_position' not in interventions_dict['goal_block'] and \
+                    'cylindrical_position' not in interventions_dict['goal_block']:
+                    cyl_pos_goal = self._stage.get_object_state('goal_block', 'cylindrical_position')
+                    cyl_pos_goal[-1] = interventions_dict['goal_block']['size'][-1] / 2.0
+                    interventions_dict['goal_block']['cylindrical_position'] = cyl_pos_goal
         elif 'tool_block' in interventions_dict:
             if 'size' in interventions_dict['tool_block']:
                 if 'goal_block' not in interventions_dict:
                     interventions_dict['goal_block'] = dict()
                 interventions_dict['goal_block']['size'] = \
                     interventions_dict['tool_block']['size']
+                if 'cartesian_position' not in interventions_dict['tool_block'] and \
+                        'cylindrical_position' not in interventions_dict['tool_block']:
+                    cyl_pos_tool = self._stage.get_object_state('tool_block', 'cylindrical_position')
+                    cyl_pos_tool[-1] = interventions_dict['tool_block']['size'][-1] / 2.0
+                    interventions_dict['tool_block']['cylindrical_position'] = cyl_pos_tool
+                if 'cartesian_position' not in interventions_dict['goal_block'] and \
+                        'cylindrical_position' not in interventions_dict['goal_block']:
+                    cyl_pos_goal = self._stage.get_object_state('goal_block', 'cylindrical_position')
+                    cyl_pos_goal[-1] = interventions_dict['tool_block']['size'][-1] / 2.0
+                    interventions_dict['goal_block']['cylindrical_position'] = cyl_pos_goal
         return interventions_dict

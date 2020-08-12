@@ -261,7 +261,7 @@ class GeneralGeneratorTask(BaseTask):
             #choose a random position for the rigid object now
             trial_index = 1
             block_position = self._stage.random_position(
-                height_limits=[0.0325, 0.15])
+                height_limits=[self.tool_block_size/2.0, 0.15])
             block_orientation = euler_to_quaternion(
                 [0, 0, np.random.uniform(-np.pi, np.pi)])
             self._stage.set_objects_pose(names=[rigid_object],
@@ -271,7 +271,7 @@ class GeneralGeneratorTask(BaseTask):
             while not self._stage.check_feasiblity_of_stage() and \
                     trial_index < 10:
                 block_position = self._stage.random_position(
-                    height_limits=[0.0325, 0.15])
+                    height_limits=[self.tool_block_size/2.0, 0.15])
                 block_orientation = euler_to_quaternion(
                     [0, 0, np.random.uniform(-np.pi, np.pi)])
                 self._stage.set_objects_pose(names=[rigid_object],

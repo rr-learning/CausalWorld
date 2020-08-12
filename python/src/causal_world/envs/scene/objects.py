@@ -209,10 +209,16 @@ class RigidObject(object):
                 self._block_ids[0],
                 physicsClientId=self._pybullet_client_ids[0])
             position = np.array(position)
-            # print("raw position", position)
             position[-1] -= WorldConstants.FLOOR_HEIGHT
-            # print("processed position", position)
             return position
+
+        elif variable_name == 'cylindrical_position':
+            position, orientation = pybullet.getBasePositionAndOrientation(
+                self._block_ids[0],
+                physicsClientId=self._pybullet_client_ids[0])
+            position = np.array(position)
+            position[-1] -= WorldConstants.FLOOR_HEIGHT
+            return cart2cyl(position)
 
         elif variable_name == 'orientation':
             position, orientation = pybullet.getBasePositionAndOrientation(
@@ -470,15 +476,6 @@ class RigidObject(object):
             self._size = interventions_dict['size']
             self._set_volume()
             self.reinit_object()
-        elif 'cartesian_position' in interventions_dict or 'orientation' in \
-                interventions_dict:
-            for i in range(0, len(self._pybullet_client_ids)):
-                position[-1] += WorldConstants.FLOOR_HEIGHT
-                pybullet.resetBasePositionAndOrientation(
-                    self._block_ids[i],
-                    position,
-                    orientation,
-                    physicsClientId=self._pybullet_client_ids[i])
         elif 'mass' in interventions_dict:
             for i in range(0, len(self._pybullet_client_ids)):
                 pybullet.changeDynamics(
@@ -488,6 +485,16 @@ class RigidObject(object):
                     physicsClientId=self._pybullet_client_ids[i])
         elif 'friction' in interventions_dict:
             self._set_lateral_friction(self._lateral_friction)
+
+        if 'cartesian_position' in interventions_dict or 'orientation' in \
+                interventions_dict:
+            for i in range(0, len(self._pybullet_client_ids)):
+                position[-1] += WorldConstants.FLOOR_HEIGHT
+                pybullet.resetBasePositionAndOrientation(
+                    self._block_ids[i],
+                    position,
+                    orientation,
+                    physicsClientId=self._pybullet_client_ids[i])
 
         if 'color' in interventions_dict:
             self._color = interventions_dict['color']
