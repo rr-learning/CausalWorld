@@ -16,7 +16,7 @@ def example():
                       enable_visualization=True,
                       seed=0,
                       action_mode="joint_positions",
-                      observation_mode="cameras",
+                      observation_mode="pixel",
                       camera_indicies=[0, 1, 2])
     env.reset()
     for _ in range(5):
