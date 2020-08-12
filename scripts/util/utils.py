@@ -34,6 +34,9 @@ def get_latest_checkpoint_path(model_path):
 
 
 def save_model_settings(file_path, model_settings):
+    # TODO: this needs to be solved in a different way in the future!
+    model_settings['intervention_actors'] = [actor.__class__.__name__ for actor
+                                             in model_settings['intervention_actors']]
     with open(file_path, 'w') as fout:
         json.dump(model_settings, fout, indent=4, default=lambda x: x.__dict__)
 

@@ -5,7 +5,7 @@ from causal_world.task_generators.task import task_generator
 import causal_world.viewers.task_viewer as viewer
 import causal_world.evaluation.visualization.visualiser as vis
 
-from CausalWorld.scripts.util import utils as utils, utils_baselines as utils_baselines
+from util import utils as utils, utils_baselines as utils_baselines
 import argparse
 import os
 

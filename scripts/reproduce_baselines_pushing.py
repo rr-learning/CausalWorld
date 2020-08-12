@@ -35,7 +35,7 @@ def baseline_model(model_num):
     NUM_RANDOM_SEEDS = 5
     random_seeds = utils.sweep('seed', list(range(NUM_RANDOM_SEEDS)))
 
-    ppo = {'num_of_envs': 2,
+    ppo = {'num_of_envs': 20,
            'algorithm': 'PPO',
            'validate_every_timesteps': int(2000000),
            'total_time_steps': int(80000001),
