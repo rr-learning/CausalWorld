@@ -7,7 +7,7 @@ import pytest
 
 @pytest.fixture(scope='module')
 def os_camera_full():
-    return TriFingerObservations(observation_mode="cameras",
+    return TriFingerObservations(observation_mode="pixel",
                                  normalize_observations=False)
 
 

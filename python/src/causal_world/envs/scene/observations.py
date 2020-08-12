@@ -28,7 +28,7 @@ class StageObservations(object):
         self._camera_indicies = camera_indicies
         self._low_norm = -1
         self._high_norm = 1
-        if observation_mode == "cameras":
+        if observation_mode == "pixel":
             self._low_norm = 0
             self._high_norm = 1
 

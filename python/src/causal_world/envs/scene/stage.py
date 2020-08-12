@@ -276,7 +276,7 @@ class Stage(object):
 
         :return:
         """
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             self._stage_observations = StageObservations(
                 self._rigid_objects,
                 self._visual_objects,
@@ -349,7 +349,7 @@ class Stage(object):
                 end = start + object.get_state_size()
                 object.set_full_state(new_state[start:end])
             start = end
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             self.update_goal_image()
         return
 
@@ -372,7 +372,7 @@ class Stage(object):
                 object.set_pose(positions[i], orientations[i])
             else:
                 raise Exception("Object {} doesnt exist".format(name))
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             self.update_goal_image()
         return
 
@@ -456,7 +456,7 @@ class Stage(object):
                 "The key {} passed doesn't exist in the stage yet".format(key))
         # save the old state of the object before intervention
         object.apply_interventions(interventions_dict)
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             self.update_goal_image()
         #self.pybullet_client.stepSimulation()
         return
@@ -562,7 +562,7 @@ class Stage(object):
             else:
                 raise Exception("The intervention on stage "
                                 "is not supported yet")
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             self.update_goal_image()
         return
 

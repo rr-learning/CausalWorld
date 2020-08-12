@@ -53,10 +53,10 @@ class CausalWorld(gym.Env):
                                      deterministic at the moment since it uses
                                      IK of pybullet and lastly "joint_torques".
         :param observation_mode: (string) observation modes available are
-                                          "structured" or "cameras" modes.
+                                          "structured" or "pixel" modes.
                                           The structured observations are
                                           specified in the task generator
-                                          itself. For the "cameras" mode
+                                          itself. For the "pixel" mode
                                           you will get maximum 6 images
                                           concatenated where the first half
                                           are the current images rendered in
@@ -237,12 +237,12 @@ class CausalWorld(gym.Env):
         return self._normalize_observations
 
     def _reset_observations_space(self):
-        if self._observation_mode == "cameras" and self.observation_space is None:
+        if self._observation_mode == "pixel" and self.observation_space is None:
             self._stage.select_observations(["goal_image"])
             self.observation_space = combine_spaces(
                 self._robot.get_observation_spaces(),
                 self._stage.get_observation_spaces())
-        elif self._observation_mode == "cameras" and self.observation_space is not None:
+        elif self._observation_mode == "pixel" and self.observation_space is not None:
             return
         else:
             self._robot.select_observations(
@@ -269,7 +269,7 @@ class CausalWorld(gym.Env):
         self._episode_length += 1
         if not self._disabled_actions:
             self._robot.apply_action(action)
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
             observation = np.concatenate((current_images, goal_images), axis=0)
@@ -355,7 +355,7 @@ class CausalWorld(gym.Env):
                 task_name=self._task._task_name,
                 task_params=self._task.get_task_params(),
                 world_params=self.get_world_params())
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
             return np.concatenate((current_images, goal_images), axis=0)
@@ -424,7 +424,7 @@ class CausalWorld(gym.Env):
                 if not success_signal:
                     logging.warning("Invalid Intervention was just executed!")
                     self._tracker.add_invalid_intervention(interventions_info)
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
             obs = np.concatenate((current_images, goal_images), axis=0)
@@ -456,7 +456,7 @@ class CausalWorld(gym.Env):
             if not success_signal:
                 logging.warning("Invalid Intervention was just executed!")
                 self._tracker.add_invalid_intervention(interventions_info)
-        if self._observation_mode == "cameras":
+        if self._observation_mode == "pixel":
             current_images = self._robot.get_current_camera_observations()
             goal_images = self._stage.get_current_goal_image()
             obs = np.concatenate((current_images, goal_images), axis=0)

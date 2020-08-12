@@ -18,7 +18,7 @@ def robot_jp_camera():
     task = task_generator(task_generator_id='pushing')
     return CausalWorld(task=task,
                        enable_visualization=False,
-                       observation_mode="cameras")
+                       observation_mode="pixel")
 
 
 def test_action_mode_switching(robot_jp_structured):
