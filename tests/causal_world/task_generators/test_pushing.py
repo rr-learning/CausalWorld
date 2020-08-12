@@ -53,7 +53,6 @@ class TestPushing(unittest.TestCase):
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
         self.env.set_starting_state(interventions_dict=new_goal)
-        self.env.reset()
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             observations_1.append(obs)
@@ -83,7 +82,6 @@ class TestPushing(unittest.TestCase):
         actions = np.array(actions)
         intervention = {'tool_block': {'cartesian_positions': [0, 0.3, 0.2]}}
         self.env.set_starting_state(interventions_dict=intervention)
-        self.env.reset()
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             observations_1.append(obs)
@@ -145,7 +143,6 @@ class TestPushing(unittest.TestCase):
             ).invalid_intervention_steps
             new_goal = env.sample_new_goal()
             env.set_starting_state(interventions_dict=new_goal)
-            env.reset()
             invalid_interventions_after = env.get_tracker(
             ).invalid_intervention_steps
             for _ in range(2):

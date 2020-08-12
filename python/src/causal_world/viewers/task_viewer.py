@@ -60,7 +60,6 @@ def view_episode(episode,
                     env_wrappers_args=env_wrappers_args)
     env.reset()
     env.set_starting_state(episode.initial_full_state)
-    env.reset()
     for time, observation, reward, action in zip(episode.timestamps,
                                                  episode.observations,
                                                  episode.rewards,
@@ -206,7 +205,6 @@ def record_video_of_episode(episode,
                     env_wrappers=env_wrappers,
                     env_wrappers_args=env_wrappers_args)
     env.set_starting_state(episode.initial_full_state)
-    env.reset()
     recorder = VideoRecorder(env, "{}.mp4".format(file_name))
     recorder.capture_frame()
     for time, observation, reward, action in zip(episode.timestamps,

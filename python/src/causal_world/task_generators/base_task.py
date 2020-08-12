@@ -359,23 +359,21 @@ class BaseTask(object):
         elif self._task_params['variables_space'] == 'space_a_b':
             intervention_space = self._intervention_space_a_b
         for visual_object in self._stage.get_visual_objects():
-            if visual_object in intervention_space and \
-                    'cylindrical_position' in intervention_space[visual_object]:
+            if visual_object in intervention_space:
                 intervention_dict[visual_object] = dict()
-                intervention_dict[visual_object]['cylindrical_position'] = \
-                    cart2cyl(self._stage.random_position(
-                        height_limits=intervention_space[visual_object]
-                                      ['cylindrical_position'][:, 2],
-                        radius_limits=intervention_space[visual_object]
-                                      ['cylindrical_position'][:, 0],
-                        angle_limits=intervention_space[visual_object]
-                                     ['cylindrical_position'][:, 1]))
-            if visual_object in intervention_space and \
-                    'euler_orientation' in intervention_space[visual_object]:
-                intervention_dict[visual_object] = dict()
-                intervention_dict[visual_object]['euler_orientation'] = \
-                    np.random.uniform(intervention_space[visual_object]['euler_orientation'][0],
-                                      intervention_space[visual_object]['euler_orientation'][1])
+                if 'cylindrical_position' in intervention_space[visual_object]:
+                    intervention_dict[visual_object]['cylindrical_position'] = \
+                        cart2cyl(self._stage.random_position(
+                            height_limits=intervention_space[visual_object]
+                                          ['cylindrical_position'][:, 2],
+                            radius_limits=intervention_space[visual_object]
+                                          ['cylindrical_position'][:, 0],
+                            angle_limits=intervention_space[visual_object]
+                                         ['cylindrical_position'][:, 1]))
+                if 'euler_orientation' in intervention_space[visual_object]:
+                    intervention_dict[visual_object]['euler_orientation'] = \
+                        np.random.uniform(intervention_space[visual_object]['euler_orientation'][0],
+                                          intervention_space[visual_object]['euler_orientation'][1])
         return intervention_dict
 
     def reset_default_state(self):

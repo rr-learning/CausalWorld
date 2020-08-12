@@ -46,12 +46,12 @@ class RigidPoseInterventionActorPolicy(BaseInterventionActorPolicy):
                             self.task_intervention_space
                             [variable]['cylindrical_position'][1])
                 if self.orientations:
-                    interventions_dict[variable]['orientation'] = \
+                    interventions_dict[variable]['euler_orientation'] = \
                         np.random.uniform(
                             self.task_intervention_space
-                            [variable]['orientation'][0],
+                            [variable]['euler_orientation'][0],
                             self.task_intervention_space
-                            [variable]['orientation'][1])
+                            [variable]['euler_orientation'][1])
         return interventions_dict
 
     def get_params(self):
