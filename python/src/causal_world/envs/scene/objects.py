@@ -1,7 +1,7 @@
 import pybullet
 import numpy as np
 from causal_world.utils.rotation_utils import rotate_points, \
-    get_transformation_matrix, get_rotation_matrix, cyl2cart, cart2cyl
+    get_transformation_matrix, get_rotation_matrix, cyl2cart, cart2cyl, euler_to_quaternion
 import copy
 from causal_world.configs.world_constants import WorldConstants
 
@@ -447,6 +447,9 @@ class RigidObject(object):
         if 'cylindrical_position' in interventions_dict:
             interventions_dict['cartesian_position'] = cyl2cart(
                 interventions_dict['cylindrical_position'])
+        if 'euler_orientation' in interventions_dict:
+            interventions_dict['orientation'] = euler_to_quaternion(
+                interventions_dict['euler_orientation'])
         if 'cartesian_position' not in interventions_dict or \
                 'orientation' not in interventions_dict:
             position, orientation = pybullet.\

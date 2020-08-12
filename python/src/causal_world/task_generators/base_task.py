@@ -370,6 +370,12 @@ class BaseTask(object):
                                       ['cylindrical_position'][:, 0],
                         angle_limits=intervention_space[visual_object]
                                      ['cylindrical_position'][:, 1]))
+            if visual_object in intervention_space and \
+                    'euler_orientation' in intervention_space[visual_object]:
+                intervention_dict[visual_object] = dict()
+                intervention_dict[visual_object]['euler_orientation'] = \
+                    np.random.uniform(intervention_space[visual_object]['euler_orientation'][0],
+                                      intervention_space[visual_object]['euler_orientation'][1])
         return intervention_dict
 
     def reset_default_state(self):
@@ -399,13 +405,10 @@ class BaseTask(object):
         #and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
             self._intervention_space_a[rigid_object] = dict()
-            # self._training_intervention_spaces[rigid_object]['cartesian_position'] = \
-            #     np.array([WorldConstants.ARENA_BB[0],
-            #               (WorldConstants.ARENA_BB[1] -
-            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-            #               WorldConstants.ARENA_BB[0]])
             self._intervention_space_a[rigid_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
+            self._intervention_space_a[rigid_object]['euler_orientation'] = \
+                np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
             )[rigid_object].__class__.__name__ == 'Cuboid':
                 self._intervention_space_a[rigid_object]['size'] = \
@@ -416,13 +419,10 @@ class BaseTask(object):
                 np.array([0.05, 0.1])
         for visual_object in self._stage._visual_objects:
             self._intervention_space_a[visual_object] = dict()
-            # self._training_intervention_spaces[visual_object]['cartesian_position'] = \
-            #     np.array([WorldConstants.ARENA_BB[0],
-            #               (WorldConstants.ARENA_BB[1] -
-            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-            #               WorldConstants.ARENA_BB[0]])
             self._intervention_space_a[visual_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, 0], [0.09, math.pi, 0.15]])
+            self._intervention_space_a[visual_object]['euler_orientation'] = \
+                np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_visual_objects(
             )[visual_object].__class__.__name__ == 'SCuboid':
                 self._intervention_space_a[visual_object]['size'] = \
@@ -458,13 +458,10 @@ class BaseTask(object):
         # and orientation modification
         for rigid_object in self._stage.get_rigid_objects():
             self._intervention_space_b[rigid_object] = dict()
-            # self._testing_intervention_spaces[rigid_object]['cartesian_position'] = \
-            #     np.array([(WorldConstants.ARENA_BB[1] -
-            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-            #               WorldConstants.ARENA_BB[0],
-            #               WorldConstants.ARENA_BB[1]])
             self._intervention_space_b[rigid_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
+            self._intervention_space_b[rigid_object]['euler_orientation'] = \
+                np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
             )[rigid_object].__class__.__name__ == 'Cuboid':
                 self._intervention_space_b[rigid_object]['size'] = \
@@ -475,13 +472,10 @@ class BaseTask(object):
                 np.array([0.1, 0.2])
         for visual_object in self._stage.get_visual_objects():
             self._intervention_space_b[visual_object] = dict()
-            # self._testing_intervention_spaces[visual_object]['cartesian_position'] = \
-            #     np.array([(WorldConstants.ARENA_BB[1] -
-            #                WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-            #               WorldConstants.ARENA_BB[0],
-            #               WorldConstants.ARENA_BB[1]])
             self._intervention_space_b[visual_object]['cylindrical_position'] = \
                 np.array([[0.09, - math.pi, 0], [0.15, math.pi, 0.3]])
+            self._intervention_space_b[visual_object]['euler_orientation'] = \
+                np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_visual_objects(
             )[visual_object].__class__.__name__ == 'SCuboid':
                 self._intervention_space_b[visual_object]['size'] = \
