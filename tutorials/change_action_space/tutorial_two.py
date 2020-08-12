@@ -17,7 +17,7 @@ def example():
     for _ in range(50):
         obs = env.reset()
         #go up
-        for i in range(80):
+        for i in range(70):
             obs, reward, done, info = env.step([0, 1, 0])
         # rotate yaw
         for i in range(20):

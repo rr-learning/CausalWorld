@@ -453,23 +453,7 @@ class TriFingerRobot(object):
             solver=pybullet.IK_DLS,
             currentPositions=rest_pose,
             physicsClientId=client)
-        joint_pos[:3] = final_joint_pose[:3]
-        final_joint_pose = pybullet.calculateInverseKinematics2(
-            WorldConstants.ROBOT_ID,
-            [finger_tip_ids[1], finger_tip_ids[0], finger_tip_ids[2]],
-            [desired[3:6], desired[0:3], desired[6:]],
-            solver=pybullet.IK_DLS,
-            currentPositions=rest_pose,
-            physicsClientId=client)
-        joint_pos[3:6] = final_joint_pose[3:6]
-        final_joint_pose = pybullet.calculateInverseKinematics2(
-            WorldConstants.ROBOT_ID,
-            [finger_tip_ids[2], finger_tip_ids[0], finger_tip_ids[1]],
-            [desired[6:], desired[0:3], desired[3:6]],
-            solver=pybullet.IK_DLS,
-            currentPositions=rest_pose,
-            physicsClientId=client)
-        joint_pos[6:] = final_joint_pose[6:]
+        joint_pos[:] = final_joint_pose[:]
         if np.isnan(joint_pos).any():
             joint_pos = rest_pose
         return joint_pos
