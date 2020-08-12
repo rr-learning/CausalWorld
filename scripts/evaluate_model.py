@@ -1,4 +1,4 @@
-from stable_baselines import TD3, PPO2, SAC, HER
+from stable_baselines import TD3, PPO2, SAC
 from causal_world.evaluation.evaluation import EvaluationPipeline
 from causal_world.benchmark.benchmarks import REACHING_BENCHMARK, \
     PUSHING_BENCHMARK, \

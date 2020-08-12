@@ -146,7 +146,7 @@ if __name__ == '__main__':
     evaluator = EvaluationPipeline(evaluation_protocols=evaluation_protocols,
                                    tracker_path=output_path,
                                    initial_seed=0)
-    scores = evaluator.evaluate_policy(policy_fn, fraction=0.02)
+    scores = evaluator.evaluate_policy(policy_fn, fraction=1)
 
     results_model = dict()
     results_model.update(scores)
