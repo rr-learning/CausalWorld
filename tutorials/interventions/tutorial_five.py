@@ -14,7 +14,6 @@ def example():
         {'goal_block': {
             'cartesian_position': [0.1, 0.1, 0.1]
         }})
-    env.reset()
     for _ in range(500):
         obs, reward, done, info = env.step(env.action_space.sample())
     env.reset_default_state()

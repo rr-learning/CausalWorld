@@ -320,6 +320,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
 
         :return:
         """
+        intervention_space = self.get_variable_space_used()
         rigid_block_side = np.random.randint(0, 2)
         goal_block_side = not rigid_block_side
         intervention_dict = dict()
@@ -333,4 +334,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
                 [0.09, np.pi/2, 0.0325])
         intervention_dict['goal_block']['cylindrical_position'] = \
             cart2cyl(self._get_random_block_position_on_side(goal_block_side))
+        intervention_dict['goal_block']['euler_orientation'] = \
+            np.random.uniform(intervention_space['goal_block']['euler_orientation'][0],
+                              intervention_space['goal_block']['euler_orientation'][1])
         return intervention_dict

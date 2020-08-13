@@ -43,7 +43,6 @@ def example():
     task = task_generator(episode.task_name, **episode.task_params)
     env = CausalWorld(task, **episode.world_params, enable_visualization=True)
     env.set_starting_state(episode.initial_full_state)
-    env.reset()
     for action in episode.robot_actions:
         env.step(action)
     env.close()

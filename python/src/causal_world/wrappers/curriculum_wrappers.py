@@ -58,5 +58,7 @@ class CurriculumWrapper(gym.Wrapper):
                 episode=self._elapsed_episodes,
                 time_step=0)
         if interventions_dict is not None:
-            self.env.set_starting_state(interventions_dict)
-        return self.env.reset()
+            success_signal, obs = self.env.set_starting_state(interventions_dict)
+        else:
+            obs = self.env.reset()
+        return obs

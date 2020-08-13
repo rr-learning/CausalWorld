@@ -212,7 +212,6 @@ class TestWorld(unittest.TestCase):
             {'goal_block': {
                 'cartesian_position': [0.1, 0.1, 0.1]
             }})
-        env.reset()
         for i in range(200):
             observations, rewards, _, _ = env.step(actions[i])
         env.reset_default_state()

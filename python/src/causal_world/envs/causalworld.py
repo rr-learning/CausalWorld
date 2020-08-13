@@ -382,7 +382,8 @@ class CausalWorld(gym.Env):
             if not success_signal:
                 logging.warning("Invalid Intervention was just executed!")
                 self._tracker.add_invalid_intervention(interventions_info)
-        return success_signal
+        obs = self.reset()
+        return success_signal, obs
 
     def close(self):
         """
@@ -447,7 +448,7 @@ class CausalWorld(gym.Env):
         :return: (nd.array) the observations after performing the intervention.
         """
         success_signal, interventions_info, reset_observation_space_signal = \
-            self._task.do_intervention(interventions_dict,
+            self._task.do_intervention(copy.deepcopy(interventions_dict),
                                        check_bounds=check_bounds)
         self._tracker.do_intervention(self._task, interventions_dict)
         if reset_observation_space_signal:
