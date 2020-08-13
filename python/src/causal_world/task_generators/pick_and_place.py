@@ -13,7 +13,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
                  joint_positions=None,
                  tool_block_position=np.array([0, -0.065, 0.0325]),
                  tool_block_orientation=np.array([0, 0, 0, 1]),
-                 goal_block_position=np.array([0, 0.065, 0.0325]),
+                 goal_block_position=np.array([0, 0.09, 0.0325]),
                  goal_block_orientation=np.array([0, 0, 0, 1])):
         """
         This task generator generates a task of picking and placing an object
@@ -67,7 +67,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
             'name': "tool_block",
             'shape': "cube",
             'initial_position': self._task_params["tool_block_position"],
-            'initial_orientation': self._task_params["goal_block_position"],
+            'initial_orientation': self._task_params["tool_block_orientation"],
             'mass': self._task_params["tool_block_mass"]
         }
         self._stage.add_rigid_general_object(**creation_dict)
@@ -89,59 +89,6 @@ class PickAndPlaceTaskGenerator(BaseTask):
         ]
         return
 
-    def _set_intervention_space_a(self):
-        """
-
-        :return:
-        """
-        super(PickAndPlaceTaskGenerator, self). \
-            _set_intervention_space_a()
-        for rigid_object in self._stage.get_rigid_objects():
-            self._intervention_space_a[rigid_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_a[rigid_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-            self._intervention_space_a[rigid_object]['cylindrical_position'][0][0] \
-                = 0
-            self._intervention_space_a[rigid_object]['cylindrical_position'][1][0] \
-                = 0.11
-        for visual_object in self._stage.get_visual_objects():
-            self._intervention_space_a[visual_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_a[visual_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-            self._intervention_space_a[visual_object]['cylindrical_position'][0][0] \
-                = 0
-            self._intervention_space_a[visual_object]['cylindrical_position'][1][0] \
-                = 0.11
-        return
-
-    def _set_intervention_space_b(self):
-        """
-
-        :return:
-        """
-        super(PickAndPlaceTaskGenerator,
-              self)._set_intervention_space_b()
-        for rigid_object in self._stage.get_rigid_objects():
-            self._intervention_space_b[rigid_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_b[rigid_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-            self._intervention_space_a[rigid_object]['cylindrical_position'][0][0] \
-                = 0.11
-            self._intervention_space_a[rigid_object]['cylindrical_position'][1][0] \
-                = 0.14
-        for visual_object in self._stage.get_visual_objects():
-            self._intervention_space_b[visual_object]['cylindrical_position'][0][-1] \
-                = 0.0325
-            self._intervention_space_b[visual_object]['cylindrical_position'][1][-1] \
-                = 0.0325
-            self._intervention_space_a[visual_object]['cylindrical_position'][0][0] \
-                = 0.11
-            self._intervention_space_a[visual_object]['cylindrical_position'][1][0] \
-                = 0.14
-        return
 
     def _set_task_state(self):
         """
@@ -216,7 +163,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
         if np.sign(block_position[1]) != np.sign(goal_position[1]):
             target_height = 0.15
         else:
-            target_height = 0.0325
+            target_height = self._stage.get_object_state('goal_block', 'size')[-1]/2.0
         previous_block_to_goal = abs(self.previous_object_position[2] -
                                      target_height)
         current_block_to_goal = abs(block_position[2] - target_height)
@@ -269,19 +216,38 @@ class PickAndPlaceTaskGenerator(BaseTask):
 
         :return:
         """
-        # for example size on goal_or tool should be propagated to the other
         if 'goal_block' in interventions_dict:
             if 'size' in interventions_dict['goal_block']:
                 if 'tool_block' not in interventions_dict:
                     interventions_dict['tool_block'] = dict()
                 interventions_dict['tool_block']['size'] = \
                     interventions_dict['goal_block']['size']
+                if 'cartesian_position' not in interventions_dict['tool_block'] and \
+                        'cylindrical_position' not in interventions_dict['tool_block']:
+                    cyl_pos_tool = self._stage.get_object_state('tool_block', 'cylindrical_position')
+                    cyl_pos_tool[-1] = interventions_dict['goal_block']['size'][-1] / 2.0
+                    interventions_dict['tool_block']['cylindrical_position'] = cyl_pos_tool
+                if 'cartesian_position' not in interventions_dict['goal_block'] and \
+                        'cylindrical_position' not in interventions_dict['goal_block']:
+                    cyl_pos_goal = self._stage.get_object_state('goal_block', 'cylindrical_position')
+                    cyl_pos_goal[-1] = interventions_dict['goal_block']['size'][-1] / 2.0
+                    interventions_dict['goal_block']['cylindrical_position'] = cyl_pos_goal
         elif 'tool_block' in interventions_dict:
             if 'size' in interventions_dict['tool_block']:
                 if 'goal_block' not in interventions_dict:
                     interventions_dict['goal_block'] = dict()
                 interventions_dict['goal_block']['size'] = \
                     interventions_dict['tool_block']['size']
+                if 'cartesian_position' not in interventions_dict['tool_block'] and \
+                        'cylindrical_position' not in interventions_dict['tool_block']:
+                    cyl_pos_tool = self._stage.get_object_state('tool_block', 'cylindrical_position')
+                    cyl_pos_tool[-1] = interventions_dict['tool_block']['size'][-1] / 2.0
+                    interventions_dict['tool_block']['cylindrical_position'] = cyl_pos_tool
+                if 'cartesian_position' not in interventions_dict['goal_block'] and \
+                        'cylindrical_position' not in interventions_dict['goal_block']:
+                    cyl_pos_goal = self._stage.get_object_state('goal_block', 'cylindrical_position')
+                    cyl_pos_goal[-1] = interventions_dict['tool_block']['size'][-1] / 2.0
+                    interventions_dict['goal_block']['cylindrical_position'] = cyl_pos_goal
         return interventions_dict
 
     def _get_random_block_position_on_side(self, side):
@@ -293,8 +259,8 @@ class PickAndPlaceTaskGenerator(BaseTask):
         """
         intervention_space = self.get_variable_space_used()
         if side == 0:
-            return self._stage.random_position(height_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 2],
+            return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
+                                                              self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
                                                angle_limits=intervention_space['goal_block']
                                                             ['cylindrical_position'][:, 1],
                                                radius_limits=intervention_space['goal_block']
@@ -303,8 +269,8 @@ class PickAndPlaceTaskGenerator(BaseTask):
                                                    [[-0.5, -0.5, 0],
                                                     [0.5, -0.065, 0.5]]))
         else:
-            return self._stage.random_position(height_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 2],
+            return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
+                                                              self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
                                                angle_limits=intervention_space['goal_block']
                                                              ['cylindrical_position'][:, 1],
                                                radius_limits=intervention_space['goal_block']
@@ -328,10 +294,10 @@ class PickAndPlaceTaskGenerator(BaseTask):
         intervention_dict['goal_block'] = dict()
         if rigid_block_side == 0:
             intervention_dict['tool_block']['cylindrical_position'] = np.array(
-                [0.09, -np.pi/2, 0.0325])
+                [0.09, -np.pi/2, self._stage.get_object_state('tool_block', 'size')[-1]/2.0])
         else:
             intervention_dict['tool_block']['cylindrical_position'] = np.array(
-                [0.09, np.pi/2, 0.0325])
+                [0.09, np.pi/2, self._stage.get_object_state('tool_block', 'size')[-1]/2.0])
         intervention_dict['goal_block']['cylindrical_position'] = \
             cart2cyl(self._get_random_block_position_on_side(goal_block_side))
         intervention_dict['goal_block']['euler_orientation'] = \

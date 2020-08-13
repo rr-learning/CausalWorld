@@ -40,7 +40,7 @@ def with_intervention_split_1():
 
 def with_intervention_split_2():
     task = task_generator(task_generator_id='pushing',
-                          variables_space='space_a')
+                          variables_space='space_b')
     env = CausalWorld(task=task, enable_visualization=False)
     interventions_space = task.get_intervention_space_a()
     env.reset()

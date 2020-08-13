@@ -1,6 +1,5 @@
 """
 This tutorial shows you how to intervene on the default starting state,
-a reset is always needed after this sort of intervention for determinisim.
 """
 from causal_world.envs.causalworld import CausalWorld
 from causal_world.task_generators.task import task_generator
