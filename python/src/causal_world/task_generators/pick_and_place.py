@@ -11,7 +11,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
                  activate_sparse_reward=False,
                  tool_block_mass=0.02,
                  joint_positions=None,
-                 tool_block_position=np.array([0, -0.065, 0.0325]),
+                 tool_block_position=np.array([0, -0.09, 0.0325]),
                  tool_block_orientation=np.array([0, 0, 0, 1]),
                  goal_block_position=np.array([0, 0.09, 0.0325]),
                  goal_block_orientation=np.array([0, 0, 0, 1])):
@@ -36,9 +36,9 @@ class PickAndPlaceTaskGenerator(BaseTask):
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+                                             "joint_positions",
+                                             "joint_velocities",
+                                             "end_effector_positions"]
         # TODO: check for nans when bounds are the same in normalization
         self._task_params["tool_block_mass"] = tool_block_mass
         self._task_params["joint_positions"] = joint_positions
@@ -88,7 +88,6 @@ class PickAndPlaceTaskGenerator(BaseTask):
             "obstacle_orientation"
         ]
         return
-
 
     def _set_task_state(self):
         """
@@ -163,7 +162,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
         if np.sign(block_position[1]) != np.sign(goal_position[1]):
             target_height = 0.15
         else:
-            target_height = self._stage.get_object_state('goal_block', 'size')[-1]/2.0
+            target_height = self._stage.get_object_state('goal_block', 'size')[-1] / 2.0
         previous_block_to_goal = abs(self.previous_object_position[2] -
                                      target_height)
         current_block_to_goal = abs(block_position[2] - target_height)
@@ -259,25 +258,27 @@ class PickAndPlaceTaskGenerator(BaseTask):
         """
         intervention_space = self.get_variable_space_used()
         if side == 0:
-            return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
-                                                              self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
-                                               angle_limits=intervention_space['goal_block']
-                                                            ['cylindrical_position'][:, 1],
-                                               radius_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 0],
-                                               allowed_section=np.array(
-                                                   [[-0.5, -0.5, 0],
-                                                    [0.5, -0.065, 0.5]]))
+            return self._stage.random_position(
+                height_limits=[self._stage.get_object_state('goal_block', 'size')[-1] / 2.0,
+                               self._stage.get_object_state('goal_block', 'size')[-1] / 2.0],
+                angle_limits=intervention_space['goal_block']
+                             ['cylindrical_position'][:, 1],
+                radius_limits=intervention_space['goal_block']
+                              ['cylindrical_position'][:, 0],
+                allowed_section=np.array(
+                    [[-0.5, -0.5, 0],
+                     [0.5, -0.065, 0.5]]))
         else:
-            return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
-                                                              self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
-                                               angle_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 1],
-                                               radius_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 0],
-                                               allowed_section=np.array(
-                                                   [[-0.5, 0.065, 0],
-                                                    [0.5, 0.5, 0.5]]))
+            return self._stage.random_position(
+                height_limits=[self._stage.get_object_state('goal_block', 'size')[-1] / 2.0,
+                               self._stage.get_object_state('goal_block', 'size')[-1] / 2.0],
+                angle_limits=intervention_space['goal_block']
+                             ['cylindrical_position'][:, 1],
+                radius_limits=intervention_space['goal_block']
+                              ['cylindrical_position'][:, 0],
+                allowed_section=np.array(
+                    [[-0.5, 0.065, 0],
+                     [0.5, 0.5, 0.5]]))
 
     def sample_new_goal(self, level=None):
         """
@@ -294,10 +295,10 @@ class PickAndPlaceTaskGenerator(BaseTask):
         intervention_dict['goal_block'] = dict()
         if rigid_block_side == 0:
             intervention_dict['tool_block']['cylindrical_position'] = np.array(
-                [0.09, -np.pi/2, self._stage.get_object_state('tool_block', 'size')[-1]/2.0])
+                [0.09, -np.pi / 2, self._stage.get_object_state('tool_block', 'size')[-1] / 2.0])
         else:
             intervention_dict['tool_block']['cylindrical_position'] = np.array(
-                [0.09, np.pi/2, self._stage.get_object_state('tool_block', 'size')[-1]/2.0])
+                [0.09, np.pi / 2, self._stage.get_object_state('tool_block', 'size')[-1] / 2.0])
         intervention_dict['goal_block']['cylindrical_position'] = \
             cart2cyl(self._get_random_block_position_on_side(goal_block_side))
         intervention_dict['goal_block']['euler_orientation'] = \
