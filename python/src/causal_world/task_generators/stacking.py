@@ -242,27 +242,27 @@ class Stacking2TaskGenerator(BaseTask):
         :return:
         """
         # for example size on goal_or tool should be propagated to the other
-        if 'goal_block' in interventions_dict:
-            if 'size' in interventions_dict['goal_block']:
+        if 'goal_block_1' in interventions_dict:
+            if 'size' in interventions_dict['goal_block_1']:
                 if 'tool_block_1' not in interventions_dict:
                     interventions_dict['tool_block_1'] = dict()
                 interventions_dict['tool_block_1']['size'] = \
-                    interventions_dict['goal_block']['size']
+                    interventions_dict['goal_block_1']['size']
                 if 'tool_block_2' not in interventions_dict:
                     interventions_dict['tool_block_2'] = dict()
                 interventions_dict['tool_block_2']['size'] = \
-                    interventions_dict['goal_block']['size']
+                    interventions_dict['goal_block_1']['size']
         elif 'tool_block_1' in interventions_dict:
             if 'size' in interventions_dict['tool_block_1']:
-                if 'goal_block' not in interventions_dict:
-                    interventions_dict['goal_block'] = dict()
-                interventions_dict['goal_block']['size'] = \
+                if 'goal_block_1' not in interventions_dict:
+                    interventions_dict['goal_block_1'] = dict()
+                interventions_dict['goal_block_1']['size'] = \
                     interventions_dict['tool_block_1']['size']
         elif 'tool_block_2' in interventions_dict:
             if 'size' in interventions_dict['tool_block_2']:
-                if 'goal_block' not in interventions_dict:
-                    interventions_dict['goal_block'] = dict()
-                interventions_dict['goal_block']['size'] = \
+                if 'goal_block_2' not in interventions_dict:
+                    interventions_dict['goal_block_2'] = dict()
+                interventions_dict['goal_block_2']['size'] = \
                     interventions_dict['tool_block_2']['size']
         return interventions_dict
 

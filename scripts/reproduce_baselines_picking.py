@@ -40,7 +40,7 @@ def baseline_model(model_num):
     ppo = {'num_of_envs': 20,
            'algorithm': 'PPO',
            'validate_every_timesteps': 2000000,
-           'total_time_steps': 80000001,
+           'total_time_steps': int(100001000),
            'train_configs': {
                "gamma": 0.99,
                "n_steps": int(120000 / 20),
@@ -55,7 +55,7 @@ def baseline_model(model_num):
     sac = {'num_of_envs': 1,
            'algorithm': 'SAC',
            'validate_every_timesteps': int(500000),
-           'total_time_steps': int(4000001),
+           'total_time_steps': int(10000001),
            'train_configs': {
                "gamma": 0.98,
                "tau": 0.01,
@@ -69,8 +69,8 @@ def baseline_model(model_num):
 
     td3 = {'num_of_envs': 1,
            'algorithm': 'TD3',
-           'validate_every_timesteps': 500000,
-           'total_time_steps': 4000001,
+           'validate_every_timesteps': int(500000),
+           'total_time_steps': int(10000001),
            'train_configs': {
                "gamma": 0.98,
                "tau": 0.01,
@@ -84,11 +84,11 @@ def baseline_model(model_num):
     curriculum_kwargs_1 = {'intervention_actors': [], 'actives': []}
     curriculum_kwargs_2 = {
         'intervention_actors': [GoalInterventionActorPolicy()],
-        'actives': [(0, 1e9, 2, 0)]
+        'actives': [(0, 1e9, 1, 0)]
     }
     curriculum_kwargs_3 = {
         'intervention_actors': [RandomInterventionActorPolicy()],
-        'actives': [(0, 1e9, 2, 0)]
+        'actives': [(0, 1e9, 1, 0)]
     }
     curriculum_kwargs = [
         curriculum_kwargs_1, curriculum_kwargs_2, curriculum_kwargs_3
