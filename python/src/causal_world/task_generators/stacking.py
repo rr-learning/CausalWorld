@@ -11,11 +11,14 @@ class Stacking2TaskGenerator(BaseTask):
                                                 0.005]),
                  activate_sparse_reward=False,
                  tool_block_mass=0.02,
+                 tool_block_size=0.065,
                  joint_positions=None,
                  tool_block_1_position=np.array([0, 0, 0.0325]),
                  tool_block_1_orientation=np.array([0, 0, 0, 1]),
-                 tool_block_2_position=np.array([0.07, 0.07, 0.0325]),
-                 tool_block_2_orientation=np.array([0, 0, 0, 1])):
+                 tool_block_2_position=np.array([0.01, 0.08, 0.0325]),
+                 tool_block_2_orientation=np.array([0, 0, 0, 1]),
+                 goal_position=np.array([-0.06, -0.06, 0.0325]),
+                 goal_orientation=np.array([0, 0, 0, 1])):
         """
         This task generates a task for picking an object in the air.
 
@@ -45,6 +48,9 @@ class Stacking2TaskGenerator(BaseTask):
         self._task_params["tool_block_1_orientation"] = tool_block_1_orientation
         self._task_params["tool_block_2_position"] = tool_block_2_position
         self._task_params["tool_block_2_orientation"] = tool_block_2_orientation
+        self._task_params["goal_position"] = goal_position
+        self._task_params["goal_orientation"] = goal_orientation
+        self._task_params["tool_block_size"] = tool_block_size
         self.previous_tool_block_1_position = None
         self.previous_tool_block_2_position = None
         self.previous_end_effector_positions = None
@@ -74,32 +80,26 @@ class Stacking2TaskGenerator(BaseTask):
         creation_dict = {
             'name': "tool_block_2",
             'shape': "cube",
-            'initial_position': np.array([0.01, 0.08, 0.0325]),
+            'initial_position': self._task_params["tool_block_2_position"],
             'initial_orientation': self._task_params["tool_block_2_orientation"],
             'mass': self._task_params["tool_block_mass"]
         }
         self._stage.add_rigid_general_object(**creation_dict)
 
-        goal_block_1_position = np.array(self._task_params["tool_block_1_position"])
-        goal_block_1_position[0] = -0.06
-        goal_block_1_position[1] = -0.06
-
         creation_dict = {
             'name': "goal_block_1",
             'shape': "cube",
-            'position': goal_block_1_position,
-            'orientation': self._task_params["tool_block_1_orientation"]
+            'position': self._task_params["goal_position"],
+            'orientation': self._task_params["goal_orientation"]
         }
         self._stage.add_silhoutte_general_object(**creation_dict)
-        goal_block_2_position = copy.deepcopy(np.array(self._task_params["tool_block_1_position"]))
-        goal_block_2_position[0] = -0.06
-        goal_block_2_position[1] = -0.06
-        goal_block_2_position[2] += 0.065
+        goal_block_2_position = copy.deepcopy(np.array(self._task_params["goal_position"]))
+        goal_block_2_position[2] += self._task_params["tool_block_size"]
         creation_dict = {
             'name': "goal_block_2",
             'shape': "cube",
             'position': goal_block_2_position,
-            'orientation': self._task_params["tool_block_1_orientation"]
+            'orientation': self._task_params["goal_orientation"]
         }
         self._stage.add_silhoutte_general_object(**creation_dict)
         self._task_stage_observation_keys = [
@@ -234,6 +234,30 @@ class Stacking2TaskGenerator(BaseTask):
             self._robot.get_latest_full_state()['velocities']
         return
 
+    def _set_intervention_space_a(self):
+        """
+
+        :return:
+        """
+        super(Stacking2TaskGenerator, self)._set_intervention_space_a()
+        for visual_object in self._stage.get_visual_objects():
+            del self._intervention_space_a[visual_object]['size']
+        for rigid_object in self._stage.get_rigid_objects():
+            del self._intervention_space_a[rigid_object]['size']
+        return
+
+    def _set_intervention_space_b(self):
+        """
+
+        :return:
+        """
+        super(Stacking2TaskGenerator, self)._set_intervention_space_b()
+        for visual_object in self._stage.get_visual_objects():
+            del self._intervention_space_b[visual_object]['size']
+        for rigid_object in self._stage.get_rigid_objects():
+            del self._intervention_space_b[rigid_object]['size']
+        return
+
     def _handle_contradictory_interventions(self, interventions_dict):
         """
 
@@ -241,29 +265,17 @@ class Stacking2TaskGenerator(BaseTask):
 
         :return:
         """
-        # for example size on goal_or tool should be propagated to the other
+        # if intervention on goal_block_1 goal_block_2 is positioned
+        # above it
+
         if 'goal_block_1' in interventions_dict:
-            if 'size' in interventions_dict['goal_block_1']:
-                if 'tool_block_1' not in interventions_dict:
-                    interventions_dict['tool_block_1'] = dict()
-                interventions_dict['tool_block_1']['size'] = \
-                    interventions_dict['goal_block_1']['size']
-                if 'tool_block_2' not in interventions_dict:
-                    interventions_dict['tool_block_2'] = dict()
-                interventions_dict['tool_block_2']['size'] = \
-                    interventions_dict['goal_block_1']['size']
-        elif 'tool_block_1' in interventions_dict:
-            if 'size' in interventions_dict['tool_block_1']:
-                if 'goal_block_1' not in interventions_dict:
-                    interventions_dict['goal_block_1'] = dict()
-                interventions_dict['goal_block_1']['size'] = \
-                    interventions_dict['tool_block_1']['size']
-        elif 'tool_block_2' in interventions_dict:
-            if 'size' in interventions_dict['tool_block_2']:
-                if 'goal_block_2' not in interventions_dict:
-                    interventions_dict['goal_block_2'] = dict()
-                interventions_dict['goal_block_2']['size'] = \
-                    interventions_dict['tool_block_2']['size']
+            if 'cylindrical_position' in interventions_dict['goal_block_1']:
+                interventions_dict['goal_block_2'] = dict()
+                interventions_dict['goal_block_2']['cylindrical_position'] = \
+                    copy.deepcopy(interventions_dict['goal_block_1']['cylindrical_position'])
+                interventions_dict['goal_block_2']['euler_orientation'] = \
+                    copy.deepcopy(interventions_dict['goal_block_1']['euler_orientation'])
+                interventions_dict['goal_block_2']['cylindrical_position'][2] += self._task_params["tool_block_size"]
         return interventions_dict
 
     def sample_new_goal(self, level=None):
@@ -286,6 +298,6 @@ class Stacking2TaskGenerator(BaseTask):
             np.random.uniform(intervention_space['goal_block_1']['euler_orientation'][0],
                               intervention_space['goal_block_1']['euler_orientation'][1])
         intervention_dict['goal_block_2'] = copy.deepcopy(intervention_dict['goal_block_1'])
-        intervention_dict['goal_block_2']['cylindrical_position'][2] += 0.065
+        intervention_dict['goal_block_2']['cylindrical_position'][2] += self._task_params["tool_block_size"]
 
         return intervention_dict
