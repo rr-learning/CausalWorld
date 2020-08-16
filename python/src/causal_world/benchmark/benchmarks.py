@@ -4,8 +4,6 @@ REACHING_BENCHMARK = dict(task_generator_id='reaching',
                           evaluation_protocols=[
                               protocols.GoalPosesSpaceA(),
                               protocols.GoalPosesSpaceB(),
-                              protocols.InitialPosesSpaceA(),
-                              protocols.InitialPosesSpaceB(),
                               protocols.DefaultTask()
                           ])
 
@@ -17,8 +15,6 @@ PUSHING_BENCHMARK = dict(task_generator_id='pushing',
                              protocols.InitialPosesSpaceB(),
                              protocols.ObjectMassesSpaceA(),
                              protocols.ObjectMassesSpaceB(),
-                             protocols.ObjectColorsSpaceA(),
-                             protocols.ObjectColorsSpaceB(),
                              protocols.ObjectSizeSpaceA(),
                              protocols.ObjectSizeSpaceB(),
                              protocols.FloorFrictionSpaceA(),

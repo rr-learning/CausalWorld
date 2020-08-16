@@ -157,6 +157,7 @@ class BaseTask(object):
             self._robot.get_full_env_state()
         state['task_observations'] = \
             copy.deepcopy(self._task_stage_observation_keys)
+
         return state
 
     def restore_state(self, state_dict, avoid_reloading_urdf=False):
@@ -190,7 +191,8 @@ class BaseTask(object):
             reset_observation_space = True
         if old_number_of_visual_objects != new_number_of_visual_objects:
             reset_observation_space = True
-        self._task_stage_observation_keys = state_dict['task_observations']
+        self._task_stage_observation_keys = copy.deepcopy(
+            state_dict['task_observations'])
         # self._restore_pybullet_state(state_dict['pybullet_states'])
         return reset_observation_space
 

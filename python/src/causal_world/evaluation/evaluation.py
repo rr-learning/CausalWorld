@@ -178,6 +178,8 @@ class EvaluationPipeline(object):
 
         :return:
         """
+        if not os.path.isdir(evaluation_path):
+            os.makedirs(evaluation_path)
         if prefix is None:
             file_path = os.path.join(evaluation_path, 'scores.json')
         else:
