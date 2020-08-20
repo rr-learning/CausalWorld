@@ -34,7 +34,7 @@ def bar_plots(output_path, data):
             autolabel(rects)
 
         ax.set_ylabel('fractional success')
-        ax.set_title(metric_label)
+        ax.set_title(metric_label[5:])
         ax.set_xticks(x)
         ax.set_ylim((0, 1.2))
         ax.set_xticklabels(protocol_labels, rotation='vertical')
@@ -86,3 +86,70 @@ def bar_plots_with_table(output_path, data):
 
         plt.savefig(
             os.path.join(output_path, 'bar_plots_table_{}.png'.format(metric_label)))
+
+
+def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
+    protocol_labels = data[0]
+    protocol_ids = ['P{}'.format(i) for i in range(len(protocol_labels))]
+    experiment_labels = data[1]
+    metric_labels = data[2]
+    x = np.arange(len(protocol_labels))  # the label locations
+
+    colors = ['blue', 'orange', 'green']
+    colors = ["#a6cee3",
+              "#1f78b4",
+              "#b2df8a",
+              "#33a02c",
+              "#fb9a99",
+              "#e31a1c",
+              "#fdbf6f",
+              "#ff7f00",
+              "#cab2d6"]
+    for (metric_label, metric_scores) in data[3]:
+        num_groups = len(metric_scores)
+        width = 0.7 / num_groups  # the width of the bars
+        fig, ax = plt.subplots(figsize=(15, 5))
+        spare_width = 0.5
+        ax.set_xlim(-spare_width, len(protocol_labels) - spare_width)
+        row_labels = list(protocol_settings[list(protocol_settings.keys())[0]].keys())
+        for index, experiment_scores in enumerate(metric_scores):
+            experiment_label, experiment_scores_list, experiment_scores_std_list = experiment_scores
+            experiment_scores_std_list_upper = [min(std, 1.0 - mean) for mean, std in zip(experiment_scores_list, experiment_scores_std_list)]
+            plt.bar(x - (num_groups - 1) * width / 2 + width * index, experiment_scores_list, width,
+                    yerr=(experiment_scores_std_list, experiment_scores_std_list_upper), capsize=2,
+                    label=experiment_labels[index],
+                    color=colors[index])
+
+        cell_text = list()
+        for row_label in row_labels:
+            cell_text.append(['{}'.format(protocol_settings[experiment_label][row_label]) for
+                              experiment_label in list(protocol_settings.keys())])
+
+        ax.set_ylabel('fractional success', fontsize=13)
+        ax.set_title(task + '  ' + metric_label[5:])
+        #ax.set_xticks(x)
+        plt.legend(ncol=3)
+        ax.set_ylim((0, 1.1))
+        plt.yticks(fontsize=13)
+        ax.get_xaxis().set_visible(False)
+        #ax.set_xticklabels(protocol_labels, rotation='vertical')
+        table = plt.table(cellText=cell_text,
+                          rowLabels=row_labels,
+                          colLabels=protocol_ids,
+                          loc='bottom')
+        #table.set_fontsize(28)
+        #table.scale(1.5, 1.5)
+        table.auto_set_font_size(False)
+        table.set_fontsize(11)
+        cellDict = table.get_celld()
+        for i in range(-1, len(protocol_ids)):
+            if i != -1:
+                cellDict[(0, i)].set_height(.1)
+            for j in range(1, len(row_labels) + 1):
+                cellDict[(j, i)].set_height(.1)
+                cellDict[(j, i)].set_fontsize(10)
+        fig.subplots_adjust(bottom=0.2)
+        fig.tight_layout()
+
+        plt.savefig(
+            os.path.join(output_path, 'bar_plots_protocol_table_{}.pdf'.format(metric_label)))
