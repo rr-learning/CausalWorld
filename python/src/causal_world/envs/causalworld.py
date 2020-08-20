@@ -108,7 +108,7 @@ class CausalWorld(gym.Env):
         self._create_world(initialize_goal_image=True)
         self._tool_cameras = None
         self._goal_cameras = None
-        if observation_mode == 'cameras':
+        if observation_mode == 'pixel':
             #TODO: change camera params after calibration on the real system
             self._tool_cameras = []
             self._tool_cameras.append(
@@ -532,7 +532,7 @@ class CausalWorld(gym.Env):
             client = self._pybullet_client_w_o_goal_id
         else:
             client = self._pybullet_client_full_id
-        self._cam_dist = 1
+        self._cam_dist = 0.4
         self._cam_yaw = 0
         self._cam_pitch = -60
         self._render_width = 320
@@ -863,7 +863,7 @@ class CausalWorld(gym.Env):
         the current simulation
         :return:
         """
-        if self._observation_mode == 'cameras':
+        if self._observation_mode == 'pixel':
             self._pybullet_client_w_o_goal_id = pybullet.connect(
                 pybullet.DIRECT)
             pybullet.configureDebugVisualizer(
