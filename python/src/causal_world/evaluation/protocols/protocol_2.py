@@ -2,13 +2,13 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class ObjectMassesSpaceA(Protocol):
+class Protocol2(Protocol):
 
     def __init__(self):
         """
-
+        ObjectMassesSpaceB
         """
-        super().__init__('object_masses_space_A')
+        super().__init__('P2')
 
     def get_intervention(self, episode, timestep):
         """
@@ -20,7 +20,7 @@ class ObjectMassesSpaceA(Protocol):
         """
         if timestep == 0:
             intervention_dict = dict()
-            intervention_space = self.env.get_intervention_space_a()
+            intervention_space = self.env.get_intervention_space_b()
             mass = None
             for rigid_object in self.env.get_task()._stage._rigid_objects:
                 if rigid_object in intervention_space and \

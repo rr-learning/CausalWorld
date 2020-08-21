@@ -133,7 +133,7 @@ def radar_plots(output_path, data):
                      position=(0.5, 1.1),
                      horizontalalignment='center',
                      verticalalignment='center')
-        for experiment_scores, color in zip(metric_scores, colors):
+        for experiment_scores, color in zip(metric_scores, colors[:len(metric_scores)]):
             experiment_label, experiment_list = experiment_scores
             ax.plot(theta, experiment_list, color=color)
             ax.fill(theta, experiment_list, facecolor=color, alpha=0.0)

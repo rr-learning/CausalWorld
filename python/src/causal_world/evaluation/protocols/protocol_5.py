@@ -1,13 +1,13 @@
 from causal_world.evaluation.protocol import Protocol
 
 
-class GoalPosesSpaceA(Protocol):
+class Protocol5(Protocol):
 
     def __init__(self):
         """
-
+        GoalPosesSpaceA
         """
-        super().__init__('goal_poses_space_A')
+        super().__init__('P5')
 
     def get_intervention(self, episode, timestep):
         """

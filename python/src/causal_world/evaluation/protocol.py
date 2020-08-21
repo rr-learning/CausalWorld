@@ -6,7 +6,7 @@ class Protocol(object):
         :param name:
         """
         self.name = name
-        self.num_evaluation_episodes_default = 50
+        self.num_evaluation_episodes_default = 200
         self.num_evaluation_episodes = self.num_evaluation_episodes_default
 
     def init_protocol(self, env, tracker, fraction=1):

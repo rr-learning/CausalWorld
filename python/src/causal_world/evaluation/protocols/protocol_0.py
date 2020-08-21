@@ -2,13 +2,13 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class DefaultTask(Protocol):
+class Protocol0(Protocol):
 
     def __init__(self):
         """
-
+        DefaultTask
         """
-        super().__init__('default_task')
+        super().__init__('P0')
 
     def get_intervention(self, episode, timestep):
         """

@@ -4,7 +4,7 @@ from causal_world.benchmark.benchmarks import REACHING_BENCHMARK, \
     PUSHING_BENCHMARK, \
     PICKING_BENCHMARK, \
     PICK_AND_PLACE_BENCHMARK, \
-    TOWER_2_BENCHMARK
+    STACKING_TWO_BENCHMARK
 import causal_world.evaluation.visualization.visualiser as vis
 
 import argparse
@@ -43,8 +43,8 @@ def protocols_from_settings(model_settings):
         protocols = PICKING_BENCHMARK
     elif task_generator_id == 'pick_and_place':
         protocols = PICK_AND_PLACE_BENCHMARK
-    elif task_generator_id == 'towers':
-        protocols = TOWER_2_BENCHMARK
+    elif task_generator_id == 'stacking2':
+        protocols = STACKING_TWO_BENCHMARK
     return protocols['evaluation_protocols']
 
 
@@ -78,7 +78,7 @@ if __name__ == '__main__':
                                    visualize_evaluation=False,
                                    tracker_path=output_path,
                                    initial_seed=0)
-    scores = evaluator.evaluate_policy(policy_fn)
+    scores = evaluator.evaluate_policy(policy_fn, fraction=1)
     evaluator.save_scores(evaluation_path, prefix=str(time_steps))
     experiments = dict()
     experiments['model'] = scores

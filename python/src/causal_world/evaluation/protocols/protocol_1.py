@@ -2,13 +2,13 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class ObjectSizeSpaceA(Protocol):
+class Protocol1(Protocol):
 
     def __init__(self):
         """
-
+        ObjectMassesSpaceA
         """
-        super().__init__('object_sizes_space_A')
+        super().__init__('P1')
 
     def get_intervention(self, episode, timestep):
         """
@@ -21,13 +21,16 @@ class ObjectSizeSpaceA(Protocol):
         if timestep == 0:
             intervention_dict = dict()
             intervention_space = self.env.get_intervention_space_a()
+            mass = None
             for rigid_object in self.env.get_task()._stage._rigid_objects:
                 if rigid_object in intervention_space and \
-                        'size' in intervention_space[rigid_object]:
+                        'mass' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()
-                    intervention_dict[rigid_object]['size'] = \
-                        np.random.uniform(intervention_space[rigid_object]['size'][0],
-                                          intervention_space[rigid_object]['size'][1])
+                    if mass is None:
+                        mass = np.random.uniform(
+                            intervention_space[rigid_object]['mass'][0],
+                            intervention_space[rigid_object]['mass'][1])
+                    intervention_dict[rigid_object]['mass'] = mass
             return intervention_dict
         else:
             return None

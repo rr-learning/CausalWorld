@@ -2,13 +2,13 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class InitialPosesSpaceA(Protocol):
+class Protocol3(Protocol):
 
     def __init__(self):
         """
-
+        ObjectSizeSpaceA
         """
-        super().__init__('initial_poses_space_A')
+        super().__init__('P3')
 
     def get_intervention(self, episode, timestep):
         """
@@ -23,11 +23,11 @@ class InitialPosesSpaceA(Protocol):
             intervention_space = self.env.get_intervention_space_a()
             for rigid_object in self.env.get_task()._stage._rigid_objects:
                 if rigid_object in intervention_space and \
-                        'cartesian_position' in intervention_space[rigid_object]:
+                        'size' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()
-                    intervention_dict[rigid_object]['cartesian_position'] = \
-                        np.random.uniform(intervention_space[rigid_object]['cartesian_position'][0],
-                                          intervention_space[rigid_object]['cartesian_position'][1])
+                    intervention_dict[rigid_object]['size'] = \
+                        np.random.uniform(intervention_space[rigid_object]['size'][0],
+                                          intervention_space[rigid_object]['size'][1])
             return intervention_dict
         else:
             return None

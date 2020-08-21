@@ -2,13 +2,13 @@ from causal_world.evaluation.protocol import Protocol
 import numpy as np
 
 
-class ObjectMassesSpaceB(Protocol):
+class Protocol7(Protocol):
 
     def __init__(self):
         """
-
+        GoalPosesInitialPosesMassesSpaceA
         """
-        super().__init__('object_masses_space_B')
+        super().__init__('P7')
 
     def get_intervention(self, episode, timestep):
         """
@@ -18,14 +18,21 @@ class ObjectMassesSpaceB(Protocol):
 
         :return:
         """
+
         if timestep == 0:
-            intervention_dict = dict()
-            intervention_space = self.env.get_intervention_space_b()
+            intervention_dict = self.env.sample_new_goal(level=None)
+            intervention_space = self.env.get_intervention_space_a()
             mass = None
             for rigid_object in self.env.get_task()._stage._rigid_objects:
                 if rigid_object in intervention_space and \
+                        'cylindrical_position' in intervention_space[rigid_object] and \
                         'mass' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()
+                    intervention_dict[rigid_object]['cylindrical_position'] = \
+                        np.random.uniform(intervention_space[rigid_object]['cylindrical_position'][0],
+                                          intervention_space[rigid_object]['cylindrical_position'][1])
+                    height = self.env.get_task()._stage._rigid_objects[rigid_object].get_variable_state('size')[2]
+                    intervention_dict[rigid_object]['cylindrical_position'][2] = height/2
                     if mass is None:
                         mass = np.random.uniform(
                             intervention_space[rigid_object]['mass'][0],
@@ -34,3 +41,7 @@ class ObjectMassesSpaceB(Protocol):
             return intervention_dict
         else:
             return None
+
+    def _init_protocol_helper(self):
+        self.env.set_intervention_space(variables_space='space_a')
+        return
