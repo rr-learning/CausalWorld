@@ -1077,9 +1077,9 @@ class BaseTask(object):
                 if isinstance(interventions_dict[intervention], dict):
                     if 'size' in interventions_dict[intervention]:
                         height = self._stage.get_object_state(intervention, 'size')[-1]
-                        self._intervention_space_a[intervention]['cylindrical_position'][0][-1] = height / 2.0
-                        self._intervention_space_b[intervention]['cylindrical_position'][0][-1] = height / 2.0
-                        self._intervention_space_a_b[intervention]['cylindrical_position'][0][-1] = height / 2.0
+                        self._intervention_space_a[intervention]['cylindrical_position'][0][-1] = 0.0
+                        self._intervention_space_b[intervention]['cylindrical_position'][0][-1] = 0.0
+                        self._intervention_space_a_b[intervention]['cylindrical_position'][0][-1] = 0.0
         return success, \
                interventions_info, reset_observation_space_signal
 

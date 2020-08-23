@@ -23,7 +23,7 @@ class Protocol10(Protocol):
                 self.env.get_task().get_intervention_space_a()
             interventions_dict = dict()
             for variable in task_intervention_space:
-                if variable != 'joint_positions':
+                if variable != 'joint_positions' and variable != 'obstacle':
                     if isinstance(task_intervention_space[variable], dict):
                         interventions_dict[variable] = dict()
                         for subvariable_name in task_intervention_space[variable]:

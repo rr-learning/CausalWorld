@@ -23,6 +23,7 @@ class Protocol6(Protocol):
             intervention_space = self.env.get_intervention_space_b()
             for rigid_object in self.env.get_task()._stage._rigid_objects:
                 if rigid_object in intervention_space and \
+                        rigid_object != 'obstacle' and \
                         'cylindrical_position' in intervention_space[rigid_object]:
                     intervention_dict[rigid_object] = dict()
                     intervention_dict[rigid_object]['cylindrical_position'] = \

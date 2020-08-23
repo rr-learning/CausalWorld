@@ -23,6 +23,7 @@ class Protocol4(Protocol):
             intervention_space = self.env.get_intervention_space_a()
             for rigid_object in self.env.get_task()._stage._rigid_objects:
                 if rigid_object in intervention_space and \
+                        rigid_object != 'obstacle' and \
                         'cylindrical_position' in intervention_space[rigid_object]:
                     if self.env.get_task()._stage._rigid_objects[rigid_object].is_not_fixed():
                         intervention_dict[rigid_object] = dict()

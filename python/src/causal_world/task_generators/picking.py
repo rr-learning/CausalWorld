@@ -6,12 +6,12 @@ class PickingTaskGenerator(BaseTask):
     def __init__(self, variables_space='space_a_b',
                  fractional_reward_weight=1,
                  dense_reward_weights=np.array([250, 0, 125,
-                                              0, 750, 0, 0,
-                                              0.005]),
+                                                0, 750, 0, 0,
+                                                0.005]),
                  activate_sparse_reward=False,
                  tool_block_mass=0.02,
                  joint_positions=None,
-                 tool_block_position= np.array([0, 0, 0.0325]),
+                 tool_block_position=np.array([0, 0, 0.0325]),
                  tool_block_orientation=np.array([0, 0, 0, 1]),
                  goal_height=0.15):
         """
@@ -33,9 +33,9 @@ class PickingTaskGenerator(BaseTask):
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+                                             "joint_positions",
+                                             "joint_velocities",
+                                             "end_effector_positions"]
         # TODO: check for nans when bounds are the same in normalization
         self._task_params["goal_height"] = goal_height
         self._task_params["tool_block_mass"] = tool_block_mass
@@ -145,10 +145,10 @@ class PickingTaskGenerator(BaseTask):
         rewards.append(previous_block_to_goal - current_block_to_goal)
         rewards.append(-current_block_to_goal)
         previous_block_to_center = np.sqrt(
-            (self.previous_object_position[0]**2 +
-             self.previous_object_position[1]**2))
+            (self.previous_object_position[0] ** 2 +
+             self.previous_object_position[1] ** 2))
         current_block_to_center = np.sqrt(
-            (block_position[0]**2 + block_position[1]**2))
+            (block_position[0] ** 2 + block_position[1] ** 2))
         rewards.append(previous_block_to_center - current_block_to_center)
         rewards.append(-current_block_to_center)
 
