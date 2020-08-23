@@ -251,11 +251,8 @@ class PickingTaskGenerator(BaseTask):
         elif self._task_params['variables_space'] == 'space_a_b':
             intervention_space = self._intervention_space_a_b
         intervention_dict['goal_block']['cylindrical_position'] = \
-            np.array(self._stage.get_rigid_objects()
-                     ['tool_block'].get_initial_position())
-        intervention_dict['goal_block']['cylindrical_position'][-1] = \
             np.random.uniform(intervention_space['goal_block']['cylindrical_position']
-                              [0][-1],
+                              [0],
                               intervention_space['goal_block']['cylindrical_position']
-                              [1][-1])
+                              [1])
         return intervention_dict

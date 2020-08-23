@@ -108,7 +108,7 @@ def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
     for (metric_label, metric_scores) in data[3]:
         num_groups = len(metric_scores)
         width = 0.7 / num_groups  # the width of the bars
-        fig, ax = plt.subplots(figsize=(15, 5))
+        fig, ax = plt.subplots(figsize=(12, 4))
         spare_width = 0.5
         ax.set_xlim(-spare_width, len(protocol_labels) - spare_width)
         row_labels = list(protocol_settings[list(protocol_settings.keys())[0]].keys())
@@ -128,8 +128,8 @@ def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
         ax.set_ylabel('fractional success', fontsize=13)
         ax.set_title(task + '  ' + metric_label[5:])
         #ax.set_xticks(x)
-        plt.legend(ncol=3)
-        ax.set_ylim((0, 1.1))
+        plt.legend(ncol=9, loc='upper right')
+        ax.set_ylim((0, 1.2))
         plt.yticks(fontsize=13)
         ax.get_xaxis().set_visible(False)
         #ax.set_xticklabels(protocol_labels, rotation='vertical')
@@ -148,7 +148,7 @@ def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
             for j in range(1, len(row_labels) + 1):
                 cellDict[(j, i)].set_height(.1)
                 cellDict[(j, i)].set_fontsize(10)
-        fig.subplots_adjust(bottom=0.2)
+        fig.subplots_adjust(bottom=0.25)
         fig.tight_layout()
 
         plt.savefig(

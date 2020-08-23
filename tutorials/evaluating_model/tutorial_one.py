@@ -16,7 +16,7 @@ from causal_world.evaluation.evaluation import EvaluationPipeline
 import causal_world.evaluation.protocols as protocols
 
 log_relative_path = './pushing_policy_tutorial_1'
-log_relative_path = './picking_policy_tutorial_1'
+#log_relative_path = './picking_policy_tutorial_1'
 #log_relative_path = './pick_and_place_policy_tutorial_1'
 
 
@@ -73,7 +73,7 @@ def evaluate_trained_policy():
         return model.predict(obs)[0]
 
     # pass the different protocols you'd like to evaluate in the following
-    evaluator = EvaluationPipeline(evaluation_protocols=[protocols.Protocol7()],
+    evaluator = EvaluationPipeline(evaluation_protocols=[protocols.Protocol5()],
                                    visualize_evaluation=True,
                                    tracker_path=log_relative_path,
                                    initial_seed=0)
@@ -85,5 +85,5 @@ def evaluate_trained_policy():
 
 
 if __name__ == '__main__':
-    # train_policy()
+    train_policy()
     evaluate_trained_policy()

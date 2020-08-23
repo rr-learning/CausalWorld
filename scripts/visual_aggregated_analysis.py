@@ -11,7 +11,7 @@ import numpy as np
 def get_mean_scores(scores_list):
     scores_mean = dict()
     num_scores = len(scores_list)
-    for key in scores_list[0].keys():
+    for key in list(scores_list[0].keys())[:-2]:
         scores_mean[key] = {}
         for sub_key in scores_list[0][key].keys():
             scores_mean[key][sub_key] = np.mean(
@@ -59,7 +59,7 @@ if __name__ == '__main__':
                 experiments[label] = aggregated_scores
 
     if os.path.exists('protocol_settings.json'):
-        with open('protocol_settings.json', 'r') as fin:
+        with open('protocol_settings_2.json', 'r') as fin:
             protocol_settings = json.load(fin)
     data = data_array_from_aggregated_experiments(experiments)
     bar_plots_with_protocol_table(output_path, data, protocol_settings, title)
