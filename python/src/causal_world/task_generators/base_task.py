@@ -405,7 +405,7 @@ class BaseTask(object):
             self._intervention_space_a[rigid_object] = dict()
             height = self._stage.get_object_state(rigid_object, 'size')[-1]
             self._intervention_space_a[rigid_object]['cylindrical_position'] = \
-                np.array([[0.0, - math.pi, height/2.0], [0.11, math.pi, 0.15]])
+                np.array([[0.0, - math.pi, 0.0], [0.11, math.pi, 0.15]])
             self._intervention_space_a[rigid_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
@@ -420,7 +420,7 @@ class BaseTask(object):
             height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_a[visual_object] = dict()
             self._intervention_space_a[visual_object]['cylindrical_position'] = \
-                np.array([[0.0, - math.pi, height/2.0], [0.11, math.pi, 0.15]])
+                np.array([[0.0, - math.pi, 0.0], [0.11, math.pi, 0.15]])
             self._intervention_space_a[visual_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_visual_objects(
@@ -460,7 +460,7 @@ class BaseTask(object):
             height = self._stage.get_object_state(rigid_object, 'size')[-1]
             self._intervention_space_b[rigid_object] = dict()
             self._intervention_space_b[rigid_object]['cylindrical_position'] = \
-                np.array([[0.11, - math.pi, height/2.0], [0.15, math.pi, 0.3]])
+                np.array([[0.11, - math.pi, 0.0], [0.15, math.pi, 0.3]])
             self._intervention_space_b[rigid_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
@@ -475,7 +475,7 @@ class BaseTask(object):
             height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_b[visual_object] = dict()
             self._intervention_space_b[visual_object]['cylindrical_position'] = \
-                np.array([[0.11, - math.pi, height/2.0], [0.15, math.pi, 0.3]])
+                np.array([[0.11, - math.pi, 0.0], [0.15, math.pi, 0.3]])
             self._intervention_space_b[visual_object]['euler_orientation'] = \
                 np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_visual_objects(
@@ -953,6 +953,9 @@ class BaseTask(object):
                          interventions_dict[intervention]).any() or \
                          (intervention_space[intervention][1]
                              < interventions_dict[intervention]).any()):
+                        logging.warning("space_0" + str(intervention_space[intervention][0]))
+                        logging.warning("applied" + str(interventions_dict[intervention]))
+                        logging.warning("space_1" + str(intervention_space[intervention][1]))
                         return False
                 else:
                     for sub_variable_name in interventions_dict[intervention]:
@@ -963,8 +966,12 @@ class BaseTask(object):
                                 (intervention_space[intervention]
                                  [sub_variable_name][1] <
                                  interventions_dict[intervention][sub_variable_name]).any()):
+                            logging.warning("space_0" + str(intervention_space[intervention][sub_variable_name][0]))
+                            logging.warning("applied" + str(interventions_dict[intervention][sub_variable_name]))
+                            logging.warning("space_1" + str(intervention_space[intervention][sub_variable_name][1]))
                             return False
                         elif sub_variable_name not in intervention_space[intervention]:
+                            logging.warning("{} not in intervention_space")
                             return False
             else:
                 return False
