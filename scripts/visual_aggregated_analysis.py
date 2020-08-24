@@ -11,7 +11,7 @@ import numpy as np
 def get_mean_scores(scores_list):
     scores_mean = dict()
     num_scores = len(scores_list)
-    for key in list(scores_list[0].keys())[:-2]:
+    for key in list(scores_list[0].keys())[:]:
         scores_mean[key] = {}
         for sub_key in scores_list[0][key].keys():
             scores_mean[key][sub_key] = np.mean(
