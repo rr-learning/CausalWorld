@@ -36,6 +36,7 @@ if __name__ == '__main__':
     NUM_RANDOM_SEEDS = 5
     num_curriculum = 3
     algorithm_list = ['PPO', 'SAC', 'TD3']
+    time_steps = ['98000000', '10000000', '10000000']
 
     experiments = dict()
 
@@ -48,8 +49,11 @@ if __name__ == '__main__':
                 model_num = algorithm_index * (num_curriculum * NUM_RANDOM_SEEDS) \
                             + curriculum * NUM_RANDOM_SEEDS \
                             + random_seed
+                time_string = time_steps[algorithm_index]
                 scores_path = os.path.join(output_path, str(model_num),
-                                           'evaluation', 'scores.json')
+                                           'evaluation',
+                                           'time_steps_{}'.format(time_string),
+                                           '{}_scores.json'.format(time_string))
                 if os.path.exists(scores_path):
                     with open(scores_path, 'r') as fin:
                         scores = json.load(fin)
@@ -58,8 +62,8 @@ if __name__ == '__main__':
                 aggregated_scores = get_mean_scores(scores_list)
                 experiments[label] = aggregated_scores
 
-    if os.path.exists('protocol_settings.json'):
-        with open('protocol_settings_2.json', 'r') as fin:
+    if os.path.exists('protocol_specifiers.json'):
+        with open('protocol_specifiers.json', 'r') as fin:
             protocol_settings = json.load(fin)
     data = data_array_from_aggregated_experiments(experiments)
     bar_plots_with_protocol_table(output_path, data, protocol_settings, title)
