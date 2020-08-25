@@ -94,8 +94,8 @@ def baseline_model(model_num, task):
 
     sac = {'num_of_envs': 1,
            'algorithm': 'SAC',
-           'validate_every_timesteps': int(500000/1e3),
-           'total_time_steps': int(10000000/1e3),
+           'validate_every_timesteps': int(500000),
+           'total_time_steps': int(10000000),
            'train_configs': {
                "gamma": 0.98,
                "tau": 0.01,
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     evaluator = EvaluationPipeline(evaluation_protocols=evaluation_protocols,
                                    tracker_path=output_path,
                                    initial_seed=0)
-    scores = evaluator.evaluate_policy(policy_fn, fraction=0.01)
+    scores = evaluator.evaluate_policy(policy_fn, fraction=1.0)
 
     results_model = dict()
     results_model.update(scores)
