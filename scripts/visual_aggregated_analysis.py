@@ -15,47 +15,47 @@ protocol_settings = {
     },
     "P1": {
         "space": "A",
-        "variables": "tool mass",
+        "variables": "tm",
         "time step": 0
     },
     "P2": {
         "space": "B",
-        "variables": "tool mass",
+        "variables": "tm",
         "time step": 0
     },
     "P3": {
         "space": "A",
-        "variables": "tool size",
+        "variables": "ts",
         "time step": 0
     },
     "P4": {
         "space": "A",
-        "variables": "tool pose",
+        "variables": "tp",
         "time step": 0
     },
     "P5": {
         "space": "A",
-        "variables": "goal pose",
+        "variables": "gp",
         "time step": 0
     },
     "P6": {
         "space": "B",
-        "variables": "tool pose, goal pose",
+        "variables": "tp, gp",
         "time step": 0
     },
     "P7": {
         "space": "A",
-        "variables": "tool pose, goal pose, tool mass",
+        "variables": "tp, gp, tm",
         "time step": 0
     },
     "P8": {
         "space": "B",
-        "variables": "tool pose, goal pose, tool mass",
+        "variables": "tp, gp, tm",
         "time step": 0
     },
     "P9": {
         "space": "B",
-        "variables": "tool pose, goal pose, tool mass, floor friction",
+        "variables": "tp, gp, tm, ff",
         "time step": 0
     },
     "P10": {
