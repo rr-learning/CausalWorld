@@ -68,7 +68,7 @@ def get_multi_process_env(model_settings, model_path, num_of_envs, ckpt_step):
     return SubprocVecEnv([_make_env(rank=i) for i in range(num_of_envs)])
 
 
-def get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step):
+def get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step, tb_path):
     policy_kwargs = dict(layers=model_settings['NET_LAYERS'])
     env = get_single_process_env(model_settings, model_path, ckpt_step)
     n_actions = env.action_space.shape[-1]
@@ -82,7 +82,7 @@ def get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step):
                          policy_kwargs=policy_kwargs,
                          **model_settings['train_configs'],
                          verbose=1,
-                         tensorboard_log=model_path)
+                         tensorboard_log=tb_path)
         model.num_timesteps = ckpt_step
     else:
         model = TD3(TD3MlpPolicy,
@@ -91,12 +91,12 @@ def get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step):
                     policy_kwargs=policy_kwargs,
                     **model_settings['train_configs'],
                     verbose=1,
-                    tensorboard_log=model_path)
+                    tensorboard_log=tb_path)
 
     return model, env
 
 
-def get_SAC_model(model_settings, model_path, ckpt_path, ckpt_step):
+def get_SAC_model(model_settings, model_path, ckpt_path, ckpt_step, tb_path):
     policy_kwargs = dict(layers=model_settings['NET_LAYERS'])
     env = get_single_process_env(model_settings, model_path, ckpt_step)
     if ckpt_path is not None:
@@ -107,7 +107,7 @@ def get_SAC_model(model_settings, model_path, ckpt_path, ckpt_step):
                          policy_kwargs=policy_kwargs,
                          **model_settings['train_configs'],
                          verbose=1,
-                         tensorboard_log=model_path)
+                         tensorboard_log=tb_path)
         model.num_timesteps = ckpt_step
     else:
         model = SAC(SACMlpPolicy,
@@ -116,11 +116,11 @@ def get_SAC_model(model_settings, model_path, ckpt_path, ckpt_step):
                     policy_kwargs=policy_kwargs,
                     **model_settings['train_configs'],
                     verbose=1,
-                    tensorboard_log=model_path)
+                    tensorboard_log=tb_path)
     return model, env
 
 
-def get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs):
+def get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs, tb_path):
     policy_kwargs = dict(act_fun=tf.nn.tanh, net_arch=model_settings['NET_LAYERS'])
     env = get_multi_process_env(model_settings, model_path, num_of_envs, ckpt_step)
     if ckpt_path is not None:
@@ -131,7 +131,7 @@ def get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs)
                           policy_kwargs=policy_kwargs,
                           **model_settings['train_configs'],
                           verbose=1,
-                          tensorboard_log=model_path)
+                          tensorboard_log=tb_path)
         model.num_timesteps = ckpt_step
     else:
         model = PPO2(MlpPolicy,
@@ -140,16 +140,21 @@ def get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs)
                      policy_kwargs=policy_kwargs,
                      **model_settings['train_configs'],
                      verbose=1,
-                     tensorboard_log=model_path)
+                     tensorboard_log=tb_path)
 
     return model, env
 
 
-def train_model(model_settings, output_path):
+def train_model(model_settings, output_path, tensorboard_logging=False):
     num_of_envs = model_settings['num_of_envs']
     total_time_steps = model_settings['total_time_steps']
     validate_every_timesteps = model_settings['validate_every_timesteps']
     model_path = os.path.join(output_path, 'model')
+
+    if tensorboard_logging:
+        tb_path = model_path
+    else:
+        tb_path = None
 
     try:
         os.makedirs(model_path)
@@ -161,17 +166,17 @@ def train_model(model_settings, output_path):
 
     set_global_seeds(model_settings['seed'])
     if model_settings['algorithm'] == 'PPO':
-        model, env = get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs)
+        model, env = get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs, tb_path)
         num_of_active_envs = num_of_envs
         total_time_steps = model_settings['total_time_steps'] - ckpt_step
         validate_every_timesteps = model_settings['validate_every_timesteps']
     elif model_settings['algorithm'] == 'SAC':
-        model, env = get_SAC_model(model_settings, model_path, ckpt_path, ckpt_step)
+        model, env = get_SAC_model(model_settings, model_path, ckpt_path, ckpt_step, tb_path)
         num_of_active_envs = num_of_envs
         total_time_steps = model_settings['total_time_steps'] - ckpt_step
         validate_every_timesteps = model_settings['validate_every_timesteps']
     elif model_settings['algorithm'] == 'TD3':
-        model, env = get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step)
+        model, env = get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step, tb_path)
         num_of_active_envs = num_of_envs
         total_time_steps = model_settings['total_time_steps'] - ckpt_step
         validate_every_timesteps = model_settings['validate_every_timesteps']
@@ -190,6 +195,7 @@ def train_model(model_settings, output_path):
     model.learn(int(total_time_steps),
                 callback=checkpoint_callback,
                 reset_num_timesteps=ckpt_path is None)
+    model.save(save_path=os.path.join(model_path, 'model_{}_steps'.format(total_time_steps)))
     if env.__class__.__name__ == 'SubprocVecEnv':
         env.env_method("save_world", output_path)
     else:

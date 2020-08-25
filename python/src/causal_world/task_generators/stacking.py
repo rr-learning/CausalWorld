@@ -270,6 +270,7 @@ class Stacking2TaskGenerator(BaseTask):
 
         if 'goal_block_1' in interventions_dict:
             if 'cylindrical_position' in interventions_dict['goal_block_1']:
+                interventions_dict['goal_block_1']['cylindrical_position'][-1] = self._task_params["tool_block_size"] / 2
                 interventions_dict['goal_block_2'] = dict()
                 interventions_dict['goal_block_2']['cylindrical_position'] = \
                     copy.deepcopy(interventions_dict['goal_block_1']['cylindrical_position'])

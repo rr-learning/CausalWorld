@@ -118,14 +118,14 @@ def radar_plots(output_path, data):
         '#fdbf6f', '#ff7f00', '#cab2d6'
     ]
     colors = ['blue', 'orange', 'green']
-    for (metric_label, metric_scores) in data[3]:
+    for metric_label in data[3]:
 
         fig, ax = plt.subplots(figsize=(9, 9),
                                nrows=1,
                                ncols=1,
                                subplot_kw=dict(projection='radar'))
         fig.subplots_adjust(wspace=0.25, hspace=0.20, top=0.85, bottom=0.05)
-
+        metric_scores = data[3][metric_label]
         ax.set_rgrids([0.2, 0.4, 0.6, 0.8])
         ax.set_title(metric_label,
                      weight='bold',
@@ -133,10 +133,10 @@ def radar_plots(output_path, data):
                      position=(0.5, 1.1),
                      horizontalalignment='center',
                      verticalalignment='center')
-        for experiment_scores, color in zip(metric_scores, colors[:len(metric_scores)]):
-            experiment_label, experiment_list = experiment_scores
-            ax.plot(theta, experiment_list, color=color)
-            ax.fill(theta, experiment_list, facecolor=color, alpha=0.0)
+        for experiment_label, color in zip(metric_scores, colors[:len(metric_scores)]):
+            experiment_scores_mean, experiment_scores_err = metric_scores[experiment_label]
+            ax.plot(theta, experiment_scores_mean, color=color)
+            ax.fill(theta, experiment_scores_mean, facecolor=color, alpha=0.0)
         ax.set_varlabels(protocol_labels)
         ax.set_ylim(0, 1.0)
 

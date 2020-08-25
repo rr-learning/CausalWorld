@@ -1,11 +1,74 @@
-import causal_world.evaluation.visualization.visualiser as vis
-from causal_world.evaluation.visualization.utils import data_array_from_aggregated_experiments
+from causal_world.evaluation.visualization.utils import aggregated_data_from_experiments
 from causal_world.evaluation.visualization.bar_plots import bar_plots_with_protocol_table
 
 import argparse
 import json
 import os
 import numpy as np
+
+# TODO: This should be returned from the individual scripts after refactoring there.
+protocol_settings = {
+    "P0": {
+        "space": "A",
+        "variables": "-",
+        "time step": 0
+    },
+    "P1": {
+        "space": "A",
+        "variables": "tool mass",
+        "time step": 0
+    },
+    "P2": {
+        "space": "B",
+        "variables": "tool mass",
+        "time step": 0
+    },
+    "P3": {
+        "space": "A",
+        "variables": "tool size",
+        "time step": 0
+    },
+    "P4": {
+        "space": "A",
+        "variables": "tool pose",
+        "time step": 0
+    },
+    "P5": {
+        "space": "A",
+        "variables": "goal pose",
+        "time step": 0
+    },
+    "P6": {
+        "space": "B",
+        "variables": "tool pose, goal pose",
+        "time step": 0
+    },
+    "P7": {
+        "space": "A",
+        "variables": "tool pose, goal pose, tool mass",
+        "time step": 0
+    },
+    "P8": {
+        "space": "B",
+        "variables": "tool pose, goal pose, tool mass",
+        "time step": 0
+    },
+    "P9": {
+        "space": "B",
+        "variables": "tool pose, goal pose, tool mass, floor friction",
+        "time step": 0
+    },
+    "P10": {
+        "space": "A",
+        "variables": "all",
+        "time step": 0
+    },
+    "P11": {
+        "space": "B",
+        "variables": "all",
+        "time step": 0
+    }
+}
 
 
 def get_mean_scores(scores_list):
@@ -24,15 +87,14 @@ def get_mean_scores(scores_list):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--output_path", required=True, help="output path")
+    parser.add_argument("--models_path", required=True, help="models_path")
     parser.add_argument("--title", required=True, help="title")
 
     args = vars(parser.parse_args())
     output_path = str(args['output_path'])
+    models_path = str(args['models_path'])
     title = str(args['title'])
 
-    # PPO_scores_path = 'baselines_picking/5/evaluation/scores.json'
-    # SAC_scores_path = 'baselines_picking/20/evaluation/scores.json'
-    # TD3_scores_path = 'baselines_picking/35/evaluation/scores.json'
     NUM_RANDOM_SEEDS = 5
     num_curriculum = 3
     algorithm_list = ['PPO', 'SAC', 'TD3']
@@ -40,7 +102,6 @@ if __name__ == '__main__':
 
     experiments = dict()
 
-    plotting_path = os.path.join(output_path, 'baseline_dummy')
     for algorithm_index, algorithm in enumerate(algorithm_list):
         for curriculum in range(num_curriculum):
             label = algorithm + '(' + str(curriculum) + ')'
@@ -50,7 +111,12 @@ if __name__ == '__main__':
                             + curriculum * NUM_RANDOM_SEEDS \
                             + random_seed
                 time_string = time_steps[algorithm_index]
-                scores_path = os.path.join(output_path, str(model_num),
+                # This is the default path saved from complete run
+                # scores_path = os.path.join(output_path, str(model_num),
+                #                            'evaluation',
+                #                            'time_steps_{}'.format(time_string),
+                #                            'scores.json')
+                scores_path = os.path.join(models_path, str(model_num),
                                            'evaluation',
                                            'time_steps_{}'.format(time_string),
                                            '{}_scores.json'.format(time_string))
@@ -62,8 +128,5 @@ if __name__ == '__main__':
                 aggregated_scores = get_mean_scores(scores_list)
                 experiments[label] = aggregated_scores
 
-    if os.path.exists('protocol_specifiers.json'):
-        with open('protocol_specifiers.json', 'r') as fin:
-            protocol_settings = json.load(fin)
-    data = data_array_from_aggregated_experiments(experiments)
+    data = aggregated_data_from_experiments(experiments, contains_err=True)
     bar_plots_with_protocol_table(output_path, data, protocol_settings, title)

@@ -18,12 +18,13 @@ import causal_world.evaluation.protocols as protocols
 log_relative_path = './pushing_policy_tutorial_1'
 #log_relative_path = './picking_policy_tutorial_1'
 #log_relative_path = './pick_and_place_policy_tutorial_1'
+#log_relative_path = './stacking2_policy_tutorial_1'
 
 
 def _make_env(rank):
 
     def _init():
-        task = task_generator(task_generator_id="picking")
+        task = task_generator(task_generator_id="pushing")
         env = CausalWorld(task=task, enable_visualization=False, seed=rank, skip_frame=3)
         return env
 
@@ -73,7 +74,7 @@ def evaluate_trained_policy():
         return model.predict(obs)[0]
 
     # pass the different protocols you'd like to evaluate in the following
-    evaluator = EvaluationPipeline(evaluation_protocols=[protocols.Protocol5()],
+    evaluator = EvaluationPipeline(evaluation_protocols=[protocols.Protocol11()],
                                    visualize_evaluation=True,
                                    tracker_path=log_relative_path,
                                    initial_seed=0)

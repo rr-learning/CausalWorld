@@ -79,7 +79,7 @@ if __name__ == '__main__':
                                    tracker_path=output_path,
                                    initial_seed=0)
     scores = evaluator.evaluate_policy(policy_fn, fraction=1)
-    evaluator.save_scores(evaluation_path, prefix=str(time_steps))
+    evaluator.save_scores(evaluation_path)
     experiments = dict()
     experiments['model'] = scores
     vis.generate_visual_analysis(evaluation_path, experiments=experiments)

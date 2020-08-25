@@ -11,7 +11,8 @@ def bar_plots(output_path, data):
 
     colors = ['blue', 'orange', 'green']
 
-    for (metric_label, metric_scores) in data[3]:
+    for metric_label in data[3]:
+        metric_scores = data[3][metric_label]
         num_groups = len(metric_scores)
         width = 0.7 / num_groups  # the width of the bars
         fig, ax = plt.subplots()
@@ -26,9 +27,9 @@ def bar_plots(output_path, data):
                             textcoords="offset points",
                             ha='center', va='bottom', rotation=90)
 
-        for index, experiment_scores in enumerate(metric_scores):
-            experiment_label, experiment_list = experiment_scores
-            rects = ax.bar(x - (num_groups - 1) * width / 2 + width * index, experiment_list, width,
+        for index, experiment_label in enumerate(metric_scores):
+            experiment_scores_mean, experiment_scores_err = metric_scores[experiment_label]
+            rects = ax.bar(x - (num_groups - 1) * width / 2 + width * index, experiment_scores_mean, width,
                            label=experiment_labels[index],
                            color=colors[index])
             autolabel(rects)
@@ -46,48 +47,6 @@ def bar_plots(output_path, data):
             os.path.join(output_path, 'bar_plots_{}.png'.format(metric_label)))
 
 
-def bar_plots_with_table(output_path, data):
-    protocol_labels = data[0]
-    experiment_labels = data[1]
-    metric_labels = data[2]
-    x = np.arange(len(protocol_labels))  # the label locations
-
-    colors = ['blue', 'orange', 'green']
-
-    for (metric_label, metric_scores) in data[3]:
-        num_groups = len(metric_scores)
-        width = 0.7 / num_groups  # the width of the bars
-        fig, ax = plt.subplots()
-        spare_width = 0.5
-        ax.set_xlim(-spare_width, len(protocol_labels) - spare_width)
-        cell_text = list()
-        row_labels = list()
-        for index, experiment_scores in enumerate(metric_scores):
-            experiment_label, experiment_list = experiment_scores
-            plt.bar(x - (num_groups - 1) * width / 2 + width * index, experiment_list, width,
-                    label=experiment_labels[index],
-                    color=colors[index])
-            cell_text.append(['{}'.format(round(x, 2)) for x in experiment_list])
-            row_labels.append(experiment_label)
-
-        ax.set_ylabel('fractional success')
-        ax.set_title(metric_label)
-        #ax.set_xticks(x)
-        ax.set_ylim((0, 1.2))
-        ax.get_xaxis().set_visible(False)
-        #ax.set_xticklabels(protocol_labels, rotation='vertical')
-        table = plt.table(cellText=cell_text,
-                          rowLabels=row_labels,
-                          colLabels=[str(i) for i in range(len(protocol_labels))],
-                          rowColours=colors,
-                          loc='bottom')
-        fig.subplots_adjust(bottom=0.1)
-        fig.tight_layout()
-
-        plt.savefig(
-            os.path.join(output_path, 'bar_plots_table_{}.png'.format(metric_label)))
-
-
 def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
     protocol_labels = data[0]
     protocol_ids = ['P{}'.format(i) for i in range(len(protocol_labels))]
@@ -95,7 +54,6 @@ def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
     metric_labels = data[2]
     x = np.arange(len(protocol_labels))  # the label locations
 
-    colors = ['blue', 'orange', 'green']
     colors = ["#a6cee3",
               "#1f78b4",
               "#b2df8a",
@@ -105,18 +63,20 @@ def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
               "#fdbf6f",
               "#ff7f00",
               "#cab2d6"]
-    for (metric_label, metric_scores) in data[3]:
+    for metric_label in data[3]:
+        metric_scores = data[3][metric_label]
         num_groups = len(metric_scores)
         width = 0.7 / num_groups  # the width of the bars
         fig, ax = plt.subplots(figsize=(12, 4))
         spare_width = 0.5
         ax.set_xlim(-spare_width, len(protocol_labels) - spare_width)
         row_labels = list(protocol_settings[list(protocol_settings.keys())[0]].keys())
-        for index, experiment_scores in enumerate(metric_scores):
-            experiment_label, experiment_scores_list, experiment_scores_std_list = experiment_scores
-            experiment_scores_std_list_upper = [min(std, 1.0 - mean) for mean, std in zip(experiment_scores_list, experiment_scores_std_list)]
-            plt.bar(x - (num_groups - 1) * width / 2 + width * index, experiment_scores_list, width,
-                    yerr=(experiment_scores_std_list, experiment_scores_std_list_upper), capsize=2,
+        for index, experiment_label in enumerate(metric_scores):
+            experiment_scores_mean, experiment_scores_err = metric_scores[experiment_label]
+            experiment_scores_std_list_upper = [min(std, 1.0 - mean) for mean, std in zip(experiment_scores_mean,
+                                                                                          experiment_scores_err)]
+            plt.bar(x - (num_groups - 1) * width / 2 + width * index, experiment_scores_mean, width,
+                    yerr=(experiment_scores_err, experiment_scores_std_list_upper), capsize=2,
                     label=experiment_labels[index],
                     color=colors[index])
 
