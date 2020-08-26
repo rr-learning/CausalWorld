@@ -30,9 +30,9 @@ Training on multiple points of this space can be achieved by the help of a Curri
 Having an explicit split between spaces A and B allows to test generalisation capabilities towards values
 that are more in line with the notions of interpolating (space A) and extrapolating (space B) generalisation.
 
---------
+-------
 Example
---------
+-------
 
 As an introductory example we want to show you how you can quantify different generalisation aspects depending
 on the curriculum exposed during training using the pushing task.
@@ -64,9 +64,9 @@ just a few interesting observations. Left (no goal pose randomization) and right
    :alt: mean last integrated fractional success, radar plot
    :align: center
 
-----------------------
+-----------------------
 Using default protocols
-----------------------
+-----------------------
 
 Below we show some demo code how you can systematically evaluate agents on a set
 of different protocols and visualize the results in radar plots of different scores

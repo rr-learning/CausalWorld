@@ -19,149 +19,107 @@ Protocol
 
 .. automodule:: causal_world.evaluation.protocols
 
-GoalPosesOOD
-------------
-.. autoclass:: GoalPosesOOD
-    :members:
-
-    .. automethod:: __init__
-
-InitialPosesOOD
+GoalPosesSpaceA
 ---------------
-.. autoclass:: InitialPosesOOD
+.. autoclass:: GoalPosesSpaceA
     :members:
 
     .. automethod:: __init__
 
-SameMassesOOD
--------------
-.. autoclass:: SameMassesOOD
+GoalPosesSpaceB
+---------------
+.. autoclass:: GoalPosesSpaceB
     :members:
 
     .. automethod:: __init__
 
-SameColorsOOD
---------------
-.. autoclass:: SameColorsOOD
+InitialPosesSpaceA
+------------------
+.. autoclass:: InitialPosesSpaceA
     :members:
 
     .. automethod:: __init__
 
-FloorFrictionOOD
+InitialPosesSpaceB
+------------------
+.. autoclass:: InitialPosesSpaceB
+    :members:
+
+    .. automethod:: __init__
+
+ObjectMassesSpaceA
+------------------
+.. autoclass:: ObjectMassesSpaceA
+    :members:
+
+    .. automethod:: __init__
+
+ObjectMassesSpaceB
+------------------
+.. autoclass:: ObjectMassesSpaceB
+    :members:
+
+    .. automethod:: __init__
+
+ObjectColorsSpaceA
+------------------
+.. autoclass:: ObjectColorsSpaceA
+    :members:
+
+    .. automethod:: __init__
+
+ObjectColorsSpaceB
+------------------
+.. autoclass:: ObjectColorsSpaceB
+    :members:
+
+    .. automethod:: __init__
+
+FloorFrictionSpaceA
+-------------------
+.. autoclass:: FloorFrictionSpaceA
+    :members:
+
+    .. automethod:: __init__
+
+FloorFrictionSpaceB
+-------------------
+.. autoclass:: FloorFrictionSpaceB
+    :members:
+
+    .. automethod:: __init__
+
+ObjectSizeSpaceA
+-----------------
+.. autoclass:: ObjectSizeSpaceA
+    :members:
+
+    .. automethod:: __init__
+
+ObjectSizeSpaceB
 ----------------
-.. autoclass:: FloorFrictionOOD
+.. autoclass:: ObjectSizeSpaceB
     :members:
 
     .. automethod:: __init__
 
-ObjectSizesOOD
---------------
-.. autoclass:: ObjectSizesOOD
+RandomSpaceA
+------------
+.. autoclass:: RandomSpaceA
     :members:
 
     .. automethod:: __init__
 
-RandomInTrainSet
-----------------
-.. autoclass:: RandomInTrainSet
-    :members:
-
-    .. automethod:: __init__
-
-InEpisodePosesChange
---------------------
-.. autoclass:: InEpisodePosesChange
+InEpisodePosesChangeSpaceA
+--------------------------
+.. autoclass:: InEpisodePosesChangeSpaceA
     :members:
 
     .. automethod:: __init__
 
 DefaultTask
-------------
+-----------
 .. autoclass:: DefaultTask
-    :members:
-
-    .. automethod:: __init__
-
-GoalPosesTestSpace
-------------------
-.. autoclass:: GoalPosesTestSpace
-    :members:
-
-    .. automethod:: __init__
-
-GoalPosesTrainSpace
--------------------
-.. autoclass:: GoalPosesTrainSpace
-    :members:
-
-    .. automethod:: __init__
-
-FloorFrictionTestSpace
-----------------------
-.. autoclass:: FloorFrictionTestSpace
-    :members:
-
-    .. automethod:: __init__
-
-FloorFrictionTrainSpace
------------------------
-.. autoclass:: FloorFrictionTrainSpace
-    :members:
-
-    .. automethod:: __init__
-
-InitialPosesTestSpace
----------------------
-.. autoclass:: InitialPosesTestSpace
-    :members:
-
-    .. automethod:: __init__
-
-InitialPosesTrainSpace
-----------------------
-.. autoclass:: InitialPosesTrainSpace
-    :members:
-
-    .. automethod:: __init__
-
-ObjectColorsTestSpace
----------------------
-.. autoclass:: ObjectColorsTestSpace
-    :members:
-
-    .. automethod:: __init__
-
-ObjectColorsTrainSpace
----------------------
-.. autoclass:: ObjectColorsTrainSpace
-    :members:
-
-    .. automethod:: __init__
-
-ObjectMassesTestSpace
----------------------
-.. autoclass:: ObjectMassesTestSpace
-    :members:
-
-    .. automethod:: __init__
-
-ObjectMassesTrainSpace
----------------------
-.. autoclass:: ObjectMassesTrainSpace
-    :members:
-
-    .. automethod:: __init__
-
-ObjectSizeTestSpace
----------------------
-.. autoclass:: ObjectSizeTestSpace
-    :members:
-
-    .. automethod:: __init__
-
-ObjectSizeTrainSpace
----------------------
-.. autoclass:: ObjectSizeTrainSpace
     :members:
 
     .. automethod:: __init__
