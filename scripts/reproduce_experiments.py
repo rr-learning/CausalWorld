@@ -151,13 +151,15 @@ if __name__ == '__main__':
                         default='pushing',
                         help="possible tasks: pushing, picking, pick_and_place, stacking2")
     parser.add_argument("--output_path", required=True, help="output path")
-    parser.add_argument("--tensorboard_logging", help="tensorboard_logging")
+    # parser.add_argument('--tensorboard', help="tensorboard logging")
+
+    tensorboard_logging = False
 
     args = vars(parser.parse_args())
     model_num = int(args['model_num'])
     task = str(args['task'])
     output_path = str(args['output_path'])
-    tensorboard_logging = bool(args['tensorboard_logging'])
+    # tensorboard_logging = bool(args['tensorboard_logging'])
 
     output_path = os.path.join(output_path, str(model_num))
     try:

@@ -98,7 +98,7 @@ if __name__ == '__main__':
     NUM_RANDOM_SEEDS = 5
     num_curriculum = 3
     algorithm_list = ['PPO', 'SAC', 'TD3']
-    time_steps = ['98000000', '10000000', '10000000']
+    time_steps = ['100000000', '10000000', '10000000']
 
     experiments = dict()
 
@@ -112,14 +112,10 @@ if __name__ == '__main__':
                             + random_seed
                 time_string = time_steps[algorithm_index]
                 # This is the default path saved from complete run
-                # scores_path = os.path.join(output_path, str(model_num),
-                #                            'evaluation',
-                #                            'time_steps_{}'.format(time_string),
-                #                            'scores.json')
-                scores_path = os.path.join(models_path, str(model_num),
+                scores_path = os.path.join(output_path, str(model_num),
                                            'evaluation',
                                            'time_steps_{}'.format(time_string),
-                                           '{}_scores.json'.format(time_string))
+                                           'scores.json')
                 if os.path.exists(scores_path):
                     with open(scores_path, 'r') as fin:
                         scores = json.load(fin)

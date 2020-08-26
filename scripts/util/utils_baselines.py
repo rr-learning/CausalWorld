@@ -81,6 +81,7 @@ def get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step, tb_path):
                          _init_setup_model=True,
                          policy_kwargs=policy_kwargs,
                          **model_settings['train_configs'],
+                         action_noise=action_noise,
                          verbose=1,
                          tensorboard_log=tb_path)
         model.num_timesteps = ckpt_step
@@ -89,6 +90,7 @@ def get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step, tb_path):
                     env,
                     _init_setup_model=True,
                     policy_kwargs=policy_kwargs,
+                    action_noise=action_noise,
                     **model_settings['train_configs'],
                     verbose=1,
                     tensorboard_log=tb_path)
