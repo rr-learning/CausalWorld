@@ -153,7 +153,8 @@ def train_model(model_settings, output_path):
 
     try:
         os.makedirs(model_path)
-        ckpt_path = ckpt_step = None
+        ckpt_path = None
+        ckpt_step = 0
     except FileExistsError:
         print("Folder '{}' already exists".format(model_path))
         ckpt_path, ckpt_step = utils.get_latest_checkpoint_path(model_path)
@@ -162,16 +163,18 @@ def train_model(model_settings, output_path):
     if model_settings['algorithm'] == 'PPO':
         model, env = get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs)
         num_of_active_envs = num_of_envs
-        total_time_steps = model_settings['total_time_steps']
+        total_time_steps = model_settings['total_time_steps'] - ckpt_step
         validate_every_timesteps = model_settings['validate_every_timesteps']
     elif model_settings['algorithm'] == 'SAC':
         model, env = get_SAC_model(model_settings, model_path, ckpt_path, ckpt_step)
         num_of_active_envs = num_of_envs
-        total_time_steps = model_settings['total_time_steps']
+        total_time_steps = model_settings['total_time_steps'] - ckpt_step
         validate_every_timesteps = model_settings['validate_every_timesteps']
     elif model_settings['algorithm'] == 'TD3':
         model, env = get_TD3_model(model_settings, model_path, ckpt_path, ckpt_step)
         num_of_active_envs = num_of_envs
+        total_time_steps = model_settings['total_time_steps'] - ckpt_step
+        validate_every_timesteps = model_settings['validate_every_timesteps']
     else:
         raise Exception("{} is not supported for training in the baselines".format(model_settings['algorithm']))
 

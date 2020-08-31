@@ -59,6 +59,24 @@ PICK_AND_PLACE_BENCHMARK = dict(task_generator_id='pick_and_place',
                                     protocols.DefaultTask()
                                 ])
 
+STACKING_TWO_BENCHMARK = dict(task_generator_id='stacking2',
+                              evaluation_protocols=[
+                                  protocols.GoalPosesSpaceA(),
+                                  protocols.GoalPosesSpaceB(),
+                                  protocols.InitialPosesSpaceA(),
+                                  protocols.InitialPosesSpaceB(),
+                                  protocols.ObjectMassesSpaceA(),
+                                  protocols.ObjectMassesSpaceB(),
+                                  protocols.ObjectColorsSpaceA(),
+                                  protocols.ObjectColorsSpaceB(),
+                                  protocols.ObjectSizeSpaceA(),
+                                  protocols.ObjectSizeSpaceB(),
+                                  protocols.FloorFrictionSpaceA(),
+                                  protocols.FloorFrictionSpaceB(),
+                                  protocols.InEpisodePosesChangeSpaceA(),
+                                  protocols.DefaultTask()
+                              ])
+
 TOWER_2_BENCHMARK = dict(task_generator_id='towers',
                          evaluation_protocols=[
                              protocols.GoalPosesSpaceA(),

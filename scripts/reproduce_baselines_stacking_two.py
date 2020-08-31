@@ -1,6 +1,6 @@
 from causal_world.evaluation.evaluation import EvaluationPipeline
 from causal_world.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
-from causal_world.benchmark.benchmarks import PICKING_BENCHMARK
+from causal_world.benchmark.benchmarks import STACKING_TWO_BENCHMARK
 from causal_world.task_generators.task import task_generator
 import causal_world.viewers.task_viewer as viewer
 import causal_world.evaluation.visualization.visualiser as vis
@@ -11,14 +11,14 @@ import os
 
 
 def baseline_model(model_num):
-    benchmarks = utils.sweep('benchmarks', [PICKING_BENCHMARK])
+    benchmarks = utils.sweep('benchmarks', [STACKING_TWO_BENCHMARK])
     task_configs = [{
         'task_configs': {
             'variables_space': 'space_a',
             'fractional_reward_weight': 1,
-            'dense_reward_weights': [250, 0, 125,
-                                     0, 750, 0,
-                                     0, 0.005]
+            'dense_reward_weights': [750, 250,
+                                     250, 125,
+                                     0.005]
         }
     }]
 
@@ -39,7 +39,7 @@ def baseline_model(model_num):
 
     ppo = {'num_of_envs': 20,
            'algorithm': 'PPO',
-           'validate_every_timesteps': 2000000,
+           'validate_every_timesteps': int(2000000),
            'total_time_steps': int(100001000),
            'train_configs': {
                "gamma": 0.99,

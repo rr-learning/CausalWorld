@@ -25,7 +25,7 @@ def checkpoints_in_folder(folder):
 def get_latest_checkpoint_path(model_path):
     filenames, numbers = checkpoints_in_folder(model_path)
     if len(filenames) == 0:
-        return None, None
+        return None, 0
     else:
         ckpt_name = filenames[np.argmax(numbers)]  # latest checkpoint
         ckpt_step = numbers[np.argmax(numbers)]

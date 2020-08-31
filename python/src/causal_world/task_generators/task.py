@@ -6,6 +6,7 @@ from causal_world.task_generators.stacked_blocks import \
 from causal_world.task_generators.creative_stacked_blocks import \
     CreativeStackedBlocksGeneratorTask
 from causal_world.task_generators.towers import TowersGeneratorTask
+from causal_world.task_generators.stacking import Stacking2TaskGenerator
 from causal_world.task_generators.general import GeneralGeneratorTask
 from causal_world.task_generators.pick_and_place import \
     PickAndPlaceTaskGenerator
@@ -28,6 +29,8 @@ def task_generator(task_generator_id="reaching", **kwargs):
         task = ReachingTaskGenerator(**kwargs)
     elif task_generator_id == "pick_and_place":
         task = PickAndPlaceTaskGenerator(**kwargs)
+    elif task_generator_id == "stacking2":
+        task = Stacking2TaskGenerator(**kwargs)
     elif task_generator_id == "stacked_blocks":
         task = StackedBlocksGeneratorTask(**kwargs)
     elif task_generator_id == "towers":
