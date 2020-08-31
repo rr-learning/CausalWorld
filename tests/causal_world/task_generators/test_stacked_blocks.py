@@ -86,7 +86,7 @@ class TestStackedBlocks(unittest.TestCase):
             if i == 50:
                 success_signal = self.env.do_intervention(
                     {'tool_level_0_num_1': {
-                        'cartesian_position': [0, 0, 2]
+                        'cylindrical_position': [0, 0, 0.2]
                     }})
         observations_2 = []
         rewards_2 = []

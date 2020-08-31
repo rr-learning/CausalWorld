@@ -173,7 +173,6 @@ class TestWorld(unittest.TestCase):
         kuka_env.close()
         return
 
-    @unittest.skip("This test will fail because of a potential bug in pybullet")
     def test_save_state(self):
         task = task_generator(task_generator_id="pushing")
         env = CausalWorld(task=task, enable_visualization=False, seed=0)

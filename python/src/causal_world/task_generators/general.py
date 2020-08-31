@@ -169,10 +169,11 @@ class GeneralGeneratorTask(BaseTask):
         elif "blocks_mass" in interventions_dict:
             new_interventions_dict = dict()
             for rigid_object in self._stage.get_rigid_objects():
-                if self._stage.get_rigid_objects()[rigid_object].is_not_fixed:
+                if self._stage.get_rigid_objects()[rigid_object].is_not_fixed():
                     new_interventions_dict[rigid_object] = dict()
                     new_interventions_dict[rigid_object]['mass'] = \
                         self.tool_mass
+            self._stage.apply_interventions(new_interventions_dict)
         else:
             raise Exception("this task generator variable "
                             "is not yet defined")

@@ -11,7 +11,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
                  activate_sparse_reward=False,
                  tool_block_mass=0.02,
                  joint_positions=None,
-                 tool_block_position=np.array([0, -0.065, 0.0325]),
+                 tool_block_position=np.array([0, -0.09, 0.0325]),
                  tool_block_orientation=np.array([0, 0, 0, 1]),
                  goal_block_position=np.array([0, 0.09, 0.0325]),
                  goal_block_orientation=np.array([0, 0, 0, 1])):
@@ -89,6 +89,65 @@ class PickAndPlaceTaskGenerator(BaseTask):
         ]
         return
 
+    def _set_intervention_space_a(self):
+        """
+
+        :return:
+        """
+        super(PickAndPlaceTaskGenerator, self)._set_intervention_space_a()
+        self._intervention_space_a['obstacle']['size'] = \
+            np.array([self._stage.get_object_state('obstacle', 'size'),
+                      self._stage.get_object_state('obstacle', 'size')])
+        self._intervention_space_a['obstacle']['size'][0][-1] = 0.02
+        self._intervention_space_a['obstacle']['size'][1][-1] = 0.065
+        self._intervention_space_a['tool_block']['cylindrical_position'][0] = \
+            np.array([0.07, np.pi/6, self._stage.get_object_state('tool_block', 'size')[-1] / 2.0])
+
+        self._intervention_space_a['tool_block']['cylindrical_position'][1] = \
+            np.array([0.12, (5 / 6.0) * np.pi ,
+                      self._stage.get_object_state('tool_block', 'size')[
+                          -1] / 2.0])
+        self._intervention_space_a['goal_block']['cylindrical_position'][0] = \
+            np.array([0.07, -np.pi / 6,
+                      self._stage.get_object_state('tool_block', 'size')[
+                          -1] / 2.0])
+
+        self._intervention_space_a['goal_block']['cylindrical_position'][1] = \
+            np.array([0.12, (5 / 6.0) * -np.pi,
+                      self._stage.get_object_state('tool_block', 'size')[
+                          -1] / 2.0])
+        return
+
+    def _set_intervention_space_b(self):
+        """
+
+        :return:
+        """
+        super(PickAndPlaceTaskGenerator, self)._set_intervention_space_b()
+        self._intervention_space_b['obstacle']['size'] = \
+            np.array([self._stage.get_object_state('obstacle', 'size'),
+                      self._stage.get_object_state('obstacle', 'size')])
+        self._intervention_space_b['obstacle']['size'][0][-1] = 0.065
+        self._intervention_space_b['obstacle']['size'][1][-1] = 0.1
+        self._intervention_space_b['tool_block']['cylindrical_position'][0] = \
+            np.array([0.12, np.pi / 6,
+                      self._stage.get_object_state('tool_block', 'size')[
+                          -1] / 2.0])
+
+        self._intervention_space_b['tool_block']['cylindrical_position'][1] = \
+            np.array([0.15, (5 / 6.0) * np.pi,
+                      self._stage.get_object_state('tool_block', 'size')[
+                          -1] / 2.0])
+        self._intervention_space_b['goal_block']['cylindrical_position'][0] = \
+            np.array([0.12, -np.pi / 6,
+                      self._stage.get_object_state('tool_block', 'size')[
+                          -1] / 2.0])
+
+        self._intervention_space_b['goal_block']['cylindrical_position'][1] = \
+            np.array([0.15, (5 / 6.0) * -np.pi,
+                      self._stage.get_object_state('tool_block', 'size')[
+                          -1] / 2.0])
+        return
 
     def _set_task_state(self):
         """
@@ -250,34 +309,34 @@ class PickAndPlaceTaskGenerator(BaseTask):
                     interventions_dict['goal_block']['cylindrical_position'] = cyl_pos_goal
         return interventions_dict
 
-    def _get_random_block_position_on_side(self, side):
-        """
-
-        :param side:
-
-        :return:
-        """
-        intervention_space = self.get_variable_space_used()
-        if side == 0:
-            return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
-                                                              self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
-                                               angle_limits=intervention_space['goal_block']
-                                                            ['cylindrical_position'][:, 1],
-                                               radius_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 0],
-                                               allowed_section=np.array(
-                                                   [[-0.5, -0.5, 0],
-                                                    [0.5, -0.065, 0.5]]))
-        else:
-            return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
-                                                              self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
-                                               angle_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 1],
-                                               radius_limits=intervention_space['goal_block']
-                                                             ['cylindrical_position'][:, 0],
-                                               allowed_section=np.array(
-                                                   [[-0.5, 0.065, 0],
-                                                    [0.5, 0.5, 0.5]]))
+    # def _get_random_block_position_on_side(self, side):
+    #     """
+    #
+    #     :param side:
+    #
+    #     :return:
+    #     """
+    #     intervention_space = self.get_variable_space_used()
+    #     if side == 0:
+    #         return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
+    #                                                           self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
+    #                                            angle_limits=intervention_space['goal_block']
+    #                                                         ['cylindrical_position'][:, 1],
+    #                                            radius_limits=intervention_space['goal_block']
+    #                                                          ['cylindrical_position'][:, 0],
+    #                                            allowed_section=np.array(
+    #                                                [[-0.5, -0.5, 0],
+    #                                                 [0.5, -0.065, 0.5]]))
+    #     else:
+    #         return self._stage.random_position(height_limits=[self._stage.get_object_state('goal_block', 'size')[-1]/2.0,
+    #                                                           self._stage.get_object_state('goal_block', 'size')[-1]/2.0],
+    #                                            angle_limits=intervention_space['goal_block']
+    #                                                          ['cylindrical_position'][:, 1],
+    #                                            radius_limits=intervention_space['goal_block']
+    #                                                          ['cylindrical_position'][:, 0],
+    #                                            allowed_section=np.array(
+    #                                                [[-0.5, 0.065, 0],
+    #                                                 [0.5, 0.5, 0.5]]))
 
     def sample_new_goal(self, level=None):
         """
@@ -288,7 +347,7 @@ class PickAndPlaceTaskGenerator(BaseTask):
         """
         intervention_space = self.get_variable_space_used()
         rigid_block_side = np.random.randint(0, 2)
-        goal_block_side = not rigid_block_side
+        # goal_block_side = not rigid_block_side
         intervention_dict = dict()
         intervention_dict['tool_block'] = dict()
         intervention_dict['goal_block'] = dict()
@@ -298,9 +357,82 @@ class PickAndPlaceTaskGenerator(BaseTask):
         else:
             intervention_dict['tool_block']['cylindrical_position'] = np.array(
                 [0.09, np.pi/2, self._stage.get_object_state('tool_block', 'size')[-1]/2.0])
+        self._adjust_variable_spaces_after_intervention(intervention_dict)
         intervention_dict['goal_block']['cylindrical_position'] = \
-            cart2cyl(self._get_random_block_position_on_side(goal_block_side))
+            np.random.uniform(
+                intervention_space['goal_block']['cylindrical_position'][0],
+                intervention_space['goal_block']['cylindrical_position'][1])
         intervention_dict['goal_block']['euler_orientation'] = \
             np.random.uniform(intervention_space['goal_block']['euler_orientation'][0],
                               intervention_space['goal_block']['euler_orientation'][1])
         return intervention_dict
+
+    def _adjust_variable_spaces_after_intervention(self, interventions_dict):
+        spaces = [self._intervention_space_a,
+                  self._intervention_space_b,
+                  self._intervention_space_a_b]
+        if 'tool_block' in interventions_dict:
+            if 'cylindrical_position' in interventions_dict['tool_block']:
+                if interventions_dict['tool_block']['cylindrical_position'][1] < 0:
+                    tool_block_multiplier = -1
+                    goal_block_multiplier = 1
+                else:
+                    tool_block_multiplier = 1
+                    goal_block_multiplier = -1
+                for variables_space in spaces:
+                    if tool_block_multiplier == -1:
+                        variables_space['tool_block'][
+                            'cylindrical_position'][1][1] = tool_block_multiplier * \
+                                                            (np.pi/6)
+                        variables_space['tool_block'][
+                            'cylindrical_position'][0][1] = tool_block_multiplier * \
+                                                            (5/6.0) * np.pi
+                        variables_space['goal_block'][
+                            'cylindrical_position'][0][1] = goal_block_multiplier * \
+                                                            (np.pi / 6)
+                        variables_space['goal_block'][
+                            'cylindrical_position'][1][1] = goal_block_multiplier * \
+                                                            (5 / 6.0) * np.pi
+                    else:
+                        variables_space['tool_block'][
+                            'cylindrical_position'][0][
+                            1] = tool_block_multiplier * \
+                                 (np.pi / 6)
+                        variables_space['tool_block'][
+                            'cylindrical_position'][1][
+                            1] = tool_block_multiplier * \
+                                 (5 / 6.0) * np.pi
+                        variables_space['goal_block'][
+                            'cylindrical_position'][1][
+                            1] = goal_block_multiplier * \
+                                 (np.pi / 6)
+                        variables_space['goal_block'][
+                            'cylindrical_position'][0][
+                            1] = goal_block_multiplier * \
+                                 (5 / 6.0) * np.pi
+            if 'size' in interventions_dict['tool_block']:
+                for variable_space in spaces:
+                    variable_space['tool_block'][
+                        'cylindrical_position'][0][
+                        -1] = \
+                        self._stage.get_object_state('tool_block', 'size')[
+                            -1] / 2.0
+                    variable_space['tool_block'][
+                        'cylindrical_position'][
+                        1][-1] = \
+                        self._stage.get_object_state('tool_block', 'size')[
+                            -1] / 2.0
+                    variable_space['goal_block'][
+                        'cylindrical_position'][0][
+                        -1] = \
+                        self._stage.get_object_state('goal_block', 'size')[
+                            -1] / 2.0
+                    variable_space['goal_block'][
+                        'cylindrical_position'][
+                        1][-1] = \
+                        self._stage.get_object_state('goal_block', 'size')[
+                            -1] / 2.0
+        return
+
+
+

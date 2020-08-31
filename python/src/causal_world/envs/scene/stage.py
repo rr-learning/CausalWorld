@@ -763,6 +763,8 @@ class Stage(object):
                                    self._get_stage_bb())/\
                     self._visual_objects[visual_object].get_volume() < 0.50:
                 return False
+            if self._visual_objects[visual_object].get_bounding_box()[0][-1] < -0.01:
+                return False
         return True
 
     def _get_stage_bb(self):

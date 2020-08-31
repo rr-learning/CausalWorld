@@ -30,21 +30,32 @@ class CurriculumWrapper(gym.Wrapper):
         :param action:
         :return:
         """
-        step_dict = self.env.step(action)
+        observation, reward, done, info = self.env.step(action)
+        invalid_interventions = 0
         self._elapsed_timesteps += 1
         interventions_dict = \
             self.interventions_curriculum.get_interventions(
                 current_task_params=self.env.get_current_state_variables(),
                 episode=self._elapsed_episodes,
                 time_step=self._elapsed_timesteps)
-        # perform intervention
         if interventions_dict is not None:
-            intervention_success_signal = \
+            success_signal, observation = \
                 self.env.do_intervention(interventions_dict=
                                          interventions_dict)
-        # TODO: discuss that the observations now doesnot correspond to
-        #  what u actually perofrmed?
-        return step_dict
+            while not success_signal and invalid_interventions < 5:
+                invalid_interventions += 1
+                interventions_dict = \
+                    self.interventions_curriculum.get_interventions(
+                        current_task_params=self.env.get_current_state_variables(),
+                        episode=self._elapsed_episodes,
+                        time_step=self._elapsed_timesteps)
+                if interventions_dict is not None:
+                    success_signal, observation = \
+                        self.env.do_intervention(interventions_dict=
+                                                 interventions_dict)
+                else:
+                    break
+        return observation, reward, done, info
 
     def reset(self):
         """
@@ -52,6 +63,7 @@ class CurriculumWrapper(gym.Wrapper):
         :return:
         """
         self._elapsed_episodes += 1
+        invalid_interventions = 0
         interventions_dict = \
             self.interventions_curriculum.get_interventions(
                 current_task_params=self.env.get_current_state_variables(),
@@ -59,6 +71,20 @@ class CurriculumWrapper(gym.Wrapper):
                 time_step=0)
         if interventions_dict is not None:
             success_signal, obs = self.env.set_starting_state(interventions_dict)
+            while not success_signal and invalid_interventions < 5:
+                invalid_interventions += 1
+                interventions_dict = \
+                    self.interventions_curriculum.get_interventions(
+                        current_task_params=self.env.get_current_state_variables(),
+                        episode=self._elapsed_episodes,
+                        time_step=0)
+                if interventions_dict is not None:
+                    success_signal, obs = self.env.set_starting_state(
+                        interventions_dict)
+                else:
+                    obs = self.env.reset()
+                    break
+
         else:
             obs = self.env.reset()
         return obs

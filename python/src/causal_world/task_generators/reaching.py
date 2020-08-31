@@ -163,7 +163,7 @@ class ReachingTaskGenerator(BaseTask):
         )['end_effector_positions']
         return np.array(achieved_goal)
 
-    def _goal_distance(self, achieved_goal, desired_goal):
+    def _goal_reward(self, achieved_goal, desired_goal):
         """
 
         :param achieved_goal:
@@ -177,25 +177,25 @@ class ReachingTaskGenerator(BaseTask):
         current_dist_to_goal_mean = np.mean(current_dist_to_goal)
         return np.array(current_dist_to_goal_mean)
 
-    def _check_preliminary_success(self, goal_distance):
+    def _check_preliminary_success(self, goal_reward):
         """
 
-        :param goal_distance:
+        :param goal_reward:
 
         :return:
         """
-        if goal_distance < 0.01:
+        if goal_reward < 0.01:
             return True
         else:
             return False
 
-    def _calculate_fractional_success(self, goal_distance):
+    def _calculate_fractional_success(self, goal_reward):
         """
 
-        :param goal_distance:
+        :param goal_reward:
         :return:
         """
-        clipped_distance = np.clip(goal_distance, 0.01, 0.03)
+        clipped_distance = np.clip(goal_reward, 0.01, 0.03)
         distance_from_success = clipped_distance - 0.01
         fractional_success = 1 - (distance_from_success / 0.02)
         return fractional_success
@@ -219,7 +219,7 @@ class ReachingTaskGenerator(BaseTask):
                                                                    self._robot.
                                                                           get_latest_full_state()['positions'])
         info['fractional_success'] =\
-            self._calculate_fractional_success(self._current_goal_distance)
+            self._calculate_fractional_success(self._current_goal_reward)
         return info
 
     def _set_intervention_space_a(self):
