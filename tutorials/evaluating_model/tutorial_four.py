@@ -25,8 +25,20 @@ def evaluate_controller():
     world_params['normalize_observations'] = False
     world_params['normalize_actions'] = False
     evaluator = EvaluationPipeline(evaluation_protocols=[
-        protocols.GoalPosesSpaceA(),
-        protocols.GoalPosesSpaceB()
+        protocols.ProtocolGenerator(name=
+                                    'goal_poses_space_a',
+                                    first_level_regex=
+                                    'goal_.*',
+                                    second_level_regex=
+                                    'cylindrical_position',
+                                    variable_space='a'),
+        protocols.ProtocolGenerator(name=
+                                    'goal_poses_space_b',
+                                    first_level_regex=
+                                    'goal_.*',
+                                    second_level_regex=
+                                    'cylindrical_position',
+                                    variable_space='b')
     ], task_params=task_params, world_params=world_params,
        visualize_evaluation=True)
 

@@ -52,6 +52,7 @@ class ProtocolWrapper(gym.Wrapper):
         self._elapsed_episodes += 1
         self._elapsed_timesteps = 0
         invalid_interventions = 0
+        observation = self.env.reset()
         interventions_dict = self.protocol.get_intervention(
             episode=self._elapsed_episodes, timestep=0)
         if interventions_dict is not None:
@@ -64,9 +65,5 @@ class ProtocolWrapper(gym.Wrapper):
                     success_signal, observation = self.env.do_intervention(
                         interventions_dict)
                 else:
-                    observation = self.env.reset()
                     break
-
-        else:
-            observation = self.env.reset()
         return observation

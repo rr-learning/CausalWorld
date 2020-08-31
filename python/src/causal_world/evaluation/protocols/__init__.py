@@ -19,3 +19,5 @@ from causal_world.evaluation.protocols.object_masses_a import ObjectMassesSpaceA
 
 from causal_world.evaluation.protocols.object_sizes_b import ObjectSizeSpaceB
 from causal_world.evaluation.protocols.object_sizes_a import ObjectSizeSpaceA
+
+from causal_world.evaluation.protocols.protocol_generator import ProtocolGenerator
