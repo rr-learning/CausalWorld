@@ -4,51 +4,15 @@ from causal_world.task_generators.task import task_generator
 import numpy as np
 
 
-def get_world(task_generator_id,
-              task_params,
-              world_params,
-              enable_visualization=False,
-              env_wrappers=np.array([]),
-              env_wrappers_args=np.array([])):
-    """
-
-    :param task_generator_id:
-    :param task_params:
-    :param world_params:
-    :param enable_visualization:
-    :param env_wrappers:
-    :param env_wrappers_args:
-    :return:
-    """
-    world_params["skip_frame"] = 1
-    if task_params is None:
-        task = task_generator(task_generator_id)
-    else:
-        del task_params["task_name"]
-        task = task_generator(task_generator_id, **task_params)
-    if "enable_visualization" in world_params.keys():
-        world_params_temp = dict(world_params)
-        del world_params_temp["enable_visualization"]
-        env = CausalWorld(task,
-                          **world_params_temp,
-                          enable_visualization=enable_visualization)
-    else:
-        env = CausalWorld(task,
-                          **world_params,
-                          enable_visualization=enable_visualization)
-    for i in range(len(env_wrappers)):
-        env = env_wrappers[i](env, **env_wrappers_args[i])
-    return env
-
-
 def view_episode(episode,
                  env_wrappers=np.array([]),
                  env_wrappers_args=np.array([])):
     """
+    Visualizes a logged episode in the GUI
 
-    :param episode:
-    :param env_wrappers:
-    :param env_wrappers_args:
+    :param episode: (Episode) the logged episode
+    :param env_wrappers: (list) a list of gym wrappers
+    :param env_wrappers_args: (list) a list of kwargs for the gym wrappers
     :return:
     """
     actual_skip_frame = episode.world_params["skip_frame"]
@@ -77,14 +41,15 @@ def view_policy(task,
                 env_wrappers=np.array([]),
                 env_wrappers_args=np.array([])):
     """
+    Visualizes a policy for a specified environment in the GUI
 
-    :param task:
-    :param world_params:
-    :param policy_fn:
-    :param max_time_steps:
-    :param number_of_resets:
-    :param env_wrappers:
-    :param env_wrappers_args:
+    :param task: (Task) the task of the environment
+    :param world_params: (dict) the world_params of the environment
+    :param policy_fn: the policy to be evaluated
+    :param max_time_steps: (int) the maximum number of time steps per episode
+    :param number_of_resets: (int) the number of resets/episodes to be viewed
+    :param env_wrappers: (list) a list of gym wrappers
+    :param env_wrappers_args: (list) a list of kwargs for the gym wrappers
     :return:
     """
     actual_skip_frame = world_params["skip_frame"]
@@ -113,18 +78,18 @@ def record_video_of_policy(task,
                            env_wrappers=np.array([]),
                            env_wrappers_args=np.array([])):
     """
+    Records a video of a policy for a specified environment
 
-    :param task:
-    :param world_params:
-    :param policy_fn:
-    :param file_name:
-    :param number_of_resets:
-    :param max_time_steps:
-    :param env_wrappers:
-    :param env_wrappers_args:
+    :param task: (Task) the task of the environment
+    :param world_params: (dict) the world_params of the environment
+    :param policy_fn: the policy to be evaluated
+    :param file_name: (str) full path where the video is being stored.
+    :param number_of_resets: (int) the number of resets/episodes to be viewed
+    :param max_time_steps: (int) the maximum number of time steps per episode
+    :param env_wrappers: (list) a list of gym wrappers
+    :param env_wrappers_args: (list) a list of kwargs for the gym wrappers
     :return:
     """
-    #TODO: discuss the speed of the current render method since it takes a long time to render a frame
     actual_skip_frame = world_params["skip_frame"]
     env = get_world(task.get_task_name(),
                     task.get_task_params(),
@@ -152,19 +117,20 @@ def record_video_of_random_policy(task,
                                   max_time_steps=100,
                                   env_wrappers=np.array([]),
                                   env_wrappers_args=np.array([])):
-    """
 
-    :param task:
-    :param world_params:
-    :param file_name:
-    :param number_of_resets:
-    :param max_time_steps:
-    :param env_wrappers:
-    :param env_wrappers_args:
+    """
+    Records a video of a random policy for a specified environment
+
+    :param task: (Task) the task of the environment
+    :param world_params: (dict) the world_params of the environment
+    :param file_name: (str) full path where the video is being stored.
+    :param number_of_resets: (int) the number of resets/episodes to be viewed
+    :param max_time_steps: (int) the maximum number of time steps per episode
+    :param env_wrappers: (list) a list of gym wrappers
+    :param env_wrappers_args: (list) a list of kwargs for the gym wrappers
     :return:
     """
-    #TODO: discuss the speed of the current render method since it takes a
-    # long time to render a frame
+
     actual_skip_frame = world_params["skip_frame"]
     env = get_world(task.get_task_name(),
                     task.get_task_params(),
@@ -190,13 +156,14 @@ def record_video_of_episode(episode,
                             env_wrappers=np.array([]),
                             env_wrappers_args=np.array([])):
     """
+     Records a video of a logged episode for a specified environment
 
-    :param episode:
-    :param file_name:
-    :param env_wrappers:
-    :param env_wrappers_args:
-    :return:
-    """
+     :param episode: (Episode) the logged episode
+     :param file_name: (str) full path where the video is being stored.
+     :param env_wrappers: (list) a list of gym wrappers
+     :param env_wrappers_args: (list) a list of kwargs for the gym wrappers
+     :return:
+     """
     actual_skip_frame = episode.world_params["skip_frame"]
     env = get_world(episode.get_task_name(),
                     episode._task_params,
@@ -216,3 +183,41 @@ def record_video_of_episode(episode,
             recorder.capture_frame()
     recorder.close()
     env.close()
+
+
+def get_world(task_generator_id,
+              task_params,
+              world_params,
+              enable_visualization=False,
+              env_wrappers=np.array([]),
+              env_wrappers_args=np.array([])):
+    """
+    Returns a particular CausalWorld instance with optional wrappers
+
+    :param task_generator_id: (str) id of the task of the environment
+    :param task_params: (dict) task params of the environment
+    :param world_params: (dict) world_params of the environment
+    :param enable_visualization: (bool) if GUI visualization is enabled
+    :param env_wrappers: (list) a list of gym wrappers
+    :param env_wrappers_args: (list) a list of kwargs for the gym wrappers
+    :return: (CausalWorld) a CausalWorld environment instance
+    """
+    world_params["skip_frame"] = 1
+    if task_params is None:
+        task = task_generator(task_generator_id)
+    else:
+        del task_params["task_name"]
+        task = task_generator(task_generator_id, **task_params)
+    if "enable_visualization" in world_params.keys():
+        world_params_temp = dict(world_params)
+        del world_params_temp["enable_visualization"]
+        env = CausalWorld(task,
+                          **world_params_temp,
+                          enable_visualization=enable_visualization)
+    else:
+        env = CausalWorld(task,
+                          **world_params,
+                          enable_visualization=enable_visualization)
+    for i in range(len(env_wrappers)):
+        env = env_wrappers[i](env, **env_wrappers_args[i])
+    return env

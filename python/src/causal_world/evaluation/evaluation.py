@@ -1,7 +1,5 @@
 import os
 from causal_world.task_generators.task import task_generator
-from causal_world.metrics.mean_complete_success_rate import \
-    MeanCompleteSuccessRate
 from causal_world.envs.causalworld import CausalWorld
 
 from causal_world.metrics.mean_last_fractional_success import \
@@ -20,7 +18,17 @@ import logging
 
 
 class EvaluationPipeline(object):
+    """
+    This class provides functionalities to evaluate a trained policy on a set
+    of protocols
 
+    :param evaluation_protocols: (list) defines the protocols that will be evaluated in this pipleine
+    :param tracker_path: (Tracker) if a tracker was stored during training this can be passed here
+    :param world_params: (dict) the world_params to set up the CausalWorld as required by the policy
+    :param task_params: (dict) the task_params of the Task on which the policy is going to be evaluated
+    :param visualize_evaluation: (bool) if the evaluation is visualized in the GUI
+    :param initial_seed: (int) the random seed of the evaluation for reproducibility
+    """
     def __init__(self,
                  evaluation_protocols,
                  tracker_path=None,
@@ -28,15 +36,6 @@ class EvaluationPipeline(object):
                  task_params=None,
                  visualize_evaluation=False,
                  initial_seed=0):
-        """
-
-        :param evaluation_protocols:
-        :param tracker_path:
-        :param world_params:
-        :param task_params:
-        :param visualize_evaluation:
-        :param initial_seed:
-        """
         self.initial_seed = initial_seed
         self.data_recorder = DataRecorder(output_directory=None)
         if tracker_path is not None:
@@ -95,10 +94,10 @@ class EvaluationPipeline(object):
 
     def run_episode(self, policy_fn):
         """
+        Returns the episode information that is accumulated when running a policy
 
-        :param policy_fn:
-
-        :return:
+        :param policy_fn: the policy_fn that takes an observation as argument and returns the inferred action
+        :return: (Episode) returns the recorded episode
         """
         obs = self.evaluation_env.reset()
         for _ in range(self.time_steps_for_evaluation):
@@ -108,10 +107,10 @@ class EvaluationPipeline(object):
 
     def process_metrics(self, episode):
         """
+        Processes an episode to compute all the metrics of the evaluation pipeline
 
-        :param episode:
-
-        :return:
+        :param episode: (Episode) The episode to be processed
+        :return: (None)
         """
         for metric in self.metrics_list:
             metric.process_episode(episode)
@@ -119,8 +118,9 @@ class EvaluationPipeline(object):
 
     def get_metric_scores(self):
         """
+        Returns the metric scores of all metrics in the evaluation pipeline
 
-        :return:
+        :return: (dict) a score dictionary containing the score for each metric name as key.
         """
         metrics = dict()
         for metric in self.metrics_list:
@@ -129,6 +129,7 @@ class EvaluationPipeline(object):
 
     def reset_metric_scores(self):
         """
+        Resets the metric scores of each metric object
 
         :return:
         """
@@ -137,11 +138,12 @@ class EvaluationPipeline(object):
 
     def evaluate_policy(self, policy, fraction=1):
         """
+        Runs the evaluation of a policy and returns a evaluation dictionary
+        with all the scores for each metric for each protocol.
 
-        :param policy:
-        :param fraction:
-
-        :return:
+        :param policy: the policy_fn that takes an observation as argument and returns the inferred action
+        :param fraction: (float) fraction of episodes to be evaluated w.r.t default (can be higher than one)
+        :return: (dict) scores dict for each metric for each protocol.
         """
         pipeline_scores = dict()
         for evaluation_protocol in self.evaluation_protocols:
@@ -172,9 +174,10 @@ class EvaluationPipeline(object):
 
     def save_scores(self, evaluation_path, prefix=None):
         """
+        Saves the scores dict as json
 
-        :param evaluation_path:
-        :param prefix:
+        :param evaluation_path: (str) the path where the scores are saved
+        :param prefix: (str) an optional prefix to the file name
 
         :return:
         """

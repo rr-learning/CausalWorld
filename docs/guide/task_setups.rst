@@ -1,8 +1,8 @@
 .. _task_setups:
 
-===============
+==================
 Task distributions
-===============
+==================
 
 .. image:: ../media/demo_pushing.gif
    :scale: 32 %
@@ -86,9 +86,9 @@ step using the fractional volumetric overlap of the tool_blocks with the 3D goal
    * - Reaching
      - The goal is to reach three different positions in space. Note: This task does not fit into the target shape formulation from all the tasks above but is intended as a starter environment for testing your agent.
 
----------------
+------------------
 Observation spaces
----------------
+------------------
 
 There are two default modes of observation spaces: 'cameras' and 'structured'
 
