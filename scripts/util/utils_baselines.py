@@ -149,8 +149,6 @@ def get_PPO_model(model_settings, model_path, ckpt_path, ckpt_step, num_of_envs,
 
 def train_model(model_settings, output_path, tensorboard_logging=False):
     num_of_envs = model_settings['num_of_envs']
-    total_time_steps = model_settings['total_time_steps']
-    validate_every_timesteps = model_settings['validate_every_timesteps']
     model_path = os.path.join(output_path, 'model')
 
     if tensorboard_logging:
