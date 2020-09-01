@@ -183,7 +183,6 @@ class TriFingerRobot(object):
         velocity_feedback = np.asarray(self._velocity_gains) * \
                             self._latest_full_state['velocities']
         joint_torques = position_feedback - velocity_feedback
-        self.update_latest_full_state()
         return joint_torques
 
     def set_action_mode(self, action_mode):
@@ -247,7 +246,6 @@ class TriFingerRobot(object):
 
         :return:
         """
-        self.update_latest_full_state()
         return np.append(self._latest_full_state['positions'],
                          self._latest_full_state['velocities'])
 
@@ -319,6 +317,7 @@ class TriFingerRobot(object):
         if self._pybullet_client_w_o_goal_id is not None:
             pybullet.stepSimulation(
                 physicsClientId=self._pybullet_client_w_o_goal_id)
+        self.update_latest_full_state()
         return
 
     def apply_action(self, action):
@@ -515,7 +514,6 @@ class TriFingerRobot(object):
         """
         # TODO: not a complete list yet of what we want to expose
         variable_params = dict()
-        self.update_latest_full_state()
         variable_params['joint_positions'] = self._latest_full_state[
             'positions']
         variable_params['control_index'] = self._control_index
@@ -627,7 +625,6 @@ class TriFingerRobot(object):
         """
         self._last_action = np.zeros(9, )
         self._last_clipped_action = np.zeros(9, )
-        self.update_latest_full_state()
         self._last_applied_joint_positions = \
             self._latest_full_state['positions']
         self._control_index = -1
@@ -835,6 +832,7 @@ class TriFingerRobot(object):
                             WorldConstants.ROBOT_HEIGHT
                         ], [0, 0, 0, 1],
                         physicsClientId=self._pybullet_client_full_id)
+                self.update_latest_full_state()
                 continue
             if "robot_finger" in intervention:
                 for sub_intervention_variable in \
@@ -890,7 +888,6 @@ class TriFingerRobot(object):
                 raise Exception(
                     "The intervention state variable specified is "
                     "not allowed", intervention)
-        self.update_latest_full_state()
         return
 
     def check_feasibility_of_robot_state(self):

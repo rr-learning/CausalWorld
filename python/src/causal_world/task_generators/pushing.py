@@ -86,6 +86,48 @@ class PushingTaskGenerator(BaseTask):
         ]
         return
 
+    def _set_intervention_space_a(self):
+        """
+
+        :return:
+        """
+        #for now remove all possible interventions on the goal in general
+        #intevrntions on size of objects might become tricky to handle
+        #contradicting interventions here?
+        super(PushingTaskGenerator, self)._set_intervention_space_a()
+        self._intervention_space_a['tool_block']['cylindrical_position'][0][-1] = \
+            self._stage.get_object_state('tool_block', 'size')[-1]/2.0
+        self._intervention_space_a['tool_block']['cylindrical_position'][
+            1][-1] = \
+            self._stage.get_object_state('tool_block', 'size')[-1] / 2.0
+        self._intervention_space_a['goal_block']['cylindrical_position'][0][
+            -1] = \
+            self._stage.get_object_state('goal_block', 'size')[-1] / 2.0
+        self._intervention_space_a['goal_block']['cylindrical_position'][
+            1][-1] = \
+            self._stage.get_object_state('goal_block', 'size')[-1] / 2.0
+        return
+
+    def _set_intervention_space_b(self):
+        """
+
+        :return:
+        """
+        super(PushingTaskGenerator, self)._set_intervention_space_b()
+        self._intervention_space_b['tool_block']['cylindrical_position'][0][
+            -1] = \
+            self._stage.get_object_state('tool_block', 'size')[-1] / 2.0
+        self._intervention_space_b['tool_block']['cylindrical_position'][
+            1][-1] = \
+            self._stage.get_object_state('tool_block', 'size')[-1] / 2.0
+        self._intervention_space_b['goal_block']['cylindrical_position'][0][
+            -1] = \
+            self._stage.get_object_state('goal_block', 'size')[-1] / 2.0
+        self._intervention_space_b['goal_block']['cylindrical_position'][
+            1][-1] = \
+            self._stage.get_object_state('goal_block', 'size')[-1] / 2.0
+        return
+
     def sample_new_goal(self, level=None):
         """
 
@@ -245,3 +287,34 @@ class PushingTaskGenerator(BaseTask):
                     cyl_pos_goal[-1] = interventions_dict['tool_block']['size'][-1] / 2.0
                     interventions_dict['goal_block']['cylindrical_position'] = cyl_pos_goal
         return interventions_dict
+
+    def _adjust_variable_spaces_after_intervention(self, interventions_dict):
+        spaces = [self._intervention_space_a,
+                  self._intervention_space_b,
+                  self._intervention_space_a_b]
+        if 'tool_block' in interventions_dict:
+            if 'size' in interventions_dict['tool_block']:
+                for variable_space in spaces:
+                    variable_space['tool_block'][
+                        'cylindrical_position'][0][
+                        -1] = \
+                        self._stage.get_object_state('tool_block', 'size')[
+                            -1] / 2.0
+                    variable_space['tool_block'][
+                        'cylindrical_position'][
+                        1][-1] = \
+                        self._stage.get_object_state('tool_block', 'size')[
+                            -1] / 2.0
+                    variable_space['goal_block'][
+                        'cylindrical_position'][0][
+                        -1] = \
+                        self._stage.get_object_state('goal_block', 'size')[
+                            -1] / 2.0
+                    variable_space['goal_block'][
+                        'cylindrical_position'][
+                        1][-1] = \
+                        self._stage.get_object_state('goal_block', 'size')[
+                            -1] / 2.0
+        return
+
+

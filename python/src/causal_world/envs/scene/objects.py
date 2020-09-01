@@ -784,7 +784,7 @@ class StaticCuboid(RigidObject):
                                            initial_orientation=orientation,
                                            mass=0,
                                            color=color,
-                                           fixed_bool=False,
+                                           fixed_bool=True,
                                            lateral_friction=lateral_friction,
                                            spinning_friction=0.001,
                                            restitution=0,

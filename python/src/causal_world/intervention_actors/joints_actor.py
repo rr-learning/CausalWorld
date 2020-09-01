@@ -14,6 +14,8 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         super(JointsInterventionActorPolicy, self).__init__()
         self.task_intervention_space = None
+        self._inverse_kinemetics_func = None
+        self._stage_bb = None
 
     def initialize(self, env):
         """
@@ -22,6 +24,8 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         :return:
         """
         self.task_intervention_space = env.get_variable_space_used()
+        self._inverse_kinemetics_func = env.get_robot().inverse_kinematics
+        self._stage_bb = env.get_stage().get_stage_bb()
         return
 
     def _act(self, variables_dict):
@@ -31,9 +35,13 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         :return:
         """
         interventions_dict = dict()
+        desired_tip_positions = np.random.uniform(self._stage_bb[0],
+                                                  self._stage_bb[1],
+                                                  size=[3, 3]).flatten()
+
         interventions_dict['joint_positions'] = \
-            np.random.uniform(self.task_intervention_space['joint_positions'][0],
-                              self.task_intervention_space['joint_positions'][1])
+            self._inverse_kinemetics_func(desired_tip_positions,
+                                          rest_pose=np.zeros(9,).tolist())
         return interventions_dict
 
     def get_params(self):

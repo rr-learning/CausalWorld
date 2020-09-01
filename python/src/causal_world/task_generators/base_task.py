@@ -67,7 +67,7 @@ class BaseTask(object):
         self._period_to_clear_memory = 1
         self._current_desired_goal = None
         self._current_achieved_goal = None
-        self._current_goal_distance = None
+        self._current_goal_reward = None
         self._max_episode_length = None
         self._create_world_func = None
         self._is_partial_solution_exposed = False
@@ -82,6 +82,9 @@ class BaseTask(object):
         :return:
         """
         self._task_params['variables_space'] = variables_space
+        return
+
+    def _adjust_variable_spaces_after_intervention(self, interventions_dict):
         return
 
     def _save_pybullet_state(self):
@@ -99,6 +102,8 @@ class BaseTask(object):
         if self._stage._pybullet_client_w_o_goal_id is not None:
             pybullet_state['w_o_goal'] = pybullet. \
                 saveState(physicsClientId=self._stage._pybullet_client_w_o_goal_id)
+        pybullet_state['latest_full_state'] = copy.deepcopy(
+            self._robot.get_latest_full_state())
         return pybullet_state
 
     def _restore_pybullet_state(self, pybullet_state):
@@ -120,6 +125,8 @@ class BaseTask(object):
             pybullet. \
                 restoreState(pybullet_state['w_o_goal'],
                              physicsClientId=self._stage._pybullet_client_w_o_goal_id)
+        self._robot._latest_full_state = copy.deepcopy(
+            pybullet_state['latest_full_state'])
         return
 
     def _remove_pybullet_state(self, pybullet_state):
@@ -155,6 +162,8 @@ class BaseTask(object):
             self._stage.get_full_env_state()
         state['robot_object_state'] = \
             self._robot.get_full_env_state()
+        state['latest_full_state'] = copy.deepcopy(
+            self._robot.get_latest_full_state())
         state['task_observations'] = \
             copy.deepcopy(self._task_stage_observation_keys)
 
@@ -193,13 +202,10 @@ class BaseTask(object):
             reset_observation_space = True
         self._task_stage_observation_keys = copy.deepcopy(
             state_dict['task_observations'])
+        self._robot._latest_full_state = copy.deepcopy(
+            state_dict['latest_full_state'])
         # self._restore_pybullet_state(state_dict['pybullet_states'])
         return reset_observation_space
-
-    # def remove_state(self, state_dict):
-    #     self._remove_pybullet_state(state_dict['pybullet_states'])
-    #     del state_dict
-    #     return
 
     def get_variable_space_used(self):
         """
@@ -303,7 +309,7 @@ class BaseTask(object):
                         self._stage.get_object_state(possible_corresponding_goal, 'cartesian_position')
                     info['possible_solution_intervention'][rigid_object]['orientation'] = \
                         self._stage.get_object_state(possible_corresponding_goal, 'orientation')
-        info['fractional_success'] = self._current_goal_distance
+        info['fractional_success'] = self._current_goal_reward
         return info
 
     def expose_potential_partial_solution(self):
@@ -401,26 +407,29 @@ class BaseTask(object):
             np.array([[-1.57, -1.2, -3.0] * 3,
                       [-0.69, 0,
                        0] * 3])
-        #any goal or object in arena put the position
-        #and orientation modification
+        #TODO: add the rest of the exposed variables here
         for rigid_object in self._stage.get_rigid_objects():
             self._intervention_space_a[rigid_object] = dict()
-            height = self._stage.get_object_state(rigid_object, 'size')[-1]
-            self._intervention_space_a[rigid_object]['cylindrical_position'] = \
-                np.array([[0.0, - math.pi, height/2.0], [0.11, math.pi, 0.15]])
-            self._intervention_space_a[rigid_object]['euler_orientation'] = \
-                np.array([[0, 0, -math.pi], [0, 0, math.pi]])
+            if self._stage.get_rigid_objects(
+            )[rigid_object].is_not_fixed():
+                height = self._stage.get_object_state(rigid_object, 'size')[-1]
+                self._intervention_space_a[rigid_object]['cylindrical_position'] = \
+                    np.array([[0.0, - math.pi, height/2.0], [0.11, math.pi, 0.15]])
+                self._intervention_space_a[rigid_object]['euler_orientation'] = \
+                    np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
             )[rigid_object].__class__.__name__ == 'Cuboid':
                 self._intervention_space_a[rigid_object]['size'] = \
-                    np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+                    np.array([[0.055, 0.055, 0.055], [0.075, 0.075, 0.075]])
             self._intervention_space_a[rigid_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
-            self._intervention_space_a[rigid_object]['mass'] = \
-                np.array([0.05, 0.1])
+            if self._stage.get_rigid_objects(
+            )[rigid_object].is_not_fixed():
+                self._intervention_space_a[rigid_object]['mass'] = \
+                    np.array([0.015, 0.045])
         for visual_object in self._stage._visual_objects:
-            height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_a[visual_object] = dict()
+            height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_a[visual_object]['cylindrical_position'] = \
                 np.array([[0.0, - math.pi, height/2.0], [0.11, math.pi, 0.15]])
             self._intervention_space_a[visual_object]['euler_orientation'] = \
@@ -428,7 +437,7 @@ class BaseTask(object):
             if self._stage.get_visual_objects(
             )[visual_object].__class__.__name__ == 'SCuboid':
                 self._intervention_space_a[visual_object]['size'] = \
-                    np.array([[0.035, 0.035, 0.035], [0.065, 0.065, 0.065]])
+                    np.array([[0.055, 0.055, 0.055], [0.075, 0.075, 0.075]])
             self._intervention_space_a[visual_object]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self._intervention_space_a['floor_color'] = \
@@ -436,6 +445,8 @@ class BaseTask(object):
         self._intervention_space_a['stage_color'] = \
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self._intervention_space_a['floor_friction'] = \
+            np.array([0.3, 0.8])
+        self._intervention_space_a['stage_friction'] = \
             np.array([0.3, 0.8])
         for link in self._robot.get_link_names():
             self._intervention_space_a[link] = dict()
@@ -456,26 +467,29 @@ class BaseTask(object):
             np.array([[-0.69, 0,
                        0] * 3,
                       [1.0, 1.57, 3.0] * 3])
-        # any goal or object in arena put the position
-        # and orientation modification
+        # TODO: add the rest of the exposed variables here
         for rigid_object in self._stage.get_rigid_objects():
-            height = self._stage.get_object_state(rigid_object, 'size')[-1]
             self._intervention_space_b[rigid_object] = dict()
-            self._intervention_space_b[rigid_object]['cylindrical_position'] = \
-                np.array([[0.11, - math.pi, height/2.0], [0.15, math.pi, 0.3]])
-            self._intervention_space_b[rigid_object]['euler_orientation'] = \
-                np.array([[0, 0, -math.pi], [0, 0, math.pi]])
+            if self._stage.get_rigid_objects(
+            )[rigid_object].is_not_fixed():
+                height = self._stage.get_object_state(rigid_object, 'size')[-1]
+                self._intervention_space_b[rigid_object]['cylindrical_position'] = \
+                    np.array([[0.11, - math.pi, height/2.0], [0.15, math.pi, 0.3]])
+                self._intervention_space_b[rigid_object]['euler_orientation'] = \
+                    np.array([[0, 0, -math.pi], [0, 0, math.pi]])
             if self._stage.get_rigid_objects(
             )[rigid_object].__class__.__name__ == 'Cuboid':
                 self._intervention_space_b[rigid_object]['size'] = \
-                    np.array([[0.065, 0.065, 0.065], [0.085, 0.085, 0.085]])
+                    np.array([[0.075, 0.075, 0.075], [0.095, 0.095, 0.095]])
             self._intervention_space_b[rigid_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
-            self._intervention_space_b[rigid_object]['mass'] = \
-                np.array([0.1, 0.2])
+            if self._stage.get_rigid_objects(
+            )[rigid_object].is_not_fixed():
+                self._intervention_space_b[rigid_object]['mass'] = \
+                    np.array([0.1, 0.2])
         for visual_object in self._stage.get_visual_objects():
-            height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_b[visual_object] = dict()
+            height = self._stage.get_object_state(visual_object, 'size')[-1]
             self._intervention_space_b[visual_object]['cylindrical_position'] = \
                 np.array([[0.11, - math.pi, height/2.0], [0.15, math.pi, 0.3]])
             self._intervention_space_b[visual_object]['euler_orientation'] = \
@@ -483,7 +497,7 @@ class BaseTask(object):
             if self._stage.get_visual_objects(
             )[visual_object].__class__.__name__ == 'SCuboid':
                 self._intervention_space_b[visual_object]['size'] = \
-                    np.array([[0.065, 0.065, 0.065], [0.085, 0.085, 0.085]])
+                    np.array([[0.075, 0.075, 0.075], [0.095, 0.095, 0.095]])
             self._intervention_space_b[visual_object]['color'] = \
                 np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self._intervention_space_b['floor_color'] = \
@@ -492,12 +506,14 @@ class BaseTask(object):
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self._intervention_space_b['floor_friction'] = \
             np.array([0.6, 0.8])
+        self._intervention_space_b['stage_friction'] = \
+            np.array([0.6, 0.8])
         for link in self._robot.get_link_names():
             self._intervention_space_b[link] = dict()
             self._intervention_space_b[link]['color'] = \
                 np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
             self._intervention_space_b[link]['mass'] = \
-                np.array([0.6, 0.8])
+                np.array([0.045, 0.1])
         return
 
     def _set_intervention_space_a_b(self):
@@ -539,12 +555,12 @@ class BaseTask(object):
         """
         achieved_goal = []
         for rigid_object in self._stage.get_rigid_objects():
-            if self._stage.get_rigid_objects()[rigid_object].is_not_fixed:
+            if self._stage.get_rigid_objects()[rigid_object].is_not_fixed():
                 achieved_goal.append(self._stage.get_rigid_objects()
                                      [rigid_object].get_bounding_box())
         return np.array(achieved_goal)
 
-    def _goal_distance(self, achieved_goal, desired_goal):
+    def _goal_reward(self, achieved_goal, desired_goal):
         """
         :param achieved_goal:
         :param desired_goal:
@@ -570,28 +586,28 @@ class BaseTask(object):
             sparse_reward = 1
         return sparse_reward
 
-    def _update_success(self, goal_distance):
+    def _update_success(self, goal_reward):
         """
 
-        :param goal_distance:
+        :param goal_reward:
 
         :return:
         """
-        preliminary_success = self._check_preliminary_success(goal_distance)
+        preliminary_success = self._check_preliminary_success(goal_reward)
         if preliminary_success:
             self._task_solved = True
         else:
             self._task_solved = False
         return
 
-    def _check_preliminary_success(self, goal_distance):
+    def _check_preliminary_success(self, goal_reward):
         """
 
-        :param goal_distance:
+        :param goal_reward:
 
         :return:
         """
-        if goal_distance > 0.9:
+        if goal_reward > 0.9:
             return True
         else:
             return False
@@ -603,24 +619,24 @@ class BaseTask(object):
         """
         self._current_desired_goal = self.get_desired_goal()
         self._current_achieved_goal = self.get_achieved_goal()
-        self._current_goal_distance = self._goal_distance(
+        self._current_goal_reward = self._goal_reward(
             desired_goal=self._current_desired_goal,
             achieved_goal=self._current_achieved_goal)
-        goal_distance = self._current_goal_distance
-        self._update_success(self._current_goal_distance)
+        goal_reward = self._current_goal_reward
+        self._update_success(self._current_goal_reward)
         if self._task_params['activate_sparse_reward']:
             if self._task_solved:
-                goal_distance = 1
+                goal_reward = 1
             else:
-                goal_distance = 0
-            return goal_distance
+                goal_reward = 0
+            return goal_reward
         else:
             dense_rewards, update_task_state_dict = \
                 self._calculate_dense_rewards(achieved_goal=self._current_achieved_goal,
                                               desired_goal=self._current_desired_goal)
             reward = np.sum(np.array(dense_rewards) *
                             self._task_params["dense_reward_weights"]) \
-                        + goal_distance * \
+                        + goal_reward * \
                         self._task_params["fractional_reward_weight"]
             self._update_task_state(update_task_state_dict)
             return reward
@@ -634,17 +650,17 @@ class BaseTask(object):
 
         :return:
         """
-        goal_distance = self._goal_distance(desired_goal=desired_goal,
+        goal_reward = self._goal_reward(desired_goal=desired_goal,
                                             achieved_goal=achieved_goal)
         if self._task_params['activate_sparse_reward']:
             #TODO: not exactly right, but its a limitation of HER
-            if self._check_preliminary_success(goal_distance):
-                goal_distance = 1
+            if self._check_preliminary_success(goal_reward):
+                goal_reward = 1
             else:
-                goal_distance = 0
-            return goal_distance
+                goal_reward = 0
+            return goal_reward
         else:
-            reward = goal_distance * self._task_params[
+            reward = goal_reward * self._task_params[
                 "fractional_reward_weight"]
             return reward
 
@@ -1068,13 +1084,7 @@ class BaseTask(object):
                not stage_infeasible and \
                task_generator_intervention_success_signal
         if success:
-            for intervention in interventions_dict:
-                if isinstance(interventions_dict[intervention], dict):
-                    if 'size' in interventions_dict[intervention]:
-                        height = self._stage.get_object_state(intervention, 'size')[-1]
-                        self._intervention_space_a[intervention]['cylindrical_position'][0][-1] = height / 2.0
-                        self._intervention_space_b[intervention]['cylindrical_position'][0][-1] = height / 2.0
-                        self._intervention_space_a_b[intervention]['cylindrical_position'][0][-1] = height / 2.0
+            self._adjust_variable_spaces_after_intervention(interventions_dict)
         return success, \
                interventions_info, reset_observation_space_signal
 

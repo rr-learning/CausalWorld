@@ -1,8 +1,7 @@
-class Protocol(object):
+class ProtocolBase(object):
     """
     Base Protocol from which each EvaluationProtocol inherits. Default number
     of evaluation protocols is 50
-
     :param name: (str) name of the protocol
     """
     def __init__(self, name):
