@@ -153,14 +153,12 @@ if __name__ == '__main__':
     parser.add_argument("--output_path", required=True, help="output path")
     # parser.add_argument('--tensorboard', help="tensorboard logging")
 
-    tensorboard_logging = False
+    tensorboard_logging = True
 
     args = vars(parser.parse_args())
     model_num = int(args['model_num'])
     task = str(args['task'])
     output_path = str(args['output_path'])
-    # tensorboard_logging = bool(args['tensorboard_logging'])
-
     output_path = os.path.join(output_path, str(model_num))
     try:
         os.makedirs(output_path)
