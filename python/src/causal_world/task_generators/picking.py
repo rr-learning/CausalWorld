@@ -226,6 +226,9 @@ class PickingTaskGenerator(BaseTask):
                     interventions_dict['tool_block'] = dict()
                 interventions_dict['tool_block']['size'] = \
                     interventions_dict['goal_block']['size']
+            if 'cylindrical_position' in interventions_dict['goal_block']:
+                interventions_dict['goal_block']['cylindrical_position'][0] = 0
+                interventions_dict['goal_block']['cylindrical_position'][1] = 0
         elif 'tool_block' in interventions_dict:
             if 'size' in interventions_dict['tool_block']:
                 if 'goal_block' not in interventions_dict:
@@ -251,8 +254,28 @@ class PickingTaskGenerator(BaseTask):
         elif self._task_params['variables_space'] == 'space_a_b':
             intervention_space = self._intervention_space_a_b
         intervention_dict['goal_block']['cylindrical_position'] = \
-            np.random.uniform(intervention_space['goal_block']['cylindrical_position']
-                              [0],
+            np.array([0, 0, np.random.uniform(intervention_space['goal_block']['cylindrical_position']
+                              [0][-1],
                               intervention_space['goal_block']['cylindrical_position']
-                              [1])
+                              [1][-1])])
         return intervention_dict
+
+    def _adjust_variable_spaces_after_intervention(self, interventions_dict):
+        spaces = [self._intervention_space_a,
+                  self._intervention_space_b,
+                  self._intervention_space_a_b]
+        if 'tool_block' in interventions_dict:
+            if 'size' in interventions_dict['tool_block']:
+                for variable_space in spaces:
+                    variable_space['tool_block'][
+                        'cylindrical_position'][0][
+                        -1] = \
+                        self._stage.get_object_state('tool_block', 'size')[
+                            -1] / 2.0
+                    variable_space['goal_block'][
+                        'cylindrical_position'][0][
+                        -1] = \
+                        self._stage.get_object_state('goal_block', 'size')[
+                            -1] / 2.0
+        return
+

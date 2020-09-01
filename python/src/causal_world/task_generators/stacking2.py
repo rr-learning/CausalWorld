@@ -20,7 +20,10 @@ class Stacking2TaskGenerator(BaseTask):
                  goal_position=np.array([-0.06, -0.06, 0.0325]),
                  goal_orientation=np.array([0, 0, 0, 1])):
         """
-        This task generates a task for picking an object in the air.
+        This task generates a task for stacking 2 blocks above each other.
+        Note: it belongs to the same shape family of towers, we only provide a
+        specific task generator for it to be able to do reward engineering
+        and to reproduce the baselines for it in an easy way.
 
         :param variables_space:
         :param fractional_reward_weight:
@@ -240,10 +243,25 @@ class Stacking2TaskGenerator(BaseTask):
         :return:
         """
         super(Stacking2TaskGenerator, self)._set_intervention_space_a()
+        self._intervention_space_a['goal_tower'] = dict()
+        self._intervention_space_a['goal_tower']['cylindrical_position'] = \
+            copy.deepcopy(self._intervention_space_a['goal_block_1']
+                          ['cylindrical_position'])
+        self._intervention_space_a['goal_tower']['cylindrical_position'][0][-1] = \
+            self._task_params["goal_position"][-1] * 2.0
+        self._intervention_space_a['goal_tower']['cylindrical_position'][1][
+            -1] = \
+            self._task_params["goal_position"][-1] * 2.0
+        self._intervention_space_a['goal_tower']['euler_orientation'] = \
+            copy.deepcopy(self._intervention_space_a['goal_block_1']
+                          ['euler_orientation'])
         for visual_object in self._stage.get_visual_objects():
             del self._intervention_space_a[visual_object]['size']
+            del self._intervention_space_a[visual_object]['euler_orientation']
+            del self._intervention_space_a[visual_object]['cylindrical_position']
         for rigid_object in self._stage.get_rigid_objects():
             del self._intervention_space_a[rigid_object]['size']
+
         return
 
     def _set_intervention_space_b(self):
@@ -252,32 +270,85 @@ class Stacking2TaskGenerator(BaseTask):
         :return:
         """
         super(Stacking2TaskGenerator, self)._set_intervention_space_b()
+        self._intervention_space_b['goal_tower'] = dict()
+        self._intervention_space_b['goal_tower']['cylindrical_position'] = \
+            copy.deepcopy(self._intervention_space_b['goal_block_1']
+                          ['cylindrical_position'])
+        self._intervention_space_b['goal_tower']['cylindrical_position'][0][-1] = \
+            self._task_params["goal_position"][-1] * 2.0
+        self._intervention_space_b['goal_tower']['cylindrical_position'][1][-1] = \
+            self._task_params["goal_position"][-1] * 2.0
+        self._intervention_space_b['goal_tower']['euler_orientation'] = \
+            copy.deepcopy(self._intervention_space_b['goal_block_1']
+                          ['euler_orientation'])
         for visual_object in self._stage.get_visual_objects():
             del self._intervention_space_b[visual_object]['size']
+            del self._intervention_space_b[visual_object]['euler_orientation']
+            del self._intervention_space_b[visual_object][
+                'cylindrical_position']
         for rigid_object in self._stage.get_rigid_objects():
             del self._intervention_space_b[rigid_object]['size']
         return
 
-    def _handle_contradictory_interventions(self, interventions_dict):
+    def get_task_generator_variables_values(self):
         """
-
-        :param interventions_dict:
 
         :return:
         """
-        # if intervention on goal_block_1 goal_block_2 is positioned
-        # above it
+        return {
+            'goal_tower': {'cylindrical_position':
+                               self._stage.get_object_state('goal_block_1',
+                                                            'cylindrical_position'),
+                           'euler_orientation':
+                               self._stage.get_object_state('goal_block_1',
+                                                            'euler_orientation')
+                           }
+        }
 
-        if 'goal_block_1' in interventions_dict:
-            if 'cylindrical_position' in interventions_dict['goal_block_1']:
-                interventions_dict['goal_block_1']['cylindrical_position'][-1] = self._task_params["tool_block_size"] / 2
-                interventions_dict['goal_block_2'] = dict()
-                interventions_dict['goal_block_2']['cylindrical_position'] = \
-                    copy.deepcopy(interventions_dict['goal_block_1']['cylindrical_position'])
-                interventions_dict['goal_block_2']['euler_orientation'] = \
-                    copy.deepcopy(interventions_dict['goal_block_1']['euler_orientation'])
-                interventions_dict['goal_block_2']['cylindrical_position'][2] += self._task_params["tool_block_size"]
-        return interventions_dict
+    def apply_task_generator_interventions(self, interventions_dict):
+        """
+
+        :param interventions_dict:
+        :return:
+        """
+        if len(interventions_dict) == 0:
+            return True, False
+        reset_observation_space = False
+        if 'goal_tower' in interventions_dict:
+            new_interventions_dict = dict()
+            new_interventions_dict['goal_block_1'] = dict()
+            new_interventions_dict['goal_block_2'] = dict()
+            if 'cylindrical_position' in interventions_dict['goal_tower']:
+                new_interventions_dict['goal_block_1']['cylindrical_position'] = \
+                    copy.deepcopy(interventions_dict['goal_tower']['cylindrical_position'])
+                new_interventions_dict['goal_block_2'][
+                    'cylindrical_position'] = \
+                    copy.deepcopy(interventions_dict['goal_tower'][
+                                      'cylindrical_position'])
+                new_interventions_dict['goal_block_1']['cylindrical_position'][-1] \
+                    = interventions_dict['goal_tower']['cylindrical_position'][-1] / 2.0
+                new_interventions_dict['goal_block_2']['cylindrical_position'][
+                    -1] \
+                    = interventions_dict['goal_tower'][
+                          'cylindrical_position'][-1] * (3 / 2.0)
+
+            elif 'euler_orientation' in interventions_dict['goal_tower']:
+                new_interventions_dict['goal_block_1']['euler_orientation'] = \
+                    copy.deepcopy(
+                        interventions_dict['goal_tower']['euler_orientation'])
+                new_interventions_dict['goal_block_2'][
+                    'euler_orientation'] = \
+                    copy.deepcopy(interventions_dict['goal_tower'][
+                                      'euler_orientation'])
+            else:
+                raise Exception("this task generator variable "
+                                "is not yet defined")
+            self._stage.apply_interventions(new_interventions_dict)
+
+        else:
+            raise Exception("this task generator variable "
+                            "is not yet defined")
+        return True, reset_observation_space
 
     def sample_new_goal(self, level=None):
         """
@@ -286,19 +357,14 @@ class Stacking2TaskGenerator(BaseTask):
         :return:
         """
         intervention_space = self.get_variable_space_used()
-        pos_low_bound = np.array(intervention_space['goal_block_1']['cylindrical_position'][0])
-        pos_low_bound[-1] = self._stage.get_object_state('tool_block_1', 'size')[-1] / 2.0
-        pos_upper_bound = np.array(intervention_space['goal_block_1']['cylindrical_position'][1])
-        pos_upper_bound[-1] = self._stage.get_object_state('tool_block_1', 'size')[-1] / 2.0
         intervention_dict = dict()
-        intervention_dict['goal_block_1'] = dict()
-        intervention_dict['goal_block_1']['cylindrical_position'] = \
-            np.random.uniform(pos_low_bound,
-                              pos_upper_bound)
-        intervention_dict['goal_block_1']['euler_orientation'] = \
-            np.random.uniform(intervention_space['goal_block_1']['euler_orientation'][0],
-                              intervention_space['goal_block_1']['euler_orientation'][1])
-        intervention_dict['goal_block_2'] = copy.deepcopy(intervention_dict['goal_block_1'])
-        intervention_dict['goal_block_2']['cylindrical_position'][2] += self._task_params["tool_block_size"]
-
+        intervention_dict['goal_tower'] = dict()
+        intervention_dict['goal_tower']['cylindrical_position'] = \
+            np.random.uniform(
+                intervention_space['goal_tower']['cylindrical_position'][0],
+                intervention_space['goal_tower']['cylindrical_position'][1])
+        intervention_dict['goal_tower']['euler_orientation'] = \
+            np.random.uniform(
+                intervention_space['goal_tower']['euler_orientation'][0],
+                intervention_space['goal_tower']['euler_orientation'][1])
         return intervention_dict

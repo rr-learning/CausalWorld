@@ -19,7 +19,7 @@ from causal_world.task_generators.pushing import \
 from causal_world.task_generators.reaching import \
     ReachingTaskGenerator
 
-from causal_world.task_generators.stacking import \
+from causal_world.task_generators.stacking2 import \
     Stacking2TaskGenerator
 
 from causal_world.task_generators.towers import \

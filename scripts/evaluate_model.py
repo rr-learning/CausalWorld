@@ -4,7 +4,7 @@ from causal_world.benchmark.benchmarks import REACHING_BENCHMARK, \
     PUSHING_BENCHMARK, \
     PICKING_BENCHMARK, \
     PICK_AND_PLACE_BENCHMARK, \
-    STACKING_TWO_BENCHMARK
+    STACKING2_BENCHMARK
 import causal_world.evaluation.visualization.visualiser as vis
 
 import argparse
@@ -44,7 +44,7 @@ def protocols_from_settings(model_settings):
     elif task_generator_id == 'pick_and_place':
         protocols = PICK_AND_PLACE_BENCHMARK
     elif task_generator_id == 'stacking2':
-        protocols = STACKING_TWO_BENCHMARK
+        protocols = STACKING2_BENCHMARK
     return protocols['evaluation_protocols']
 
 

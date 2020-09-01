@@ -1,21 +1,4 @@
-from causal_world.evaluation.protocols.protocol_0 import Protocol0
-from causal_world.evaluation.protocols.protocol_1 import Protocol1
-from causal_world.evaluation.protocols.protocol_2 import Protocol2
-from causal_world.evaluation.protocols.protocol_3 import Protocol3
-from causal_world.evaluation.protocols.protocol_4 import Protocol4
-from causal_world.evaluation.protocols.protocol_5 import Protocol5
-from causal_world.evaluation.protocols.protocol_6 import Protocol6
-from causal_world.evaluation.protocols.protocol_7 import Protocol7
-from causal_world.evaluation.protocols.protocol_8 import Protocol8
-from causal_world.evaluation.protocols.protocol_9 import Protocol9
-from causal_world.evaluation.protocols.protocol_10 import Protocol10
-from causal_world.evaluation.protocols.protocol_11 import Protocol11
-
-from causal_world.evaluation.protocols.goal_poses_b import GoalPosesSpaceB
-from causal_world.evaluation.protocols.in_episode_poses_change import InEpisodePosesChangeSpaceA
-from causal_world.evaluation.protocols.floor_friction_b import FloorFrictionSpaceB
-from causal_world.evaluation.protocols.floor_friction_a import FloorFrictionSpaceA
-from causal_world.evaluation.protocols.initial_poses_b import InitialPosesSpaceB
-from causal_world.evaluation.protocols.object_colors_b import ObjectColorsSpaceB
-from causal_world.evaluation.protocols.object_colors_a import ObjectColorsSpaceA
-from causal_world.evaluation.protocols.object_sizes_b import ObjectSizeSpaceB
+from causal_world.evaluation.protocols.fully_random_protocol import \
+    FullyRandomProtocol
+from causal_world.evaluation.protocols.protocol_generator import \
+    ProtocolGenerator

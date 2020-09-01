@@ -175,7 +175,7 @@ class TestWorld(unittest.TestCase):
 
     @unittest.skip("This test will fail because of a potential bug in pybullet")
     def test_save_state(self):
-        task = task_generator(task_generator_id="pushing")
+        task = task_generator(task_generator_id="creative_stacked_blocks")
         env = CausalWorld(task=task, enable_visualization=False, seed=0)
         actions = [env.action_space.sample() for _ in range(200)]
         env.reset()

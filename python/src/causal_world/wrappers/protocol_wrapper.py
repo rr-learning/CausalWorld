@@ -1,5 +1,4 @@
 import gym
-import numpy as np
 
 
 class ProtocolWrapper(gym.Wrapper):
@@ -26,11 +25,23 @@ class ProtocolWrapper(gym.Wrapper):
         """
         observation, reward, done, info = self.env.step(action)
         self._elapsed_timesteps += 1
+        invalid_interventions = 0
         interventions_dict = self.protocol.get_intervention(
             episode=self._elapsed_episodes, timestep=self._elapsed_episodes)
         if interventions_dict is not None:
-            _, observation = \
+            success_signal, observation = \
                 self.env.do_intervention(interventions_dict=interventions_dict)
+            while not success_signal and invalid_interventions < 5:
+                invalid_interventions += 1
+                interventions_dict = self.protocol.get_intervention(
+                    episode=self._elapsed_episodes,
+                    timestep=self._elapsed_episodes)
+                if interventions_dict is not None:
+                    success_signal, observation = \
+                        self.env.do_intervention(interventions_dict=
+                                                 interventions_dict)
+                else:
+                    break
         return observation, reward, done, info
 
     def reset(self):
@@ -40,15 +51,19 @@ class ProtocolWrapper(gym.Wrapper):
         """
         self._elapsed_episodes += 1
         self._elapsed_timesteps = 0
-        success_signal = False
-        sampling = 0
+        invalid_interventions = 0
         observation = self.env.reset()
-        while not success_signal and sampling < 100:
-            sampling += 1
-            interventions_dict = self.protocol.get_intervention(
-                episode=self._elapsed_episodes, timestep=0)
-            if interventions_dict is not None:
-                success_signal, observation = self.env.do_intervention(interventions_dict)
-            else:
-                break
+        interventions_dict = self.protocol.get_intervention(
+            episode=self._elapsed_episodes, timestep=0)
+        if interventions_dict is not None:
+            success_signal, observation = self.env.do_intervention(interventions_dict)
+            while not success_signal and invalid_interventions < 5:
+                invalid_interventions += 1
+                interventions_dict = self.protocol.get_intervention(
+                    episode=self._elapsed_episodes, timestep=0)
+                if interventions_dict is not None:
+                    success_signal, observation = self.env.do_intervention(
+                        interventions_dict)
+                else:
+                    break
         return observation

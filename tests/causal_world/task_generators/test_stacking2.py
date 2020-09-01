@@ -4,12 +4,11 @@ import numpy as np
 import unittest
 
 
-class TestGeneral(unittest.TestCase):
+class TestStacking2(unittest.TestCase):
 
     def setUp(self):
-        self.task = task_generator(task_generator_id="general")
+        self.task = task_generator(task_generator_id="stacking2")
         self.env = CausalWorld(task=self.task, enable_visualization=False)
-        self.env.reset()
         return
 
     def tearDown(self):
@@ -39,13 +38,14 @@ class TestGeneral(unittest.TestCase):
                 observations_2.append(obs)
                 rewards_2.append(reward)
                 if not np.array_equal(observations_1[i], observations_2[i]):
+                    print(i)
                     print(
                         np.array(observations_1[i]) -
                         np.array(observations_2[i]))
                 assert np.array_equal(observations_1[i], observations_2[i])
             assert rewards_1 == rewards_2
 
-    def test_determinism_w_interventions(self):
+    def test_determinism_w_interventions_1(self):
         observations_1 = []
         rewards_1 = []
         horizon = 100
@@ -53,6 +53,32 @@ class TestGeneral(unittest.TestCase):
         actions = np.array(actions)
         new_goal = self.env.sample_new_goal()
         self.env.set_starting_state(interventions_dict=new_goal)
+        for i in range(horizon):
+            obs, reward, done, info = self.env.step(actions[i])
+            observations_1.append(obs)
+            rewards_1.append(reward)
+
+        for _ in range(10):
+            observations_2 = []
+            rewards_2 = []
+            self.env.reset()
+            for i in range(horizon):
+                obs, reward, done, info = self.env.step(actions[i])
+                observations_2.append(obs)
+                rewards_2.append(reward)
+                if not np.array_equal(observations_1[i], observations_2[i]):
+                    print(observations_1[i] - observations_2[i])
+                assert np.array_equal(observations_1[i], observations_2[i])
+            assert rewards_1 == rewards_2
+
+    def test_determinism_w_interventions_2(self):
+        observations_1 = []
+        rewards_1 = []
+        horizon = 100
+        actions = [self.env.action_space.sample() for _ in range(horizon)]
+        actions = np.array(actions)
+        intervention = {'joint_positions': [0, 0, 0, 0, 0, 0, 0, 0, 0]}
+        self.env.set_starting_state(interventions_dict=intervention)
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             observations_1.append(obs)
@@ -85,10 +111,11 @@ class TestGeneral(unittest.TestCase):
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
             if i == 50:
-                success_signal = self.env.do_intervention(
-                    {'tool_level_0_num_1': {
+                success_signal = self.env.do_intervention({
+                    'tool_block_1': {
                         'cylindrical_position': [0, 0, 0.2]
-                    }})
+                    }
+                })
         observations_2 = []
         rewards_2 = []
         self.env.reset()

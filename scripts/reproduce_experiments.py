@@ -1,7 +1,7 @@
 from causal_world.evaluation.evaluation import EvaluationPipeline
 from causal_world.intervention_actors import RandomInterventionActorPolicy, GoalInterventionActorPolicy
 from causal_world.benchmark.benchmarks import PUSHING_BENCHMARK, PICKING_BENCHMARK, \
-    PICK_AND_PLACE_BENCHMARK, STACKING_TWO_BENCHMARK
+    PICK_AND_PLACE_BENCHMARK, STACKING2_BENCHMARK
 from causal_world.task_generators.task import task_generator
 import causal_world.viewers.task_viewer as viewer
 import causal_world.evaluation.visualization.visualiser as vis
@@ -42,7 +42,7 @@ def baseline_model(model_num, task):
             }
         }]
     elif task == 'stacking2':
-        benchmarks = utils.sweep('benchmarks', [STACKING_TWO_BENCHMARK])
+        benchmarks = utils.sweep('benchmarks', [STACKING2_BENCHMARK])
         task_configs = [{
             'task_configs': {
                 'variables_space': 'space_a',

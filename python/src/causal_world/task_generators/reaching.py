@@ -68,10 +68,10 @@ class ReachingTaskGenerator(BaseTask):
         }
         self._stage.add_silhoutte_general_object(**creation_dict)
         self._task_stage_observation_keys = [
-            "goal_60_cartesian_position", "goal_120_cartesian_position",
+            "goal_60_cartesian_position",
+            "goal_120_cartesian_position",
             "goal_300_cartesian_position"
         ]
-        self.current_number_of_obstacles = 0
         return
 
     def get_description(self):
@@ -81,7 +81,7 @@ class ReachingTaskGenerator(BaseTask):
         """
         return \
             "Task where the goal is to reach a " \
-            "point for each finger"
+            "goal point for each finger"
 
     def _calculate_dense_rewards(self, desired_goal, achieved_goal):
         """
@@ -131,7 +131,6 @@ class ReachingTaskGenerator(BaseTask):
 
         :return:
         """
-        self.current_number_of_obstacles = 0
         self.previous_end_effector_positions = \
             self._robot.get_latest_full_state()['end_effector_positions']
         self.previous_joint_velocities = \
@@ -164,7 +163,7 @@ class ReachingTaskGenerator(BaseTask):
         )['end_effector_positions']
         return np.array(achieved_goal)
 
-    def _goal_distance(self, achieved_goal, desired_goal):
+    def _goal_reward(self, achieved_goal, desired_goal):
         """
 
         :param achieved_goal:
@@ -178,17 +177,28 @@ class ReachingTaskGenerator(BaseTask):
         current_dist_to_goal_mean = np.mean(current_dist_to_goal)
         return np.array(current_dist_to_goal_mean)
 
-    def _check_preliminary_success(self, goal_distance):
+    def _check_preliminary_success(self, goal_reward):
         """
 
-        :param goal_distance:
+        :param goal_reward:
 
         :return:
         """
-        if goal_distance < 0.01:
+        if goal_reward < 0.01:
             return True
         else:
             return False
+
+    def _calculate_fractional_success(self, goal_reward):
+        """
+
+        :param goal_reward:
+        :return:
+        """
+        clipped_distance = np.clip(goal_reward, 0.01, 0.03)
+        distance_from_success = clipped_distance - 0.01
+        fractional_success = 1 - (distance_from_success / 0.02)
+        return fractional_success
 
     def get_info(self):
         """
@@ -208,7 +218,8 @@ class ReachingTaskGenerator(BaseTask):
                 self._robot.get_joint_positions_from_tip_positions(self._current_desired_goal,
                                                                    self._robot.
                                                                           get_latest_full_state()['positions'])
-        info['fractional_success'] = self._current_goal_distance
+        info['fractional_success'] =\
+            self._calculate_fractional_success(self._current_goal_reward)
         return info
 
     def _set_intervention_space_a(self):
@@ -216,41 +227,9 @@ class ReachingTaskGenerator(BaseTask):
 
         :return:
         """
-        # you can override these easily
         super(ReachingTaskGenerator, self)._set_intervention_space_a()
-        lower_bound = np.array(WorldConstants.ARENA_BB[0])
-        upper_bound = (WorldConstants.ARENA_BB[1] -
-                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-                      WorldConstants.ARENA_BB[0]
-        lower_bound[1] = float(upper_bound[1])
-        upper_bound[1] = ((WorldConstants.ARENA_BB[1] -
-                           WorldConstants.ARENA_BB[0]) * 3 / 4 + \
-                          WorldConstants.ARENA_BB[0])[1]
-        self._intervention_space_a['goal_60']['cartesian_position'] = \
-            np.array([lower_bound,
-                      upper_bound]) #blue is finger 0, green 240
-        lower_bound = np.array(WorldConstants.ARENA_BB[0])
-        upper_bound = (WorldConstants.ARENA_BB[1] -
-                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-                      WorldConstants.ARENA_BB[0]
-        upper_bound[0] = ((WorldConstants.ARENA_BB[1] -
-                           WorldConstants.ARENA_BB[0]) * 1 / 4 + \
-                          WorldConstants.ARENA_BB[0])[1]
-        self._intervention_space_a['goal_120']['cartesian_position'] = \
-            np.array([lower_bound,
-                      upper_bound])  # blue is finger 0, green 240
-        lower_bound = np.array(WorldConstants.ARENA_BB[0])
-        upper_bound = (WorldConstants.ARENA_BB[1] -
-                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-                      WorldConstants.ARENA_BB[0]
-        upper_bound[1] = (
-            (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 4 +
-            WorldConstants.ARENA_BB[0])[1]
-        self._intervention_space_a['goal_300']['cartesian_position'] = \
-            np.array([lower_bound,
-                      upper_bound])
-        # self._training_intervention_spaces['number_of_obstacles'] = \
-        #     np.array([1, 5])
+        self._intervention_space_a['number_of_obstacles'] = \
+            np.array([1, 5])
 
         return
 
@@ -260,47 +239,8 @@ class ReachingTaskGenerator(BaseTask):
         :return:
         """
         super(ReachingTaskGenerator, self)._set_intervention_space_b()
-        lower_bound = (WorldConstants.ARENA_BB[1] -
-                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-                      WorldConstants.ARENA_BB[0]
-        lower_bound[0] = (
-            (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 3 / 4 +
-            WorldConstants.ARENA_BB[0])[1]
-        upper_bound = np.array(WorldConstants.ARENA_BB[1])
-
-        self._intervention_space_b['goal_60']['cartesian_position'] = \
-            np.array([lower_bound,
-                      upper_bound])
-        lower_bound = (WorldConstants.ARENA_BB[1] -
-                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-                      WorldConstants.ARENA_BB[0]
-        lower_bound[0] = (
-            (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 4 +
-            WorldConstants.ARENA_BB[0])[1]
-        upper_bound = np.array(WorldConstants.ARENA_BB[1])
-        upper_bound[0] = (
-            (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 2 +
-            WorldConstants.ARENA_BB[0])[1]
-        self._intervention_space_b['goal_120']['cartesian_position'] = \
-            np.array([lower_bound,
-                      upper_bound])
-        lower_bound = (WorldConstants.ARENA_BB[1] -
-                       WorldConstants.ARENA_BB[0]) * 1 / 2 + \
-                      WorldConstants.ARENA_BB[0]
-        lower_bound[1] = (
-            (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 4 +
-            WorldConstants.ARENA_BB[0])[1]
-        upper_bound = np.array(WorldConstants.ARENA_BB[1])
-        upper_bound[1] = (
-            (WorldConstants.ARENA_BB[1] - WorldConstants.ARENA_BB[0]) * 1 / 2 +
-            WorldConstants.ARENA_BB[0])[1]
-
-        self._intervention_space_b['goal_300']['cartesian_position'] = \
-            np.array([lower_bound,
-                      upper_bound])
-        #TODO:dicuss this!
-        # self._testing_intervention_spaces['number_of_obstacles'] = \
-        #     np.array([1, 5])
+        self._intervention_space_b['number_of_obstacles'] = \
+            np.array([1, 5])
         return
 
     def get_task_generator_variables_values(self):
@@ -349,11 +289,13 @@ class ReachingTaskGenerator(BaseTask):
                     self._task_stage_observation_keys.append("obstacle_" +
                                                              str(i) +
                                                              "_orientation")
-            #TODO: if its less than what I have
+            else:
+                return True, reset_observation_space
         else:
             raise Exception("this task generator variable "
                             "is not yet defined")
         self._set_intervention_space_b()
         self._set_intervention_space_a()
+        self._set_intervention_space_a_b()
         self._stage.finalize_stage()
         return True, reset_observation_space
