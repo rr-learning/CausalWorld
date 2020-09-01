@@ -11,7 +11,7 @@ def example():
     env = CausalWorld(task=task, enable_visualization=True)
     for _ in range(20):
         env.reset()
-        for _ in range(100):
+        for _ in range(200):
             obs, reward, done, info = env.step(env.action_space.sample())
     env.close()
 

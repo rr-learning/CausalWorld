@@ -15,7 +15,7 @@ seed = 0
 skip_frame = 35
 num_of_particles = 500
 num_elite = 50
-max_iterations = 10
+max_iterations = 20
 horizon_length = 6
 parallel_agents = 25
 
@@ -25,8 +25,12 @@ def _make_env():
     def _init():
         task = task_generator(
             task_generator_id='picking',
-            joint_positions=[0., -0.5, -0.6, 0., -0.4, -0.7, 0., -0.4, -0.7],
-            tool_block_position=[0.0, -0.02, 0.035],
+            joint_positions=[-0.21737874, 0.55613149,
+                             -1.09308519, -0.12868997,
+                             0.52551013, -1.08006493,
+                             -0.00221536, 0.46163487,
+                             -1.00948735],
+            tool_block_position=[0.0, 0, 0.035],
             fractional_reward_weight=1,
             dense_reward_weights=np.array([0, 10, 0,
                                            1, 1, 0, 0,
@@ -44,15 +48,19 @@ def _make_env():
 def run_mpc():
     task = task_generator(
         task_generator_id='picking',
-        joint_positions=[0., -0.5, -0.6, 0., -0.4, -0.7, 0., -0.4, -0.7],
-        tool_block_position=[0.0, -0.02, 0.035],
+        joint_positions=[-0.21737874, 0.55613149,
+                         -1.09308519, -0.12868997,
+                         0.52551013, -1.08006493,
+                         -0.00221536, 0.46163487,
+                         -1.00948735],
+        tool_block_position=[0.0, 0, 0.035],
         fractional_reward_weight=1,
         dense_reward_weights=np.array([0, 10, 0,
                                        1, 1, 0, 0,
                                        0]))
     env = CausalWorld(task=task,
                       skip_frame=1,
-                      enable_visualization=False,
+                      enable_visualization=True,
                       seed=seed)
     true_model = TrueModel(_make_env, parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(
