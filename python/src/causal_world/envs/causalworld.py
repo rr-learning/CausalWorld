@@ -532,7 +532,7 @@ class CausalWorld(gym.Env):
             client = self._pybullet_client_w_o_goal_id
         else:
             client = self._pybullet_client_full_id
-        self._cam_dist = 1
+        self._cam_dist = 0.4
         self._cam_yaw = 0
         self._cam_pitch = -60
         self._render_width = 320

@@ -1,12 +1,13 @@
 from causal_world.metrics.metric_base import BaseMetric
+import numpy as np
 
 
 class MeanFullIntegratedFractionalSuccess(BaseMetric):
 
     def __init__(self):
         super(MeanFullIntegratedFractionalSuccess,
-              self).__init__(name='mean_full_integrated_fractional_success')
-        self.accumulated_success = 0
+              self).__init__(name='full_integrated_fractional_success')
+        self.per_episode_scores = []
         self.total_number_of_episodes = 0
         return
 
@@ -20,19 +21,19 @@ class MeanFullIntegratedFractionalSuccess(BaseMetric):
         in_episode_accumulated_success = 0.0
         for info in episode_obj.infos:
             in_episode_accumulated_success += info['fractional_success']
-        self.accumulated_success += in_episode_accumulated_success / len(
-            episode_obj.infos)
+        self.per_episode_scores.append(in_episode_accumulated_success / len(
+            episode_obj.infos))
 
     def get_metric_score(self):
         """
 
         :return:
         """
-        return self.accumulated_success / float(self.total_number_of_episodes)
+        return (np.mean(self.per_episode_scores), np.std(self.per_episode_scores))
 
     def reset(self):
         """
         :return:
         """
-        self.accumulated_success = 0
+        self.per_episode_scores = []
         self.total_number_of_episodes = 0

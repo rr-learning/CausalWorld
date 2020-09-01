@@ -100,7 +100,8 @@ class EvaluationPipeline(object):
         :return: (Episode) returns the recorded episode
         """
         obs = self.evaluation_env.reset()
-        for _ in range(self.time_steps_for_evaluation):
+        done = False
+        while not done:
             desired_action = policy_fn(obs)
             obs, rew, done, info = self.evaluation_env.step(desired_action)
         return self.data_recorder.get_current_episode()
@@ -124,7 +125,9 @@ class EvaluationPipeline(object):
         """
         metrics = dict()
         for metric in self.metrics_list:
-            metrics[metric.name] = metric.get_metric_score()
+            mean, std = metric.get_metric_score()
+            metrics['mean_' + metric.name] = mean
+            metrics['std_' + metric.name] = std
         return metrics
 
     def reset_metric_scores(self):

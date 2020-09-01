@@ -330,4 +330,3 @@ STACKING2_BENCHMARK = dict(task_generator_id='stacking2',
                                 protocols.FullyRandomProtocol(name='P11',
                                                               variable_space='b')
                             ])
-

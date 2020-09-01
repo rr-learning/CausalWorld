@@ -971,6 +971,9 @@ class BaseTask(object):
                          interventions_dict[intervention]).any() or \
                          (intervention_space[intervention][1]
                              < interventions_dict[intervention]).any()):
+                        logging.warning("lower bound is: " + str(intervention_space[intervention][0]))
+                        logging.warning("applied: " + str(interventions_dict[intervention]))
+                        logging.warning("upper bound is:" + str(intervention_space[intervention][1]))
                         return False
                 else:
                     for sub_variable_name in interventions_dict[intervention]:
@@ -981,8 +984,12 @@ class BaseTask(object):
                                 (intervention_space[intervention]
                                  [sub_variable_name][1] <
                                  interventions_dict[intervention][sub_variable_name]).any()):
+                            logging.warning("lower bound is:" + str(intervention_space[intervention][sub_variable_name][0]))
+                            logging.warning("applied:" + str(interventions_dict[intervention][sub_variable_name]))
+                            logging.warning("upper bound is:" + str(intervention_space[intervention][sub_variable_name][1]))
                             return False
                         elif sub_variable_name not in intervention_space[intervention]:
+                            logging.warning("{} not in intervention_space")
                             return False
             else:
                 return False
