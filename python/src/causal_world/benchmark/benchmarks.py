@@ -258,5 +258,76 @@ PICK_AND_PLACE_BENCHMARK = dict(task_generator_id='pick_and_place',
                                                                   variable_space='a'),
                                     protocols.FullyRandomProtocol(name='P11',
                                                                   variable_space='b')
-
                                 ])
+
+STACKING2_BENCHMARK = dict(task_generator_id='stacking2',
+                            evaluation_protocols=[
+                                protocols.ProtocolGenerator(name=
+                                                            'P0',
+                                                            first_level_regex=
+                                                            '',
+                                                            second_level_regex=
+                                                            '',
+                                                            variable_space='a_b'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P1',
+                                                            first_level_regex=
+                                                            'tool_block.*',
+                                                            second_level_regex=
+                                                            'mass',
+                                                            variable_space='a'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P2',
+                                                            first_level_regex=
+                                                            'tool_block.*',
+                                                            second_level_regex=
+                                                            'mass',
+                                                            variable_space='b'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P4',
+                                                            first_level_regex=
+                                                            'tool_block.*',
+                                                            second_level_regex=
+                                                            'cylindrical_position',
+                                                            variable_space='a'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P5',
+                                                            first_level_regex=
+                                                            'goal_tower',
+                                                            second_level_regex=
+                                                            'cylindrical_position',
+                                                            variable_space='a'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P6',
+                                                            first_level_regex=
+                                                            'goal_tower|tool_block.*',
+                                                            second_level_regex=
+                                                            'cylindrical_position',
+                                                            variable_space='b'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P7',
+                                                            first_level_regex=
+                                                            'goal_tower|tool_block.*',
+                                                            second_level_regex=
+                                                            'cylindrical_position|mass',
+                                                            variable_space='a'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P8',
+                                                            first_level_regex=
+                                                            'goal_tower|tool_block.*',
+                                                            second_level_regex=
+                                                            'cylindrical_position|mass',
+                                                            variable_space='b'),
+                                protocols.ProtocolGenerator(name=
+                                                            'P9',
+                                                            first_level_regex=
+                                                            'goal_block|tool_block.*|floor_friction',
+                                                            second_level_regex=
+                                                            'cylindrical_position|mass',
+                                                            variable_space='b'),
+                                protocols.FullyRandomProtocol(name='P10',
+                                                              variable_space='a'),
+                                protocols.FullyRandomProtocol(name='P11',
+                                                              variable_space='b')
+                            ])
+

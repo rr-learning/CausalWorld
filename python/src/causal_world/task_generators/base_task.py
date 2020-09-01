@@ -407,8 +407,7 @@ class BaseTask(object):
             np.array([[-1.57, -1.2, -3.0] * 3,
                       [-0.69, 0,
                        0] * 3])
-        #any goal or object in arena put the position
-        #and orientation modification
+        #TODO: add the rest of the exposed variables here
         for rigid_object in self._stage.get_rigid_objects():
             self._intervention_space_a[rigid_object] = dict()
             if self._stage.get_rigid_objects(
@@ -447,6 +446,8 @@ class BaseTask(object):
             np.array([[0, 0, 0], [0.5, 0.5, 0.5]])
         self._intervention_space_a['floor_friction'] = \
             np.array([0.3, 0.8])
+        self._intervention_space_a['stage_friction'] = \
+            np.array([0.3, 0.8])
         for link in self._robot.get_link_names():
             self._intervention_space_a[link] = dict()
             self._intervention_space_a[link]['color'] = \
@@ -466,8 +467,7 @@ class BaseTask(object):
             np.array([[-0.69, 0,
                        0] * 3,
                       [1.0, 1.57, 3.0] * 3])
-        # any goal or object in arena put the position
-        # and orientation modification
+        # TODO: add the rest of the exposed variables here
         for rigid_object in self._stage.get_rigid_objects():
             self._intervention_space_b[rigid_object] = dict()
             if self._stage.get_rigid_objects(
@@ -505,6 +505,8 @@ class BaseTask(object):
         self._intervention_space_b['stage_color'] = \
             np.array([[0.5, 0.5, 0.5], [1, 1, 1]])
         self._intervention_space_b['floor_friction'] = \
+            np.array([0.6, 0.8])
+        self._intervention_space_b['stage_friction'] = \
             np.array([0.6, 0.8])
         for link in self._robot.get_link_names():
             self._intervention_space_b[link] = dict()
