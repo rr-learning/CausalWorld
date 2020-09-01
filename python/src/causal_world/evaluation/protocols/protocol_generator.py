@@ -1,9 +1,9 @@
-from causal_world.evaluation.protocol import Protocol
+from causal_world.evaluation.protocols.protocol import ProtocolBase
 import numpy as np
 import re
 
 
-class ProtocolGenerator(Protocol):
+class ProtocolGenerator(ProtocolBase):
 
     def __init__(self, name, first_level_regex,
                  second_level_regex,

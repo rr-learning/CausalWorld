@@ -15,8 +15,6 @@ class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         super(RandomInterventionActorPolicy, self).__init__()
         self.task_intervention_space = None
-        self._inverse_kinemetics_func = None
-        self._stage_bb = None
 
     def initialize(self, env):
         """
@@ -25,8 +23,6 @@ class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
         :return:
         """
         self.task_intervention_space = env.get_variable_space_used()
-        self._inverse_kinemetics_func = env.get_robot().inverse_kinematics
-        self._stage_bb = env.get_stage()._get_stage_bb()
         return
 
     def _act(self, variables_dict):
@@ -57,17 +53,6 @@ class RandomInterventionActorPolicy(BaseInterventionActorPolicy):
                         [variable][subvariable_name][1])
             else:
                 if not intervene_on_joint_positions and variable == 'joint_positions':
-                    continue
-                if intervene_on_joint_positions and variable == 'joint_positions':
-                    desired_tip_positions = np.random.uniform(
-                        self._stage_bb[0],
-                        self._stage_bb[1],
-                        size=[3, 3]).flatten()
-
-                    interventions_dict[variable] = \
-                        self._inverse_kinemetics_func(desired_tip_positions,
-                                                      rest_pose=np.zeros(
-                                                          9, ).tolist())
                     continue
                 interventions_dict[variable] = np.random.uniform(
                     self.task_intervention_space[variable][0],

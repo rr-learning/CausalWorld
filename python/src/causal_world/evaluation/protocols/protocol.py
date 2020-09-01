@@ -1,4 +1,4 @@
-class Protocol(object):
+class ProtocolBase(object):
 
     def __init__(self, name):
         """

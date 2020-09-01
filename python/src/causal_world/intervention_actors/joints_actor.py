@@ -25,7 +25,7 @@ class JointsInterventionActorPolicy(BaseInterventionActorPolicy):
         """
         self.task_intervention_space = env.get_variable_space_used()
         self._inverse_kinemetics_func = env.get_robot().inverse_kinematics
-        self._stage_bb = env.get_stage()._get_stage_bb()
+        self._stage_bb = env.get_stage().get_stage_bb()
         return
 
     def _act(self, variables_dict):

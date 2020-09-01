@@ -64,7 +64,7 @@ class BaseTask(object):
         self._empty_stage = None
         self._recreation_time = 0
         #TODO: this should be increased! there might be a bug from pybullet's side.
-        self._period_to_clear_memory = 50
+        self._period_to_clear_memory = 1
         self._current_desired_goal = None
         self._current_achieved_goal = None
         self._current_goal_reward = None
@@ -162,6 +162,8 @@ class BaseTask(object):
             self._stage.get_full_env_state()
         state['robot_object_state'] = \
             self._robot.get_full_env_state()
+        state['latest_full_state'] = copy.deepcopy(
+            self._robot.get_latest_full_state())
         state['task_observations'] = \
             copy.deepcopy(self._task_stage_observation_keys)
 
@@ -200,13 +202,10 @@ class BaseTask(object):
             reset_observation_space = True
         self._task_stage_observation_keys = copy.deepcopy(
             state_dict['task_observations'])
+        self._robot._latest_full_state = copy.deepcopy(
+            state_dict['latest_full_state'])
         # self._restore_pybullet_state(state_dict['pybullet_states'])
         return reset_observation_space
-
-    # def remove_state(self, state_dict):
-    #     self._remove_pybullet_state(state_dict['pybullet_states'])
-    #     del state_dict
-    #     return
 
     def get_variable_space_used(self):
         """
