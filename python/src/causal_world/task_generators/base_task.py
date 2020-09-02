@@ -992,6 +992,7 @@ class BaseTask(object):
                             logging.warning("{} not in intervention_space")
                             return False
             else:
+                logging.warning("{} not in intervention_space".format(intervention))
                 return False
         return True
 

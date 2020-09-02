@@ -44,6 +44,12 @@ def combine_intervention_spaces(cont_bound_a, cont_bound_b):
             if cont_bound_a[0][val_ind] < cont_bound_b[0][val_ind]:
                 lb.append(cont_bound_a[0][val_ind])
                 ub.append(cont_bound_b[1][val_ind])
+            elif cont_bound_a[0][val_ind] == cont_bound_b[0][val_ind]:
+                lb.append(cont_bound_a[0][val_ind])
+                if cont_bound_a[1][val_ind] < cont_bound_b[1][val_ind]:
+                    ub.append(cont_bound_b[1][val_ind])
+                else:
+                    ub.append(cont_bound_a[1][val_ind])
             else:
                 lb.append(cont_bound_b[0][val_ind])
                 ub.append(cont_bound_a[1][val_ind])

@@ -80,7 +80,7 @@ class TestPushing(unittest.TestCase):
         horizon = 100
         actions = [self.env.action_space.sample() for _ in range(horizon)]
         actions = np.array(actions)
-        intervention = {'tool_block': {'cartesian_positions': [0, 0.3, 0.2]}}
+        intervention = {'tool_block': {'cylindrical_position': [0, 0.3, 0.0325]}}
         self.env.set_starting_state(interventions_dict=intervention)
         for i in range(horizon):
             obs, reward, done, info = self.env.step(actions[i])
@@ -121,7 +121,7 @@ class TestPushing(unittest.TestCase):
             if i == 50:
                 success_signal = self.env.do_intervention(
                     {'tool_block': {
-                        'cartesian_position': [0.1, 0.1, 0.0425]
+                        'cylindrical_position': [0.1, np.pi / 2, 0.0325]
                     }})
         observations_2 = []
         rewards_2 = []

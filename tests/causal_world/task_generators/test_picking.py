@@ -176,7 +176,7 @@ class TestPicking(unittest.TestCase):
             if i == 50:
                 success_signal = self.env.do_intervention(
                     {'tool_block': {
-                        'cartesian_position': [0.1, 0.1, 0.0425]
+                        'cylindrical_position': [0.1, np.pi / 2, 0.0325]
                     }})
         observations_2 = []
         rewards_2 = []
