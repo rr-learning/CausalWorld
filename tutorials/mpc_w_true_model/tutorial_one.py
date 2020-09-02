@@ -4,8 +4,8 @@ with the true model.
 """
 from stable_baselines.common import set_global_seeds
 from causal_world.envs.causalworld import CausalWorld
-from causal_world.baselines.model_based.true_model import TrueModel
-from causal_world.baselines.model_based.optimizers.cem import \
+from causal_world.dynamics_model import SimulatorModel
+from causal_world.utils.mpc_optimizers import \
     CrossEntropyMethod
 from gym.wrappers.monitoring.video_recorder import VideoRecorder
 import numpy as np
@@ -62,7 +62,7 @@ def run_mpc():
                       skip_frame=1,
                       enable_visualization=True,
                       seed=seed)
-    true_model = TrueModel(_make_env, parallel_agents=parallel_agents)
+    true_model = SimulatorModel(_make_env, parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(
         planning_horizon=horizon_length,
         max_iterations=max_iterations,

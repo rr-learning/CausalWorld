@@ -2,7 +2,7 @@ from stable_baselines.common.vec_env import SubprocVecEnv
 import numpy as np
 
 
-class TrueModel(object):
+class SimulatorModel(object):
 
     def __init__(self, _make_env_func, parallel_agents):
         self.parallel_agents = parallel_agents
