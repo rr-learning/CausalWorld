@@ -3,6 +3,10 @@ import numpy as np
 
 class GraspingPolicy(object):
     def __init__(self, tool_blocks_order):
+        """
+
+        :param tool_blocks_order:
+        """
         self._program_counter = 0
         self._program = tool_blocks_order
         self._phase = 0
@@ -101,6 +105,10 @@ class GraspingPolicy(object):
         return np.concatenate((pos_r, pos_g, pos_b), axis=0)
 
     def _get_ds(self):
+        """
+
+        :return:
+        """
         if self._phase == 0:
             d_r = self._d1_r
             d_gb = self._d1_gb
@@ -126,6 +134,16 @@ class GraspingPolicy(object):
                                current_cube_y,
                                next_cube_x,
                                next_cube_y):
+        """
+
+        :param target_x:
+        :param target_y:
+        :param current_cube_x:
+        :param current_cube_y:
+        :param next_cube_x:
+        :param next_cube_y:
+        :return:
+        """
         if self._phase < 4:
             current_x = current_cube_x
             current_y = current_cube_y
@@ -139,6 +157,10 @@ class GraspingPolicy(object):
         return xy_target
 
     def _get_alpha(self):
+        """
+
+        :return:
+        """
         if self._phase < 3:
             return 0
         elif self._phase == 3:
@@ -153,6 +175,11 @@ class GraspingPolicy(object):
             raise ValueError()
 
     def _get_target_hs(self, target_height):
+        """
+
+        :param target_height:
+        :return:
+        """
         if self._phase == 0:
             h_r = self._h1_r
             h_gb = self._h1_gb
@@ -190,13 +217,29 @@ class GraspingPolicy(object):
         return np.array([h_r, h_gb, h_gb])
 
     def reset_controller(self):
+        """
+
+        :return:
+        """
         self._phase = 0
         self._t = 0
         self._program_counter = 0
 
     def _mix_sin(self, t):
+        """
+
+        :param t:
+        :return:
+        """
         return 0.5 * (1 - np.cos(t * np.pi))
 
     def _combine_convex(self, a, b, alpha):
+        """
+        
+        :param a:
+        :param b:
+        :param alpha:
+        :return:
+        """
         return (1 - alpha) * a + alpha * b
 
