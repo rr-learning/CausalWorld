@@ -349,8 +349,14 @@ class TriFingerRobot(object):
                 self.step_simulation()
         elif self._action_mode == "end_effector_positions":
             #TODO: check if the desired tip positions are in the feasible set
-            joint_positions = self.get_joint_positions_from_tip_positions\
-                (action_to_apply, list(self._latest_full_state['positions']))
+
+            #TODO: just a hack since IK is not stable
+            if np.isclose(self._latest_full_state['end_effector_positions'],
+                          action_to_apply).all():
+                joint_positions = self._last_applied_joint_positions
+            else:
+                joint_positions = self.get_joint_positions_from_tip_positions\
+                    (action_to_apply, list(self._latest_full_state['positions']))
             self._last_applied_joint_positions = joint_positions
             for _ in range(self._skip_frame):
                 desired_torques = \
@@ -447,12 +453,38 @@ class TriFingerRobot(object):
         finger_tip_ids = self._finger_tip_ids
         final_joint_pose = pybullet.calculateInverseKinematics2(
             WorldConstants.ROBOT_ID,
-            [finger_tip_ids[0], finger_tip_ids[1], finger_tip_ids[2]],
-            [desired[0:3], desired[3:6], desired[6:]],
+            [finger_tip_ids[0],
+             finger_tip_ids[1],
+             finger_tip_ids[2]],
+            [desired[0:3],
+             desired[3:6],
+             desired[6:]],
             solver=pybullet.IK_DLS,
             currentPositions=rest_pose,
             physicsClientId=client)
-        joint_pos[:] = final_joint_pose[:]
+        joint_pos[:3] = final_joint_pose[:3]
+        final_joint_pose = pybullet.calculateInverseKinematics2(
+            WorldConstants.ROBOT_ID,
+            [finger_tip_ids[1], finger_tip_ids[0],
+             finger_tip_ids[2]],
+            [desired[3:6],
+             desired[0:3],
+             desired[6:]],
+            solver=pybullet.IK_DLS,
+            currentPositions=rest_pose,
+            physicsClientId=client)
+        joint_pos[3:6] = final_joint_pose[3:6]
+        final_joint_pose = pybullet.calculateInverseKinematics2(
+            WorldConstants.ROBOT_ID,
+            [finger_tip_ids[2], finger_tip_ids[0],
+             finger_tip_ids[1]],
+            [desired[6:],
+             desired[0:3],
+             desired[3:6]],
+            solver=pybullet.IK_DLS,
+            currentPositions=rest_pose,
+            physicsClientId=client)
+        joint_pos[6:] = final_joint_pose[6:]
         if np.isnan(joint_pos).any():
             joint_pos = rest_pose
         return joint_pos
@@ -597,13 +629,6 @@ class TriFingerRobot(object):
         result[2] -= WorldConstants.FLOOR_HEIGHT
         result[5] -= WorldConstants.FLOOR_HEIGHT
         result[-1] -= WorldConstants.FLOOR_HEIGHT
-        # tip_positions = self._pinocchio_utils.forward_kinematics(
-        #     joint_positions
-        # )
-        # result_2 = np.concatenate(tip_positions)
-        # result_2[2] -= WorldConstants.FLOOR_HEIGHT
-        # result_2[5] -= WorldConstants.FLOOR_HEIGHT
-        # result_2[-1] -= WorldConstants.FLOOR_HEIGHT
         return result
 
     def _process_action_joint_positions(self, robot_state):
