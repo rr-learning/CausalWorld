@@ -86,7 +86,7 @@ class TestGeneral(unittest.TestCase):
             obs, reward, done, info = self.env.step(actions[i])
             if i == 50:
                 success_signal = self.env.do_intervention(
-                    {'tool_level_0_num_1': {
+                    {'tool_0': {
                         'cylindrical_position': [0, 0, 0.2]
                     }})
         observations_2 = []
