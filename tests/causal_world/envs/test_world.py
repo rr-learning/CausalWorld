@@ -210,7 +210,7 @@ class TestWorld(unittest.TestCase):
             rewards_1.append(rewards)
         env.set_starting_state(
             {'goal_block': {
-                'cartesian_position': [0.1, 0.1, 0.1]
+                'cylindrical_position': [0.1, np.pi, 0.1]
             }})
         for i in range(200):
             observations, rewards, _, _ = env.step(actions[i])
