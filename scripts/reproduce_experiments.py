@@ -112,12 +112,12 @@ def baseline_model(model_num, task):
            'validate_every_timesteps': int(500000),
            'total_time_steps': int(10000000),
            'train_configs': {
-               "gamma": 0.98,
-               "tau": 0.01,
-               "learning_rate": 0.00025,
-               "buffer_size": 1000000,
+               "gamma": 0.96,
+               "tau": 0.02,
+               "learning_rate": 1e-4,
+               "buffer_size": 500000,
                "learning_starts": 1000,
-               "batch_size": 256}}
+               "batch_size": 128}}
 
     algorithms = [ppo, sac, td3]
 
