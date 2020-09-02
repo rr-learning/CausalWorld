@@ -60,7 +60,7 @@ def run_mpc():
                                        0]))
     env = CausalWorld(task=task,
                       skip_frame=1,
-                      enable_visualization=True,
+                      enable_visualization=False,
                       seed=seed)
     true_model = SimulatorModel(_make_env, parallel_agents=parallel_agents)
     optimizer = CrossEntropyMethod(
