@@ -12,7 +12,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                  tool_block_mass=0.08,
                  joint_positions=None,
                  blocks_min_size=0.035,
-                 num_of_levels=8,
+                 num_of_levels=4,
                  max_level_width=0.12):
         """
         This task generator generates a task in the family of create stacked

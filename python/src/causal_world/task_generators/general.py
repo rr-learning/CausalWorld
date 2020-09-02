@@ -51,7 +51,7 @@ class GeneralGeneratorTask(BaseTask):
                                        [-0.12,  -0.12, 0.2],
                                        [-0.12, 0.12, 0.2],
                                        [0.12, -0.10, 0.3],
-                                       [0.9, -0.8, 0.1]]
+                                       [0.09, -0.08, 0.1]]
         self.tool_mass = self._task_params["tool_block_mass"]
         self.nums_objects = self._task_params["nums_objects"]
         self.tool_block_size = np.array(self._task_params["tool_block_size"])
