@@ -235,7 +235,7 @@ class GraspingPolicy(object):
 
     def _combine_convex(self, a, b, alpha):
         """
-        
+
         :param a:
         :param b:
         :param alpha:

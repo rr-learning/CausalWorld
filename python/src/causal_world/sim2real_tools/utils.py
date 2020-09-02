@@ -1,5 +1,4 @@
 import gym
-from causal_world.curriculum import Curriculum
 
 
 class RealisticRobotWrapper(gym.Wrapper):
