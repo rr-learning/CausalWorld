@@ -36,7 +36,6 @@ class DeltaActionEnvWrapper(gym.ActionWrapper):
         if self.env.are_actions_normalized():
             offset = self.env.get_robot().normalize_observation_for_key(
                 observation=offset, key=self.env.get_action_mode())
-        print('calculated is: ', action + offset)
         return action + offset
 
     def reverse_action(self, action):
