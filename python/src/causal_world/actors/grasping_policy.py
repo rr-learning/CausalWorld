@@ -48,7 +48,7 @@ class GraspingPolicy(object):
             return obs[19:28]
 
         block_idx = self._program[self._program_counter]
-        number_of_blocks = 2
+        number_of_blocks = len(self._program)
 
         target_height = obs[28 + (number_of_blocks*17) + (block_idx*11) + 6]
 
