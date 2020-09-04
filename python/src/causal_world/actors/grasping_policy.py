@@ -32,7 +32,8 @@ class GraspingPolicy(object):
                                   0.005, 0.005, 0.01,
                                   0.01]
 
-        pass
+        self.current_target_x = None
+        self.current_target_y = None
 
     def act(self, obs):
         """
@@ -54,16 +55,51 @@ class GraspingPolicy(object):
         target_x = obs[28 + (number_of_blocks*17) + (block_idx*11) + 4]
         target_y = obs[28 + (number_of_blocks*17) + (block_idx*11) + 5]
 
-        current_cube_x = obs[28 + (block_idx*17) + 4]
-        current_cube_y = obs[28 + (block_idx*17) + 5]
+        # Only set target for cube when phase is 0, otherwise the robot moving
+        # the target cube creates a runaway effect due to a moving target
+        if self._phase == 0:
+            self.current_target_x = obs[28 + (block_idx * 17) + 4]
+            self.current_target_y = obs[28 + (block_idx * 17) + 5]
 
-        next_cube_x = 0
-        next_cube_y = 0
+        if self._program_counter < len(self._program) - 1:
+            next_block_idx = self._program[self._program_counter + 1]
+        else:
+            next_block_idx = self._program[-1]
+
+        next_cube_x = obs[28 + (next_block_idx*17) + 4]
+        next_cube_y = obs[28 + (next_block_idx*17) + 5]
 
         # Detect falling cube
         if self._phase == 3 and obs[28 + (block_idx*17) + 6] < self._fall_trigger_h:
             self._phase = 0
             self._t = 0
+
+        #calculate the target of the grip center
+        # xy_target is the target of the grip center
+        interpolated_xy = self._get_interpolated_xy(target_x,
+                                                    target_y,
+                                                    self.current_target_x,
+                                                    self.current_target_y,
+                                                    next_cube_x,
+                                                    next_cube_y)
+
+        #calculate end_effector_positions
+        # Target heights of fingertips
+        target_h_r, target_h_g, target_h_b = self._get_target_hs(target_height)
+
+        # Target-distance of fingertips from the grip center
+        d_r, d_g, d_b = self._get_ds()
+        #construct end effector positions target
+        # Construct full target positions for each fingertip
+        pos_r = np.array([interpolated_xy[0] + d_r * np.cos(self._a1),
+                          interpolated_xy[1] + d_r * np.sin(self._a1),
+                          target_h_r])
+        pos_g = np.array([interpolated_xy[0] + d_g * np.cos(self._a2),
+                          interpolated_xy[1] + d_g * np.sin(self._a2),
+                          target_h_g])
+        pos_b = np.array([interpolated_xy[0] + d_b * np.cos(self._a3),
+                          interpolated_xy[1] + d_b * np.sin(self._a3),
+                          target_h_b])
 
         self._t += self._phase_velocities[self._phase]
         if self._t >= 1.0:
@@ -74,34 +110,7 @@ class GraspingPolicy(object):
             self._phase = 0
             self._program_counter += 1
             self._t = 0
-            self.act(obs)
 
-        #calculate the target of the grip center
-        # xy_target is the target of the grip center
-        current_xy_target = self._get_current_xy_target(target_x,
-                                                        target_y,
-                                                        current_cube_x,
-                                                        current_cube_y,
-                                                        next_cube_x,
-                                                        next_cube_y)
-
-        #calculate end_effector_positions
-        # Target heights of fingertips
-        target_h_r, target_h_g, target_h_b = self._get_target_hs(target_height)
-
-        # Target-distance of fingertips from the grip center
-        d_r, d_g, d_b = self._get_ds()
-        #construct end effector positions target
-        # Construct full target positions for each fingertip
-        pos_r = np.array([current_xy_target[0] + d_r * np.cos(self._a1),
-                          current_xy_target[1] + d_r * np.sin(self._a1),
-                          target_h_r])
-        pos_g = np.array([current_xy_target[0] + d_g * np.cos(self._a2),
-                          current_xy_target[1] + d_g * np.sin(self._a2),
-                          target_h_g])
-        pos_b = np.array([current_xy_target[0] + d_b * np.cos(self._a3),
-                          current_xy_target[1] + d_b * np.sin(self._a3),
-                          target_h_b])
         return np.concatenate((pos_r, pos_g, pos_b), axis=0)
 
     def _get_ds(self):
@@ -129,11 +138,11 @@ class GraspingPolicy(object):
             raise ValueError()
         return [d_r, d_gb, d_gb]
 
-    def _get_current_xy_target(self, target_x,
-                               target_y, current_cube_x,
-                               current_cube_y,
-                               next_cube_x,
-                               next_cube_y):
+    def _get_interpolated_xy(self, target_x,
+                             target_y, current_cube_x,
+                             current_cube_y,
+                             next_cube_x,
+                             next_cube_y):
         """
 
         :param target_x:
