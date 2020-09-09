@@ -85,12 +85,12 @@ def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
             cell_text.append(['{}'.format(protocol_settings[experiment_label][row_label]) for
                               experiment_label in list(protocol_settings.keys())])
 
-        ax.set_ylabel('fractional success', fontsize=13)
+        ax.set_ylabel('fractional success', fontsize=11)
         ax.set_title(task + '  ' + metric_label[5:])
         #ax.set_xticks(x)
         plt.legend(ncol=9, loc='upper right')
         ax.set_ylim((0, 1.2))
-        plt.yticks(fontsize=13)
+        plt.yticks(fontsize=11)
         ax.get_xaxis().set_visible(False)
         #ax.set_xticklabels(protocol_labels, rotation='vertical')
         table = plt.table(cellText=cell_text,
@@ -107,7 +107,7 @@ def bar_plots_with_protocol_table(output_path, data, protocol_settings, task):
                 cellDict[(0, i)].set_height(.1)
             for j in range(1, len(row_labels) + 1):
                 cellDict[(j, i)].set_height(.1)
-                cellDict[(j, i)].set_fontsize(10)
+                cellDict[(j, i)].set_fontsize(9)
         fig.subplots_adjust(bottom=0.25)
         fig.tight_layout()
 

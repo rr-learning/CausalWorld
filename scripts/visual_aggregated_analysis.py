@@ -86,12 +86,10 @@ def get_mean_scores(scores_list):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--output_path", required=True, help="output path")
     parser.add_argument("--models_path", required=True, help="models_path")
     parser.add_argument("--title", required=True, help="title")
 
     args = vars(parser.parse_args())
-    output_path = str(args['output_path'])
     models_path = str(args['models_path'])
     title = str(args['title'])
 
@@ -112,7 +110,7 @@ if __name__ == '__main__':
                             + random_seed
                 time_string = time_steps[algorithm_index]
                 # This is the default path saved from complete run
-                scores_path = os.path.join(output_path, str(model_num),
+                scores_path = os.path.join(models_path, str(model_num),
                                            'evaluation',
                                            'time_steps_{}'.format(time_string),
                                            'scores.json')
@@ -125,4 +123,4 @@ if __name__ == '__main__':
                 experiments[label] = aggregated_scores
 
     data = aggregated_data_from_experiments(experiments, contains_err=True)
-    bar_plots_with_protocol_table(output_path, data, protocol_settings, title)
+    bar_plots_with_protocol_table(models_path, data, protocol_settings, title)
