@@ -38,7 +38,8 @@ This package can be either [pip-installed](#install-as-a-pip-package-in-a-conda-
   conda activate causal_world
   (causal_world) pip install -e .
   ```
-
+<details>
+<summary>optional steps</summary>
 3. Make the docs.
 
   ```bash
@@ -86,6 +87,8 @@ This package can be either [pip-installed](#install-as-a-pip-package-in-a-conda-
   (causal_world) pip install -e .
   (causal_world) pip install pyprind
   ```
+</details>
+
 
 
 
