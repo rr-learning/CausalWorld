@@ -10,11 +10,11 @@ CausalWorld is an open-source framework and benchmark for causal structure learn
 This package can be either [pip-installed](#install-as-a-pip-package-in-a-conda-env), or used in a catkin workspace.
 
 <p align=center>
-<img src="docs/media/real_platform.png" width=200><img src="docs/media/realistic_wrapper.gif" width=200><img src="docs/media/random_interventions.gif" width=200><img src="docs/media/magic_pick_and_place.gif" width=200>
+<img src="docs/media/pushing.gif" width=200><img src="docs/media/picking.gif" width=200><img src="docs/media/pick_and_place.gif" width=200><img src="docs/media/stacking2.gif" width=200>
 </p>
 
 <p align=center>
-<img src="docs/media/pushing_randomization.gif" width=200><img src="docs/media/demo_creative_stacked_blocks.gif" width=200><img src="docs/media/radar_plots_mean_last_integrated_fractional_success.png" width=200>
+<img src="docs/media/towers.gif" width=200><img src="docs/media/stacked_blocks.gif" width=200><img src="docs/media/creative_stacked_blocks.gif" width=200><img src="docs/media/general.gif" width=200>
 </p>
 
 ## Install as a pip package in a conda env

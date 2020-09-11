@@ -9,7 +9,7 @@ class DummyActorPolicy(BaseActorPolicy):
     externally)
     """
     def __init__(self):
-        super(DummyActorPolicy, self).__init__()
+        super(DummyActorPolicy, self).__init__(identifier="dummy_policy")
         self.action = None
         return
 
@@ -37,3 +37,4 @@ class DummyActorPolicy(BaseActorPolicy):
         """
         self.action = action
         return
+

@@ -215,7 +215,7 @@ class TowersGeneratorTask(BaseTask):
         self._intervention_space_a['blocks_mass'] = \
             np.array([0.02, 0.06])
         self._intervention_space_a['tower_dims'] = \
-            np.array([[0.035, 0.035, 0.035], [0.10, 0.10, 0.10]])
+            np.array([[0.08, 0.08, 0.08], [0.12, 0.12, 0.12]])
         self._intervention_space_a['tower_center'] = \
             np.array([[-0.1, -0.1], [0.05, 0.05]])
         return
@@ -235,7 +235,7 @@ class TowersGeneratorTask(BaseTask):
         self._intervention_space_b['blocks_mass'] = \
             np.array([0.06, 0.08])
         self._intervention_space_b['tower_dims'] = \
-            np.array([[0.10, 0.10, 0.10], [0.13, 0.13, 0.13]])
+            np.array([[0.12, 0.12, 0.12], [0.20, 0.20, 0.20]])
         self._intervention_space_b['tower_center'] = \
             np.array([[0.05, 0.05], [0.1, 0.1]])
         return

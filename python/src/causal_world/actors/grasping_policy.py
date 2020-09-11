@@ -1,12 +1,62 @@
 import numpy as np
+from causal_world.actors.base_policy import BaseActorPolicy
 
 
-class GraspingPolicy(object):
+class GraspingPolicy(BaseActorPolicy):
+    """
+    This policy is expected to run @25 Hz, its a hand designed policy for
+    picking and placing blocks of a specific size 6.5CM weighing 20grams
+    for the best result tried.
+    The policy outputs desired normalized end_effector_positions
+
+    Description of phases:
+    - Phase 0: Move finger-center above the cube center of the current
+               instruction.
+    - Phase 1: Lower finger-center down to encircle the target cube, and
+               close grip.
+    - Phase 2: Move finger-center up again, keeping the grip tight
+              (lifting the block).
+    - Phase 3: Smoothly move the finger-center toward the goal xy, keeping the
+               height constant.
+    - Phase 4: Move finger-center vertically toward goal height
+                (keeping relative difference of different finger heights given
+                by h0), at the same time loosen the grip (i.e. increasing the
+                radius of the "grip circle").
+    - Phase 5: Move finger center up again
+
+    Other variables and values:
+    - alpha: interpolation value between two positions
+    - ds: Distances of finger tips to grip center
+    - t: time between 0 and 1 in current phase
+    - phase: every instruction has 7 phases (described above)
+    - program_counter: The index of the current instruction in the overall
+                       program. Is incremented once the policy has successfully
+                       completed all phases.
+
+    Hyperparameters:
+
+    - phase_velocity_k : the speed at which phase "k" in the state machine
+                         progresses.
+    - d0_r, d0_gb: Distance of finger tips from grip center while gripping the
+                   object.
+    - gb_angle_spread: Angle between green and blue finger tips along the "grip
+                       circle".
+    - d1_r, d1_gb: Distance of finger tips from grip center while not gripping
+    - h1_r, h1_gb: Height of grip center while moving around
+    - h0_r, h0_gb: Height of grip center to which it is lowered while grasping
+    - fall_trigger_h: if box is detected below this height when it is supposed
+                      to be gripped, try grasping it again (reset phase to 0).
+
+    """
     def __init__(self, tool_blocks_order):
         """
 
-        :param tool_blocks_order:
+        :param tool_blocks_order: (nd.array) specifies the program where the
+                                             indicies ranges from 0 to the
+                                             number of blocks available in the
+                                             arena.
         """
+        super(GraspingPolicy, self).__init__(identifier="grasping_policy")
         self._program_counter = 0
         self._program = tool_blocks_order
         self._phase = 0
@@ -75,7 +125,6 @@ class GraspingPolicy(object):
             self._t = 0
 
         #calculate the target of the grip center
-        # xy_target is the target of the grip center
         interpolated_xy = self._get_interpolated_xy(target_x,
                                                     target_y,
                                                     self.current_target_x,
@@ -83,13 +132,11 @@ class GraspingPolicy(object):
                                                     next_cube_x,
                                                     next_cube_y)
 
-        #calculate end_effector_positions
         # Target heights of fingertips
         target_h_r, target_h_g, target_h_b = self._get_target_hs(target_height)
 
         # Target-distance of fingertips from the grip center
         d_r, d_g, d_b = self._get_ds()
-        #construct end effector positions target
         # Construct full target positions for each fingertip
         pos_r = np.array([interpolated_xy[0] + d_r * np.cos(self._a1),
                           interpolated_xy[1] + d_r * np.sin(self._a1),
@@ -116,7 +163,7 @@ class GraspingPolicy(object):
     def _get_ds(self):
         """
 
-        :return:
+        :return: distances of finger tips to grip center
         """
         if self._phase == 0:
             d_r = self._d1_r
@@ -145,12 +192,12 @@ class GraspingPolicy(object):
                              next_cube_y):
         """
 
-        :param target_x:
-        :param target_y:
-        :param current_cube_x:
-        :param current_cube_y:
-        :param next_cube_x:
-        :param next_cube_y:
+        :param target_x: target x of the grip center.
+        :param target_y: target y of the grip center.
+        :param current_cube_x: x of current cube to be gripped.
+        :param current_cube_y: y of current cube to be gripped.
+        :param next_cube_x: x of next cube to be gripped.
+        :param next_cube_y: y of next cube to be gripped.
         :return:
         """
         if self._phase < 4:
@@ -168,7 +215,7 @@ class GraspingPolicy(object):
     def _get_alpha(self):
         """
 
-        :return:
+        :return: alpha for interpolation depending on the phase.
         """
         if self._phase < 3:
             return 0
@@ -186,8 +233,8 @@ class GraspingPolicy(object):
     def _get_target_hs(self, target_height):
         """
 
-        :param target_height:
-        :return:
+        :param target_height: target height to be reached.
+        :return: target height for all the end effectors.
         """
         if self._phase == 0:
             h_r = self._h1_r
@@ -225,8 +272,9 @@ class GraspingPolicy(object):
 
         return np.array([h_r, h_gb, h_gb])
 
-    def reset_controller(self):
+    def reset(self):
         """
+        resets the controller
 
         :return:
         """
@@ -237,18 +285,18 @@ class GraspingPolicy(object):
     def _mix_sin(self, t):
         """
 
-        :param t:
-        :return:
+        :param t: time ranging from 0 to 1.
+        :return: mixed sin wave.
         """
         return 0.5 * (1 - np.cos(t * np.pi))
 
     def _combine_convex(self, a, b, alpha):
         """
 
-        :param a:
-        :param b:
-        :param alpha:
-        :return:
+        :param a: start
+        :param b: end
+        :param alpha: interpolation
+        :return: convex combination.
         """
         return (1 - alpha) * a + alpha * b
 

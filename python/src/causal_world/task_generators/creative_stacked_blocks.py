@@ -12,7 +12,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
                  tool_block_mass=0.08,
                  joint_positions=None,
                  blocks_min_size=0.035,
-                 num_of_levels=4,
+                 num_of_levels=8,
                  max_level_width=0.12):
         """
         This task generator generates a task in the family of create stacked
@@ -289,7 +289,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         for rigid_object in self._stage.get_rigid_objects():
             del self._intervention_space_a[rigid_object]['size']
         self._intervention_space_a['stack_levels'] = \
-            np.array([1, 5])
+            np.array([3, 5])
         self._intervention_space_a['blocks_mass'] = \
             np.array([0.02, 0.06])
         self._intervention_space_a['blocks_min_size'] = \

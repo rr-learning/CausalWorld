@@ -221,3 +221,39 @@ def get_world(task_generator_id,
     for i in range(len(env_wrappers)):
         env = env_wrappers[i](env, **env_wrappers_args[i])
     return env
+
+
+def record_video(env,
+                 policy,
+                 file_name,
+                 number_of_resets=1,
+                 max_time_steps=None):
+    """
+    Records a video of a policy for a specified environment
+    :param env: (causal_world.CausalWorld) the environment to use for
+                                           recording.
+    :param policy_fn: the policy to be evaluated
+    :param file_name: (str) full path where the video is being stored.
+    :param number_of_resets: (int) the number of resets/episodes to be viewed
+    :param max_time_steps: (int) the maximum number of time steps per episode
+    :return:
+    """
+    recorder = VideoRecorder(env, "{}.mp4".format(file_name))
+    for reset_idx in range(number_of_resets):
+        policy.reset()
+        obs = env.reset()
+        recorder.capture_frame()
+        if max_time_steps is not None:
+            for i in range(max_time_steps):
+                desired_action = policy.act(obs)
+                obs, reward, done, info = env.step(action=desired_action)
+                recorder.capture_frame()
+        else:
+            while True:
+                desired_action = policy.act(obs)
+                obs, reward, done, info = env.step(action=desired_action)
+                recorder.capture_frame()
+                if done:
+                    break
+    recorder.close()
+    return

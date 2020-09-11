@@ -12,8 +12,8 @@ class StackedBlocksGeneratorTask(BaseTask):
                  tool_block_mass=0.08,
                  joint_positions=None,
                  blocks_min_size=0.035,
-                 num_of_levels=3,
-                 max_level_width=0.12):
+                 num_of_levels=5,
+                 max_level_width=0.25):
         """
         This task generator will generate a task for stacking an arbitrary random
         configuration of blocks above each other.

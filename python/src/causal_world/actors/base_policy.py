@@ -29,3 +29,11 @@ class BaseActorPolicy(object):
         :return: (nd.array) defines the action to be executed at time step t
         """
         raise NotImplementedError()
+
+    def reset(self):
+        """
+        The function is called for the controller to be cleared.
+
+        :return:
+        """
+        return
