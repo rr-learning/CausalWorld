@@ -11,7 +11,7 @@ class RealisticRobotWrapper(gym.Wrapper):
         # TODO: this wrapper can't be loaded at the moment or saved
         super(RealisticRobotWrapper, self).__init__(env)
         self.env.set_starting_state({
-            'robot_height': 0.286,
+            # 'robot_height': 0.286,
             'robot_finger_60_link_0': {
                 'color': [0.2, 0.2, 0.2]
             },

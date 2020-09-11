@@ -13,7 +13,9 @@
 CausalWorld is an open-source framework and benchmark for causal structure learning and testing explicit parameteric generalization in a robotic manipulation environment where tasks range from rather simple to extremely hard, where its crucial to have a deep understanding of the surrounding environment and the meaning of cause and effect. We hope that you find it useful for your own research.  
 
 This package can be either [pip-installed](#install-as-a-pip-package-in-a-conda-env), or used in a catkin workspace.
-
+<p align=center>
+<img src="docs/media/random.gif" width=200><img src="docs/media/realistic.gif" width=200><img src="docs/media/magic.gif" width=200><img src="docs/media/reaching.gif" width=200>
+</p>
 <p align=center>
 <img src="docs/media/pushing.gif" width=200><img src="docs/media/picking.gif" width=200><img src="docs/media/pick_and_place.gif" width=200><img src="docs/media/stacking2.gif" width=200>
 </p>
