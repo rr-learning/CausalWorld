@@ -9,7 +9,7 @@ import numpy as np
 # TODO: This should be returned from the individual scripts after refactoring there.
 protocol_settings = {
     "P0": {
-        "space": "A",
+        "space": "-",
         "variables": "-",
         "time step": 0
     },
@@ -45,17 +45,17 @@ protocol_settings = {
     },
     "P7": {
         "space": "A",
-        "variables": "tp, gp, tm",
+        "variables": "tp, gp, \n tm",
         "time step": 0
     },
     "P8": {
         "space": "B",
-        "variables": "tp, gp, tm",
+        "variables": "tp, gp, \n tm",
         "time step": 0
     },
     "P9": {
         "space": "B",
-        "variables": "tp, gp, tm, ff",
+        "variables": "tp, gp, \n tm, ff",
         "time step": 0
     },
     "P10": {
