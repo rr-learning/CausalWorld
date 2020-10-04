@@ -1,0 +1,14 @@
+name: causal_world
+channels:
+- conda-forge
+dependencies:
+- python=3.7.4
+- sphinx
+- jupyter
+- pip:
+  - pybullet==2.8.5
+  - gym
+  - catkin_pkg
+  - sphinx_rtd_theme
+  - pytest
+  - psutil

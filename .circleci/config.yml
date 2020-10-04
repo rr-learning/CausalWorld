@@ -1,0 +1,24 @@
+version: 2.1
+
+jobs:
+  build-and-test:
+    docker:
+      - image: continuumio/miniconda3
+    steps:
+      - checkout
+      - run: apt-get update --yes
+      - run: apt-get install gcc --yes 
+      - run: conda env create -f environment.yml
+      - run: conda init bash
+      - run: source /root/.bashrc
+      - run:
+          name: run tests
+          command: |
+            source activate causal_world
+            pip install -e .
+            python -m unittest discover tests/causal_world/
+      
+workflows:
+  main:
+    jobs:
+      - build-and-test
