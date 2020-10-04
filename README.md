@@ -1,11 +1,13 @@
 # CausalWorld
 
+
 [![license](https://img.shields.io/github/license/DAVFoundation/captain-n3m0.svg?style=flat-square)](https://github.com/DAVFoundation/captain-n3m0/blob/master/LICENSE)
 [![GitHub release](https://img.shields.io/github/release/rr-learning/CausalWorld/all.svg)](https://github.com/rr-learning/CausalWorld/releases)
 [![Documentation Status](https://readthedocs.org/projects/causal_world/badge/?version=latest)](https://causal_world.readthedocs.io/en/latest/?badge=latest)
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://github.com/rr-learning/CausalWorld/graphs/commit-activity)
 [![PR](https://camo.githubusercontent.com/f96261621753dacf526590825b84f87ccb1db0e6/68747470733a2f2f696d672e736869656c64732e696f2f62616467652f5052732d77656c636f6d652d627269676874677265656e2e7376673f7374796c653d666c6174)](https://github.com/rr-learning/CausalWorld/pulls)
 [![Open Source Love png2](https://camo.githubusercontent.com/60dcf2177b53824e7912a6adfb3ff5e318d14ae4/68747470733a2f2f6261646765732e66726170736f66742e636f6d2f6f732f76312f6f70656e2d736f757263652e706e673f763d313033)](https://github.com/rr-learning)
+[![Discord](https://img.shields.io/discord/694945190867370155.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/X9p2BPA)
 
 
 [![<rr-learning>](https://circleci.com/gh/rr-learning/CausalWorld.svg?style=svg&circle-token=28380a46b1bca6dac49b07e423eac9e4111d3d29)](https://circleci.com/gh/rr-learning/CausalWorld)
@@ -15,7 +17,7 @@ CausalWorld is an open-source simulation framework and benchmark for causal stru
 Go [here](https://sites.google.com/view/causal-world/home) for the API documentation.
 
 
-This package can be [pip-installed](#install-as-a-pip-package-in-a-conda-env-from-source).
+This package can be [pip-installed](#install-as-a-pip-package-from-latest-release).
 <p align=center>
 <img src="docs/media/random.gif" width=200><img src="docs/media/realistic.gif" width=200><img src="docs/media/magic.gif" width=200><img src="docs/media/reaching.gif" width=200>
 </p>
@@ -47,9 +49,9 @@ This package can be [pip-installed](#install-as-a-pip-package-in-a-conda-env-fro
 
 ## Announcements
 
-### October 2nd 2020
+### October 5th 2020
 
-We release v1.0. Given that its the first release of the framework, we are expecting some issues here and there, so please report any issues you encounter.
+We release v1.2. Given that its the first release of the framework, we are expecting some issues here and there, so please report any issues you encounter.
 
 ## Install as a pip package from latest release
 
@@ -213,6 +215,7 @@ env.close()
 | **Features**                | **Causal World**              |
 | --------------------------- | --------------------------------- |
 | Do Interventions            | :heavy_check_mark:                |
+| Counterfactual Environments | :heavy_check_mark:                |
 | Imitation Learning          | :heavy_check_mark:                |
 | Custom environments         | :heavy_check_mark:                | 
 | Support HER Style Algorithms| :heavy_check_mark:                |
