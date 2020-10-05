@@ -45,13 +45,15 @@ This package can be [pip-installed](#install-as-a-pip-package-from-latest-releas
 - [Comparison to other benchmarks](#comparison-to-other-benchmarks)
 - [Curriculum Through Interventions](#curriculum-through-interventions)
 - [Train Your Agents](#train-your-agents)
-- [Test How Your Agent Generalizes](#test-how-your-agent-generalizes)
+- [Disentangling Generalization: Test How Your Agent Generalizes](#disentangling-generalization:-test-how-your-agent-generalizes)
 - [Meta-Learning](#meta-learning)
 - [Imitation-Learning](#imitation-learning)
 - [Sim2Real](#sim2real)
 - [Baselines](#baselines)
 - [Citing Causal-World](#citing-causal-world)
+- [Authors](#authors)
 - [Contributing](#contributing)
+- [Acknowledgments](#acknowledgments)
 
 ## Announcements
 
