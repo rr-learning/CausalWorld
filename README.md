@@ -45,7 +45,9 @@ This package can be [pip-installed](#install-as-a-pip-package-from-latest-releas
 - [Comparison to other benchmarks](#comparison-to-other-benchmarks)
 - [Curriculum Through Interventions](#curriculum-through-interventions)
 - [Train Your Agents](#train-your-agents)
-- [Disentangling Generalization: Test How Your Agent Generalizes](#disentangling-generalization:-test-how-your-agent-generalizes)
+Disentangling Generalization: Test How Your Agent Generalizes
+
+- [Disentangling Generalization](#disentangling-generalization)
 - [Meta-Learning](#meta-learning)
 - [Imitation-Learning](#imitation-learning)
 - [Sim2Real](#sim2real)
@@ -310,7 +312,7 @@ model = PPO2(MlpPolicy,
 model.learn(total_timesteps=1000000)
 ```
 
-## Disentangling Generalization: Test How Your Agent Generalizes
+## Disentangling Generalization
 
 <p align=center>
 <img src="docs/media/policy_0.gif" width=200><img src="docs/media/radar.png" width=200><img src="docs/media/policy_1.gif" width=200>
