@@ -308,7 +308,7 @@ model = PPO2(MlpPolicy,
 model.learn(total_timesteps=1000000)
 ```
 
-## Test How Your Agent Generalizes
+## Disentangling Generalization: Test How Your Agent Generalizes
 
 <p align=center>
 <img src="docs/media/policy_0.gif" width=200><img src="docs/media/radar.png" width=200><img src="docs/media/policy_1.gif" width=200>
@@ -445,9 +445,9 @@ CausalWorld is work done by [Ossama Ahmed (ETH Zürich)](https://ei.is.mpg.de/~o
 
 ## Acknowledgments
 
-The authors would like to thank [Felix Widmaier (MPI Tübingen)](https://ei.is.mpg.de/person/felixwidmaier) and [Shruti Joshi (MPI Tübingen)](https://ei.is.mpg.de/person/sjoshi) for the useful discussions and for the development of the [TriFinger robot’s simulator](https://trifinger-robot-simulation.readthedocs.io/en/latest/), which served as a startingpoint for the work presented in this paper.
+The authors would like to thank [Felix Widmaier (MPI Tübingen)](https://ei.is.mpg.de/person/felixwidmaier) and [Shruti Joshi (MPI Tübingen)](https://ei.is.mpg.de/person/sjoshi) for the useful discussions and for the development of the [TriFinger robot’s simulator](https://trifinger-robot-simulation.readthedocs.io/en/latest/), which served as a starting point for the work presented in this paper.
 
 ## Contributing
 
-A guide coming up soon for how can you contribute to causal_world.
+A guide coming up soon for how you can contribute to causal_world.
 
