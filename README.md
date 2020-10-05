@@ -12,9 +12,15 @@
 
 [![<rr-learning>](https://circleci.com/gh/rr-learning/CausalWorld.svg?style=svg&circle-token=28380a46b1bca6dac49b07e423eac9e4111d3d29)](https://circleci.com/gh/rr-learning/CausalWorld)
   
-CausalWorld is an open-source simulation framework and benchmark for causal structure and transfer learning in a robotic manipulation environment (powered by bullet) where tasks range from rather simple to extremely hard. Tasks consist of constructing 3D shapes from a given set of blocks - inspired by how children learn to build complex structures. The release v1.0 supports many interesting goal shape families as well as exposing many causal variables in the environment to perform do_interventions on them. Checkout the project's [website](https://sites.google.com/view/causal-world/home) for the baseline results and the paper. 
+CausalWorld is an open-source simulation framework and benchmark for causal structure and transfer learning in a robotic manipulation environment (powered by bullet) where tasks range from rather simple to extremely hard. Tasks consist of constructing 3D shapes from a given set of blocks - inspired by how children learn to build complex structures. The release v1.0 supports many interesting goal shape families as well as exposing many causal variables in the environment to perform do_interventions on them. 
+
+Checkout the project's [website](https://sites.google.com/view/causal-world/home) for the baseline results and the paper. 
  
-Go [here](https://sites.google.com/view/causal-world/home) for the API documentation.
+Go [here](https://sites.google.com/view/causal-world/home) for the documentation.
+
+Go [here](https://github.com/rr-learning/CausalWorld/tree/master/tutorials) for the tutorials.
+
+Go [here](https://discord.com/invite/X9p2BPA) for the discord channel for discussions.
 
 
 This package can be [pip-installed](#install-as-a-pip-package-from-latest-release).
@@ -221,10 +227,13 @@ env.close()
 | Support HER Style Algorithms| :heavy_check_mark:                |
 | Sim2Real                    | :heavy_check_mark:                |
 | Meta Learning                  | :heavy_check_mark:                |
+| Multi-task Learning                  | :heavy_check_mark:                |
 | Discrete Action Space                | :heavy_check_mark:                |
-| Structure Observations           | :heavy_check_mark:                |
+| Structured Observations           | :heavy_check_mark:                |
 | Visual Observations           | :heavy_check_mark:                |
 | Goal Images            | :heavy_check_mark:                |
+| Disentangling Generalization            | :heavy_check_mark:                |
+| Benchmarking algorithms            | :heavy_check_mark:                |
 | Modular interface            | :heavy_check_mark:                |
 | Ipython / Notebook friendly | :heavy_check_mark:                |
 | Documentation               | :heavy_check_mark:                |
@@ -348,6 +357,25 @@ out-of-distribution evaluation, we make sure its easy for users to define meanin
 
 We also support online task distributions where task distributions are not known apriori, which is closer to what the robot will face in real life.
 
+```python
+from causal_world.envs import CausalWorld
+from causal_world.task_generators import generate_task
+from causal_world.sim2real_tools import TransferReal
+
+
+task = generate_task(task_generator_id='stacked_blocks')
+env = CausalWorld(task=task, enable_visualization=True)
+env.reset()
+for _ in range(10):
+    for i in range(200):
+        obs, reward, done, info = env.step(env.action_space.sample())
+    goal_intervention_dict = env.sample_new_goal()
+    print("new goal chosen: ", goal_intervention_dict)
+    success_signal, obs = env.do_intervention(goal_intervention_dict)
+    print("Goal Intervention success signal", success_signal)
+env.close()
+```
+
 ## Imitation-Learning
 
 Using the different tools provided in the framework its straight forward to perform imitation learning 
@@ -411,7 +439,13 @@ for _ in range(20):
   
 ## Authors
 
+CausalWorld is work done by [Ossama Ahmed (ETH Zürich)](https://ei.is.mpg.de/~oahmed), [Frederik Träuble (MPI Tübingen)](https://ei.is.mpg.de/person/ftraeuble), [Anirudh Goyal (MILA)](https://anirudh9119.github.io/), [Alexander Neitz (MPI Tübingen)](https://ei.is.mpg.de/person/aneitz), [Manuel Wütrich (MPI Tübingen)](https://ei.is.mpg.de/~mwuthrich),  [Yoshua Bengio (MILA)](https://yoshuabengio.org/), [Bernhard Schölkopf (MPI Tübingen)](https://ei.is.mpg.de/person/bs) and [Stefan Bauer (MPI Tübingen)](https://ei.is.mpg.de/person/sbauer).
+
 ## Citing Causal-World
+
+## Acknowledgments
+
+The authors would like to thank [Felix Widmaier (MPI Tübingen)](https://ei.is.mpg.de/person/felixwidmaier) and [Shruti Joshi (MPI Tübingen)](https://ei.is.mpg.de/person/sjoshi) for the useful discussions and for the development of the [TriFinger robot’s simulator](https://trifinger-robot-simulation.readthedocs.io/en/latest/), which served as a startingpoint for the work presented in this paper.
 
 ## Contributing
 
