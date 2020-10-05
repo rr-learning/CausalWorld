@@ -45,8 +45,6 @@ This package can be [pip-installed](#install-as-a-pip-package-from-latest-releas
 - [Comparison to other benchmarks](#comparison-to-other-benchmarks)
 - [Curriculum Through Interventions](#curriculum-through-interventions)
 - [Train Your Agents](#train-your-agents)
-Disentangling Generalization: Test How Your Agent Generalizes
-
 - [Disentangling Generalization](#disentangling-generalization)
 - [Meta-Learning](#meta-learning)
 - [Imitation-Learning](#imitation-learning)
