@@ -477,7 +477,7 @@ CausalWorld is work done by [Ossama Ahmed (ETH Zürich)](https://ei.is.mpg.de/~o
 
 ## Acknowledgments
 
-The authors would like to thank [Felix Widmaier (MPI Tübingen)](https://ei.is.mpg.de/person/felixwidmaier) and [Shruti Joshi (MPI Tübingen)](https://ei.is.mpg.de/person/sjoshi) for the useful discussions and for the development of the [TriFinger robot’s simulator](https://trifinger-robot-simulation.readthedocs.io/en/latest/), which served as a starting point for the work presented in this paper.
+The authors would like to thank [Felix Widmaier (MPI Tübingen)](https://ei.is.mpg.de/person/felixwidmaier), [Vaibhav Agrawal (MPI Tübingen)](https://ei.is.mpg.de/person/vagrawal) and [Shruti Joshi (MPI Tübingen)](https://ei.is.mpg.de/person/sjoshi) for the useful discussions and for the development of the [TriFinger robot’s simulator](https://trifinger-robot-simulation.readthedocs.io/en/latest/), which served as a starting point for the work presented in this paper.
 
 ## Contributing
 
