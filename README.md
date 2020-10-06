@@ -438,6 +438,9 @@ for _ in range(20):
 <img src="docs/media/2_push.gif" width=200><img src="docs/media/2_pick.gif" width=200><img src="docs/media/2_pick_and_place.gif" width=200><img src="docs/media/2_stacking2.gif" width=200>
 </p>
  
+## Reproducing Baselines
+
+[Go here to reproduce the baselines](https://github.com/rr-learning/CausalWorld/tree/master/scripts)
   
 ## Authors
 
@@ -452,4 +455,10 @@ The authors would like to thank [Felix Widmaier (MPI Tübingen)](https://ei.is.m
 ## Contributing
 
 A guide coming up soon for how you can contribute to causal_world.
+
+## List of publications and submissions using CausalWorld (please open a pull request to add your work to the list):
+
+- https://openreview.net/pdf?id=Q2iaAc-4I1v
+
+
 
