@@ -282,7 +282,7 @@ env.close()
   ```
 
 ## Curriculum Through Interventions
-To provide a convenient way of specifying learning curricula, we introduce intervention actors.  At each time step, such an actor takes all the exposed variables of the environ-ment as inputs and may intervene on them.  To encourage modularity, one may combine multipleactors in a learning curriculum.  This actor is defined by the episode number to start intervening,the episode number to stop intervening, the timestep within the episode it should intervene and theepisode periodicity of interventions.  
+To provide a convenient way of specifying learning curricula, we introduce intervention actors.  At each time step, such an actor takes all the exposed variables of the environment as inputs and may intervene on them.  To encourage modularity, one may combine multiple actors in a learning curriculum.  This actor is defined by the episode number to start intervening,the episode number to stop intervening, the time step within the episode it should intervene and the episode periodicity of interventions.  
 <p align=center>
 <img src="docs/media/guided_goal.gif" width=200><img src="docs/media/block_interventions.gif" width=200>
 </p>

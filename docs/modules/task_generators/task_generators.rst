@@ -4,7 +4,7 @@ Task Generators
 Task
 ----
 .. automodule:: causal_world.task_generators.task
-    :members: task_generator
+    :members: generate_task
 
 .. automodule:: causal_world.task_generators
 

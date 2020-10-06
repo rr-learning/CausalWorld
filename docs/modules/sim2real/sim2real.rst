@@ -9,3 +9,10 @@ RealisticRobotWrapper
     :members:
 
     .. automethod:: __init__
+
+TransferRealWrapper
+-------------------
+.. autoclass:: TransferReal
+    :members:
+
+    .. automethod:: __init__

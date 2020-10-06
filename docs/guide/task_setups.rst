@@ -149,6 +149,7 @@ structured: In this mode the observation space is a lower-dimensional feature ve
 time left for task (1), joint_positions (9), joint_velocities (9), end_effector_positions (9). Then for each tool object in the
 environment additional 17-dimensions are used representing: type (1), size (3), cartesian_position (3),
 quaternion_orientation (4), linear_velocity (3), angular_velocity (3). For each goal subshape in the environment additional
+11-dimesnions are used representing: type (1), size (3), cartesian_position (3) and orientation (4). Lastly, if there are any fixed blocks in the environment additional
 11-dimesnions are used representing: type (1), size (3), cartesian_position (3) and orientation (4).
 
 .. image:: ../media/structured_observation_space.png
