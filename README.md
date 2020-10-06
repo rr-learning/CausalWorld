@@ -43,6 +43,7 @@ This package can be [pip-installed](#install-as-a-pip-package-from-latest-releas
 - [Dive In!!](#dive-in!!)
 - [Main Features](#main-features)
 - [Comparison to other benchmarks](#comparison-to-other-benchmarks)
+- [Do Interventions](#do-interventions)
 - [Curriculum Through Interventions](#curriculum-through-interventions)
 - [Train Your Agents](#train-your-agents)
 - [Disentangling Generalization](#disentangling-generalization)
@@ -253,6 +254,32 @@ env.close()
 | Coinrun               | :x:|:heavy_check_mark:|:x:|:x:|:x:|:x:|:x:|:x:|:x:|:heavy_check_mark:|
 | AtariArcade               | :x:|:x:|:x:|:x:|:x:|:x:|:x:|:x:|:heavy_check_mark:/:x:|:heavy_check_mark:|
 | **CausalWorld**              | :heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
+
+## Do Interventions
+To provide a convenient way of evaluating robustness of RL algorithms, we expose a lot of variables in the environment and allow do-interventions on them at any point in time.
+<p align=center>
+<img src="docs/media/do_interventions_0.gif" width=200><img src="docs/media/do_interventions_1.gif" width=200><img src="docs/media/do_interventions_2.gif" width=200>
+</p>
+
+
+  ```python
+from causal_world.envs import CausalWorld
+from causal_world.task_generators import generate_task
+import numpy as np
+
+task = generate_task(task_generator_id='general')
+env = CausalWorld(task=task, enable_visualization=True)
+for _ in range(10):
+    env.reset()
+    success_signal, obs = env.do_intervention(
+            {'stage_color': np.random.uniform(0, 1, [
+                3,
+            ])})
+    print("Intervention success signal", success_signal)
+    for _ in range(100):
+        obs, reward, done, info = env.step(env.action_space.sample())
+env.close()
+  ```
 
 ## Curriculum Through Interventions
 To provide a convenient way of specifying learning curricula, we introduce intervention actors.  At each time step, such an actor takes all the exposed variables of the environ-ment as inputs and may intervene on them.  To encourage modularity, one may combine multipleactors in a learning curriculum.  This actor is defined by the episode number to start intervening,the episode number to stop intervening, the timestep within the episode it should intervene and theepisode periodicity of interventions.  

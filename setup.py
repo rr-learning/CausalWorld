@@ -1,7 +1,7 @@
 import setuptools
 setuptools.setup(
      name='causal_world',
-     version='1.1',
+     version='1.2',
      author="Ossama Ahmed, Frederik Trauble",
      author_email="ossama.ahmed@mail.mcgill.ca, frederik.traeuble@outlook.com",
      description="CausalWorld: A Robotic Manipulation Benchmark "
