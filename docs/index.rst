@@ -118,6 +118,7 @@ You can start right away with couple of lines as seen below:
    guide/getting_started.rst
    guide/task_setups.rst
    guide/evaluating_policy.rst
+   guide/intervention_spaces.rst
 
 .. toctree::
    :maxdepth: 3

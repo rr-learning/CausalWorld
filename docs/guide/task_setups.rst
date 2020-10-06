@@ -105,9 +105,9 @@ step using the fractional volumetric overlap of the tool_blocks with the 3D goal
 Observation spaces
 ------------------
 
-There are two default modes of observation spaces: 'cameras' and 'structured'
+There are two default modes of observation spaces: 'pixel' and 'structured'
 
-cameras: Three cameras are mounted around the trifinger robot pointing on the floor. In this mode the observations
+pixel: Three cameras are mounted around the trifinger robot pointing on the floor. In this mode the observations
 after each time step are the three raw rgb images from these cameras showing the actual tool_blocks and fingers.
 
 The goal shape is depicted in three additional rgb images in which the robot fingers are removed from the scene.
