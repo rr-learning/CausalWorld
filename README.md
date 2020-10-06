@@ -483,7 +483,7 @@ The authors would like to thank [Felix Widmaier (MPI Tübingen)](https://ei.is.m
 
 A guide coming up soon for how you can contribute to causal_world.
 
-## List of publications and submissions using CausalWorld (please open a pull request to add your work to the list):
+## List of publications and submissions using CausalWorld:
 
 - https://openreview.net/pdf?id=Q2iaAc-4I1v
 

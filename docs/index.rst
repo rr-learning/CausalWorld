@@ -3,7 +3,7 @@ CausalWorld Overview
 CausalWorld is an open-source simulation framework and benchmark for causal structure
 and transfer learning in a robotic manipulation environment (powered by `bullet <https://github.com/bulletphysics/bullet3>`_) where tasks
 range from rather simple to extremely hard. Tasks consist of constructing 3D shapes from a given set of blocks - inspired by
-how children learn to build complex structures. The release v1.0 supports many interesting goal shape families as well as exposing many causal variables in the environment to perform do_interventions on them.
+how children learn to build complex structures. The release v1.2 supports many interesting goal shape families as well as exposing many causal and non-causal variables in the environment to perform do_interventions on them.
 
 
 Checkout the project's `website <https://sites.google.com/view/causal-world/home>`_ for the baseline results and the paper.
