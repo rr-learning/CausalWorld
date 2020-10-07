@@ -58,7 +58,7 @@ This package can be [pip-installed](#install-as-a-pip-package-from-latest-releas
 
 ## Announcements
 
-### October 7th 2020
+### October 9th 2020
 
 We release v1.2. Given that its the first release of the framework, we are expecting some issues here and there, so please report any issues you encounter.
 
