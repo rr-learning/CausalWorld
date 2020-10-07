@@ -12,7 +12,7 @@
 
 [![<rr-learning>](https://circleci.com/gh/rr-learning/CausalWorld.svg?style=svg&circle-token=28380a46b1bca6dac49b07e423eac9e4111d3d29)](https://circleci.com/gh/rr-learning/CausalWorld)
   
-CausalWorld is an open-source simulation framework and benchmark for causal structure and transfer learning in a robotic manipulation environment (powered by bullet) where tasks range from rather simple to extremely hard. Tasks consist of constructing 3D shapes from a given set of blocks - inspired by how children learn to build complex structures. The release v1.0 supports many interesting goal shape families as well as exposing many causal variables in the environment to perform do_interventions on them. 
+CausalWorld is an open-source simulation framework and benchmark for causal structure and transfer learning in a robotic manipulation environment (powered by bullet) where tasks range from rather simple to extremely hard. Tasks consist of constructing 3D shapes from a given set of blocks - inspired by how children learn to build complex structures. The release v1.2 supports many interesting goal shape families as well as exposing many causal variables in the environment to perform do_interventions on them. 
 
 Checkout the project's [website](https://sites.google.com/view/causal-world/home) for the baseline results and the paper. 
  
