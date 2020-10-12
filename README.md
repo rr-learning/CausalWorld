@@ -14,7 +14,7 @@
   
 CausalWorld is an open-source simulation framework and benchmark for causal structure and transfer learning in a robotic manipulation environment (powered by bullet) where tasks range from rather simple to extremely hard. Tasks consist of constructing 3D shapes from a given set of blocks - inspired by how children learn to build complex structures. The release v1.2 supports many interesting goal shape families as well as exposing many causal variables in the environment to perform do_interventions on them. 
 
-Checkout the project's [website](https://sites.google.com/view/causal-world/home) for the baseline results and the paper. 
+Checkout the project's [website](https://sites.google.com/view/causal-world/home) for the baseline results and the [paper](https://arxiv.org/pdf/2010.04296.pdf). 
  
 Go [here](https://causal-world.readthedocs.io/en/latest/index.html) for the documentation.
 
@@ -54,7 +54,8 @@ This package can be [pip-installed](#install-as-a-pip-package-from-latest-releas
 - [Citing Causal-World](#citing-causal-world)
 - [Authors](#authors)
 - [Contributing](#contributing)
-- [Acknowledgments](#acknowledgments)
+- [Contributing](#contributing)
+- [Citing CausalWorld](#citing-causalworld)
 
 ## Announcements
 
@@ -473,7 +474,18 @@ for _ in range(20):
 
 CausalWorld is work done by [Ossama Ahmed (ETH Zürich)](https://ossamaahmed.github.io/), [Frederik Träuble (MPI Tübingen)](https://ei.is.mpg.de/person/ftraeuble), [Anirudh Goyal (MILA)](https://anirudh9119.github.io/), [Alexander Neitz (MPI Tübingen)](https://ei.is.mpg.de/person/aneitz), [Manuel Wütrich (MPI Tübingen)](https://ei.is.mpg.de/~mwuthrich),  [Yoshua Bengio (MILA)](https://yoshuabengio.org/), [Bernhard Schölkopf (MPI Tübingen)](https://ei.is.mpg.de/person/bs) and [Stefan Bauer (MPI Tübingen)](https://ei.is.mpg.de/person/sbauer).
 
-## Citing Causal-World
+## Citing CausalWorld
+
+```
+@misc{ahmed2020causalworld,
+      title={CausalWorld: A Robotic Manipulation Benchmark for Causal Structure and Transfer Learning},
+      author={Ossama Ahmed and Frederik Träuble and Anirudh Goyal and Alexander Neitz and Manuel Wüthrich and Yoshua Bengio and Bernhard Schölkopf and Stefan Bauer},
+      year={2020},
+      eprint={2010.04296},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+}
+```
 
 ## Acknowledgments
 

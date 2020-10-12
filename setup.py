@@ -21,6 +21,7 @@ setuptools.setup(
         'sphinx',
         'matplotlib',
         'sphinx_rtd_theme',
+        'sphinxcontrib-bibtex',
         'pytest',
         'psutil'
       ],

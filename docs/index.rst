@@ -6,7 +6,7 @@ range from rather simple to extremely hard. Tasks consist of constructing 3D sha
 how children learn to build complex structures. The release v1.2 supports many interesting goal shape families as well as exposing many causal and non-causal variables in the environment to perform do_interventions on them.
 
 
-Checkout the project's `website <https://sites.google.com/view/causal-world/home>`_ for the baseline results and the paper.
+Checkout the project's `website <https://sites.google.com/view/causal-world/home>`_ for the baseline results and the `paper <https://arxiv.org/abs/2010.04296>`_.
 
 .. image:: ./media/do_intervention_fig.png
    :scale: 25 %
@@ -108,7 +108,24 @@ You can start right away with couple of lines as seen below:
 
 
 
+Authors
+-------
 
+CausalWorld is work done by `Ossama Ahmed (ETH Zürich) <https://ossamaahmed.github.io/>`_, `Frederik Träuble (MPI Tübingen) <https://ei.is.mpg.de/person/ftraeuble>`_, `Anirudh Goyal (MILA) <https://anirudh9119.github.io/>`_, `Alexander Neitz (MPI Tübingen) <https://ei.is.mpg.de/person/aneitz>`_, `Manuel Wütrich (MPI Tübingen) <https://ei.is.mpg.de/~mwuthrich>`_,  `Yoshua Bengio (MILA) <https://yoshuabengio.org/>`_, `Bernhard Schölkopf (MPI Tübingen) <https://ei.is.mpg.de/person/bs>`_ and `Stefan Bauer (MPI Tübingen) <https://ei.is.mpg.de/person/sbauer>`_.
+
+Cite Causal World
+-----------------
+
+.. code-block:: bibtex
+
+   @misc{ahmed2020causalworld,
+      title={CausalWorld: A Robotic Manipulation Benchmark for Causal Structure and Transfer Learning},
+      author={Ossama Ahmed and Frederik Träuble and Anirudh Goyal and Alexander Neitz and Manuel Wüthrich and Yoshua Bengio and Bernhard Schölkopf and Stefan Bauer},
+      year={2020},
+      eprint={2010.04296},
+      archivePrefix={arXiv},
+      primaryClass={cs.RO}
+    }
 
 .. toctree::
    :maxdepth: 2
