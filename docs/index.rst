@@ -111,7 +111,7 @@ You can start right away with couple of lines as seen below:
 Authors
 -------
 
-CausalWorld is work done by `Ossama Ahmed (ETH Zürich) <https://ossamaahmed.github.io/>`_, `Frederik Träuble (MPI Tübingen) <https://ei.is.mpg.de/person/ftraeuble>`_, `Anirudh Goyal (MILA) <https://anirudh9119.github.io/>`_, `Alexander Neitz (MPI Tübingen) <https://ei.is.mpg.de/person/aneitz>`_, `Manuel Wütrich (MPI Tübingen) <https://ei.is.mpg.de/~mwuthrich>`_,  `Yoshua Bengio (MILA) <https://yoshuabengio.org/>`_, `Bernhard Schölkopf (MPI Tübingen) <https://ei.is.mpg.de/person/bs>`_ and `Stefan Bauer (MPI Tübingen) <https://ei.is.mpg.de/person/sbauer>`_.
+CausalWorld is work done by `Ossama Ahmed (ETH Zürich) <https://ossamaahmed.github.io/>`_, `Frederik Träuble (MPI Tübingen) <https://ei.is.mpg.de/person/ftraeuble>`_, `Anirudh Goyal (MILA) <https://anirudh9119.github.io/>`_, `Alexander Neitz (MPI Tübingen) <https://ei.is.mpg.de/person/aneitz>`_, `Manuel Wüthrich (MPI Tübingen) <https://ei.is.mpg.de/~mwuthrich>`_,  `Yoshua Bengio (MILA) <https://yoshuabengio.org/>`_, `Bernhard Schölkopf (MPI Tübingen) <https://ei.is.mpg.de/person/bs>`_ and `Stefan Bauer (MPI Tübingen) <https://ei.is.mpg.de/person/sbauer>`_.
 
 Cite Causal World
 -----------------

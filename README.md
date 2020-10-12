@@ -472,7 +472,7 @@ for _ in range(20):
   
 ## Authors
 
-CausalWorld is work done by [Ossama Ahmed (ETH Zürich)](https://ossamaahmed.github.io/), [Frederik Träuble (MPI Tübingen)](https://ei.is.mpg.de/person/ftraeuble), [Anirudh Goyal (MILA)](https://anirudh9119.github.io/), [Alexander Neitz (MPI Tübingen)](https://ei.is.mpg.de/person/aneitz), [Manuel Wütrich (MPI Tübingen)](https://ei.is.mpg.de/~mwuthrich),  [Yoshua Bengio (MILA)](https://yoshuabengio.org/), [Bernhard Schölkopf (MPI Tübingen)](https://ei.is.mpg.de/person/bs) and [Stefan Bauer (MPI Tübingen)](https://ei.is.mpg.de/person/sbauer).
+CausalWorld is work done by [Ossama Ahmed (ETH Zürich)](https://ossamaahmed.github.io/), [Frederik Träuble (MPI Tübingen)](https://ei.is.mpg.de/person/ftraeuble), [Anirudh Goyal (MILA)](https://anirudh9119.github.io/), [Alexander Neitz (MPI Tübingen)](https://ei.is.mpg.de/person/aneitz), [Manuel Wüthrich (MPI Tübingen)](https://ei.is.mpg.de/~mwuthrich),  [Yoshua Bengio (MILA)](https://yoshuabengio.org/), [Bernhard Schölkopf (MPI Tübingen)](https://ei.is.mpg.de/person/bs) and [Stefan Bauer (MPI Tübingen)](https://ei.is.mpg.de/person/sbauer).
 
 ## Citing CausalWorld
 
