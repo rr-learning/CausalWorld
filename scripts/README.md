@@ -1,7 +1,7 @@
 ### How to reproduce experiments from CausalWorld paper?
 
 Run the following command to reproduce experiments (training and evaluation) reported in the paper 
-CausalWorld: : [*A Robotic Manipulation Benchmark for Parametric Generalization and Causal Structure Learning paper*](link)
+CausalWorld: : [*A Robotic Manipulation Benchmark for Parametric Generalization and Causal Structure Learning paper*](https://arxiv.org/pdf/2010.04296.pdf)
 
 
 ```
