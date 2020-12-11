@@ -469,7 +469,7 @@ class CreativeStackedBlocksGeneratorTask(BaseTask):
         while respecting the allowed boundaries passed
 
         :param allowed_boundaries: (list) specifies a bounding box (2, 2)
-        :param start_z: (float) z position to start generating the blocks from.
+        :param start_z: (float) z position to start generating_dataset the blocks from.
         :param min_size:
 
         :return:

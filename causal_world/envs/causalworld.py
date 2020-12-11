@@ -98,6 +98,7 @@ class CausalWorld(gym.Env):
         self._pybullet_client_w_goal_id = None
         self._pybullet_client_full_id = None
         self._revolute_joint_ids = None
+        self._add_boundary = True
         self._instantiate_pybullet()
         self.link_name_to_index = None
         self._robot_properties_path = os.path.join(
@@ -691,6 +692,12 @@ class CausalWorld(gym.Env):
         """
         return self._action_mode
 
+    def get_observation_mode(self):
+        """
+        :return: (str) returns which observation mode the causal_world is operating in.
+        """
+        return self._observation_mode
+
     def set_action_mode(self, action_mode):
         """
         used to set or change the action mode.
@@ -866,21 +873,35 @@ class CausalWorld(gym.Env):
                                    -1,
                                    rgbaColor=table_colour,
                                    physicsClientId=pybullet_client)
-
-        stage_id = pybullet.createCollisionShape(
-            shapeType=pybullet.GEOM_MESH,
-            fileName=mesh_path("edu/frame_wall.stl"),
-            flags=pybullet.GEOM_FORCE_CONCAVE_TRIMESH,
-            physicsClientId=pybullet_client)
-        obj = pybullet.createMultiBody(baseCollisionShapeIndex=stage_id,
-                                       baseVisualShapeIndex=-1,
-                                       basePosition=[0, 0, 0.01],
-                                       baseOrientation=[0, 0, 0, 1],
+        if self._add_boundary:
+            stage_id = pybullet.createCollisionShape(
+                shapeType=pybullet.GEOM_MESH,
+                fileName=mesh_path("edu/frame_wall.stl"),
+                flags=pybullet.GEOM_FORCE_CONCAVE_TRIMESH,
+                physicsClientId=pybullet_client)
+            obj = pybullet.createMultiBody(baseCollisionShapeIndex=stage_id,
+                                           baseVisualShapeIndex=-1,
+                                           basePosition=[0, 0, 0.01],
+                                           baseOrientation=[0, 0, 0, 1],
+                                           physicsClientId=pybullet_client)
+            pybullet.changeVisualShape(obj,
+                                       -1,
+                                       rgbaColor=high_border_colour,
                                        physicsClientId=pybullet_client)
-        pybullet.changeVisualShape(obj,
-                                   -1,
-                                   rgbaColor=high_border_colour,
-                                   physicsClientId=pybullet_client)
+        return
+
+    def remove_boundary(self):
+        self._add_boundary = False
+        if self._pybullet_client_full_id is not None:
+            pybullet.removeBody(WorldConstants.STAGE_ID,
+                                physicsClientId=self._pybullet_client_full_id)
+        if self._pybullet_client_w_o_goal_id is not None:
+            pybullet.removeBody(WorldConstants.STAGE_ID,
+                                physicsClientId=self._pybullet_client_w_o_goal_id)
+        if self._pybullet_client_w_goal_id is not None:
+            pybullet.removeBody(WorldConstants.STAGE_ID,
+                                physicsClientId=self._pybullet_client_w_goal_id)
+            self._stage.update_goal_image()
         return
 
     def _instantiate_pybullet(self):

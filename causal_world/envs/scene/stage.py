@@ -820,7 +820,7 @@ class Stage(object):
         """
         for contact in pybullet.getContactPoints(
                 physicsClientId=self._rigid_objects_client_instances[0]):
-            if contact[8] < -0.03:
+            if contact[8] < -0.01:
                 return False
         #check if all the visual objects are within the bb og the available arena
         for visual_object in self._visual_objects:
@@ -832,6 +832,19 @@ class Stage(object):
             if self._visual_objects[visual_object].get_bounding_box()[0][-1] < -0.01:
                 return False
         return True
+
+    def get_tool_object_closest_to_point(self, xyz_point):
+        closest_object = None
+
+        for rigid_object in self._rigid_objects:
+            object_position = self._rigid_objects[rigid_object].\
+                get_variable_state('cartesian_position')
+            distance_point_to_object = np.abs(object_position - xyz_point)
+            if np.all(distance_point_to_object < self.
+                    _rigid_objects[rigid_object].get_variable_state('size')/2):
+                closest_object = self._rigid_objects[rigid_object].get_name()
+                break
+        return closest_object
 
     def get_stage_bb(self):
         """

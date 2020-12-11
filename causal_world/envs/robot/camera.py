@@ -1,5 +1,6 @@
 import pybullet
 import numpy as np
+from causal_world.configs.world_constants import WorldConstants
 
 
 class Camera(object):
@@ -17,8 +18,8 @@ class Camera(object):
         self._translation = camera_position
         self._camera_orientation = camera_orientation
         self._pybullet_client_id = pybullet_client_id
-        self._width = 128
-        self._height = 128
+        self._width = WorldConstants.CAMERA_RESOLUTION_WIDTH
+        self._height = WorldConstants.CAMERA_RESOLUTION_HEIGHT
         x = self._camera_orientation[0]
         y = self._camera_orientation[1]
         z = self._camera_orientation[2]

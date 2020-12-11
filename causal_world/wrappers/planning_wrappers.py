@@ -4,6 +4,8 @@ from causal_world.utils.rotation_utils import quaternion_to_euler, \
     euler_to_quaternion
 import gym
 import numpy as np
+from causal_world.configs.world_constants import WorldConstants
+from gym import spaces
 
 
 class ObjectSelectorActorPolicy(BaseInterventionActorPolicy):
@@ -106,12 +108,15 @@ class ObjectSelectorWrapper(gym.Wrapper):
         super(ObjectSelectorWrapper, self).__init__(env)
         self.env = env
         self.env.set_skip_frame(1)
+        intervention_dict = {'robot_height': 1.0}
+        env.set_starting_state(intervention_dict, check_bounds=False)
         self.intervention_actor = ObjectSelectorActorPolicy()
         self.intervention_actor.initialize_actor(self.env)
-        self.observation_space = gym.spaces.Box(
-            self.env.observation_space.low[28:],
-            self.env.observation_space.high[28:],
-            dtype=np.float64)
+        if self.env._robot.get_observation_mode() == 'structured':
+            self.observation_space = gym.spaces.Box(
+                self.env.observation_space.low[28:],
+                self.env.observation_space.high[28:],
+                dtype=np.float64)
         self.objects_order = list(
             self.env.get_stage().get_rigid_objects().keys())
         self.objects_order.sort()
@@ -139,7 +144,8 @@ class ObjectSelectorWrapper(gym.Wrapper):
             self.env.get_current_state_variables())
         self.env.do_intervention(intervention_dict, check_bounds=False)
         obs, reward, done, info = self.env.step(self.env.action_space.low)
-        obs = obs[28:]
+        if self.env.get_observation_mode() == 'structured':
+            obs = obs[28:]
         return obs, reward, done, info
 
     def reset(self):
@@ -155,3 +161,89 @@ class ObjectSelectorWrapper(gym.Wrapper):
         interventions_dict['joint_positions'] = self.intervention_actor.low_joint_positions
         self.env.do_intervention(interventions_dict, check_bounds=False)
         return result
+
+
+class PickxyzDropxyzWrapper(gym.Wrapper):
+
+    def __init__(self, env):
+        """
+
+        :param env: (causal_world.CausalWorld) the environment to convert.
+        """
+        super(PickxyzDropxyzWrapper, self).__init__(env)
+        self.env = env
+        self.env.set_skip_frame(250)
+        intervention_dict = {'robot_height': 1.0}
+        env.set_starting_state(intervention_dict, check_bounds=False)
+        if self.env._robot.get_observation_mode() == 'structured':
+            raise Exception("This wrapper is meant for pixel mode only")
+        self._lower_bounds = np.append(np.tile(WorldConstants.ARENA_BB[0], 2),
+                                       [-np.pi, -np.pi, -np.pi])
+        self._upper_bounds = np.append(np.tile(WorldConstants.ARENA_BB[1], 2),
+                                       [-np.pi, -np.pi, -np.pi])
+        if self.env._normalize_actions:
+            self.action_space = spaces.Box(low=-np.ones(9),
+                                           high=np.ones(9),
+                                           dtype=np.float64)
+        else:
+            self.action_space = spaces.Box(low=self._lower_bounds,
+                                           high=self._upper_bounds,
+                                           dtype=np.float64)
+        self._number_of_cameras = self.env._camera_indicies.shape[0]
+        self.env.add_wrapper_info({'PickxyzDropxyzWrapper': dict()})
+
+    def step(self, action):
+        """
+        Used to step through the enviroment.
+
+        :param action: (nd.array) specifies which action should be taken by
+                                  the robot, should follow the same action
+                                  mode specified.
+
+        :return: (nd.array) specifies the observations returned after stepping
+                            through the environment. Again, it follows the
+                            observation_mode specified.
+        """
+        #either denormalize or not
+        denormalized_action = np.copy(action)
+        if self.env._normalize_actions:
+            denormalized_action = np.copy(self._lower_bounds + (action + 1.0) / 2.0 * \
+                                          (self._upper_bounds - self._lower_bounds))
+        #find the object closest to the pick location and distance is smaller than this object size
+        closest_object = self.env.get_stage().\
+            get_tool_object_closest_to_point(denormalized_action[:3])
+        if closest_object is not None:
+            intervention_dict = dict()
+            intervention_dict[closest_object] = \
+                {'cartesian_position': denormalized_action[3:6],
+                 'orientation': euler_to_quaternion(denormalized_action[6:])}
+            success_signal, action_images = self.env.do_intervention(intervention_dict,
+                                                                    check_bounds=False)
+        else:
+            action_images = self.env._robot.get_current_camera_observations()
+        action_images = action_images[:self._number_of_cameras]
+        obs, reward, done, info = self.env.step(np.zeros(9))
+        if closest_object is not None:
+            info['pick_success'] = True
+        else:
+            info['pick_success'] = False
+        if closest_object is not None and success_signal:
+            info['drop_success'] = True
+        else:
+            info['drop_success'] = False
+        new_obs = np.concatenate([action_images,
+                                  obs], axis=0)
+        return new_obs, reward, done, info
+
+    def reset(self):
+        """
+        Resets the environment to the current starting state of the environment.
+
+        :return: (nd.array) specifies the observations returned after resetting
+                            the environment. Again, it follows the
+                            observation_mode specified.
+        """
+        self.env.reset()
+        for i in range(2):
+            obs, reward, done, info = self.env.step(self.env.action_space.low)
+        return obs

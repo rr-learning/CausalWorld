@@ -47,9 +47,9 @@ class GeneralGeneratorTask(BaseTask):
                          dense_reward_weights=dense_reward_weights,
                          activate_sparse_reward=activate_sparse_reward)
         self._task_robot_observation_keys = ["time_left_for_task",
-                                            "joint_positions",
-                                            "joint_velocities",
-                                            "end_effector_positions"]
+                                             "joint_positions",
+                                             "joint_velocities",
+                                             "end_effector_positions"]
         self._task_params["tool_block_mass"] = tool_block_mass
         self._task_params["joint_positions"] = joint_positions
         self._task_params["nums_objects"] = nums_objects
@@ -89,7 +89,9 @@ class GeneralGeneratorTask(BaseTask):
         """
         super(GeneralGeneratorTask, self)._set_intervention_space_a()
         for visual_object in self._stage.get_visual_objects():
-            del self._intervention_space_a[visual_object]
+            for key in list(self._intervention_space_a[visual_object].keys()):
+                if key != 'color':
+                    del self._intervention_space_a[visual_object][key]
         for rigid_object in self._stage.get_rigid_objects():
             del self._intervention_space_a[rigid_object]['size']
         self._intervention_space_a['nums_objects'] = \
@@ -107,7 +109,9 @@ class GeneralGeneratorTask(BaseTask):
         """
         super(GeneralGeneratorTask, self)._set_intervention_space_b()
         for visual_object in self._stage.get_visual_objects():
-            del self._intervention_space_b[visual_object]
+            for key in list(self._intervention_space_b[visual_object].keys()):
+                if key != 'color':
+                    del self._intervention_space_b[visual_object][key]
         for rigid_object in self._stage.get_rigid_objects():
             del self._intervention_space_b[rigid_object]['size']
         self._intervention_space_b['nums_objects'] = \
@@ -229,7 +233,8 @@ class GeneralGeneratorTask(BaseTask):
                 'initial_position': dropping_position,
                 'initial_orientation': dropping_orientation,
                 'mass': self.tool_mass,
-                'size': np.repeat(self.tool_block_size, 3)
+                'size': np.repeat(self.tool_block_size, 3),
+                'color': np.random.uniform(size=[3, ])
             }
             self._stage.add_rigid_general_object(**creation_dict)
             self._task_stage_observation_keys.append("tool_" + str(object_num) +
@@ -257,7 +262,10 @@ class GeneralGeneratorTask(BaseTask):
                 'orientation':
                     self._stage.get_object_state(rigid_object, 'orientation'),
                 'size':
-                    np.repeat(self.tool_block_size, 3)
+                    np.repeat(self.tool_block_size, 3),
+                'color':
+                    self._stage.get_object_state(rigid_object,
+                                                 'color')
             }
             self._stage.add_silhoutte_general_object(**creation_dict)
             self._task_stage_observation_keys.append(
@@ -268,6 +276,10 @@ class GeneralGeneratorTask(BaseTask):
                 rigid_object.replace('tool', 'goal') + '_cartesian_position')
             self._task_stage_observation_keys.append(
                 rigid_object.replace('tool', 'goal') + '_orientation')
+
+        self._stage.finalize_stage()
+
+        for rigid_object in self._stage._rigid_objects:
             trial_index = 1
             block_position = self._stage.random_position(
                 height_limits=[self.tool_block_size/2.0, 0.15])
