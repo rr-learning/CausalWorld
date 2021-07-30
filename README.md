@@ -477,13 +477,12 @@ CausalWorld is work done by [Ossama Ahmed (ETH Zürich)](https://ossamaahmed.git
 ## Citing CausalWorld
 
 ```
-@misc{ahmed2020causalworld,
-      title={CausalWorld: A Robotic Manipulation Benchmark for Causal Structure and Transfer Learning},
-      author={Ossama Ahmed and Frederik Träuble and Anirudh Goyal and Alexander Neitz and Manuel Wüthrich and Yoshua Bengio and Bernhard Schölkopf and Stefan Bauer},
-      year={2020},
-      eprint={2010.04296},
-      archivePrefix={arXiv},
-      primaryClass={cs.RO}
+@inproceedings{
+ahmed2021causalworld,
+title={CausalWorld: A Robotic Manipulation Benchmark for Causal Structure and Transfer Learning},
+author={Ossama Ahmed and Frederik Tr{\"a}uble and Anirudh Goyal and Alexander Neitz and Manuel W{\"u}thrich and Yoshua Bengio and Bernhard Sch{\"o}lkopf and Stefan Bauer},
+booktitle={International Conference on Learning Representations},
+year={2021}
 }
 ```
 
