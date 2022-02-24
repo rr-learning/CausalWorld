@@ -147,7 +147,6 @@ class TriFingerRobot(object):
         current_velocity = np.array(
             [joint[1] for joint in current_joint_states])
         current_torques = np.array([joint[3] for joint in current_joint_states])
-        
         self._latest_full_state = {
             'positions':
                 current_position,
