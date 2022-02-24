@@ -882,6 +882,51 @@ class BaseTask(object):
             get_current_observations(self._stage_observation_helper_keys)
         self._current_full_observations_dict = dict(robot_observations_dict)
         self._current_full_observations_dict.update(stage_observations_dict)
+        observations_filtered = []
+        for key in self._task_robot_observation_keys:
+            if key in self._non_default_robot_observation_funcs:
+                if self._robot._normalize_observations:
+                    new_obs = \
+                        self._robot.\
+                            normalize_observation_for_key(
+                                key=key, 
+                                observation=\
+                                self._non_default_robot_observation_funcs[key]()
+                            )
+                else:
+                    new_obs = self._non_default_robot_observation_funcs[key]()
+            else:
+                new_obs = self._current_full_observations_dict[key]
+            
+            if type(new_obs) is np.ndarray:
+                observations_filtered.extend(new_obs.flat)
+            elif type(new_obs) is list or  type(new_obs) is tuple:
+                observations_filtered.extend(new_obs)
+            else:
+                observations_filtered.append(new_obs)
+
+        for key in self._task_stage_observation_keys:
+            if key in self._non_default_stage_observation_funcs:
+                if self._stage._normalize_observations:
+                    new_obs = self._stage.normalize_observation_for_key(
+                            key=key,
+                            observation=\
+                            self._non_default_stage_observation_funcs[key]()
+                        )
+                else:
+                    new_obs = self._non_default_stage_observation_funcs[key]()
+            else:
+                new_obs = self._current_full_observations_dict[key]
+            
+            if type(new_obs) is np.ndarray:
+                observations_filtered.extend(new_obs.flat)
+            elif type(new_obs) is list or  type(new_obs) is tuple:
+                observations_filtered.extend(new_obs)
+            else:
+                observations_filtered.append(new_obs)
+        # return np.array(observations_filtered)
+        observations_filtered_new = np.array(observations_filtered)
+        
         observations_filtered = np.array([])
         for key in self._task_robot_observation_keys:
             if key in self._non_default_robot_observation_funcs:
@@ -923,6 +968,7 @@ class BaseTask(object):
                     np.append(observations_filtered,
                               np.array(self._current_full_observations_dict[key]))
 
+        np.testing.assert_equal(observations_filtered_new, observations_filtered)
         return observations_filtered
 
     def get_task_params(self):
