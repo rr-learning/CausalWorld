@@ -585,18 +585,12 @@ class BaseTask(object):
         :return: (nd.array) specifies the desired goal as bounding boxes of
                             goal shapes by default.
         """
-        desired_goal = []
-        for visual_goal in self._stage.get_visual_objects():
-            desired_goal.append(self._stage.get_visual_objects()
-                                [visual_goal].get_bounding_box())
-        desired_goal_alternative = np.array(
+        return np.array(
             [
                 visual_goal.get_bounding_box()
                 for visual_goal in self._stage.get_visual_objects().values()
             ]
         )
-        np.testing.assert_array_equal(desired_goal_alternative , np.array(desired_goal))
-        return np.array(desired_goal)
         
     def get_achieved_goal(self):
         """
@@ -604,24 +598,13 @@ class BaseTask(object):
         :return: (nd.array) specifies the achieved goal as bounding boxes of
                             objects by default.
         """       
-        achieved_goal = []
-        for rigid_object in self._stage.get_rigid_objects():
-            if self._stage.get_rigid_objects()[rigid_object].is_not_fixed():
-                achieved_goal.append(self._stage.get_rigid_objects()
-                                     [rigid_object].get_bounding_box())    
-        
-        achieved_goal = np.array(achieved_goal)
-        
-        achieved_goal2 = np.array(
+        return np.array(
             [
                 rigid_object.get_bounding_box() 
                 for rigid_object in self._stage.get_rigid_objects().values()
                 if rigid_object.is_not_fixed()
             ]
-        )            
-        np.testing.assert_array_equal(np.array(achieved_goal) , achieved_goal2)
-
-        return np.array(achieved_goal)
+        )   
 
     def _goal_reward(self, achieved_goal, desired_goal):
         """
