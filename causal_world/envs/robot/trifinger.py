@@ -413,7 +413,7 @@ class TriFingerRobot(object):
                 forces=torque_commands,
                 physicsClientId=self._pybullet_client_full_id)
         return torque_commands
-    
+
     def _safety_torque_check(self, desired_torques):
         """
         limits desired_torques to max_motor_torque 
@@ -423,7 +423,7 @@ class TriFingerRobot(object):
                                             to the robot.
 
         :return: (list) the modified torque commands after applying a safety check.
-        """       
+        """
         applied_torques = clip(
             np.asarray(desired_torques),
             -self._max_motor_torque,
@@ -436,7 +436,7 @@ class TriFingerRobot(object):
                 -self._max_motor_torque,
                 self._max_motor_torque,
         )
-        
+
         return list(applied_torques)
 
     def inverse_kinematics(self, desired_tip_positions, rest_pose):
@@ -638,9 +638,8 @@ class TriFingerRobot(object):
         result[2] -= WorldConstants.FLOOR_HEIGHT
         result[5] -= WorldConstants.FLOOR_HEIGHT
         result[-1] -= WorldConstants.FLOOR_HEIGHT
-        
         return np.array(result)
-    
+
     def _process_action_joint_positions(self, robot_state):
         """
         This returns the absolute joint positions command sent in position control mode

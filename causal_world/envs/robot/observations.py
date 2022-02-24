@@ -252,7 +252,7 @@ class TriFingerObservations(object):
     def clip_observation(self, observation):
         """
 
-        :param observation: (nd.ardray) observation vector to clip.
+        :param observation: (nd.array) observation vector to clip.
 
         :return: (nd.array) clipped observation vector to satisfy the limits.
         """
