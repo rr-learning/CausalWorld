@@ -1,5 +1,6 @@
 from causal_world.envs.robot.action import TriFingerAction
 from causal_world.envs.robot.observations import TriFingerObservations
+from causal_world.utils.env_utils import clip
 import numpy as np
 import pybullet
 from causal_world.configs.world_constants import WorldConstants
@@ -146,6 +147,15 @@ class TriFingerRobot(object):
         current_velocity = np.array(
             [joint[1] for joint in current_joint_states])
         current_torques = np.array([joint[3] for joint in current_joint_states])
+        
+        a_current_joint_states = np.array(current_joint_states)
+        a_current_position = a_current_joint_states[:,0]
+        a_current_velocity = a_current_joint_states[:,1]
+        a_current_torques = a_current_joint_states[:,3]
+        np.testing.assert_array_equal(current_position, a_current_position)
+        np.testing.assert_array_equal(current_velocity, a_current_velocity)
+        np.testing.assert_array_equal(current_torques, a_current_torques)
+        
         self._latest_full_state = {
             'positions':
                 current_position,
@@ -411,7 +421,7 @@ class TriFingerRobot(object):
                 forces=torque_commands,
                 physicsClientId=self._pybullet_client_full_id)
         return torque_commands
-
+    
     def _safety_torque_check(self, desired_torques):
         """
 
@@ -419,22 +429,20 @@ class TriFingerRobot(object):
                                             to the robot.
 
         :return: (nd.array) the modified torque commands after applying a safety check.
-        """
-        applied_torques = np.clip(
+        """       
+        applied_torques = clip(
             np.asarray(desired_torques),
             -self._max_motor_torque,
-            +self._max_motor_torque,
+            self._max_motor_torque,
         )
-        applied_torques -= self._safety_kd * self._latest_full_state[
-            'velocities']
 
-        applied_torques = list(
-            np.clip(
-                np.asarray(applied_torques),
-                -self._max_motor_torque,
-                +self._max_motor_torque,
-            ))
-
+        applied_torques = list(clip(
+            applied_torques \
+            - self._safety_kd * self._latest_full_state['velocities'],
+            -self._max_motor_torque,
+            self._max_motor_torque,
+        ))
+        
         return applied_torques
 
     def inverse_kinematics(self, desired_tip_positions, rest_pose):
@@ -600,6 +608,7 @@ class TriFingerRobot(object):
 
         :return: (nd.array) the current end effector positions of the robot.
         """
+        # 37.4ms
         result = np.array([])
         if self._pybullet_client_full_id is not None:
             position_1 = pybullet.getLinkState(
@@ -639,8 +648,50 @@ class TriFingerRobot(object):
         result[2] -= WorldConstants.FLOOR_HEIGHT
         result[5] -= WorldConstants.FLOOR_HEIGHT
         result[-1] -= WorldConstants.FLOOR_HEIGHT
-        return result
+    
+        # 23ms
+        if self._pybullet_client_full_id is not None:
+            position_1 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID,
+                linkIndex=5,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_full_id)[0]
+            position_2 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID,
+                linkIndex=10,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_full_id)[0]
+            position_3 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID,
+                linkIndex=15,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_full_id)[0]
+        else:
+            position_1 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID,
+                linkIndex=5,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_w_o_goal_id)[0]
+            position_2 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID,
+                linkIndex=10,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_w_o_goal_id)[0]
+            position_3 = pybullet.getLinkState(
+                WorldConstants.ROBOT_ID,
+                linkIndex=15,
+                computeForwardKinematics=True,
+                physicsClientId=self._pybullet_client_w_o_goal_id)[0]
+        result3 = list(position_1) + list(position_2) + list(position_3)
+        result3[2] -= WorldConstants.FLOOR_HEIGHT
+        result3[5] -= WorldConstants.FLOOR_HEIGHT
+        result3[-1] -= WorldConstants.FLOOR_HEIGHT
+        result3 = np.array(result3)
 
+        np.testing.assert_array_equal(result,result3)
+        
+        return result
+    
     def _process_action_joint_positions(self, robot_state):
         """
         This returns the absolute joint positions command sent in position control mode

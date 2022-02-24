@@ -1,7 +1,7 @@
 import numpy as np
 
 from gym import spaces
-
+from causal_world.utils.env_utils import clip
 
 class TriFingerObservations(object):
 
@@ -252,14 +252,14 @@ class TriFingerObservations(object):
     def clip_observation(self, observation):
         """
 
-        :param observation: (nd.array) observation vector to clip.
+        :param observation: (nd.ardray) observation vector to clip.
 
         :return: (nd.array) clipped observation vector to satisfy the limits.
         """
         if self._normalized_observations:
-            return np.clip(observation, self._low_norm, self._high_norm)
+            return clip(observation, self._low_norm, self._high_norm)
         else:
-            return np.clip(observation, self._low, self._high)
+            return clip(observation, self._low, self._high)
 
     def add_observation(self, observation_key, lower_bound=None,
                         upper_bound=None, observation_fn=None):

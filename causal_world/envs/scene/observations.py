@@ -1,5 +1,6 @@
 import numpy as np
 from gym import spaces
+from causal_world.utils.env_utils import clip
 
 
 class StageObservations(object):
@@ -214,7 +215,7 @@ class StageObservations(object):
         """
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
-        if np.array(lower_key == higher_key).all():
+        if (lower_key == higher_key).all():
             return observation
         return (self._high_norm - self._low_norm) * (
             observation - lower_key) / (higher_key - lower_key) + self._low_norm
@@ -228,7 +229,7 @@ class StageObservations(object):
         """
         lower_key = np.array(self._lower_bounds[key])
         higher_key = np.array(self._upper_bounds[key])
-        if np.array(lower_key == higher_key).all():
+        if (lower_key == higher_key).all():
             return observation
         return lower_key + (observation - self._low_norm) / (
             self._high_norm - self._low_norm) * (higher_key - lower_key)
@@ -257,9 +258,9 @@ class StageObservations(object):
         :return: (nd.array) clipped observation vector to satisfy the limits.
         """
         if self._normalized_observations:
-            return np.clip(observation, self._low_norm, self._high_norm)
+            return clip(observation, self._low_norm, self._high_norm)
         else:
-            return np.clip(observation, self._low, self._high)
+            return clip(observation, self._low, self._high)
 
     def get_current_observations(self, helper_keys):
         """
