@@ -924,52 +924,7 @@ class BaseTask(object):
                 observations_filtered.extend(new_obs)
             else:
                 observations_filtered.append(new_obs)
-        # return np.array(observations_filtered)
-        observations_filtered_new = np.array(observations_filtered)
-        
-        observations_filtered = np.array([])
-        for key in self._task_robot_observation_keys:
-            if key in self._non_default_robot_observation_funcs:
-                if self._robot._normalize_observations:
-                    normalized_observations = \
-                        self._robot.\
-                            normalize_observation_for_key\
-                            (key=key, observation=
-                            self._non_default_robot_observation_funcs[key]())
-                    observations_filtered = \
-                        np.append(observations_filtered,
-                                  normalized_observations)
-                else:
-                    observations_filtered =\
-                        np.append(observations_filtered,
-                                  self._non_default_robot_observation_funcs[key]())
-            else:
-                observations_filtered = \
-                    np.append(observations_filtered,
-                              np.array(self._current_full_observations_dict[key]))
-
-        for key in self._task_stage_observation_keys:
-            if key in self._non_default_stage_observation_funcs:
-                if self._stage._normalize_observations:
-                    normalized_observations = \
-                        self._stage.normalize_observation_for_key\
-                            (key=key,
-                             observation=
-                             self._non_default_stage_observation_funcs[key]())
-                    observations_filtered = \
-                        np.append(observations_filtered,
-                                  normalized_observations)
-                else:
-                    observations_filtered =\
-                        np.append(observations_filtered,
-                                  self._non_default_robot_observation_funcs[key]())
-            else:
-                observations_filtered = \
-                    np.append(observations_filtered,
-                              np.array(self._current_full_observations_dict[key]))
-
-        np.testing.assert_equal(observations_filtered_new, observations_filtered)
-        return observations_filtered
+        return np.array(observations_filtered)
 
     def get_task_params(self):
         """
