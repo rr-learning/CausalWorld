@@ -23,7 +23,8 @@ setuptools.setup(
         'sphinx_rtd_theme',
         'sphinxcontrib-bibtex',
         'pytest',
-        'psutil'
+        'psutil',
+        'scipy'
       ],
     zip_safe=False
     )

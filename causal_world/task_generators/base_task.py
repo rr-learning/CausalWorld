@@ -890,17 +890,17 @@ class BaseTask(object):
                         self._robot.\
                             normalize_observation_for_key(
                                 key=key, 
-                                observation=\
-                                self._non_default_robot_observation_funcs[key]()
+                                observation=
+                                    self._non_default_robot_observation_funcs[key]()
                             )
                 else:
                     new_obs = self._non_default_robot_observation_funcs[key]()
             else:
                 new_obs = self._current_full_observations_dict[key]
             
-            if type(new_obs) is np.ndarray:
+            if isinstance(new_obs, np.ndarray):
                 observations_filtered.extend(new_obs.flat)
-            elif type(new_obs) is list or  type(new_obs) is tuple:
+            elif isinstance(new_obs, (list, tuple)):
                 observations_filtered.extend(new_obs)
             else:
                 observations_filtered.append(new_obs)
@@ -918,9 +918,9 @@ class BaseTask(object):
             else:
                 new_obs = self._current_full_observations_dict[key]
             
-            if type(new_obs) is np.ndarray:
+            if isinstance(new_obs, np.ndarray):
                 observations_filtered.extend(new_obs.flat)
-            elif type(new_obs) is list or  type(new_obs) is tuple:
+            elif isinstance(new_obs, (list, tuple)):
                 observations_filtered.extend(new_obs)
             else:
                 observations_filtered.append(new_obs)
