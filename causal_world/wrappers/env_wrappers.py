@@ -3,7 +3,7 @@ from gym import spaces
 import gym
 
 
-class HERGoalEnvWrapper(gym.GoalEnv):
+class HERGoalEnvWrapper(gym.Env):
 
     def __init__(self, env, activate_sparse_reward=False):
         """
