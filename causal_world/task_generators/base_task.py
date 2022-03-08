@@ -585,24 +585,26 @@ class BaseTask(object):
         :return: (nd.array) specifies the desired goal as bounding boxes of
                             goal shapes by default.
         """
-        desired_goal = []
-        for visual_goal in self._stage.get_visual_objects():
-            desired_goal.append(self._stage.get_visual_objects()
-                                [visual_goal].get_bounding_box())
-        return np.array(desired_goal)
-
+        return np.array(
+            [
+                visual_goal.get_bounding_box()
+                for visual_goal in self._stage.get_visual_objects().values()
+            ]
+        )
+        
     def get_achieved_goal(self):
         """
 
         :return: (nd.array) specifies the achieved goal as bounding boxes of
                             objects by default.
-        """
-        achieved_goal = []
-        for rigid_object in self._stage.get_rigid_objects():
-            if self._stage.get_rigid_objects()[rigid_object].is_not_fixed():
-                achieved_goal.append(self._stage.get_rigid_objects()
-                                     [rigid_object].get_bounding_box())
-        return np.array(achieved_goal)
+        """       
+        return np.array(
+            [
+                rigid_object.get_bounding_box() 
+                for rigid_object in self._stage.get_rigid_objects().values()
+                if rigid_object.is_not_fixed()
+            ]
+        )   
 
     def _goal_reward(self, achieved_goal, desired_goal):
         """
@@ -880,48 +882,49 @@ class BaseTask(object):
             get_current_observations(self._stage_observation_helper_keys)
         self._current_full_observations_dict = dict(robot_observations_dict)
         self._current_full_observations_dict.update(stage_observations_dict)
-        observations_filtered = np.array([])
+        observations_filtered = []
         for key in self._task_robot_observation_keys:
             if key in self._non_default_robot_observation_funcs:
                 if self._robot._normalize_observations:
-                    normalized_observations = \
+                    new_obs = \
                         self._robot.\
-                            normalize_observation_for_key\
-                            (key=key, observation=
-                            self._non_default_robot_observation_funcs[key]())
-                    observations_filtered = \
-                        np.append(observations_filtered,
-                                  normalized_observations)
+                            normalize_observation_for_key(
+                                key=key, 
+                                observation=
+                                    self._non_default_robot_observation_funcs[key]()
+                            )
                 else:
-                    observations_filtered =\
-                        np.append(observations_filtered,
-                                  self._non_default_robot_observation_funcs[key]())
+                    new_obs = self._non_default_robot_observation_funcs[key]()
             else:
-                observations_filtered = \
-                    np.append(observations_filtered,
-                              np.array(self._current_full_observations_dict[key]))
+                new_obs = self._current_full_observations_dict[key]
+            
+            if isinstance(new_obs, np.ndarray):
+                observations_filtered.extend(new_obs.flat)
+            elif isinstance(new_obs, (list, tuple)):
+                observations_filtered.extend(new_obs)
+            else:
+                observations_filtered.append(new_obs)
 
         for key in self._task_stage_observation_keys:
             if key in self._non_default_stage_observation_funcs:
                 if self._stage._normalize_observations:
-                    normalized_observations = \
-                        self._stage.normalize_observation_for_key\
-                            (key=key,
-                             observation=
-                             self._non_default_stage_observation_funcs[key]())
-                    observations_filtered = \
-                        np.append(observations_filtered,
-                                  normalized_observations)
+                    new_obs = self._stage.normalize_observation_for_key(
+                            key=key,
+                            observation=\
+                            self._non_default_stage_observation_funcs[key]()
+                        )
                 else:
-                    observations_filtered =\
-                        np.append(observations_filtered,
-                                  self._non_default_robot_observation_funcs[key]())
+                    new_obs = self._non_default_stage_observation_funcs[key]()
             else:
-                observations_filtered = \
-                    np.append(observations_filtered,
-                              np.array(self._current_full_observations_dict[key]))
-
-        return observations_filtered
+                new_obs = self._current_full_observations_dict[key]
+            
+            if isinstance(new_obs, np.ndarray):
+                observations_filtered.extend(new_obs.flat)
+            elif isinstance(new_obs, (list, tuple)):
+                observations_filtered.extend(new_obs)
+            else:
+                observations_filtered.append(new_obs)
+        return np.array(observations_filtered)
 
     def get_task_params(self):
         """

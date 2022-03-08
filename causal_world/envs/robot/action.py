@@ -1,7 +1,6 @@
 import numpy as np
-
 from gym import spaces
-
+from causal_world.utils.env_utils import clip
 
 class TriFingerAction(object):
 
@@ -93,9 +92,9 @@ class TriFingerAction(object):
         :return: (nd.array) clipped action.
         """
         if self.normalize_actions:
-            return np.clip(action, -1.0, 1.0)
+            return clip(action, -1.0, 1.0)
         else:
-            return np.clip(action, self.low, self.high)
+            return clip(action, self.low, self.high)
 
     def normalize_action(self, action):
         """

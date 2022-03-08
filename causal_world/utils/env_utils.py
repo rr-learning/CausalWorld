@@ -1,6 +1,12 @@
 import numpy as np
 from gym import spaces
 
+try:
+    # numpy versions 1.17+ have np.core.umath.clip
+    # as faster alternative to 1.17+ np.clip
+    clip = np.core.umath.clip
+except AttributeError:
+    clip = np.clip
 
 def scale(x, space):
     """

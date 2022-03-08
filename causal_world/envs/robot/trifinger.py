@@ -1,5 +1,6 @@
 from causal_world.envs.robot.action import TriFingerAction
 from causal_world.envs.robot.observations import TriFingerObservations
+from causal_world.utils.env_utils import clip
 import numpy as np
 import pybullet
 from causal_world.configs.world_constants import WorldConstants
@@ -414,28 +415,28 @@ class TriFingerRobot(object):
 
     def _safety_torque_check(self, desired_torques):
         """
-
+        limits desired_torques to max_motor_torque 
+        and lowers amplitude of desired_torques in velocity direction
+        
         :param desired_torques: (nd.array) the desired torque commands to be applied
                                             to the robot.
 
-        :return: (nd.array) the modified torque commands after applying a safety check.
+        :return: (list) the modified torque commands after applying a safety check.
         """
-        applied_torques = np.clip(
+        applied_torques = clip(
             np.asarray(desired_torques),
             -self._max_motor_torque,
-            +self._max_motor_torque,
+            self._max_motor_torque,
         )
-        applied_torques -= self._safety_kd * self._latest_full_state[
-            'velocities']
 
-        applied_torques = list(
-            np.clip(
-                np.asarray(applied_torques),
+        applied_torques = clip(
+                applied_torques \
+                - self._safety_kd * self._latest_full_state['velocities'],
                 -self._max_motor_torque,
-                +self._max_motor_torque,
-            ))
+                self._max_motor_torque,
+        )
 
-        return applied_torques
+        return list(applied_torques)
 
     def inverse_kinematics(self, desired_tip_positions, rest_pose):
         """
@@ -600,46 +601,43 @@ class TriFingerRobot(object):
 
         :return: (nd.array) the current end effector positions of the robot.
         """
-        result = np.array([])
         if self._pybullet_client_full_id is not None:
             position_1 = pybullet.getLinkState(
                 WorldConstants.ROBOT_ID,
                 linkIndex=5,
                 computeForwardKinematics=True,
-                physicsClientId=self._pybullet_client_full_id)
+                physicsClientId=self._pybullet_client_full_id)[0]
             position_2 = pybullet.getLinkState(
                 WorldConstants.ROBOT_ID,
                 linkIndex=10,
                 computeForwardKinematics=True,
-                physicsClientId=self._pybullet_client_full_id)
+                physicsClientId=self._pybullet_client_full_id)[0]
             position_3 = pybullet.getLinkState(
                 WorldConstants.ROBOT_ID,
                 linkIndex=15,
                 computeForwardKinematics=True,
-                physicsClientId=self._pybullet_client_full_id)
+                physicsClientId=self._pybullet_client_full_id)[0]
         else:
             position_1 = pybullet.getLinkState(
                 WorldConstants.ROBOT_ID,
                 linkIndex=5,
                 computeForwardKinematics=True,
-                physicsClientId=self._pybullet_client_w_o_goal_id)
+                physicsClientId=self._pybullet_client_w_o_goal_id)[0]
             position_2 = pybullet.getLinkState(
                 WorldConstants.ROBOT_ID,
                 linkIndex=10,
                 computeForwardKinematics=True,
-                physicsClientId=self._pybullet_client_w_o_goal_id)
+                physicsClientId=self._pybullet_client_w_o_goal_id)[0]
             position_3 = pybullet.getLinkState(
                 WorldConstants.ROBOT_ID,
                 linkIndex=15,
                 computeForwardKinematics=True,
-                physicsClientId=self._pybullet_client_w_o_goal_id)
-        result = np.append(result, position_1[0])
-        result = np.append(result, position_2[0])
-        result = np.append(result, position_3[0])
+                physicsClientId=self._pybullet_client_w_o_goal_id)[0]
+        result = list(position_1) + list(position_2) + list(position_3)
         result[2] -= WorldConstants.FLOOR_HEIGHT
         result[5] -= WorldConstants.FLOOR_HEIGHT
         result[-1] -= WorldConstants.FLOOR_HEIGHT
-        return result
+        return np.array(result)
 
     def _process_action_joint_positions(self, robot_state):
         """
