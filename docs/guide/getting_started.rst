@@ -26,9 +26,9 @@ Setting up an environment can be as simple as two lines of codes
 .. code-block:: python
 
     from causal_world.envs import CausalWorld
-    from causal_world.task_generators import task_generator
+    from causal_world.task_generators.task import generate_task
 
-    task = task_generator(task_generator_id='stacked_blocks')
+    task = generate_task(task_generator_id='stacked_blocks')
     env = CausalWorld(task=task)
     env.reset()
     for _ in range(2000):
