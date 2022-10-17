@@ -228,7 +228,7 @@ class ReachingTaskGenerator(BaseTask):
         info['achieved_goal'] = self._current_achieved_goal
         info['success'] = self._task_solved
         if self._is_ground_truth_state_exposed:
-            info['ground_truth_current_state_varibales'] = \
+            info['ground_truth_current_state_variables'] = \
                 self.get_current_variable_values()
         if self._is_partial_solution_exposed:
             info['possible_solution_intervention'] = dict()
