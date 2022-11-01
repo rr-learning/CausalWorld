@@ -513,7 +513,7 @@ class Stage(object):
                         in the environment's stage except for objects.
         """
         if self._pybullet_client_w_o_goal_id is not None:
-            client = self._pybullet_client_w_o_goal_id is not None
+            client = self._pybullet_client_w_o_goal_id
         else:
             client = self._pybullet_client_full_id
         variable_params = dict()
