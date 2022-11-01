@@ -7,8 +7,8 @@ dependencies:
 - jupyter
 - scipy
 - pip:
-  - pybullet==2.8.5
-  - gym
+  - pybullet==3.2.5
+  - gym==0.17.2
   - catkin_pkg
   - sphinx_rtd_theme
   - pytest
