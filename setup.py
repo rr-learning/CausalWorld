@@ -14,8 +14,8 @@ setuptools.setup(
                                     'assets/robot_properties_fingers/urdf/*.urdf']},
      include_package_data=True,
      install_requires=[
-        'pybullet==2.8.5',
-        'gym',
+        'pybullet==3.2.5',
+        'gym==0.17.2',
         'numpy',
         'catkin_pkg',
         'sphinx',
