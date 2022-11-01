@@ -178,7 +178,7 @@ and 0 otherwise.
 
 The info dict - by default - contains the keys fractional_success and success defined as above and the keys
 desired_goal and achieved_goal that might be relevant when training using Hindsight Experience Replay. Additionally
-you can get a nested dictionary of all current state variables via the key ground_truth_current_state_varibales as well
+you can get a nested dictionary of all current state variables via the key ground_truth_current_state_variables as well
 as privileged information in the form of possible solution interventions via the key possible_solution_intervention.
 For this to be added call the methods add_ground_truth_state_to_info() or expose_potential_partial_solution() respectively.
 
